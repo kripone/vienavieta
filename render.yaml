@@ -38,7 +38,9 @@ services:
         sync: false
       - key: EMAIL_FROM
         sync: false
-      # Bildes: Cloudflare R2, sk. docs/DEPLOY.md
+      # Bildes: testam datubāzē ("db"); kad ir R2 atslēgas, nomaini uz "s3" (sk. docs/DEPLOY.md)
+      - key: STORAGE_DRIVER
+        value: db
       - key: S3_BUCKET
         sync: false
       - key: S3_ENDPOINT

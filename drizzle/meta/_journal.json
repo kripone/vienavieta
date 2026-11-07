@@ -22,6 +22,13 @@
       "when": 1794013769456,
       "tag": "0002_lithuania",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794044790136,
+      "tag": "0003_media_objects",
+      "breakpoints": true
     }
   ]
 }

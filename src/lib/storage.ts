@@ -2,13 +2,19 @@ import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } fro
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { eq } from "drizzle-orm";
+import { db, schema } from "@/db";
+
 /**
- * Failu krātuve bildēm.
- * - Ja iestatīts S3_BUCKET: S3 saderīga krātuve (Cloudflare R2, Backblaze B2, AWS S3).
- * - Citādi: lokālā mape data/uploads (izstrādei).
+ * Failu krātuve bildēm (STORAGE_DRIVER):
+ * - "s3": S3 saderīga krātuve (Cloudflare R2, Backblaze B2, AWS S3); noklusējums, ja iestatīts S3_BUCKET.
+ * - "db": PostgreSQL tabula media_objects. Testa versijām bez ārējas krātuves; lieliem apjomiem neder.
+ * - "local": mape data/uploads (izstrādei); noklusējums citādi.
  */
 const LOCAL_DIR = path.join(process.cwd(), "data", "uploads");
-const useS3 = Boolean(process.env.S3_BUCKET);
+const driver = (process.env.STORAGE_DRIVER || (process.env.S3_BUCKET ? "s3" : "local")) as "s3" | "db" | "local";
+const useS3 = driver === "s3";
+const useDb = driver === "db";
 
 const s3 = useS3
   ? new S3Client({
@@ -33,6 +39,10 @@ export async function putObject(key: string, body: Buffer, contentType: string) 
     );
     return;
   }
+  if (useDb) {
+    await db.insert(schema.mediaObjects).values({ key, contentType, data: body }).onConflictDoUpdate({ target: schema.mediaObjects.key, set: { contentType, data: body } });
+    return;
+  }
   const file = path.join(LOCAL_DIR, key);
   await mkdir(path.dirname(file), { recursive: true });
   await writeFile(file, body);
@@ -45,6 +55,10 @@ export async function getObject(key: string): Promise<Buffer | null> {
       const r = await s3.send(new GetObjectCommand({ Bucket: process.env.S3_BUCKET, Key: key }));
       return r.Body ? Buffer.from(await r.Body.transformToByteArray()) : null;
     }
+    if (useDb) {
+      const row = await db.query.mediaObjects.findFirst({ where: eq(schema.mediaObjects.key, key) });
+      return row ? Buffer.from(row.data) : null;
+    }
     return await readFile(path.join(LOCAL_DIR, key));
   } catch {
     return null;
@@ -55,6 +69,10 @@ export async function deleteObject(key: string) {
   checkKey(key);
   if (s3) {
     await s3.send(new DeleteObjectCommand({ Bucket: process.env.S3_BUCKET, Key: key }));
+    return;
+  }
+  if (useDb) {
+    await db.delete(schema.mediaObjects).where(eq(schema.mediaObjects.key, key));
     return;
   }
   await rm(path.join(LOCAL_DIR, key), { force: true });

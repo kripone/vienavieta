@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   boolean,
+  customType,
   doublePrecision,
   index,
   integer,
@@ -341,5 +342,15 @@ export const promotions = pgTable("promotions", {
   paymentRef: text("payment_ref"),
   paidAt: timestamp("paid_at", { withTimezone: true }),
   validUntil: timestamp("valid_until", { withTimezone: true }),
+  createdAt: createdAt(),
+});
+
+// ---------- failu glabāšana datubāzē (testa versijai bez ārējas krātuves) ----------
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({ dataType: () => "bytea" });
+
+export const mediaObjects = pgTable("media_objects", {
+  key: text("key").primaryKey(),
+  contentType: text("content_type").notNull(),
+  data: bytea("data").notNull(),
   createdAt: createdAt(),
 });

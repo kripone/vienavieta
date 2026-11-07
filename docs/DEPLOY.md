@@ -8,6 +8,10 @@ Ieteiktā kombinācija sākumam:
 Aptuvenās izmaksas: Render ~7 $ portālam + ~6 $ datubāzei mēnesī. R2 un Brevo sākumā bez maksas. Cenas pārbaudi pakalpojumu lapās.
 
 ## 1. Cloudflare R2 (bildēm)
+
+Testa versijā bildes glabājas datubāzē (`STORAGE_DRIVER=db`), tāpēc šo soli var izdarīt vēlāk.
+Kad R2 ir iestatīts, Render nomaini `STORAGE_DRIVER` uz `s3`. Jau augšupielādētās bildes paliek datubāzē un R2 netiek pārceltas.
+
 1. Cloudflare panelī atver **R2 Object Storage** un ieslēdz R2 (prasīs maksājuma karti, bet līdz 10 GB nemaksā).
 2. **Create bucket**: nosaukums `vienavieta-photos`, atrašanās vieta "Automatic" vai "Eastern Europe".
 3. Bucket iestatījumos **Public access → R2.dev subdomain → Allow**. Nokopē adresi (`https://pub-….r2.dev`), tā būs `MEDIA_PUBLIC_URL`. Vēlāk to var aizstāt ar savu domēnu, piem. `media.vienavieta.lv`.
