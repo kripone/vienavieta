@@ -31,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </a>
             <span className="tag">Visi Latvijas sludinājumi vienā meklētājā</span>
             <nav className="nav">
+              <a href="/tirgus" className="btn" title="Tirgus tendences">📈 <span className="hide-sm">Tirgus</span></a>
               <ThemeToggle />
               <UserMenu />
               <a href="/pievienot" className="btn primary">+ Pievienot</a>

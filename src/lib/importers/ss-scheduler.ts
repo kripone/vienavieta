@@ -3,6 +3,7 @@
 // Stāvoklis glabājas tabulā crawl_state, tāpēc pēc pārstartēšanas pilnā kārta neatkārtojas lieki.
 import { db, schema } from "@/db";
 import { SS_FULL_EVERY_HOURS, SS_QUICK_EVERY_MIN, SS_SECTIONS } from "../constants";
+import { ensureDailySnapshot } from "../market";
 import { crawlSection } from "./ss-pages";
 
 const g = globalThis as unknown as { ssCrawlerStarted?: boolean };
@@ -13,6 +14,11 @@ export function ssCrawlerEnabled() {
 }
 
 async function tick() {
+  // tirgus momentuzņēmums reizi dienā (pēc 3:00 UTC, kad nakts pilnās kārtas parasti beigušās)
+  if (new Date().getUTCHours() >= 3) {
+    const snap = await ensureDailySnapshot().catch((e) => console.error("Tirgus momentuzņēmums neizdevās:", e));
+    if (snap) console.log("Tirgus momentuzņēmums:", JSON.stringify(snap));
+  }
   const state = new Map((await db.select().from(schema.crawlState)).map((s) => [s.name, s]));
   const now = Date.now();
   for (const section of SS_SECTIONS) {

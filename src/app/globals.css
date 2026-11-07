@@ -313,3 +313,34 @@ table.cmp td img { width: 100%; max-height: 120px; object-fit: cover; border-rad
 table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transparent); font-weight: 700; }
 .eval-long .eb { justify-self: start; }
 .cmp-wrap { margin-bottom: 90px; }
+
+/* Grafiki (src/components/charts.tsx) */
+.chart { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.chart figcaption { font-family: var(--f-display); font-weight: 600; font-size: 16px; margin-bottom: 8px; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .tick { fill: var(--muted); font-size: 11px; font-family: var(--f-body); }
+.chart .val { fill: var(--fg); font-size: 12px; font-weight: 700; font-family: var(--f-body); }
+.chart .hit { fill: transparent; }
+.chart .mark:hover .hit, .chart g:hover > .hit { fill: var(--surface-2); }
+.chart .dot { opacity: .75; stroke: var(--surface); stroke-width: 1.5; }
+.chart a:hover .dot { opacity: 1; r: 6; }
+.chart-table { margin-top: 8px; font-size: 13px; }
+.chart-table summary { cursor: pointer; color: var(--muted); }
+.chart-table table { border-collapse: collapse; margin-top: 6px; }
+.chart-table th, .chart-table td { padding: 3px 10px 3px 0; text-align: left; border-bottom: 1px solid var(--line); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.barlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.barlist li { display: grid; grid-template-columns: minmax(90px, 160px) 1fr auto; gap: 10px; align-items: center; font-size: 14px; }
+.bl-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bl-track { height: 10px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+.bl-bar { display: block; height: 100%; border-radius: 0 4px 4px 0; }
+.bl-val { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.bl-val small { color: var(--muted); font-weight: 400; }
+.market-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap: 16px; }
+.market-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; margin-bottom: 16px; }
+.market-form select { font: inherit; font-size: 15px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; min-width: 160px; }
+.stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; min-width: 150px; }
+.stat b { display: block; font-family: var(--f-display); font-size: 24px; font-variant-numeric: tabular-nums; }
+.stat span { color: var(--muted); font-size: 13px; }

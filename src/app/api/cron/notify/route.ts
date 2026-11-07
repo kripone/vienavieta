@@ -1,5 +1,6 @@
 import { importSsRss } from "@/lib/importers/ss-rss";
 import { ssCrawlerEnabled } from "@/lib/importers/ss-scheduler";
+import { ensureDailySnapshot } from "@/lib/market";
 import { runNotifications } from "@/lib/notify";
 
 export const dynamic = "force-dynamic";
@@ -36,10 +37,12 @@ async function handle(req: Request) {
         console.error("ss.com RSS imports neizdevās:", err);
       }
     }
-    // 2) paziņojumi (ietver arī tikko ievāktos)
+    // 2) tirgus momentuzņēmums reizi dienā (ja fona plānotājs to vēl nav izdarījis)
+    const snapshot = await ensureDailySnapshot().catch((e) => (console.error("Tirgus momentuzņēmums neizdevās:", e), "failed"));
+    // 3) paziņojumi (ietver arī tikko ievāktos)
     const result = await runNotifications();
     console.log("Paziņojumu kārta:", JSON.stringify(result));
-    return Response.json({ imported, ...result });
+    return Response.json({ imported, snapshot, ...result });
   } catch (err) {
     console.error("Paziņojumu kārta neizdevās:", err);
     return Response.json({ error: "failed" }, { status: 500 });

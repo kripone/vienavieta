@@ -69,7 +69,8 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] ss.com sarakstu lapas (pēc jurista atzinuma): visas lapas reizi diennaktī, jaunie ik 15 min, ss.com izdzēstie tiek noņemti
 - [ ] Citu portālu RSS/partneru plūsmas (reklama.lv, city24.lv, autoplius.lt …)
 - [x] ss.com sīktēli tieši no ss.com servera (neglabājam), ja nenāk: ilustrācija
-- [ ] Tirgus tendences: cenu grafiki pa modeļiem un reģioniem
+- [x] Tirgus tendences /tirgus: populārākās markas, modeļi, cena pa gadiem, cena pret nobraukumu, €/m² pa reģioniem un vietām
+- [x] Dienas tirgus momentuzņēmumi (market_stats) cenu dinamikai laikā
 - [x] Dublikātu apvienošana starp portāliem (marka/modelis/gads/cena/nobraukums vai veids/istabas/platība/vieta): viena kartīte, "Arī: ss.com ↗"
 
 ## Palaišana produkcijā

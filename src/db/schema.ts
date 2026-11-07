@@ -15,6 +15,7 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  date,
 } from "drizzle-orm/pg-core";
 
 // ---------- uzskaitījumi ----------
@@ -374,3 +375,20 @@ export const crawlState = pgTable("crawl_state", {
   /** Pēdējās pilnās kārtas kopsavilkums (lapas, jauni, atjaunoti, paslēpti, kļūdas) */
   lastResult: jsonb("last_result").$type<Record<string, unknown>>(),
 });
+
+/**
+ * Tirgus momentuzņēmums reizi dienā (tirgus tendencēm): mediāna un kvartiļi segmentā.
+ * Segments: "car:<makeId>:<modelId>", "moto:<makeId>:<modelId>", "prop:<īpašuma veids>:<regionId>:<darījums>" (cena par m²).
+ */
+export const marketStats = pgTable(
+  "market_stats",
+  {
+    day: date("day").notNull(),
+    segment: text("segment").notNull(),
+    median: integer("median").notNull(),
+    p25: integer("p25").notNull(),
+    p75: integer("p75").notNull(),
+    n: integer("n").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.day, t.segment] }), index("market_stats_segment_idx").on(t.segment, t.day)],
+);
