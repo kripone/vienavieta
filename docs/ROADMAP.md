@@ -31,13 +31,14 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [ ] Cenas novērtējums pret līdzīgiem sludinājumiem
 
 ## 5. Lietotāju funkcijas
-- [ ] Favorīti un cenu krituma paziņojumi
+- [x] Favorīti: sirsniņa kartītē un sludinājuma lapā, lapa /favoriti, cenas kritums kopš saglabāšanas
+- [ ] Cenu krituma paziņojumi e-pastā
 - [ ] Saglabātās meklēšanas ar e-pasta paziņojumiem
 - [ ] Ziņas starp pircēju un pārdevēju
 - [ ] Salīdzināšana
 
 ## 6. Moderācija
-- [ ] Sūdzības un automātiska paslēpšana pēc 3 sūdzībām
+- [x] Sūdzības ("Ziņot par sludinājumu") un automātiska paslēpšana pēc 3 dažādu lietotāju sūdzībām
 - [ ] Moderatora panelis: sūdzības, bloķēšana, dublikāti
 
 ## 7. Ienākumi un papildu
@@ -61,7 +62,8 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 
 ## Palaišana produkcijā
 - [x] Render Blueprint (render.yaml) un instrukcija docs/DEPLOY.md
-- [ ] Testa versija internetā
+- [x] Testa versija internetā: Render + Cloudflare R2 + Brevo + Google karte
 - [ ] Domēns, hostings, pārvaldīta PostgreSQL
-- [ ] E-pasta sūtīšana, kļūdu uzraudzība, rezerves kopijas
+- [x] E-pasta sūtīšana (Brevo API)
+- [ ] Kļūdu uzraudzība, rezerves kopijas
 - [ ] Lietošanas noteikumi, privātuma politika, sīkdatnes

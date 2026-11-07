@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ContactReveal } from "@/components/contact-reveal";
+import { FavButton } from "@/components/fav-button";
+import { ReportButton } from "@/components/report-button";
 import { Gallery } from "@/components/gallery";
 import { priceUnit } from "@/components/listing-card";
 import { OwnerActions } from "@/components/owner-actions";
 import { DEAL_LABEL, VEHICLE_CLASS_LABEL, type VehicleClass } from "@/lib/constants";
 import { formatNumber, formatPrice, timeAgo } from "@/lib/format";
 import { landLabel } from "@/lib/listing-input";
+import { favoriteIds } from "@/lib/favorites";
 import { getListing, locationLabel } from "@/lib/listings";
 import { getCurrentUser } from "@/lib/session";
 
@@ -60,6 +63,7 @@ export default async function ListingPage(props: Props) {
           ["Lietošanas mērķis", l.purpose],
           ["Ērtības", l.amenities.length ? l.amenities.join(", ") : null],
         ];
+  const isFav = user && !isOwner ? (await favoriteIds(user.id, [l.id])).has(l.id) : false;
   const seller = d.sellerType === "dealer" && d.companyName ? d.companyName : d.sellerName || "Privātpersona";
   const unit = priceUnit(l.deal);
 
@@ -67,11 +71,15 @@ export default async function ListingPage(props: Props) {
     <main className="wrap">
       {saglabats && isOwner && <p className="welcome">Sludinājums saglabāts{l.status === "active" ? " un redzams visiem" : ""}.</p>}
       {l.status === "sold" && <p className="alert">Šis sludinājums ir atzīmēts kā pārdots.</p>}
+      {l.status === "pending" && isOwner && <p className="alert">Sludinājums ir paslēpts pēc vairāku lietotāju sūdzībām. Moderators to pārbaudīs, un pēc tam tas atkal būs redzams.</p>}
       {isOwner && <OwnerActions id={l.id} status={l.status} />}
       <div className="det">
         <Gallery photos={d.photos} title={l.title} placeholder={l.kind === "vehicle" ? "🚗" : "🏠"} />
         <div className="det-side">
-          <h1>{l.title}</h1>
+          <div className="det-title">
+            <h1>{l.title}</h1>
+            {!isOwner && <FavButton id={l.id} on={isFav} loggedIn={Boolean(user)} big />}
+          </div>
           <div className="det-price">
             {formatPrice(l.price)} {unit && <small>{unit}</small>}
           </div>
@@ -87,6 +95,7 @@ export default async function ListingPage(props: Props) {
             </span>
             {l.status === "active" && !isOwner && <ContactReveal id={l.id} />}
           </div>
+          {l.status === "active" && !isOwner && <ReportButton id={l.id} loggedIn={Boolean(user)} />}
         </div>
       </div>
       <div className="det-body">

@@ -267,6 +267,8 @@ export const favorites = pgTable(
   {
     userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     listingId: text("listing_id").notNull().references(() => listings.id, { onDelete: "cascade" }),
+    /** Cena brīdī, kad sludinājums saglabāts (cenu krituma paziņojumiem). */
+    priceAtSave: integer("price_at_save"),
     createdAt: createdAt(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.listingId] })],

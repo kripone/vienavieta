@@ -8,7 +8,7 @@ const { listings, places, regions, makes, models, listingPhotos, users } = schem
 const coverThumb = sql<string | null>`(select ${listingPhotos.thumbKey} from ${listingPhotos} where ${listingPhotos.listingId} = ${listings.id} order by ${listingPhotos.position} limit 1)`;
 const photoCount = sql<number>`(select count(*)::int from ${listingPhotos} where ${listingPhotos.listingId} = ${listings.id})`;
 
-const cardFields = {
+export const cardFields = {
   id: listings.id,
   kind: listings.kind,
   status: listings.status,

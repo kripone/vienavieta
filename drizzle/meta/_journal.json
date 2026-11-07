@@ -29,6 +29,13 @@
       "when": 1794044790136,
       "tag": "0003_media_objects",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794049800248,
+      "tag": "0004_favorites_price",
+      "breakpoints": true
     }
   ]
 }

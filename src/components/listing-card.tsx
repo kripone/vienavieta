@@ -1,3 +1,4 @@
+import { FavButton } from "@/components/fav-button";
 import { DEAL_LABEL } from "@/lib/constants";
 import { formatNumber, formatPrice, timeAgo } from "@/lib/format";
 import { landLabel } from "@/lib/listing-input";
@@ -10,7 +11,17 @@ export function priceUnit(deal: string | null) {
   return deal === "rent" ? "/mēn." : deal === "day" ? "/dienā" : "";
 }
 
-export function ListingCard({ l, showStatus, actions }: { l: Card; showStatus?: boolean; actions?: React.ReactNode }) {
+type CardProps = {
+  l: Card;
+  showStatus?: boolean;
+  actions?: React.ReactNode;
+  /** Ja norādīts, kartītē rāda sirsniņu. */
+  favorite?: { on: boolean; loggedIn: boolean };
+  /** Cena, kad sludinājums saglabāts favorītos (rāda, ja tagad lētāk). */
+  oldPrice?: number | null;
+};
+
+export function ListingCard({ l, showStatus, actions, favorite, oldPrice }: CardProps) {
   const meta =
     l.kind === "vehicle"
       ? [l.year, l.mileageKm != null ? `${formatNumber(l.mileageKm)} km` : null, l.fuel, l.gearbox, l.body]
@@ -42,8 +53,16 @@ export function ListingCard({ l, showStatus, actions }: { l: Card; showStatus?: 
         </div>
         {actions}
       </div>
-      <div className="price">
-        {formatPrice(l.price)} {unit && <small>{unit}</small>}
+      <div className="price-col">
+        <div className="price">
+          {formatPrice(l.price)} {unit && <small>{unit}</small>}
+        </div>
+        {oldPrice != null && oldPrice > l.price && (
+          <div className="drop">
+            <s>{formatPrice(oldPrice)}</s> −{formatPrice(oldPrice - l.price)}
+          </div>
+        )}
+        {favorite && <FavButton id={l.id} on={favorite.on} loggedIn={favorite.loggedIn} />}
       </div>
     </article>
   );

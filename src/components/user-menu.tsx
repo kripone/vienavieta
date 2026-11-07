@@ -14,6 +14,7 @@ export async function UserMenu() {
     user.sellerType === "dealer" && user.companyName ? user.companyName : (user.name || user.email).split(" ")[0];
   return (
     <>
+      <a href="/favoriti" className="btn" title="Favorīti">♥ <span className="hide-sm">Favorīti</span></a>
       <a href="/mani-sludinajumi" className="btn">Mani sludinājumi</a>
       <a href="/profils" className="btn user-btn" title="Mans profils">
         👤 <span>{label}</span>
