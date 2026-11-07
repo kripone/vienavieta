@@ -31,9 +31,11 @@ type CardProps = {
   evaluation?: PriceEval | null;
   /** Rādīt pogu "Salīdzināt". */
   compare?: boolean;
+  /** VZD darījumu €/m² mediāna šajā mājā (src/lib/vzd.ts). */
+  vzd?: { median: number; n: number } | null;
 };
 
-export function ListingCard({ l, showStatus, actions, favorite, oldPrice, also, evaluation, compare }: CardProps) {
+export function ListingCard({ l, showStatus, actions, favorite, oldPrice, also, evaluation, compare, vzd }: CardProps) {
   const meta =
     l.kind === "vehicle"
       ? [l.year, l.mileageKm != null ? `${formatNumber(l.mileageKm)} km` : null, l.fuel, l.gearbox, l.body]
@@ -94,6 +96,12 @@ export function ListingCard({ l, showStatus, actions, favorite, oldPrice, also, 
               ),
             )}
           </div>
+        )}
+        {vzd && (
+          <a className="vzd-badge" href={`/sludinajumi/${l.id}#vzd`} title="Reālās pirkuma cenas šajā mājā (Valsts zemes dienests)">
+            VZD: šajā mājā {formatNumber(vzd.median)} €/m² ({vzd.n})
+            {l.areaM2 ? <> · šis {formatNumber(Math.round(l.price / Number(l.areaM2)))} €/m²</> : null}
+          </a>
         )}
         {actions}
       </div>

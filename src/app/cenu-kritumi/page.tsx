@@ -3,6 +3,7 @@ import { ListingCard } from "@/components/listing-card";
 import { recentDrops } from "@/lib/history";
 import { alsoAt } from "@/lib/dedupe";
 import { priceEvals } from "@/lib/price-eval";
+import { vzdBadges } from "@/lib/vzd";
 import { formatPrice, timeAgo } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Cenu kritumi", description: "Sludinājumi, kuriem pēdējās dienās samazināta cena: auto un nekustamais īpašums." };
@@ -15,9 +16,10 @@ export default async function DropsPage(props: { searchParams: Promise<Record<st
   const kind = sp.k === "auto" ? "vehicle" : sp.k === "ipasumi" ? "property" : undefined;
   const days = sp.d === "1" || sp.d === "30" ? sp.d : "7";
   const rows = await recentDrops({ kind, days: Number(days), limit: 60 }).catch(() => []);
-  const [also, evals] = await Promise.all([
+  const [also, evals, vzd] = await Promise.all([
     alsoAt(rows.map((r) => r.card)).catch(() => new Map()),
     priceEvals(rows.map((r) => r.card.id)).catch(() => new Map()),
+    vzdBadges(rows.filter((r) => r.card.kind === "property").map((r) => r.card.id)).catch(() => new Map()),
   ]);
   const q = (k?: string, d?: string) => {
     const p = new URLSearchParams();
@@ -49,7 +51,7 @@ export default async function DropsPage(props: { searchParams: Promise<Record<st
               <p className="fine">
                 {timeAgo(at)}: {formatPrice(prev)} → <b>{formatPrice(card.price)}</b> (−{Math.round(((prev - card.price) / prev) * 100)}%)
               </p>
-              <ListingCard l={card} oldPrice={card.firstPrice ?? prev} also={also.get(card.id)} evaluation={evals.get(card.id)} compare />
+              <ListingCard l={card} oldPrice={card.firstPrice ?? prev} also={also.get(card.id)} evaluation={evals.get(card.id)} vzd={vzd.get(card.id)} compare />
             </div>
           ))}
         </div>

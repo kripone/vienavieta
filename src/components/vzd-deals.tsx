@@ -11,7 +11,7 @@ export function VzdDeals({ data, perM2 }: { data: { same: VzdDeal[]; median: num
     return pct === 0 ? "tikpat" : `${Math.abs(pct)}% ${pct > 0 ? "dārgāk" : "lētāk"}`;
   };
   return (
-    <section className="vzd">
+    <section className="vzd" id="vzd">
       <h2>Reālās darījumu cenas</h2>
       <div className="stat-row">
         {data.median != null && (

@@ -360,3 +360,8 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .tbl th, .tbl td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 .tbl th:first-child, .tbl td:first-child { text-align: left; }
 .tbl th { font-weight: 600; color: var(--muted); }
+.vzd-badge { display: inline-block; margin-top: 6px; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: inherit; text-decoration: none; font-variant-numeric: tabular-nums; }
+.vzd-badge:hover { border-color: currentColor; }
+.house { margin: 20px 0; }
+.house h2 { margin-bottom: 4px; }
+.sugg { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; }

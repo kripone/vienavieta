@@ -132,7 +132,7 @@ function conditions(s: SearchParams): SQL[] {
   else if (s.seller) add(eq(users.sellerType, s.seller));
   if (s.q) {
     const like = `%${s.q.replace(/[%_\\]/g, (m) => "\\" + m)}%`;
-    add(or(ilike(listings.title, like), ilike(listings.description, like), ilike(makes.name, like), ilike(models.name, like), ilike(places.name, like)));
+    add(or(ilike(listings.title, like), ilike(listings.description, like), ilike(makes.name, like), ilike(models.name, like), ilike(places.name, like), ilike(listings.address, like)));
   }
   if (s.zone) {
     const poly = s.zone.map(([la, lo]) => `(${lo},${la})`).join(",");

@@ -1,5 +1,5 @@
 // VZD darījumu cenas sludinājuma lapai: tajā pašā mājā un tuvākajā apkārtnē.
-import { and, desc, eq, gte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { houseKey } from "./vzd-key";
 
@@ -48,4 +48,74 @@ export async function dealsForListing(l: { address: string | null; lat: number |
   const perM2 = basis.map((d) => d.amount / Number(d.areaM2)).sort((a, b) => a - b);
   const median = perM2.length ? Math.round(perM2[Math.floor((perM2.length - 1) / 2)]) : null;
   return { same, median, medianN: basis.length, medianRecent: basis === recent, area };
+}
+
+const median = (xs: number[]) => {
+  const s = [...xs].sort((a, b) => a - b);
+  return s.length ? Math.round(s[Math.floor((s.length - 1) / 2)]) : null;
+};
+const threeYearsAgo = () => new Date(Date.now() - 3 * 365 * 86_400_000).toISOString().slice(0, 10);
+/** ~5 km: tā pati iela citā pilsētā neskaitās */
+const close = (a: { lat: number | null; lon: number | null }, b: { lat: number | null; lon: number | null }) =>
+  a.lat == null || a.lon == null || b.lat == null || b.lon == null || (Math.abs(a.lat - b.lat) < 0.045 && Math.abs(a.lon - b.lon) < 0.08);
+
+/** Kartītēm: mājas €/m² mediāna (VZD) pārdodamiem dzīvokļiem lapā. */
+export async function vzdBadges(ids: string[]) {
+  const out = new Map<string, { median: number; n: number }>();
+  if (!ids.length) return out;
+  const ls = await db
+    .select({ id: schema.listings.id, address: schema.listings.address, lat: schema.listings.lat, lon: schema.listings.lon })
+    .from(schema.listings)
+    .where(and(inArray(schema.listings.id, ids), eq(schema.listings.propertyType, "Dzīvoklis"), eq(schema.listings.deal, "sell")));
+  const keyed = ls.map((l) => ({ ...l, key: l.address ? houseKey(l.address) : null })).filter((l) => l.key);
+  if (!keyed.length) return out;
+  const deals = await db
+    .select({ key: vzdDeals.houseKey, day: vzdDeals.day, amount: vzdDeals.amount, areaM2: vzdDeals.areaM2, lat: vzdDeals.lat, lon: vzdDeals.lon })
+    .from(vzdDeals)
+    .where(inArray(vzdDeals.houseKey, [...new Set(keyed.map((l) => l.key!))]));
+  const cut = threeYearsAgo();
+  for (const l of keyed) {
+    const mine = deals.filter((d) => d.key === l.key && close(l, d));
+    if (!mine.length) continue;
+    const recent = mine.filter((d) => d.day >= cut);
+    const basis = recent.length >= 3 ? recent : mine;
+    const m = median(basis.map((d) => d.amount / Number(d.areaM2)));
+    if (m) out.set(l.id, { median: m, n: basis.length });
+  }
+  return out;
+}
+
+/** Lapai /darijumi: darījumi pēc adreses (iela + mājas numurs), sagrupēti pa ēkām. */
+export async function dealsByAddress(q: string) {
+  const key = houseKey(q);
+  const rows = key
+    ? await db
+        .select({ day: vzdDeals.day, amount: vzdDeals.amount, areaM2: vzdDeals.areaM2, rooms: vzdDeals.rooms, floor: vzdDeals.floor, floors: vzdDeals.floors, address: vzdDeals.address, builtYear: vzdDeals.builtYear, material: vzdDeals.material })
+        .from(vzdDeals)
+        .where(eq(vzdDeals.houseKey, key))
+        .orderBy(desc(vzdDeals.day))
+        .limit(500)
+    : [];
+  // pilsēta/vieta no pieprasījuma (piem. "Kalna 13a, Rīga") sašaurina, ja tā pati iela ir vairākās vietās
+  const cityPart = q.split(",").slice(1).join(" ").trim().toLowerCase();
+  const groups = new Map<string, typeof rows>();
+  for (const r of rows) {
+    if (cityPart && !r.address.toLowerCase().includes(cityPart)) continue;
+    groups.set(r.address, [...(groups.get(r.address) ?? []), r]);
+  }
+  const cut = threeYearsAgo();
+  const houses = [...groups].map(([address, deals]) => {
+    const recent = deals.filter((d) => d.day >= cut);
+    const basis = recent.length >= 3 ? recent : deals;
+    return { address, deals, median: median(basis.map((d) => d.amount / Number(d.areaM2))), medianN: basis.length, medianRecent: basis === recent, builtYear: deals[0].builtYear, material: deals[0].material };
+  });
+  houses.sort((a, b) => b.deals.length - a.deals.length);
+  // ja precīzi neatrada: līdzīgas adreses ieteikumiem
+  let suggestions: string[] = [];
+  if (!houses.length && q.trim().length >= 3) {
+    const term = q.split(",")[0].trim().replace(/[%_]/g, "");
+    const r = await db.execute<{ address: string }>(sql`select address from vzd_deals where address ilike ${"%" + term + "%"} group by address order by count(*) desc limit 15`);
+    suggestions = r.rows.map((x) => x.address);
+  }
+  return { houses, suggestions };
 }

@@ -9,6 +9,7 @@ import { TypeStrip } from "@/components/type-strip";
 import { VEHICLE_CLASS_LABEL, type VehicleClass } from "@/lib/constants";
 import { alsoAt } from "@/lib/dedupe";
 import { priceEvals } from "@/lib/price-eval";
+import { vzdBadges } from "@/lib/vzd";
 import { favoriteIds } from "@/lib/favorites";
 import { plural } from "@/lib/format";
 import { regionOptions } from "@/lib/listings";
@@ -35,9 +36,13 @@ export default async function SearchPage(props: { searchParams: Promise<SP> }) {
   }
   const stripMode = s.cat === "vehicle" && (s.vc ?? "car") === "car" ? "car" : s.cat === "property" && !s.ptype?.startsWith("g:") ? "home" : null;
   const counts = stripMode && result ? await typeCounts(s).catch(() => ({})) : {};
-  const [also, evals] = result
-    ? await Promise.all([alsoAt(result.rows).catch(() => new Map()), priceEvals(result.rows.map((r) => r.id)).catch(() => new Map())])
-    : [new Map(), new Map()];
+  const [also, evals, vzd] = result
+    ? await Promise.all([
+        alsoAt(result.rows).catch(() => new Map()),
+        priceEvals(result.rows.map((r) => r.id)).catch(() => new Map()),
+        vzdBadges(result.rows.filter((r) => r.kind === "property").map((r) => r.id)).catch(() => new Map()),
+      ])
+    : [new Map(), new Map(), new Map()];
   const favs = user && result ? await favoriteIds(user.id, result.rows.map((r) => r.id)).catch(() => new Set<string>()) : new Set<string>();
 
   const heading = s.cat === "vehicle" ? VEHICLE_CLASS_LABEL[(s.vc ?? "car") as VehicleClass] : s.cat === "property" ? "Nekustamais īpašums" : "Visi sludinājumi";
@@ -81,7 +86,7 @@ export default async function SearchPage(props: { searchParams: Promise<SP> }) {
           <>
             <div className="list">
               {result.rows.map((l) => (
-                <ListingCard key={l.id} l={l} favorite={{ on: favs.has(l.id), loggedIn: Boolean(user) }} also={also.get(l.id)} evaluation={evals.get(l.id)} oldPrice={l.firstPrice} compare />
+                <ListingCard key={l.id} l={l} favorite={{ on: favs.has(l.id), loggedIn: Boolean(user) }} also={also.get(l.id)} evaluation={evals.get(l.id)} oldPrice={l.firstPrice} vzd={vzd.get(l.id)} compare />
               ))}
             </div>
             {result.pages > 1 && (
