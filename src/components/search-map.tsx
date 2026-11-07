@@ -193,6 +193,9 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
         {zone && <button type="button" className="btn small" onClick={clearZone}>Notīrīt zonu</button>}
         <button type="button" className="btn small" onClick={() => setFull((f) => !f)}>{full ? "✕ Aizvērt" : "⤢ Lielā karte"}</button>
         {count != null && <span className="fine">{count} kartē</span>}
+        {count === 0 && /(^|&)cat=vehicle(&|$)/.test(query) && (
+          <span className="fine">· ss.com auto sarakstā vieta nav norādīta, tāpēc tie kartē nav redzami</span>
+        )}
       </div>
       {drawing && <div className="drawhint">Velc ar peli vai pirkstu ap vajadzīgo vietu</div>}
       <div ref={box} className="map" role="application" aria-label="Sludinājumu karte" />

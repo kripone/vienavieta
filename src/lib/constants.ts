@@ -45,7 +45,25 @@ export const MODEL_BODY_HINTS: Record<string, readonly string[]> = {
   Minivens: ["touran", "sharan", "galaxy", "smax", "cmax", "zafira", "scenic", "grandscenic", "espace", "berlingo", "partner", "rifter", "caddy", "verso", "alhambra", "picasso", "spacetourer", "bclass", "vito", "multivan", "carens"],
   Pikaps: ["hilux", "ranger", "amarok", "l200", "navara", "dmax", "ram", "f150", "tacoma"],
   Mikroautobuss: ["transporter", "caravelle", "transit", "sprinter", "vclass", "trafic", "vivaro", "expert", "jumpy", "proace", "crafter"],
-  Kupeja: ["tt", "rcz", "z4", "mx5", "911", "cayman", "boxster", "supra", "gt86", "brz"],
+  Kupeja: ["tt", "rcz", "z4", "mx5", "911", "cayman", "boxster", "supra", "gt86", "brz", "mustang", "camaro", "challenger"],
+  Kabriolets: ["eos", "beetlecabrio", "slk", "slc", "sl", "z3", "miata", "spider", "cabrio", "cabriolet", "roadster"],
+  // Tālāk: biežākā virsbūve populārajiem modeļiem Latvijas tirgū (ja sludinājumā nav norādīts citādi)
+  Hečbeks: [
+    "golf", "polo", "up", "id3", "fabia", "citigo", "scala", "rapid", "ibiza", "leon", "mii", "a1", "a3", "1", "118", "116", "120", "i3",
+    "yaris", "auris", "aygo", "iq", "prius", "corolla", "jazz", "civic", "fit", "i10", "i20", "i30", "ioniq", "picanto", "rio", "ceed", "venga",
+    "micra", "note", "leaf", "almera", "fiesta", "focus", "ka", "kuga2", "astra", "corsa", "adam", "karl", "clio", "megane", "zoe", "twingo",
+    "208", "207", "206", "308", "307", "107", "108", "c1", "c2", "c3", "c4", "ds3", "punto", "500", "panda", "tipo", "bravo", "swift", "baleno",
+    "alto", "splash", "colt", "spacestar", "mazda2", "2", "3", "mazda3", "sandero", "logan", "mini", "cooper", "one", "smart", "fortwo", "aclass", "a",
+    "v40", "c30",
+  ],
+  Sedans: [
+    "passat", "jetta", "arteon", "octavia", "superb", "a4", "a5", "a6", "a7", "a8", "3", "320", "318", "316", "330", "335", "325", "520", "525", "530",
+    "535", "540", "730", "740", "750", "5", "7", "cclass", "eclass", "sclass", "c", "e", "s", "c200", "c220", "c180", "e200", "e220", "e250",
+    "e300", "e350", "s350", "s500", "cla", "camry", "avensis", "corollasedan", "accord", "elantra", "sonata", "optima", "k5", "mondeo", "fusion",
+    "vectra", "laguna", "talisman", "fluence", "407", "508", "c5", "s40", "s60", "s80", "s90", "xf", "xe", "xj", "is", "gs", "es", "ls", "mazda6",
+    "6", "legacy", "impreza", "lancer", "galant", "primera", "teana", "maxima", "altima", "model s", "models", "model3", "panamera", "ghibli", "quattroporte",
+    "insignia",
+  ],
 };
 /** Modeļa nosaukuma vārdi, kas norāda universāli (Passat Variant, Octavia Combi, A4 Avant …). */
 export const WAGON_WORDS = ["variant", "combi", "kombi", "avant", "touring", "universal", "universāls", "estate", "sw", "sportswagon", "tourer", "break", "allroad"] as const;

@@ -92,9 +92,19 @@ export function inferBody(model?: string | null): string | null {
   if (!model) return null;
   const words = model.toLowerCase().split(/[\s/()-]+/);
   if (words.some((w) => (WAGON_WORDS as readonly string[]).includes(w))) return "Universāls";
+  // BMW sērijas un Mercedes klases (mūsu katalogā "3. sērija", "E klase")
+  const series = model.match(/^(\d)\.\s*sērija/i);
+  if (series) return ({ "1": "Hečbeks", "2": "Kupeja", "3": "Sedans", "4": "Kupeja", "5": "Sedans", "6": "Kupeja", "7": "Sedans", "8": "Kupeja" } as Record<string, string>)[series[1]] ?? null;
+  const klase = model.match(/^([A-Z])\s*klase/i);
+  if (klase) return ({ A: "Hečbeks", B: "Minivens", C: "Sedans", E: "Sedans", S: "Sedans", G: "Apvidus", M: "Apvidus", R: "Minivens", V: "Mikroautobuss", X: "Pikaps", T: "Minivens" } as Record<string, string>)[klase[1].toUpperCase()] ?? null;
   const key = model.toLowerCase().replace(/[\s\-().]/g, "");
+  const first = words[0]?.replace(/[^a-z0-9ā-ž]/g, "") ?? "";
+  // 1) precīza atbilstība visam nosaukumam vai pirmajam vārdam; 2) sākums (≥3 burti), apvidus/minivens pirmie
   for (const [body, list] of Object.entries(MODEL_BODY_HINTS)) {
-    if (list.some((m) => key === m.replace(/[\s-]/g, "") || (m.length >= 3 && key.startsWith(m.replace(/[\s-]/g, ""))))) return body;
+    if (list.some((m) => { const k = m.replace(/[\s-]/g, ""); return key === k || first === k; })) return body;
+  }
+  for (const [body, list] of Object.entries(MODEL_BODY_HINTS)) {
+    if (list.some((m) => { const k = m.replace(/[\s-]/g, ""); return k.length >= 3 && key.startsWith(k); })) return body;
   }
   return null;
 }

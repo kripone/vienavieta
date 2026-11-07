@@ -12,7 +12,7 @@ const { listings, places, regions, makes, models, priceHistory } = schema;
 
 /** Plūsmas vai sadaļas apraksts: kas tajā ir (transports ar klasi vai īpašums ar veidu). */
 type Feed = { kind: "vehicle"; vehicleClass: "car" | "moto" } | { kind: "property"; propertyType: "Dzīvoklis" | "Māja" | "Zeme" };
-export type RssItem = { link: string; pubDate: Date; fields: Record<string, string[]> };
+export type RssItem = { link: string; pubDate: Date; fields: Record<string, string[]>; /** sludinājuma teksta sākums, tikai modeļa atpazīšanai */ snippet?: string };
 
 // tikai ASCII: HTTP galvenēs nedrīkst būt garumzīmes
 const USER_AGENT = "VienaVietaBot/1.0 (+https://vienavieta-omew.onrender.com; RSS reader)";
@@ -45,9 +45,10 @@ export function parseRss(xml: string): RssItem[] {
     const link = body.match(/<link>\s*([^<\s]+)\s*<\/link>/)?.[1];
     const pub = body.match(/<pubDate>([^<]+)<\/pubDate>/)?.[1];
     const desc = body.match(/<description>\s*<!\[CDATA\[([\s\S]*?)\]\]>\s*<\/description>/)?.[1] ?? "";
+    const snippet = body.match(/<title>\s*<!\[CDATA\[([\s\S]*?)\]\]>/)?.[1];
     if (!link || !/^https:\/\/www\.ss\.(com|lv)\/msg\//.test(link)) continue;
     const d = pub ? new Date(pub) : new Date();
-    items.push({ link, pubDate: Number.isNaN(d.getTime()) ? new Date() : d, fields: parseFields(desc) });
+    items.push({ link, pubDate: Number.isNaN(d.getTime()) ? new Date() : d, fields: parseFields(desc), snippet });
   }
   return items;
 }
@@ -154,14 +155,88 @@ export function makePlaceFinder(rows: PlaceRow[]) {
   };
 }
 
+/** "Ogre un raj." / "Rīga" / "Jūrmala" → pilsētas vieta (pilsētām: centrs). "Rīgas rajons" u.c. bez pilsētas → null. */
+export function makeCityFinder(rows: PlaceRow[]) {
+  return (t: string): PlaceRow | null => {
+    const s = slug(t.replace(/\s+un\s+raj\.?$/i, ""));
+    if (!s || /rajons$/.test(s)) return null;
+    const city = rows.filter((p) => slug(p.region) === s);
+    if (city.length) return city.find((p) => slug(p.name) === "centrs") ?? city[0];
+    return rows.find((p) => slug(p.name) === s) ?? null;
+  };
+}
+
 // ---------- marka / modelis ----------
 type MakeRow = { id: number; name: string; vehicleClass: string };
 type ModelRow = { id: number; makeId: number; name: string };
 
-function matchModel(list: ModelRow[], makeId: number, raw: string) {
-  const r = slug(raw.replace(/\(.*?\)/g, ""));
+/** ss.com markas nosaukumi, kas atšķiras no mūsu kataloga. */
+const MAKE_ALIASES: Record<string, string> = {
+  mercedes: "mercedes-benz", "mercedes-benz": "mercedes-benz", vw: "volkswagen", "land-rover": "land-rover", landrover: "land-rover",
+  "alfa-romeo": "alfa-romeo", alfa: "alfa-romeo", citroen: "citroen", skoda: "skoda", "rolls-royce": "rolls-royce", vaz: "lada", "gaz": "gaz",
+};
+
+export function findMake(makes: MakeRow[], vehicleClass: string, raw: string) {
+  const k = slug(raw);
+  const want = MAKE_ALIASES[k] ?? k;
+  return makes.find((m) => m.vehicleClass === vehicleClass && slug(m.name) === want) ?? null;
+}
+
+/** ss.com modeļu pieraksts → mūsu katalogs: BMW "320d" → "3. sērija", Mercedes "E220" → "E klase", "ML350" → "M klase". */
+function normalizeModel(makeName: string, raw: string) {
+  const r = raw.replace(/\(.*?\)/g, "").trim();
+  if (/^bmw$/i.test(makeName)) {
+    const m = r.match(/^(\d)\d{2}\s?[a-z]{0,3}$/i);
+    if (m) return `${m[1]}. sērija`;
+  }
+  if (/^mercedes/i.test(makeName)) {
+    const m = r.match(/^([A-Za-z]{1,3})[\s-]?\d{2,3}/);
+    if (m) {
+      const L = m[1].toUpperCase();
+      if (L.length === 1) return `${L} klase`;
+      if (L === "ML") return "M klase";
+      return L; // CLS, GLE, GLC, CLA, SLK …
+    }
+  }
+  return r;
+}
+
+export function matchModel(list: ModelRow[], makeId: number, raw: string, makeName = "") {
+  const r = slug(normalizeModel(makeName, raw));
+  if (!r) return null;
   const mine = list.filter((m) => m.makeId === makeId);
-  return mine.find((m) => slug(m.name) === r) ?? mine.find((m) => slug(m.name).replace(/-/g, "") === r.replace(/-/g, "")) ?? mine.find((m) => r.startsWith(slug(m.name)) && slug(m.name).length >= 2) ?? null;
+  return (
+    mine.find((m) => slug(m.name) === r) ??
+    mine.find((m) => slug(m.name).replace(/-/g, "") === r.replace(/-/g, "")) ??
+    mine.find((m) => r.startsWith(slug(m.name)) && slug(m.name).length >= 2) ??
+    null
+  );
+}
+
+/**
+ * Ja ss.com modelis ir "Citi", meklējam mūsu kataloga modeli sludinājuma teksta sākumā (piem. "Kia EV6 GT-Line…").
+ * Tekstu izmantojam tikai atpazīšanai; to neglabājam un nerādām.
+ */
+export function modelFromText(list: ModelRow[], makeId: number, text?: string) {
+  if (!text) return null;
+  const words = ` ${slug(text.slice(0, 160)).replace(/-/g, " ")} `;
+  const compact = words.replace(/\s+/g, "");
+  const mine = list.filter((m) => m.makeId === makeId).sort((a, b) => b.name.length - a.name.length);
+  for (const m of mine) {
+    const spaced = slug(m.name).replace(/-/g, " ");
+    if (spaced.length < 2) continue;
+    if (words.includes(` ${spaced} `)) return m;
+    const c = spaced.replace(/\s+/g, "");
+    // "ID 4" un "ID.4" tekstā "id4": tikai, ja nosaukumā ir burti un cipari (citādi "golf" atrastos "golfklubā")
+    if (c.length >= 3 && /\d/.test(c) && /[a-z]/.test(c) && new RegExp(`(^|\\s)${c.split("").join("\\s?")}(\\s|$)`).test(words)) return m;
+  }
+  return compact ? null : null;
+}
+
+/** Virsraksts ārējam transportam no faktiem, piem. "Kia EV6 2022", "BMW 3. sērija 2.0 dīzelis 2016". */
+export function vehicleTitle(make: string, model: string, engineL: string | null, fuel: string | null, year: number | null) {
+  return [make, model, engineL ? Number(engineL).toFixed(1) : "", fuel === "Dīzelis" ? "dīzelis" : fuel === "Hibrīds" ? "hibrīds" : "", year ?? ""]
+    .filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
 }
 
 // ---------- viena ieraksta pārveide ----------
@@ -195,15 +270,15 @@ export function mapItem(
     // marka: no "Marka" lauka (auto) vai adreses ceļa (moto: …/motorcycles/kawasaki/…)
     const makeRaw = first(f, "Marka") ?? path.split("/").filter(Boolean).at(-2) ?? "";
     const modelRaw0 = feed.vehicleClass === "car" ? (f["Modelis"]?.[0] ?? f["Marka"]?.[1] ?? "") : (first(f, "Modelis") ?? "");
-    const modelRaw = /^(citi|cits|cita|other|another)$/i.test(modelRaw0.trim()) ? "" : modelRaw0; // ss.com "Citi" = modelis nav sarakstā
-    const make = ctx.makes.find((m) => m.vehicleClass === feed.vehicleClass && slug(m.name) === slug(makeRaw));
-    const model = make ? matchModel(ctx.models, make.id, modelRaw) : null;
+    const isOther = /^(citi|cits|cita|other|another)$/i.test(modelRaw0.trim()); // ss.com "Citi" = modelis nav viņu sarakstā
+    const modelRaw = isOther ? "" : modelRaw0;
+    const make = findMake(ctx.makes, feed.vehicleClass, makeRaw);
+    const model = make ? (matchModel(ctx.models, make.id, modelRaw, make.name) ?? (isOther || !modelRaw ? modelFromText(ctx.models, make.id, item.snippet) : null)) : null;
     const year = int(first(f, "Gads"));
     const { engineL, fuel } = engine(first(f, "Tilpums"));
     const makeName = make?.name ?? (makeRaw ? makeRaw[0].toUpperCase() + makeRaw.slice(1) : "");
     const modelName = model?.name ?? modelRaw;
-    const title = [makeName, modelName, engineL ? Number(engineL).toFixed(1) : "", fuel === "Dīzelis" ? "dīzelis" : fuel === "Hibrīds" ? "hibrīds" : "", year ?? ""]
-      .filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+    const title = vehicleTitle(makeName, modelName, engineL, fuel, year);
     if (!title) return null;
     return {
       ...base,

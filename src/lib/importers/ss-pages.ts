@@ -5,12 +5,12 @@ import { and, eq, inArray, lt } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { SS_QUICK_PAGES, SS_REQUEST_DELAY_MS, SS_SECTIONS } from "../constants";
 import { linkDuplicate } from "../dedupe";
-import { makePlaceFinder, mapItem, type MakeRow, type ModelRow, type PlaceRow, type RssItem } from "./ss-rss";
+import { makeCityFinder, makePlaceFinder, mapItem, type MakeRow, type ModelRow, type PlaceRow, type RssItem } from "./ss-rss";
 
 const { listings, places, regions, makes, models, priceHistory, crawlState } = schema;
 
 export type Section = (typeof SS_SECTIONS)[number];
-export type PageRow = { link: string; fields: Record<string, string[]>; thumb?: string };
+export type PageRow = { link: string; fields: Record<string, string[]>; thumb?: string; snippet?: string; region?: string };
 
 const USER_AGENT = "VienaVietaBot/1.0 (+https://vienavieta-omew.onrender.com)";
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -36,7 +36,11 @@ export function parseListPage(html: string): { rows: PageRow[]; lastPage: number
     });
     // sīktēla adrese (rādām no ss.com servera, neglabājam un nelejupielādējam)
     const thumb = body.match(/<img[^>]*src="(https:\/\/i\.ss\.com\/[^"]+\.th2\.jpg)"/)?.[1];
-    rows.push({ link: `https://www.ss.com${href}`, fields, thumb });
+    // sludinājuma teksta sākums: tikai modeļa atpazīšanai, ja ss.com modelis ir "Citi" (neglabājam, nerādām)
+    const snippet = text(body.match(/<a[^>]*class="am"[^>]*>([\s\S]*?)<\/a>/)?.[1] ?? "");
+    // pilsēta/rajons zem sludinājuma (motocikliem ir; vieglajiem auto ss.com sarakstā nav)
+    const region = text(body.match(/<div class="ads_region">([\s\S]*?)<\/div>/)?.[1] ?? "") || undefined;
+    rows.push({ link: `https://www.ss.com${href}`, fields, thumb, snippet, region });
   }
   const pages = [...html.matchAll(/class="navi"[^>]*href="[^"]*?page(\d+)\.html"/g), ...html.matchAll(/href="[^"]*?page(\d+)\.html"[^>]*class="navi"/g)].map((x) => Number(x[1]));
   return { rows, lastPage: Math.max(1, ...pages) };
@@ -51,7 +55,7 @@ async function defaultFetch(url: string) {
   return r.text();
 }
 
-type Ctx = { findPlace: ReturnType<typeof makePlaceFinder>; makes: MakeRow[]; models: ModelRow[] };
+type Ctx = { findPlace: ReturnType<typeof makePlaceFinder>; findCity: (t: string) => PlaceRow | null; makes: MakeRow[]; models: ModelRow[] };
 async function loadCtx(): Promise<Ctx> {
   const [placeRows, makeRows, modelRows] = await Promise.all([
     db.select({ id: places.id, name: places.name, lat: places.lat, lon: places.lon, region: regions.name })
@@ -59,7 +63,7 @@ async function loadCtx(): Promise<Ctx> {
     db.select({ id: makes.id, name: makes.name, vehicleClass: makes.vehicleClass }).from(makes),
     db.select({ id: models.id, makeId: models.makeId, name: models.name }).from(models),
   ]);
-  return { findPlace: makePlaceFinder(placeRows as PlaceRow[]), makes: makeRows as MakeRow[], models: modelRows };
+  return { findPlace: makePlaceFinder(placeRows as PlaceRow[]), findCity: makeCityFinder(placeRows as PlaceRow[]), makes: makeRows as MakeRow[], models: modelRows };
 }
 
 export type CrawlResult = { section: string; mode: "quick" | "full"; pages: number; rows: number; created: number; updated: number; priceChanged: number; duplicates: number; removed: number; errors: string[]; ms: number };
@@ -72,14 +76,22 @@ async function saveRows(section: Section, pageRows: PageRow[], ctx: Ctx, res: Cr
   const createdAt = mode === "full" ? new Date(now.getTime() - 86_400_000) : now;
   const mapped = pageRows
     .map((r) => {
-      const m = mapItem(section, { link: r.link, pubDate: now, fields: r.fields } as RssItem, ctx);
-      return m ? { ...m, externalThumbUrl: r.thumb ?? null, createdAt } : null;
+      const m = mapItem(section, { link: r.link, pubDate: now, fields: r.fields, snippet: r.snippet } as RssItem, ctx);
+      if (!m) return null;
+      // transportam: pilsēta no saraksta (ja ir) → vietas centrs kartē
+      const city = m.kind === "vehicle" && !m.placeId && r.region ? ctx.findCity(r.region) : null;
+      return {
+        ...m,
+        externalThumbUrl: r.thumb ?? null,
+        createdAt,
+        ...(city ? { placeId: city.id, lat: city.lat + (Math.random() - 0.5) * 0.01, lon: city.lon + (Math.random() - 0.5) * 0.02, geoPrecision: "place" } : {}),
+      };
     })
     .filter((x): x is NonNullable<typeof x> => Boolean(x));
   const byId = new Map(mapped.map((m) => [m.externalId!, m]));
   if (!byId.size) return;
   const existing = await db
-    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl, address: listings.address })
+    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl, address: listings.address, makeId: listings.makeId, modelId: listings.modelId, body: listings.body, placeId: listings.placeId })
     .from(listings)
     .where(and(eq(listings.source, "ss.com"), inArray(listings.externalId, [...byId.keys()])));
   const seen = new Set<string>();
@@ -89,10 +101,18 @@ async function saveRows(section: Section, pageRows: PageRow[], ctx: Ctx, res: Cr
     const row = byId.get(e.externalId!)!;
     if (e.status === "hidden") continue; // paslēpis moderators: neaiztiekam
     const newAddress = row.address && row.address !== e.address;
-    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl || newAddress) {
+    // labāk atpazīta marka/modelis (piem. "Citi" → EV6, "Mercedes" → Mercedes-Benz): atjaunojam arī virsrakstu un virsbūvi
+    const better = (row.makeId && !e.makeId) || (row.modelId && !e.modelId);
+    const newPlace = row.kind === "vehicle" && row.placeId && !e.placeId;
+    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl || newAddress || better || newPlace) {
       await db
         .update(listings)
-        .set({ price: row.price, status: "active", externalThumbUrl: row.externalThumbUrl, ...(newAddress ? { address: row.address, geoPrecision: "place" } : {}), updatedAt: now })
+        .set({
+          price: row.price, status: "active", externalThumbUrl: row.externalThumbUrl, updatedAt: now,
+          ...(newAddress ? { address: row.address, geoPrecision: "place" } : {}),
+          ...(newPlace ? { placeId: row.placeId, lat: row.lat, lon: row.lon, geoPrecision: "place" } : {}),
+          ...(better ? { makeId: row.makeId, modelId: row.modelId, makeText: row.makeText, modelText: row.modelText, title: row.title, ...(e.body ? {} : { body: row.body }) } : {}),
+        })
         .where(eq(listings.id, e.id));
       if (e.price !== row.price) {
         await db.insert(priceHistory).values({ listingId: e.id, price: row.price });
