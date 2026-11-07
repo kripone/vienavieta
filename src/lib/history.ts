@@ -34,8 +34,8 @@ export async function recentDrops(opts: { kind?: "vehicle" | "property"; days?: 
   const days = opts.days ?? 7;
   const limit = opts.limit ?? 60;
   const since = new Date(Date.now() - days * 86_400_000);
-  const drops = await db.execute<{ listing_id: string; prev: number; price: number; changed_at: string }>(sql`
-    select listing_id, prev, price, changed_at from (
+  const drops = await db.execute<{ listing_id: string; prev: number; price: number; ms: number }>(sql`
+    select listing_id, prev, price, (extract(epoch from changed_at) * 1000)::float8 as ms from (
       select ph.listing_id, ph.price, ph.changed_at,
              lag(ph.price) over (partition by ph.listing_id order by ph.changed_at, ph.id) as prev,
              row_number() over (partition by ph.listing_id order by ph.changed_at desc, ph.id desc) as rn
@@ -60,7 +60,7 @@ export async function recentDrops(opts: { kind?: "vehicle" | "property"; days?: 
   return drops.rows
     .filter((d) => byId.has(d.listing_id) && byId.get(d.listing_id)!.price === d.price)
     .slice(0, limit)
-    .map((d) => ({ card: byId.get(d.listing_id)!, prev: Number(d.prev), at: new Date(d.changed_at) }));
+    .map((d) => ({ card: byId.get(d.listing_id)!, prev: Number(d.prev), at: new Date(Number(d.ms)) }));
 }
 
 /** Normalizē portāla saiti salīdzināšanai: bez protokola, www, vaicājuma un beigu slīpsvītras. */

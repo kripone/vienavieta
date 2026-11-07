@@ -17,7 +17,7 @@ export function PriceHistory({ h, external }: { h: { points: HistoryPoint[]; fir
         <div className="stat"><b>{h.changes}</b><span>cenas izmaiņas</span></div>
         <div className="stat">
           <b className={diff < 0 ? "down" : diff > 0 ? "up" : ""}>{diff === 0 ? "—" : `${diff < 0 ? "−" : "+"}${formatPrice(Math.abs(diff))}`}</b>
-          <span>{diff === 0 ? "cena nav mainīta" : `${pct > 0 ? "+" : ""}${pct}% no sākuma`}</span>
+          <span>{diff === 0 ? "cena nav mainīta" : `${pct > 0 ? "+" : pct < 0 ? "−" : ""}${Math.abs(pct)}% no sākuma`}</span>
         </div>
       </div>
       {h.changes > 0 && <Steps points={h.points} min={h.min} max={h.max} />}
