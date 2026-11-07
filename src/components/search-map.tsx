@@ -1,4 +1,5 @@
 "use client";
+import { useT } from "@/i18n/client";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useRouter } from "next/navigation";
@@ -8,7 +9,7 @@ import { GOOGLE_KEY, googleCopyright, googleSession, googleTileUrl, type GoogleM
 type Point = [string, number, number, 1 | 2, number, string];
 
 const STREETS = process.env.NEXT_PUBLIC_MAP_TILES_URL || "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-const STREETS_ATTR = process.env.NEXT_PUBLIC_MAP_TILES_ATTRIBUTION || '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+const STREETS_ATTR = process.env.NEXT_PUBLIC_MAP_TILES_ATTRIBUTION || '&copy; <a href="https://www.openstreetmap.org/copyright">{t("OpenStreetMap")}</a>';
 const SATELLITE = process.env.NEXT_PUBLIC_MAP_SATELLITE_URL || "";
 const SATELLITE_ATTR = process.env.NEXT_PUBLIC_MAP_SATELLITE_ATTRIBUTION || "";
 
@@ -27,7 +28,7 @@ function simplify(pts: L.Point[], min = 8) {
  * Atsauce "Google Maps" + autortiesības no viewport atbildes tiek atjaunotas pēc katras kustības.
  */
 function addGoogleLayers(m: L.Map) {
-  m.attributionControl.setPrefix('<span aria-label="Google Maps" style="font-weight:700">Google Maps</span>');
+  m.attributionControl.setPrefix('<span aria-label={t("Google Maps")} style="font-weight:700">{t("Google Maps")}</span>');
   const layers: Partial<Record<GoogleMapType, { layer: L.TileLayer; session: string }>> = {};
   let active: GoogleMapType = "roadmap";
   let lastCopyright = "";
@@ -63,6 +64,7 @@ function addGoogleLayers(m: L.Map) {
 }
 
 export function SearchMap({ query, zone }: { query: string; zone?: string }) {
+  const { t } = useT();
   const router = useRouter();
   const box = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
@@ -188,17 +190,17 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
     <div className={`mapwrap${full ? " full" : ""}`}>
       <div className="maptools">
         <button type="button" className={`btn small${drawing ? " primary" : ""}`} onClick={() => setDrawing((d) => !d)}>
-          {drawing ? "Atcelt zīmēšanu" : "✎ Apvilkt zonu"}
+          {drawing ? t("Atcelt zīmēšanu") : `✎ ${t("Apvilkt zonu")}`}
         </button>
-        {zone && <button type="button" className="btn small" onClick={clearZone}>Notīrīt zonu</button>}
-        <button type="button" className="btn small" onClick={() => setFull((f) => !f)}>{full ? "✕ Aizvērt" : "⤢ Lielā karte"}</button>
+        {zone && <button type="button" className="btn small" onClick={clearZone}>{t("Notīrīt zonu")}</button>}
+        <button type="button" className="btn small" onClick={() => setFull((f) => !f)}>{full ? `✕ ${t("Aizvērt")}` : `⤢ ${t("Lielā karte")}`}</button>
         {count != null && <span className="fine">{count} kartē</span>}
         {count === 0 && /(^|&)cat=vehicle(&|$)/.test(query) && (
-          <span className="fine">· ss.com auto sarakstā vieta nav norādīta, tāpēc tie kartē nav redzami</span>
+          <span className="fine">{t("· ss.com auto sarakstā vieta nav norādīta, tāpēc tie kartē nav redzami")}</span>
         )}
       </div>
-      {drawing && <div className="drawhint">Velc ar peli vai pirkstu ap vajadzīgo vietu</div>}
-      <div ref={box} className="map" role="application" aria-label="Sludinājumu karte" />
+      {drawing && <div className="drawhint">{t("Velc ar peli vai pirkstu ap vajadzīgo vietu")}</div>}
+      <div ref={box} className="map" role="application" aria-label={t("Sludinājumu karte")} />
     </div>
   );
 }

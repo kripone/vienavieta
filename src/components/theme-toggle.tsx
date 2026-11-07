@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useT } from "@/i18n/client";
 
 type Theme = "system" | "light" | "dark";
 const NEXT: Record<Theme, Theme> = { system: "light", light: "dark", dark: "system" };
@@ -14,6 +15,7 @@ const ICON: Record<Theme, React.ReactNode> = {
 export const themeScript = `try{var t=localStorage.getItem("vv-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}`;
 
 export function ThemeToggle() {
+  const { t: tr } = useT();
   const [theme, setTheme] = useState<Theme>("system");
   useEffect(() => {
     try {
@@ -35,7 +37,7 @@ export function ThemeToggle() {
   }
 
   return (
-    <button type="button" className="btn theme-btn" onClick={click} aria-label={`${LABEL[theme]}. Mainīt`} title={LABEL[theme]}>
+    <button type="button" className="btn theme-btn" onClick={click} aria-label={`${tr(LABEL[theme])}. ${tr("Mainīt")}`} title={tr(LABEL[theme])}>
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         {ICON[theme]}
       </svg>

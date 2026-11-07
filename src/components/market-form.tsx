@@ -1,14 +1,16 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { useT } from "@/i18n/client";
 
 type Opt = { value: string; label: string };
 
 /** Izvēlnes tirgus lapā: maiņa uzreiz atver jauno skatu (saite paliek dalāma). */
 export function MarketSelect({ name, value, options, params, reset = [], label }: { name: string; value: string; options: Opt[]; params: Record<string, string>; reset?: string[]; label: string }) {
+  const { t } = useT();
   const router = useRouter();
   return (
     <label className="field">
-      {label}
+      {t(label)}
       <select
         value={value}
         onChange={(e) => {
@@ -19,7 +21,7 @@ export function MarketSelect({ name, value, options, params, reset = [], label }
           router.push(`/tirgus?${p}`);
         }}
       >
-        {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        {options.map((o) => <option key={o.value} value={o.value}>{t(o.label)}</option>)}
       </select>
     </label>
   );

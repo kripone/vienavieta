@@ -1,4 +1,5 @@
 "use client";
+import { useT } from "@/i18n/client";
 import { vcIcon } from "@/lib/illustrations";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -26,6 +27,7 @@ function propertyKeys(ptype: string): readonly string[] {
 }
 
 export function SearchFilters({ initial, regions }: { initial: FilterValues; regions: RegionOption[] }) {
+  const { t } = useT();
   const router = useRouter();
   const [v, setV] = useState<FilterValues>(initial);
   const [makes, setMakes] = useState<Make[]>([]);
@@ -59,22 +61,22 @@ export function SearchFilters({ initial, regions }: { initial: FilterValues; reg
 
   const sel = (k: string, label: string, opts: readonly (string | readonly [string, string])[], any = "Jebkurš") => (
     <label className="field" key={k}>
-      {label}
+      {t(label)}
       <select value={v[k] ?? ""} onChange={(e) => update({ [k]: e.target.value })}>
-        <option value="">{any}</option>
-        {opts.map((o) => (typeof o === "string" ? <option key={o} value={o}>{o}</option> : <option key={o[0]} value={o[0]}>{o[1]}</option>))}
+        <option value="">{t(any)}</option>
+        {opts.map((o) => (typeof o === "string" ? <option key={o} value={o}>{t(o)}</option> : <option key={o[0]} value={o[0]}>{t(o[1])}</option>))}
       </select>
     </label>
   );
   const numIn = (k: string, label: string, ph?: string) => (
     <label className="field" key={k}>
-      {label}
+      {t(label)}
       <input type="number" inputMode="numeric" min={0} value={v[k] ?? ""} placeholder={ph} onChange={(e) => update({ [k]: e.target.value }, 500)} />
     </label>
   );
   const check = (k: string, label: string) => (
     <label key={k}>
-      <input type="checkbox" checked={v[k] === "1"} onChange={(e) => update({ [k]: e.target.checked ? "1" : "" })} /> {label}
+      <input type="checkbox" checked={v[k] === "1"} onChange={(e) => update({ [k]: e.target.checked ? "1" : "" })} /> {t(label)}
     </label>
   );
 
@@ -85,47 +87,47 @@ export function SearchFilters({ initial, regions }: { initial: FilterValues; reg
 
   return (
     <div className="filters">
-      <div className="seg full" role="group" aria-label="Kategorija">
+      <div className="seg full" role="group" aria-label={t("Kategorija")}>
         {([["", "Visi"], ["vehicle", "Transports"], ["property", "Īpašumi"]] as const).map(([c, l]) => (
           <button key={c} type="button" aria-pressed={(v.cat ?? "") === c} onClick={() => update({ cat: c, vc: c === "vehicle" ? "car" : "", make: "", model: "", body: "", ptype: "", country: "", loc: "" })}>
-            {l}
+            {t(l)}
           </button>
         ))}
       </div>
 
       {v.cat === "vehicle" && (
-        <div className="vc-row" role="group" aria-label="Transporta veids">
+        <div className="vc-row" role="group" aria-label={t("Transporta veids")}>
           {VEHICLE_CLASSES.map((c) => (
             <button key={c} type="button" aria-pressed={vc === c} onClick={() => update({ vc: c, make: "", model: "", body: "" })}>
               <span dangerouslySetInnerHTML={{ __html: vcIcon(c) }} style={{ display: "contents" }} />
-              <span>{VEHICLE_CLASS_LABEL[c]}</span>
+              <span>{t(VEHICLE_CLASS_LABEL[c])}</span>
             </button>
           ))}
         </div>
       )}
 
       <label className="field">
-        Meklēt
-        <input type="search" value={v.q ?? ""} placeholder="piem. Golf, 2 istabas, Teika" onChange={(e) => update({ q: e.target.value }, 500)} />
+        {t("Meklēt")}
+        <input type="search" value={v.q ?? ""} placeholder={t("piem. Golf, 2 istabas, Teika")} onChange={(e) => update({ q: e.target.value }, 500)} />
       </label>
       <div className="grid2">
         {numIn("pmin", "Cena no, €")}
         {numIn("pmax", "Cena līdz, €")}
       </div>
-      {v.cat === "vehicle" && <div className="seg seg-sm" role="group" aria-label="Valsts">
+      {v.cat === "vehicle" && <div className="seg seg-sm" role="group" aria-label={t("Valsts")}>
         {([["", "Latvija un Lietuva"], ["LV", "Latvija"], ["LT", "Lietuva"]] as const).map(([c, l]) => (
           <button key={c} type="button" aria-pressed={(v.country ?? "") === c} onClick={() => update({ country: c, loc: "" })}>
-            {l}
+            {t(l)}
           </button>
         ))}
       </div>}
       <label className="field">
-        Vieta
+        {t("Vieta")}
         <select value={v.loc ?? ""} onChange={(e) => update({ loc: e.target.value })}>
-          <option value="">{v.cat !== "vehicle" || v.country === "LV" ? "Visa Latvija" : v.country === "LT" ? "Visa Lietuva" : "Visas vietas"}</option>
+          <option value="">{t(v.cat !== "vehicle" || v.country === "LV" ? "Visa Latvija" : v.country === "LT" ? "Visa Lietuva" : "Visas vietas")}</option>
           {regions.filter((r) => (v.cat === "vehicle" ? !v.country || r.country === v.country : r.country === "LV")).map((r) => (
-            <optgroup key={r.region} label={v.cat === "vehicle" && !v.country && r.country === "LT" ? `Lietuva · ${r.region}` : r.region}>
-              <option value={`r:${r.regionId}`}>{r.country === "LT" && r.kind !== "city" ? `Visa ${r.region}` : r.kind === "city" ? `Visa ${r.region}` : `Viss ${r.region}`}</option>
+            <optgroup key={r.region} label={v.cat === "vehicle" && !v.country && r.country === "LT" ? `${t("Lietuva")} · ${r.region}` : r.region}>
+              <option value={`r:${r.regionId}`}>{r.kind === "city" || r.country === "LT" ? t("Visa {r}", { r: r.region }) : t("Viss {r}", { r: r.region })}</option>
               {r.places.map((p) => <option key={p.id} value={`p:${p.id}`}>{p.name}</option>)}
             </optgroup>
           ))}
@@ -136,17 +138,17 @@ export function SearchFilters({ initial, regions }: { initial: FilterValues; reg
         <>
           <div className="grid2">
             <label className="field">
-              Marka
+              {t("Marka")}
               <select value={v.make ?? ""} onChange={(e) => update({ make: e.target.value, model: "" })}>
-                <option value="">Visas markas</option>
-                <optgroup label="Populārākās">{makes.filter((m) => m.popular).map((m) => <option key={"p" + m.id} value={m.id}>{m.name}</option>)}</optgroup>
-                <optgroup label="Visas markas">{makes.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}</optgroup>
+                <option value="">{t("Visas markas")}</option>
+                <optgroup label={t("Populārākās")}>{makes.filter((m) => m.popular).map((m) => <option key={"p" + m.id} value={m.id}>{m.name}</option>)}</optgroup>
+                <optgroup label={t("Visas markas")}>{makes.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}</optgroup>
               </select>
             </label>
             <label className="field">
-              Modelis
+              {t("Modelis")}
               <select value={v.model ?? ""} disabled={!make} onChange={(e) => update({ model: e.target.value })}>
-                <option value="">{make ? "Visi modeļi" : "Vispirms marka"}</option>
+                <option value="">{make ? t("Visi modeļi") : t("Vispirms marka")}</option>
                 {make?.models.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
               </select>
             </label>
@@ -159,7 +161,7 @@ export function SearchFilters({ initial, regions }: { initial: FilterValues; reg
           </div>
           <div className="checks">{check("el", "⚡ Tikai elektriskie")}</div>
           <details className="more" open={Boolean(v.drive || v.kwmin || v.ccmin || v.ccmax || v.color)}>
-            <summary>Vairāk filtru</summary>
+            <summary>{t("Vairāk filtru")}</summary>
             <div className="grid2">
               {sel("drive", "Piedziņa", DRIVES, "Jebkura")}
               {sel("kwmin", "Jauda no", KW.map(([k, z]) => [k, `${k} kW (${z})`] as const), "Jebkura")}
@@ -175,13 +177,13 @@ export function SearchFilters({ initial, regions }: { initial: FilterValues; reg
         <>
           <div className="grid2">
             <label className="field full">
-              Īpašuma veids
+              {t("Īpašuma veids")}
               <select value={v.ptype ?? ""} onChange={(e) => update({ ptype: e.target.value })}>
-                <option value="">Visi veidi</option>
+                <option value="">{t("Visi veidi")}</option>
                 {Object.entries(PROPERTY_GROUPS).map(([g, ts]) => (
-                  <optgroup key={g} label={g}>
-                    <option value={`g:${g}`}>Visi: {g.toLocaleLowerCase("lv")}</option>
-                    {ts.map((t) => <option key={t} value={t}>{t}</option>)}
+                  <optgroup key={g} label={t(g)}>
+                    <option value={`g:${g}`}>{t("Visi: {g}", { g: t(g).toLocaleLowerCase() })}</option>
+                    {ts.map((x) => <option key={x} value={x}>{t(x)}</option>)}
                   </optgroup>
                 ))}
               </select>
@@ -201,7 +203,7 @@ export function SearchFilters({ initial, regions }: { initial: FilterValues; reg
           {pkeys.includes("floor") && <div className="checks">{check("notfirst", "Ne pirmais stāvs")}{check("notlast", "Ne pēdējais stāvs")}</div>}
           {(pkeys.some((k) => ["series", "material", "heating", "condition", "builtYear", "amenities"].includes(k))) && (
             <details className="more" open={Boolean(v.series || v.material || v.heating || v.condition || v.builtmin || v.amen)}>
-              <summary>Vairāk filtru</summary>
+              <summary>{t("Vairāk filtru")}</summary>
               <div className="grid2">
                 {pkeys.includes("series") && sel("series", "Sērija", SERIES)}
                 {pkeys.includes("material") && sel("material", "Mājas tips", MATERIALS)}
@@ -213,7 +215,7 @@ export function SearchFilters({ initial, regions }: { initial: FilterValues; reg
                 <div className="checks" style={{ marginTop: 10 }}>
                   {AMENITIES.map((a) => (
                     <label key={a}>
-                      <input type="checkbox" checked={amen.includes(a)} onChange={(e) => update({ amen: (e.target.checked ? [...amen, a] : amen.filter((x) => x !== a)).join(",") })} /> {a}
+                      <input type="checkbox" checked={amen.includes(a)} onChange={(e) => update({ amen: (e.target.checked ? [...amen, a] : amen.filter((x) => x !== a)).join(",") })} /> {t(a)}
                     </label>
                   ))}
                 </div>
@@ -224,20 +226,20 @@ export function SearchFilters({ initial, regions }: { initial: FilterValues; reg
       )}
 
       <label className="field">
-        Pārdevējs
+        {t("Pārdevējs")}
         <select value={v.seller ?? ""} onChange={(e) => update({ seller: e.target.value })}>
-          <option value="">Visi pārdevēji</option>
-          <option value="private">Privātpersonas</option>
-          <option value="dealer">Saloni un aģentūras</option>
-          <option value="verified">Tikai ar apstiprinātu identitāti</option>
+          <option value="">{t("Visi pārdevēji")}</option>
+          <option value="private">{t("Privātpersonas")}</option>
+          <option value="dealer">{t("Saloni un aģentūras")}</option>
+          <option value="verified">{t("Tikai ar apstiprinātu identitāti")}</option>
         </select>
       </label>
       <label className="field">
-        Avots
+        {t("Avots")}
         <select value={v.src ?? ""} onChange={(e) => update({ src: e.target.value })}>
-          <option value="">Visi sludinājumi</option>
-          <option value="own">Tikai VienāVietā</option>
-          <option value="ext">No citiem portāliem (ss.com)</option>
+          <option value="">{t("Visi sludinājumi")}</option>
+          <option value="own">{t("Tikai VienāVietā")}</option>
+          <option value="ext">{t("No citiem portāliem (ss.com)")}</option>
         </select>
       </label>
 

@@ -1,4 +1,5 @@
 "use client";
+import { useT } from "@/i18n/client";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
@@ -6,6 +7,7 @@ type Social = { google: boolean; facebook: boolean; apple: boolean };
 const SOCIAL_LABEL = { google: "Google", facebook: "Facebook", apple: "Apple" } as const;
 
 export function LoginForm({ next, social }: { next: string; social: Social }) {
+  const { t } = useT();
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -15,7 +17,7 @@ export function LoginForm({ next, social }: { next: string; social: Social }) {
     const value = email.trim();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(value)) {
       setState("error");
-      setMessage("Ievadi derīgu e-pasta adresi.");
+      setMessage(t("Ievadi derīgu e-pasta adresi."));
       return;
     }
     setState("sending");
@@ -27,7 +29,7 @@ export function LoginForm({ next, social }: { next: string; social: Social }) {
     });
     if (error) {
       setState("error");
-      setMessage(error.status === 429 ? "Pārāk daudz mēģinājumu. Pagaidi minūti un mēģini vēlreiz." : "Neizdevās nosūtīt saiti. Mēģini vēlreiz.");
+      setMessage(error.status === 429 ? t("Pārāk daudz mēģinājumu. Pagaidi minūti un mēģini vēlreiz.") : t("Neizdevās nosūtīt saiti. Mēģini vēlreiz."));
       return;
     }
     setState("sent");
@@ -38,12 +40,12 @@ export function LoginForm({ next, social }: { next: string; social: Social }) {
   if (state === "sent") {
     return (
       <div className="panel">
-        <h2>Pārbaudi e-pastu</h2>
+        <h2>{t("Pārbaudi e-pastu")}</h2>
         <p>
-          Nosūtījām pieteikšanās saiti uz <b>{email.trim()}</b>. Atver to šajā pašā ierīcē. Saite ir derīga 15 minūtes.
+          {t("Nosūtījām pieteikšanās saiti uz")} <b>{email.trim()}</b>. {t("Atver to šajā pašā ierīcē. Saite ir derīga 15 minūtes.")}
         </p>
         <button type="button" className="btn" onClick={() => setState("idle")}>
-          Izmantot citu e-pastu
+          {t("Izmantot citu e-pastu")}
         </button>
       </div>
     );
@@ -61,20 +63,20 @@ export function LoginForm({ next, social }: { next: string; social: Social }) {
             ))}
           </div>
           <div className="or">
-            <span>vai ar e-pastu</span>
+            <span>{t("vai ar e-pastu")}</span>
           </div>
         </>
       )}
       <form onSubmit={onSubmit} noValidate className="stack">
         <label className="field">
-          E-pasts
-          <input type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="vards@epasts.lv" required />
+          {t("E-pasts")}
+          <input type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("vards@epasts.lv")} required />
         </label>
         <button type="submit" className="btn primary" disabled={state === "sending"}>
-          {state === "sending" ? "Sūta…" : "Sūtīt pieteikšanās saiti"}
+          {state === "sending" ? t("Sūta…") : t("Sūtīt pieteikšanās saiti")}
         </button>
         {state === "error" && <p className="alert">{message}</p>}
-        <p className="fine">Parole nav vajadzīga: nosūtīsim saiti, ar kuru vari pieteikties. Ja konta vēl nav, tas tiks izveidots.</p>
+        <p className="fine">{t("Parole nav vajadzīga: nosūtīsim saiti, ar kuru vari pieteikties. Ja konta vēl nav, tas tiks izveidots.")}</p>
       </form>
     </div>
   );

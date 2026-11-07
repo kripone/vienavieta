@@ -365,3 +365,5 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .house { margin: 20px 0; }
 .house h2 { margin-bottom: 4px; }
 .sugg { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; }
+/* Valodas izvēle galvenē */
+.lang { font: inherit; font-size: 13px; font-weight: 600; padding: 6px 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: inherit; cursor: pointer; }

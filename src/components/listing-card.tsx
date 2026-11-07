@@ -10,11 +10,13 @@ import { formatNumber, formatPrice, timeAgo } from "@/lib/format";
 import { landLabel } from "@/lib/listing-input";
 import { locationLabel, type ListingCard as Card } from "@/lib/listings";
 import { mediaUrl } from "@/lib/storage";
+import { getT } from "@/i18n/server";
+import { trTitle } from "@/i18n/content";
 
 const STATUS: Record<string, string> = { active: "Aktīvs", pending: "Gaida pārbaudi", hidden: "Paslēpts", sold: "Pārdots", deleted: "Dzēsts" };
 
-export function priceUnit(deal: string | null) {
-  return deal === "rent" ? "/mēn." : deal === "day" ? "/dienā" : "";
+export function priceUnit(deal: string | null, t: (k: string) => string = (k) => k) {
+  return deal === "rent" ? t("/mēn.") : deal === "day" ? t("/dienā") : "";
 }
 
 type CardProps = {
@@ -35,12 +37,13 @@ type CardProps = {
   vzd?: { median: number; n: number } | null;
 };
 
-export function ListingCard({ l, showStatus, actions, favorite, oldPrice, also, evaluation, compare, vzd }: CardProps) {
+export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, also, evaluation, compare, vzd }: CardProps) {
+  const { t } = await getT();
   const meta =
     l.kind === "vehicle"
-      ? [l.year, l.mileageKm != null ? `${formatNumber(l.mileageKm)} km` : null, l.fuel, l.gearbox, l.body]
-      : [l.propertyType, l.areaM2 ? `${Number(l.areaM2)} m²` : null, l.rooms ? `${l.rooms} ist.` : null, l.landM2 && !l.areaM2 ? landLabel(l.landM2) : null, l.deal ? DEAL_LABEL[l.deal] : null];
-  const unit = priceUnit(l.deal);
+      ? [l.year, l.mileageKm != null ? `${formatNumber(l.mileageKm)} km` : null, l.fuel && t(l.fuel), l.gearbox && t(l.gearbox), l.body && t(l.body)]
+      : [l.propertyType && t(l.propertyType), l.areaM2 ? `${Number(l.areaM2)} m²` : null, l.rooms ? t("{n} ist.", { n: l.rooms }) : null, l.landM2 && !l.areaM2 ? landLabel(l.landM2) : null, l.deal ? t(DEAL_LABEL[l.deal]) : null];
+  const unit = priceUnit(l.deal, t);
   const ext = l.source !== "own" && l.externalUrl ? l.externalUrl : null;
   const src = SOURCE_LABEL[l.source] ?? l.source;
   // Ārējie sludinājumi: virsraksts ved uz oriģinālu (jaunā cilnē); mūsu lapā ir tikai fakti un saite.
@@ -60,13 +63,13 @@ export function ListingCard({ l, showStatus, actions, favorite, oldPrice, also, 
         {l.photoCount > 1 && <span className="pc">📷 {l.photoCount}</span>}
       </a>
       <div className="body">
-        <span className={`kind ${l.kind}`}>{l.kind === "vehicle" ? "Transports" : "Īpašums"}</span>
-        {showStatus && l.status !== "active" && <span className="status">{STATUS[l.status]}</span>}
+        <span className={`kind ${l.kind}`}>{l.kind === "vehicle" ? t("Transports") : t("Īpašums")}</span>
+        {showStatus && l.status !== "active" && <span className="status">{t(STATUS[l.status])}</span>}
         <h2>
           {ext ? (
-            <a href={ext} {...extLink} title={`Atvērt sludinājumu ${src} (jaunā cilnē)`}>{l.title}</a>
+            <a href={ext} {...extLink} title={t("Atvērt sludinājumu {src} (jaunā cilnē)", { src })}>{trTitle(l.title, t)}</a>
           ) : (
-            <a href={`/sludinajumi/${l.id}`}>{l.title}</a>
+            <a href={`/sludinajumi/${l.id}`}>{trTitle(l.title, t)}</a>
           )}
         </h2>
         <div className="meta">
@@ -74,18 +77,18 @@ export function ListingCard({ l, showStatus, actions, favorite, oldPrice, also, 
             <span key={i}>{m}</span>
           ))}
           {where && <span>📍 {where}</span>}
-          <span>{timeAgo(l.createdAt)}</span>
+          <span>{timeAgo(l.createdAt, t)}</span>
         </div>
         {ext && (
           <div className="ext-row">
-            <span className="src-badge">Avots: {src}</span>
-            <a className="ext-link" href={ext} {...extLink}>Skatīt {src} ↗</a>
-            <a className="fine" href={`/sludinajumi/${l.id}`}>Sīkāk</a>
+            <span className="src-badge">{t("Avots: {src}", { src })}</span>
+            <a className="ext-link" href={ext} {...extLink}>{t("Skatīt {src}", { src })} ↗</a>
+            <a className="fine" href={`/sludinajumi/${l.id}`}>{t("Sīkāk")}</a>
           </div>
         )}
         {also && also.length > 0 && (
           <div className="ext-row also">
-            <span className="fine">Arī:</span>
+            <span className="fine">{t("Arī:")}</span>
             {also.map((a) =>
               a.source === "own" ? (
                 <a key={a.id} href={a.url}>VienāVietā</a>
@@ -98,9 +101,9 @@ export function ListingCard({ l, showStatus, actions, favorite, oldPrice, also, 
           </div>
         )}
         {vzd && (
-          <a className="vzd-badge" href={`/sludinajumi/${l.id}#vzd`} title="Reālās pirkuma cenas šajā mājā (Valsts zemes dienests)">
-            VZD: šajā mājā {formatNumber(vzd.median)} €/m² ({vzd.n})
-            {l.areaM2 ? <> · šis {formatNumber(Math.round(l.price / Number(l.areaM2)))} €/m²</> : null}
+          <a className="vzd-badge" href={`/sludinajumi/${l.id}#vzd`} title={t("Reālās pirkuma cenas šajā mājā (Valsts zemes dienests)")}>
+            {t("VZD: šajā mājā {v} €/m² ({n})", { v: formatNumber(vzd.median), n: vzd.n })}
+            {l.areaM2 ? <> · {t("šis {v} €/m²", { v: formatNumber(Math.round(l.price / Number(l.areaM2))) })}</> : null}
           </a>
         )}
         {actions}

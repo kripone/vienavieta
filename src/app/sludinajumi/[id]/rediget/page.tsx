@@ -1,14 +1,19 @@
+import { getT } from "@/i18n/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ListingForm, type FormValues } from "@/components/listing-form";
 import { getListing, regionOptions } from "@/lib/listings";
 import { requireUser } from "@/lib/session";
 
-export const metadata: Metadata = { title: "Rediģēt sludinājumu" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return { title: t("Rediģēt sludinājumu") };
+}
 
 const str = (v: unknown) => (v == null ? "" : String(v));
 
 export default async function EditPage(props: { params: Promise<{ id: string }> }) {
+  const { t } = await getT();
   const { id } = await props.params;
   const user = await requireUser(`/sludinajumi/${id}/rediget`);
   const data = await getListing(id);
@@ -54,7 +59,7 @@ export default async function EditPage(props: { params: Promise<{ id: string }> 
   };
   return (
     <main className="wrap mid">
-      <h1>Rediģēt sludinājumu</h1>
+      <h1>{t("Rediģēt sludinājumu")}</h1>
       <ListingForm regions={await regionOptions()} initial={initial} initialAmenities={l.amenities} initialPhotos={data.photos.map((p) => ({ id: p.id, thumbUrl: p.thumbUrl }))} />
     </main>
   );

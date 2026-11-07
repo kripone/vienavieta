@@ -1,3 +1,4 @@
+import { getT } from "@/i18n/server";
 import { Suspense } from "react";
 import { FiltersBox } from "@/components/filters-box";
 import { ListingCard } from "@/components/listing-card";
@@ -11,7 +12,6 @@ import { alsoAt } from "@/lib/dedupe";
 import { priceEvals } from "@/lib/price-eval";
 import { vzdBadges } from "@/lib/vzd";
 import { favoriteIds } from "@/lib/favorites";
-import { plural } from "@/lib/format";
 import { regionOptions } from "@/lib/listings";
 import { parseSearch, searchListings, typeCounts } from "@/lib/search";
 import { getCurrentUser } from "@/lib/session";
@@ -21,6 +21,7 @@ export const dynamic = "force-dynamic";
 type SP = Record<string, string | string[] | undefined>;
 
 export default async function SearchPage(props: { searchParams: Promise<SP> }) {
+  const { t, tp } = await getT();
   const raw = await props.searchParams;
   const s = parseSearch(raw);
   const flat: Record<string, string> = {};
@@ -45,7 +46,7 @@ export default async function SearchPage(props: { searchParams: Promise<SP> }) {
     : [new Map(), new Map(), new Map()];
   const favs = user && result ? await favoriteIds(user.id, result.rows.map((r) => r.id)).catch(() => new Set<string>()) : new Set<string>();
 
-  const heading = s.cat === "vehicle" ? VEHICLE_CLASS_LABEL[(s.vc ?? "car") as VehicleClass] : s.cat === "property" ? "Nekustamais īpašums" : "Visi sludinājumi";
+  const heading = s.cat === "vehicle" ? t(VEHICLE_CLASS_LABEL[(s.vc ?? "car") as VehicleClass]) : s.cat === "property" ? t("Nekustamais īpašums") : t("Visi sludinājumi");
   const pointsQuery = new URLSearchParams(Object.entries(flat).filter(([k]) => !["page", "sort", "zone"].includes(k))).toString();
   const pageHref = (n: number) => {
     const p = new URLSearchParams(flat);
@@ -66,7 +67,7 @@ export default async function SearchPage(props: { searchParams: Promise<SP> }) {
         <SearchMapLazy query={pointsQuery} zone={flat.zone} />
         <div className="results-head">
           <h1>{heading}</h1>
-          {result && <span className="count">{plural(result.total, "sludinājums", "sludinājumi")}</span>}
+          {result && <span className="count">{tp(result.total, "sludinājums", "sludinājumi")}</span>}
           <span className="grow" />
           <Suspense>
             <SortSelect value={s.sort} />
@@ -75,13 +76,13 @@ export default async function SearchPage(props: { searchParams: Promise<SP> }) {
         <Suspense>
           <SaveSearchButton loggedIn={Boolean(user)} />
         </Suspense>
-        {s.zone && <p className="zone-note">Rāda tikai sludinājumus iezīmētajā zonā.</p>}
+        {s.zone && <p className="zone-note">{t("Rāda tikai sludinājumus iezīmētajā zonā.")}</p>}
         {!result ? (
           <div className="notice">
             Neizdevās pieslēgties datubāzei. Pārbaudi, vai tā darbojas (<code>docker compose up -d</code>).
           </div>
         ) : result.rows.length === 0 ? (
-          <div className="notice">Nekas neatbilst izvēlētajiem filtriem. Pamēģini paplašināt meklēšanu.</div>
+          <div className="notice">{t("Nekas neatbilst izvēlētajiem filtriem. Pamēģini paplašināt meklēšanu.")}</div>
         ) : (
           <>
             <div className="list">
@@ -90,12 +91,12 @@ export default async function SearchPage(props: { searchParams: Promise<SP> }) {
               ))}
             </div>
             {result.pages > 1 && (
-              <nav className="pager" aria-label="Lapas">
-                {s.page > 1 && <a className="btn small" href={pageHref(s.page - 1)}>‹ Iepriekšējā</a>}
+              <nav className="pager" aria-label={t("Lapas")}>
+                {s.page > 1 && <a className="btn small" href={pageHref(s.page - 1)}>{t("‹ Iepriekšējā")}</a>}
                 <span className="fine">
-                  {s.page}. lapa no {result.pages}
+                  {t("{n}. lapa no {m}", { n: s.page, m: result.pages })}
                 </span>
-                {s.page < result.pages && <a className="btn small" href={pageHref(s.page + 1)}>Nākamā ›</a>}
+                {s.page < result.pages && <a className="btn small" href={pageHref(s.page + 1)}>{t("Nākamā ›")}</a>}
               </nav>
             )}
           </>

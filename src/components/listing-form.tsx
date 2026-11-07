@@ -1,4 +1,5 @@
 "use client";
+import { useT } from "@/i18n/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { saveListing } from "@/app/sludinajumi/actions";
@@ -38,6 +39,7 @@ export function ListingForm(props: {
   initialPhotos?: PhotoItem[];
   defaultPhone?: string;
 }) {
+  const { t } = useT();
   const router = useRouter();
   const isEdit = Boolean(props.initial?.id);
   const [v, setV] = useState<FormValues>({ ...blank, contactPhone: props.defaultPhone ?? "", ...(props.initial as FormValues) });
@@ -68,12 +70,12 @@ export function ListingForm(props: {
     if (!files) return;
     const list = Array.from(files).slice(0, MAX_PHOTOS - photos.length);
     for (const [i, f] of list.entries()) {
-      setUploading(`Augšupielādē bildi ${i + 1} no ${list.length}…`);
+      setUploading(t("Augšupielādē bildi {i} no {n}…", { i: i + 1, n: list.length }));
       const fd = new FormData();
       fd.append("file", f);
       const r = await fetch("/api/uploads", { method: "POST", body: fd });
       const d = await r.json().catch(() => ({}));
-      if (!r.ok) { setErrors((e) => ({ ...e, photos: d.error ?? "Bildi neizdevās augšupielādēt." })); break; }
+      if (!r.ok) { setErrors((e) => ({ ...e, photos: d.error ?? t("Bildi neizdevās augšupielādēt.") })); break; }
       setPhotos((p) => [...p, { id: d.id, thumbUrl: d.thumbUrl }]);
     }
     setUploading("");
@@ -93,20 +95,20 @@ export function ListingForm(props: {
     requestAnimationFrame(() => document.querySelector(".err")?.scrollIntoView({ behavior: "smooth", block: "center" }));
   }
 
-  const err = (k: string) => (errors[k] ? <span className="err">{errors[k]}</span> : null);
+  const err = (k: string) => (errors[k] ? <span className="err">{t(errors[k])}</span> : null);
   const sel = ({ k, label, list, any = "— izvēlies —", required }: { k: string; label: string; list: readonly string[]; any?: string; required?: boolean }) => (
     <label className="field" key={k}>
-      {label}{required && " *"}
+      {t(label)}{required && " *"}
       <select value={v[k]} onChange={set(k)} aria-invalid={Boolean(errors[k])}>
-        <option value="">{any}</option>
-        {list.map((o) => <option key={o} value={o}>{o}</option>)}
+        <option value="">{t(any)}</option>
+        {list.map((o) => <option key={o} value={o}>{t(o)}</option>)}
       </select>
       {err(k)}
     </label>
   );
   const num = ({ k, label, required, step }: { k: string; label: string; required?: boolean; step?: string }) => (
     <label className="field" key={k}>
-      {label}{required && " *"}
+      {t(label)}{required && " *"}
       <input inputMode={step ? "decimal" : "numeric"} type="number" step={step ?? "1"} value={v[k]} onChange={set(k)} aria-invalid={Boolean(errors[k])} />
       {err(k)}
     </label>
@@ -115,47 +117,47 @@ export function ListingForm(props: {
   return (
     <form onSubmit={onSubmit} noValidate className="stack lform">
       {!isEdit && (
-        <div className="seg" role="group" aria-label="Kategorija">
-          <button type="button" aria-pressed={v.kind === "vehicle"} onClick={() => setV((p) => ({ ...p, kind: "vehicle" }))}>Transports</button>
-          <button type="button" aria-pressed={v.kind === "property"} onClick={() => setV((p) => ({ ...p, kind: "property", placeId: props.regions.some((r) => r.country === "LT" && r.places.some((pl) => String(pl.id) === p.placeId)) ? "" : p.placeId }))}>Nekustamais īpašums</button>
+        <div className="seg" role="group" aria-label={t("Kategorija")}>
+          <button type="button" aria-pressed={v.kind === "vehicle"} onClick={() => setV((p) => ({ ...p, kind: "vehicle" }))}>{t("Transports")}</button>
+          <button type="button" aria-pressed={v.kind === "property"} onClick={() => setV((p) => ({ ...p, kind: "property", placeId: props.regions.some((r) => r.country === "LT" && r.places.some((pl) => String(pl.id) === p.placeId)) ? "" : p.placeId }))}>{t("Nekustamais īpašums")}</button>
         </div>
       )}
 
       {v.kind === "vehicle" ? (
         <section className="panel grid2">
-          <h2 className="full">Transportlīdzeklis</h2>
+          <h2 className="full">{t("Transportlīdzeklis")}</h2>
           <label className="field full">
-            Transporta veids *
+            {t("Transporta veids *")}
             <select value={v.vehicleClass} onChange={(e) => setV((p) => ({ ...p, vehicleClass: e.target.value, makeId: "", modelId: "", body: "" }))} disabled={isEdit}>
-              {VEHICLE_CLASSES.map((c) => <option key={c} value={c}>{VEHICLE_CLASS_LABEL[c]}</option>)}
+              {VEHICLE_CLASSES.map((c) => <option key={c} value={c}>{t(VEHICLE_CLASS_LABEL[c])}</option>)}
             </select>
           </label>
           <label className="field">
-            Marka *
+            {t("Marka *")}
             <select value={v.makeId} onChange={(e) => setV((p) => ({ ...p, makeId: e.target.value, modelId: "" }))} aria-invalid={Boolean(errors.makeId)}>
-              <option value="">{makes.length ? "— izvēlies —" : "Ielādē…"}</option>
-              {sortedMakes.popular.length > 0 && <optgroup label="Populārākās">{sortedMakes.popular.map((m) => <option key={"p" + m.id} value={m.id}>{m.name}</option>)}</optgroup>}
-              <optgroup label="Visas markas">{sortedMakes.all.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}</optgroup>
+              <option value="">{makes.length ? t("— izvēlies —") : t("Ielādē…")}</option>
+              {sortedMakes.popular.length > 0 && <optgroup label={t("Populārākās")}>{sortedMakes.popular.map((m) => <option key={"p" + m.id} value={m.id}>{m.name}</option>)}</optgroup>}
+              <optgroup label={t("Visas markas")}>{sortedMakes.all.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}</optgroup>
             </select>
             {err("makeId")}
           </label>
           <label className="field">
-            Modelis *
+            {t("Modelis *")}
             <select value={v.modelId} onChange={set("modelId")} disabled={!make} aria-invalid={Boolean(errors.modelId)}>
-              <option value="">{make ? "— izvēlies —" : "Vispirms marka"}</option>
+              <option value="">{make ? t("— izvēlies —") : t("Vispirms marka")}</option>
               {make?.models.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
             </select>
             {err("modelId")}
           </label>
           {!v.makeId && (
             <label className="field">
-              Vai ieraksti marku
+              {t("Vai ieraksti marku")}
               <input value={v.makeText} onChange={set("makeText")} maxLength={40} />
             </label>
           )}
           {!v.modelId && (
             <label className="field">
-              Vai ieraksti modeli
+              {t("Vai ieraksti modeli")}
               <input value={v.modelText} onChange={set("modelText")} maxLength={60} />
             </label>
           )}
@@ -169,27 +171,27 @@ export function ListingForm(props: {
           {sel({ k: "drive", label: "Piedziņa", list: DRIVES, any: "Nav norādīts" })}
           {sel({ k: "color", label: "Krāsa", list: COLORS, any: "Nav norādīts" })}
           <label className="field">
-            VIN kods
+            {t("VIN kods")}
             <input value={v.vin} onChange={set("vin")} maxLength={17} style={{ textTransform: "uppercase" }} aria-invalid={Boolean(errors.vin)} />
             {err("vin")}
-            <span className="fine">Netiek rādīts publiski. Nākotnē izmantosim auto vēstures pārbaudei.</span>
+            <span className="fine">{t("Netiek rādīts publiski. Nākotnē izmantosim auto vēstures pārbaudei.")}</span>
           </label>
         </section>
       ) : (
         <section className="panel grid2">
-          <h2 className="full">Īpašums</h2>
+          <h2 className="full">{t("Īpašums")}</h2>
           <label className="field">
-            Īpašuma veids *
+            {t("Īpašuma veids *")}
             <select value={v.propertyType} onChange={set("propertyType")} disabled={isEdit}>
               {Object.entries(PROPERTY_GROUPS).map(([g, ts]) => (
-                <optgroup key={g} label={g}>{ts.map((t) => <option key={t} value={t}>{t}</option>)}</optgroup>
+                <optgroup key={g} label={t(g)}>{ts.map((x) => <option key={x} value={x}>{t(x)}</option>)}</optgroup>
               ))}
             </select>
           </label>
           <label className="field">
-            Darījums *
+            {t("Darījums *")}
             <select value={v.deal} onChange={set("deal")}>
-              {DEALS.map((d) => <option key={d} value={d}>{DEAL_LABEL[d]}</option>)}
+              {DEALS.map((d) => <option key={d} value={d}>{t(DEAL_LABEL[d])}</option>)}
             </select>
           </label>
           {["rooms", "areaM2", "landM2", "floor", "floors", "builtYear"].filter((f) => fields.includes(f)).map((f) =>
@@ -198,11 +200,11 @@ export function ListingForm(props: {
           {["series", "material", "heating", "condition", "purpose"].filter((f) => fields.includes(f)).map((f) => sel({ k: f, label: PROPERTY_LABELS[f], list: PROPERTY_LISTS[f], any: "Nav norādīts" }))}
           {fields.includes("amenities") && (
             <fieldset className="field full">
-              <legend>Ērtības</legend>
+              <legend>{t("Ērtības")}</legend>
               <div className="checks">
                 {AMENITIES.map((a) => (
                   <label key={a}>
-                    <input type="checkbox" checked={amenities.includes(a)} onChange={(e) => setAmenities((p) => (e.target.checked ? [...p, a] : p.filter((x) => x !== a)))} /> {a}
+                    <input type="checkbox" checked={amenities.includes(a)} onChange={(e) => setAmenities((p) => (e.target.checked ? [...p, a] : p.filter((x) => x !== a)))} /> {t(a)}
                   </label>
                 ))}
               </div>
@@ -212,18 +214,18 @@ export function ListingForm(props: {
       )}
 
       <section className="panel grid2">
-        <h2 className="full">Cena un vieta</h2>
+        <h2 className="full">{t("Cena un vieta")}</h2>
         <label className="field">
-          Cena, € *{v.kind === "property" && v.deal === "rent" ? " mēnesī" : v.kind === "property" && v.deal === "day" ? " dienā" : ""}
+          {t("Cena, €")} *{v.kind === "property" && v.deal === "rent" ? ` ${t("mēnesī")}` : v.kind === "property" && v.deal === "day" ? ` ${t("dienā")}` : ""}
           <input type="number" inputMode="numeric" min={1} value={v.price} onChange={set("price")} aria-invalid={Boolean(errors.price)} />
           {err("price")}
         </label>
         <label className="field">
-          Vieta *
+          {t("Vieta *")}
           <select value={v.placeId} onChange={set("placeId")} aria-invalid={Boolean(errors.placeId)}>
-            <option value="">— izvēlies —</option>
+            <option value="">{t("— izvēlies —")}</option>
             {props.regions.filter((r) => v.kind === "vehicle" || r.country === "LV").map((r) => (
-              <optgroup key={r.region} label={r.country === "LT" ? `Lietuva · ${r.region}` : r.region}>
+              <optgroup key={r.region} label={r.country === "LT" ? `${t("Lietuva")} · ${r.region}` : r.region}>
                 {r.places.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </optgroup>
             ))}
@@ -233,39 +235,39 @@ export function ListingForm(props: {
       </section>
 
       <section className="panel stack">
-        <h2>Apraksts</h2>
+        <h2>{t("Apraksts")}</h2>
         <label className="field">
-          Virsraksts
-          <input value={v.title} onChange={set("title")} maxLength={90} placeholder="Var atstāt tukšu: saliksim no ievadītajiem datiem" aria-invalid={Boolean(errors.title)} />
+          {t("Virsraksts")}
+          <input value={v.title} onChange={set("title")} maxLength={90} placeholder={t("Var atstāt tukšu: saliksim no ievadītajiem datiem")} aria-invalid={Boolean(errors.title)} />
           {err("title")}
         </label>
         <label className="field">
-          Apraksts
-          <textarea rows={6} value={v.description} onChange={set("description")} maxLength={4000} placeholder="Stāvoklis, aprīkojums, remonti, kāpēc pārdod…" aria-invalid={Boolean(errors.description)} />
+          {t("Apraksts")}
+          <textarea rows={6} value={v.description} onChange={set("description")} maxLength={4000} placeholder={t("Stāvoklis, aprīkojums, remonti, kāpēc pārdod…")} aria-invalid={Boolean(errors.description)} />
           <span className="fine">{v.description.length} / 4000</span>
           {err("description")}
         </label>
       </section>
 
       <section className="panel stack">
-        <h2>Bildes</h2>
+        <h2>{t("Bildes")}</h2>
         <p className="fine">Līdz {MAX_PHOTOS} bildēm. Pirmā būs galvenā. Atrašanās vietas dati no bildēm tiek dzēsti automātiski.</p>
         <div className="photos">
           {photos.map((p, i) => (
             <div className="ph" key={p.id}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={p.thumbUrl} alt={`Bilde ${i + 1}`} />
-              {i === 0 && <span className="cover">Galvenā</span>}
+              {i === 0 && <span className="cover">{t("Galvenā")}</span>}
               <div className="ph-act">
-                <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Pārvietot pa kreisi">‹</button>
-                <button type="button" onClick={() => setPhotos((x) => x.filter((y) => y.id !== p.id))} aria-label="Noņemt bildi">×</button>
-                <button type="button" onClick={() => move(i, 1)} disabled={i === photos.length - 1} aria-label="Pārvietot pa labi">›</button>
+                <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label={t("Pārvietot pa kreisi")}>‹</button>
+                <button type="button" onClick={() => setPhotos((x) => x.filter((y) => y.id !== p.id))} aria-label={t("Noņemt bildi")}>×</button>
+                <button type="button" onClick={() => move(i, 1)} disabled={i === photos.length - 1} aria-label={t("Pārvietot pa labi")}>›</button>
               </div>
             </div>
           ))}
           {photos.length < MAX_PHOTOS && (
             <label className="ph-add">
-              + Pievienot bildes
+              {t("+ Pievienot bildes")}
               <input type="file" accept="image/*" multiple hidden onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
             </label>
           )}
@@ -275,30 +277,30 @@ export function ListingForm(props: {
       </section>
 
       <section className="panel grid2">
-        <h2 className="full">Kontakti</h2>
+        <h2 className="full">{t("Kontakti")}</h2>
         <label className="field">
-          Tālrunis
+          {t("Tālrunis")}
           <input type="tel" inputMode="tel" value={v.contactPhone} onChange={set("contactPhone")} placeholder="+371 20000000" aria-invalid={Boolean(errors.contactPhone)} />
           {err("contactPhone")}
         </label>
         <label className="field">
-          E-pasts
-          <input type="email" value={v.contactEmail} onChange={set("contactEmail")} placeholder="pēc izvēles" aria-invalid={Boolean(errors.contactEmail)} />
+          {t("E-pasts")}
+          <input type="email" value={v.contactEmail} onChange={set("contactEmail")} placeholder={t("pēc izvēles")} aria-invalid={Boolean(errors.contactEmail)} />
           {err("contactEmail")}
         </label>
-        <p className="fine full">Kontaktus pircējs redz tikai pēc pogas "Rādīt tālruni". Tā tos grūtāk savākt surogātpasta sūtītājiem.</p>
+        <p className="fine full">{t("Kontaktus pircējs redz tikai pēc pogas \"Rādīt tālruni\". Tā tos grūtāk savākt surogātpasta sūtītājiem.")}</p>
         {/* Slēpts lauks: cilvēki to neredz un neaizpilda, roboti bieži aizpilda */}
         <label className="hp" aria-hidden="true">
-          Mājaslapa <input ref={honeypot} tabIndex={-1} autoComplete="off" name="website" />
+          {t("Mājaslapa")} <input ref={honeypot} tabIndex={-1} autoComplete="off" name="website" />
         </label>
       </section>
 
       {errors.form && <p className="alert err-box">{errors.form}</p>}
       <div className="row">
         <button type="submit" className="btn primary" disabled={saving || Boolean(uploading)}>
-          {saving ? "Saglabā…" : isEdit ? "Saglabāt izmaiņas" : "Publicēt sludinājumu"}
+          {saving ? t("Saglabā…") : isEdit ? t("Saglabāt izmaiņas") : t("Publicēt sludinājumu")}
         </button>
-        <button type="button" className="btn" onClick={() => router.back()}>Atcelt</button>
+        <button type="button" className="btn" onClick={() => router.back()}>{t("Atcelt")}</button>
       </div>
     </form>
   );

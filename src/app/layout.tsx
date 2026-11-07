@@ -11,37 +11,49 @@ import "./globals.css";
 import { CompareBar } from "@/components/compare";
 import { ThemeToggle, themeScript } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
+import { LangSwitch } from "@/components/lang-switch";
+import { I18nProvider } from "@/i18n/client";
+import { getLocale, getT } from "@/i18n/server";
+import { DICTS } from "@/i18n/dicts";
 
-export const metadata: Metadata = {
-  title: { default: "VienāVietā", template: "%s · VienāVietā" },
-  description: "Visi Latvijas sludinājumi vienā meklētājā: transports un nekustamais īpašums.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return {
+    title: { default: "VienāVietā", template: "%s · VienāVietā" },
+    description: t("Visi Latvijas sludinājumi vienā meklētājā: transports un nekustamais īpašums."),
+  };
+}
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
+  const { t } = await getT();
   return (
-    <html lang="lv" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
+        <I18nProvider locale={locale} dict={DICTS[locale]}>
         <header className="top">
           <div className="wrap">
             <a href="/" className="logo">
-              Vienā<b>Vietā</b>
+              {t("Vienā")}<b>{t("Vietā")}</b>
             </a>
-            <span className="tag">Visi Latvijas sludinājumi vienā meklētājā</span>
+            <span className="tag">{t("Visi Latvijas sludinājumi vienā meklētājā")}</span>
             <nav className="nav">
-              <a href="/tirgus" className="btn" title="Tirgus tendences">📈 <span className="hide-sm">Tirgus</span></a>
-              <a href="/cenu-kritumi" className="btn" title="Cenu kritumi">▼ <span className="hide-sm">Kritumi</span></a>
-              <a href="/darijumi" className="btn" title="Reālās dzīvokļu darījumu cenas (VZD)">🏠 <span className="hide-sm">Darījumi</span></a>
+              <a href="/tirgus" className="btn" title={t("Tirgus tendences")}>📈 <span className="hide-sm">{t("Tirgus")}</span></a>
+              <a href="/cenu-kritumi" className="btn" title={t("Cenu kritumi")}>▼ <span className="hide-sm">{t("Kritumi")}</span></a>
+              <a href="/darijumi" className="btn" title={t("Reālās dzīvokļu darījumu cenas (VZD)")}>🏠 <span className="hide-sm">{t("Darījumi")}</span></a>
+              <LangSwitch />
               <ThemeToggle />
               <UserMenu />
-              <a href="/pievienot" className="btn primary">+ Pievienot</a>
+              <a href="/pievienot" className="btn primary">+ {t("Pievienot")}</a>
             </nav>
           </div>
         </header>
         {children}
         <CompareBar />
+        </I18nProvider>
       </body>
     </html>
   );

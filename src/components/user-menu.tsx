@@ -1,12 +1,14 @@
+import { getT } from "@/i18n/server";
 import { moderationCounts } from "@/lib/moderation";
 import { getCurrentUser, isModerator } from "@/lib/session";
 
 export async function UserMenu() {
+  const { t } = await getT();
   const user = await getCurrentUser();
   if (!user) {
     return (
       <a href="/ielogoties" className="btn">
-        Ielogoties
+        {t("Ielogoties")}
       </a>
     );
   }
@@ -17,14 +19,14 @@ export async function UserMenu() {
   return (
     <>
       {mod && (
-        <a href="/moderacija" className="btn" title="Moderācija">
-          ⚑ <span className="hide-sm">Moderācija</span>
+        <a href="/moderacija" className="btn" title={t("Moderācija")}>
+          ⚑ <span className="hide-sm">{t("Moderācija")}</span>
           {mod.open > 0 && <span className="badge">{mod.open}</span>}
         </a>
       )}
-      <a href="/favoriti" className="btn" title="Favorīti">♥ <span className="hide-sm">Favorīti</span></a>
-      <a href="/mani-sludinajumi" className="btn">Mani sludinājumi</a>
-      <a href="/profils" className="btn user-btn" title="Mans profils">
+      <a href="/favoriti" className="btn" title={t("Favorīti")}>♥ <span className="hide-sm">{t("Favorīti")}</span></a>
+      <a href="/mani-sludinajumi" className="btn">{t("Mani sludinājumi")}</a>
+      <a href="/profils" className="btn user-btn" title={t("Mans profils")}>
         👤 <span>{label}</span>
       </a>
     </>

@@ -1,7 +1,9 @@
 "use client";
+import { useT } from "@/i18n/client";
 import { useState } from "react";
 
 export function ContactReveal({ id }: { id: string }) {
+  const { t } = useT();
   const [c, setC] = useState<{ phone: string | null; email: string | null } | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -23,10 +25,10 @@ export function ContactReveal({ id }: { id: string }) {
           const r = await fetch(`/api/listings/${id}/contact`, { method: "POST" });
           setBusy(false);
           if (r.ok) setC(await r.json());
-          else setErr("Kontaktus neizdevās ielādēt.");
+          else setErr(t("Kontaktus neizdevās ielādēt."));
         }}
       >
-        {busy ? "Ielādē…" : "Rādīt tālruni"}
+        {busy ? t("Ielādē…") : t("Rādīt tālruni")}
       </button>
       {err && <span className="err">{err}</span>}
     </>

@@ -1,10 +1,12 @@
 "use client";
+import { useT } from "@/i18n/client";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { reportListing } from "@/app/sludinajumi/report";
 import { REPORT_REASONS } from "@/lib/constants";
 
 export function ReportButton({ id, loggedIn }: { id: string; loggedIn: boolean }) {
+  const { t } = useT();
   const router = useRouter();
   const path = usePathname();
   const [open, setOpen] = useState(false);
@@ -14,11 +16,11 @@ export function ReportButton({ id, loggedIn }: { id: string; loggedIn: boolean }
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
 
-  if (done) return <p className="report fine">Paldies! Sūdzība saņemta, un moderators to pārbaudīs.</p>;
+  if (done) return <p className="report fine">{t("Paldies! Sūdzība saņemta, un moderators to pārbaudīs.")}</p>;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!reason) return setError("Izvēlies iemeslu.");
+    if (!reason) return setError(t("Izvēlies iemeslu."));
     setBusy(true);
     setError("");
     const r = await reportListing(id, reason, note);
@@ -32,17 +34,17 @@ export function ReportButton({ id, loggedIn }: { id: string; loggedIn: boolean }
     <div className="report">
       {!open ? (
         <button type="button" className="linkish" onClick={() => (loggedIn ? setOpen(true) : router.push(`/ielogoties?next=${encodeURIComponent(path)}`))}>
-          ⚑ Ziņot par sludinājumu
+          {t("⚑ Ziņot par sludinājumu")}
         </button>
       ) : (
         <form className="panel" onSubmit={submit}>
-          <b>Kas nav kārtībā?</b>
+          <b>{t("Kas nav kārtībā?")}</b>
           <label className="field">
-            Iemesls
+            {t("Iemesls")}
             <select value={reason} onChange={(e) => setReason(e.target.value)} aria-invalid={Boolean(error && !reason)}>
-              <option value="">— izvēlies —</option>
+              <option value="">{t("— izvēlies —")}</option>
               {Object.entries(REPORT_REASONS).map(([k, v]) => (
-                <option key={k} value={k}>{v}</option>
+                <option key={k} value={k}>{t(v)}</option>
               ))}
             </select>
           </label>
@@ -52,8 +54,8 @@ export function ReportButton({ id, loggedIn }: { id: string; loggedIn: boolean }
           </label>
           {error && <span className="err">{error}</span>}
           <div className="row">
-            <button type="submit" className="btn small primary" disabled={busy}>Nosūtīt</button>
-            <button type="button" className="btn small" onClick={() => setOpen(false)}>Atcelt</button>
+            <button type="submit" className="btn small primary" disabled={busy}>{t("Nosūtīt")}</button>
+            <button type="button" className="btn small" onClick={() => setOpen(false)}>{t("Atcelt")}</button>
           </div>
         </form>
       )}

@@ -1,10 +1,12 @@
 "use client";
+import { useT } from "@/i18n/client";
 import { Ill } from "./ill";
 import { useState } from "react";
 
 type Photo = { id: string; url: string; thumbUrl: string };
 
 export function Gallery({ photos, title, placeholder }: { photos: Photo[]; title: string; placeholder: string }) {
+  const { t } = useT();
   // placeholder: SVG ilustrācija no src/lib/illustrations.ts
   const [i, setI] = useState(0);
   if (!photos.length) return <div className="gal-main empty"><Ill svg={placeholder} /></div>;
@@ -17,8 +19,8 @@ export function Gallery({ photos, title, placeholder }: { photos: Photo[]; title
         <img src={photos[i].url} alt={`${title}, bilde ${i + 1} no ${n}`} />
         {n > 1 && (
           <>
-            <button type="button" className="gal-nav prev" onClick={() => go(-1)} aria-label="Iepriekšējā bilde">‹</button>
-            <button type="button" className="gal-nav next" onClick={() => go(1)} aria-label="Nākamā bilde">›</button>
+            <button type="button" className="gal-nav prev" onClick={() => go(-1)} aria-label={t("Iepriekšējā bilde")}>‹</button>
+            <button type="button" className="gal-nav next" onClick={() => go(1)} aria-label={t("Nākamā bilde")}>›</button>
             <span className="gal-count">{i + 1} / {n}</span>
           </>
         )}

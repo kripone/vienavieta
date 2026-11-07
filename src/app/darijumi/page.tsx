@@ -1,33 +1,39 @@
+import { getT } from "@/i18n/server";
 import type { Metadata } from "next";
 import { dealsByAddress } from "@/lib/vzd";
-import { formatNumber, formatPrice, plural } from "@/lib/format";
+import { formatNumber, formatPrice } from "@/lib/format";
+import { INTL_LOCALE, type Locale } from "@/i18n/core";
 
-export const metadata: Metadata = { title: "Dzīvokļu darījumu cenas", description: "Par cik dzīvokļi patiešām pārdoti konkrētā mājā: Valsts zemes dienesta darījumu dati kopš 2016. gada." };
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return { title: t("Dzīvokļu darījumu cenas"), description: t("Par cik dzīvokļi patiešām pārdoti konkrētā mājā: Valsts zemes dienesta darījumu dati kopš 2016. gada.") };
+}
 export const dynamic = "force-dynamic";
 
-const fmtDay = (d: string) => new Date(d + "T12:00:00Z").toLocaleDateString("lv-LV", { month: "short", year: "numeric", timeZone: "Europe/Riga" });
+const fmtDay = (d: string, loc: Locale) => new Date(d + "T12:00:00Z").toLocaleDateString(INTL_LOCALE[loc], { month: "short", year: "numeric", timeZone: "Europe/Riga" });
 
 /** "Kalna iela 13A, Rīga" → "Kalna" (meklēšanai sludinājumu adresēs, kur ielas tips nav rakstīts) */
 const streetOf = (address: string) => address.split(",")[0].replace(/\s+\d.*$/, "").replace(/\s+(iela|gatve|prospekts|bulvāris|šoseja|laukums|aleja|dambis|krastmala|ceļš)$/i, "").trim() || null;
 
 export default async function DealsPage(props: { searchParams: Promise<Record<string, string | undefined>> }) {
+  const { t, tp, locale } = await getT();
   const { q: raw } = await props.searchParams;
   const q = (raw ?? "").trim().slice(0, 120);
   const res = q ? await dealsByAddress(q).catch(() => ({ houses: [], suggestions: [] })) : null;
   return (
     <main className="wrap">
-      <h1>Dzīvokļu darījumu cenas</h1>
-      <p className="lead">Ieraksti mājas adresi, un redzēsi, par cik tajā patiešām pārdoti dzīvokļi. Dati ir no zemesgrāmatā reģistrētajiem pirkuma darījumiem kopš 2016. gada.</p>
+      <h1>{t("Dzīvokļu darījumu cenas")}</h1>
+      <p className="lead">{t("Ieraksti mājas adresi, un redzēsi, par cik tajā patiešām pārdoti dzīvokļi. Dati ir no zemesgrāmatā reģistrētajiem pirkuma darījumiem kopš 2016. gada.")}</p>
       <form className="lookup" action="/darijumi">
-        <input name="q" required defaultValue={q} placeholder="Piem. Kalna iela 13A, Rīga" aria-label="Adrese" />
-        <button className="btn primary">Meklēt</button>
+        <input name="q" required defaultValue={q} placeholder={t("Piem. Kalna iela 13A, Rīga")} aria-label={t("Adrese")} />
+        <button className="btn primary">{t("Meklēt")}</button>
       </form>
       {res && res.houses.length === 0 && (
         <div className="notice">
-          {/\d/.test(q) ? "Šai adresei darījumu nav atrasts." : "Ieraksti ielu kopā ar mājas numuru, piem. „Brīvības iela 100”."}
+          {/\d/.test(q) ? t("Šai adresei darījumu nav atrasts.") : t("Ieraksti ielu kopā ar mājas numuru, piem. „Brīvības iela 100”.")}
           {res.suggestions.length > 0 && (
             <>
-              <p>Varbūt domāji:</p>
+              <p>{t("Varbūt domāji:")}</p>
               <ul className="sugg">
                 {res.suggestions.map((a) => (
                   <li key={a}><a className="btn small" href={`/darijumi?q=${encodeURIComponent(a)}`}>{a}</a></li>
@@ -41,23 +47,23 @@ export default async function DealsPage(props: { searchParams: Promise<Record<st
         <section key={h.address} className="house">
           <h2>{h.address}</h2>
           <p className="fine">
-            {[h.builtYear ? `Būvēta ${h.builtYear}` : null, h.material].filter(Boolean).join(" · ")}
+            {[h.builtYear ? t("Būvēta {y}", { y: h.builtYear }) : null, h.material && t(h.material)].filter(Boolean).join(" · ")}
           </p>
           <div className="stat-row">
             {h.median != null && (
-              <div className="stat"><b>{formatNumber(h.median)} €/m²</b><span>vidēji {h.medianRecent ? "pēdējos 3 gados" : "kopš 2016"} ({h.medianN})</span></div>
+              <div className="stat"><b>{formatNumber(h.median)} €/m²</b><span>{h.medianRecent ? t("vidēji pēdējos 3 gados") : t("vidēji kopš 2016")} ({h.medianN})</span></div>
             )}
-            <div className="stat"><b>{plural(h.deals.length, "darījums", "darījumi")}</b><span>kopš 2016</span></div>
+            <div className="stat"><b>{tp(h.deals.length, "darījums", "darījumi")}</b><span>{t("kopš 2016")}</span></div>
           </div>
           <div className="tbl-wrap">
             <table className="tbl">
               <thead>
-                <tr><th>Datums</th><th>Stāvs</th><th>Istabas</th><th>Platība</th><th>Cena</th><th>€/m²</th></tr>
+                <tr><th>{t("Datums")}</th><th>{t("Stāvs")}</th><th>{t("Istabas")}</th><th>{t("Platība")}</th><th>{t("Cena")}</th><th>€/m²</th></tr>
               </thead>
               <tbody>
                 {h.deals.slice(0, 60).map((d, i) => (
                   <tr key={i}>
-                    <td>{fmtDay(d.day)}</td>
+                    <td>{fmtDay(d.day, locale)}</td>
                     <td>{d.floor != null ? `${d.floor}${d.floors ? "/" + d.floors : ""}` : "—"}</td>
                     <td>{d.rooms ?? "—"}</td>
                     <td>{Number(d.areaM2)} m²</td>
@@ -69,12 +75,12 @@ export default async function DealsPage(props: { searchParams: Promise<Record<st
             </table>
           </div>
           {streetOf(h.address) && (
-            <p><a href={`/?cat=property&ptype=Dz%C4%ABvoklis&q=${encodeURIComponent(streetOf(h.address)!)}`}>Pārdošanā esošie dzīvokļi {streetOf(h.address)} ielā →</a></p>
+            <p><a href={`/?cat=property&ptype=Dz%C4%ABvoklis&q=${encodeURIComponent(streetOf(h.address)!)}`}>{t("Pārdošanā esošie dzīvokļi: {s}", { s: streetOf(h.address) })} →</a></p>
           )}
         </section>
       ))}
       <p className="fine">
-        Dati: Valsts zemes dienests, NĪTIS (<a href="https://data.gov.lv/dati/lv/dataset/darijumi-ar-telpu-grupam" target="_blank" rel="noopener noreferrer">data.gov.lv</a>, CC BY 4.0). Tikai veseli dzīvokļi; atjaunots reizi mēnesī. Zemesgrāmatā reģistrētā summa var atšķirties no tirgus vērtības.
+        Dati: Valsts zemes dienests, NĪTIS (<a href="https://data.gov.lv/dati/lv/dataset/darijumi-ar-telpu-grupam" target="_blank" rel="noopener noreferrer">{t("data.gov.lv")}</a>, CC BY 4.0). Tikai veseli dzīvokļi; atjaunots reizi mēnesī. Zemesgrāmatā reģistrētā summa var atšķirties no tirgus vērtības.
       </p>
     </main>
   );

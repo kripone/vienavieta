@@ -1,4 +1,5 @@
 "use client";
+import { useT } from "@/i18n/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { approveListing, blockUser, hideListing, unblockUser, type ModResult } from "@/app/moderacija/actions";
@@ -17,6 +18,7 @@ const CONFIRM: Partial<Record<Action, string>> = {
 
 /** Moderatora pogas sludinājumam vai lietotājam. */
 export function ModActions({ listingId, userId, actions }: { listingId?: string; userId?: string; actions: Action[] }) {
+  const { t } = useT();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [confirm, setConfirm] = useState<Action | null>(null);
@@ -42,8 +44,8 @@ export function ModActions({ listingId, userId, actions }: { listingId?: string;
     return (
       <div className="row mod-actions">
         <span className="fine">{CONFIRM[confirm]}</span>
-        <button type="button" className="btn small danger" disabled={busy} onClick={() => run(confirm)}>Jā</button>
-        <button type="button" className="btn small" onClick={() => setConfirm(null)}>Nē</button>
+        <button type="button" className="btn small danger" disabled={busy} onClick={() => run(confirm)}>{t("Jā")}</button>
+        <button type="button" className="btn small" onClick={() => setConfirm(null)}>{t("Nē")}</button>
       </div>
     );
   }

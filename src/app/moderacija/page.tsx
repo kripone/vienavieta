@@ -1,3 +1,4 @@
+import { getT } from "@/i18n/server";
 import type { Metadata } from "next";
 import { ModActions } from "@/components/mod-actions";
 import { REPORT_REASONS } from "@/lib/constants";
@@ -5,7 +6,10 @@ import { formatPrice, plural, timeAgo } from "@/lib/format";
 import { findUsers, hiddenListings, moderationCounts, reportedListings } from "@/lib/moderation";
 import { isModerator, requireModerator } from "@/lib/session";
 
-export const metadata: Metadata = { title: "Moderācija", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return { title: t("Moderācija"), robots: { index: false } };
+}
 
 type SP = { tab?: string; q?: string };
 const TABS = [
@@ -17,6 +21,7 @@ const STATUS: Record<string, string> = { active: "Aktīvs", pending: "Paslēpts 
 const reasonLabel = (r: string) => REPORT_REASONS[r as keyof typeof REPORT_REASONS] ?? r;
 
 export default async function ModerationPage(props: { searchParams: Promise<SP> }) {
+  const { t } = await getT();
   const sp = await props.searchParams;
   const tab = TABS.some(([t]) => t === sp.tab) ? sp.tab! : "sudzibas";
   await requireModerator(`/moderacija?tab=${tab}`);
@@ -25,8 +30,8 @@ export default async function ModerationPage(props: { searchParams: Promise<SP> 
 
   return (
     <main className="wrap mod">
-      <h1>Moderācija</h1>
-      <nav className="seg mod-tabs" aria-label="Sadaļas">
+      <h1>{t("Moderācija")}</h1>
+      <nav className="seg mod-tabs" aria-label={t("Sadaļas")}>
         {TABS.map(([t, label]) => (
           <a key={t} href={`/moderacija?tab=${t}`} aria-current={tab === t ? "page" : undefined}>
             {label} {badge[t] > 0 && <span className="badge">{badge[t]}</span>}
@@ -41,8 +46,9 @@ export default async function ModerationPage(props: { searchParams: Promise<SP> 
 }
 
 async function Reports() {
+  const { t } = await getT();
   const rows = await reportedListings();
-  if (!rows.length) return <div className="notice">Jaunu sūdzību nav. 🎉</div>;
+  if (!rows.length) return <div className="notice">{t("Jaunu sūdzību nav. 🎉")}</div>;
   return (
     <div className="stack">
       {rows.map((r) => {
@@ -77,8 +83,9 @@ async function Reports() {
 }
 
 async function Hidden() {
+  const { t } = await getT();
   const rows = await hiddenListings();
-  if (!rows.length) return <div className="notice">Paslēptu sludinājumu nav.</div>;
+  if (!rows.length) return <div className="notice">{t("Paslēptu sludinājumu nav.")}</div>;
   return (
     <div className="stack">
       {rows.map((r) => (
@@ -100,16 +107,17 @@ async function Hidden() {
 }
 
 async function Users({ q }: { q?: string }) {
+  const { t } = await getT();
   const rows = await findUsers(q);
   return (
     <>
       <form className="row mod-search" action="/moderacija">
         <input type="hidden" name="tab" value="lietotaji" />
-        <input type="search" name="q" defaultValue={q} placeholder="E-pasts, vārds vai uzņēmums" aria-label="Meklēt lietotāju" />
-        <button className="btn" type="submit">Meklēt</button>
+        <input type="search" name="q" defaultValue={q} placeholder={t("E-pasts, vārds vai uzņēmums")} aria-label={t("Meklēt lietotāju")} />
+        <button className="btn" type="submit">{t("Meklēt")}</button>
       </form>
       {!rows.length ? (
-        <div className="notice">Neviens lietotājs neatbilst meklējumam.</div>
+        <div className="notice">{t("Neviens lietotājs neatbilst meklējumam.")}</div>
       ) : (
         <div className="stack">
           {rows.map((u) => (

@@ -1,3 +1,4 @@
+import { getT } from "@/i18n/server";
 // Vienkārši SVG/HTML grafiki tirgus lapai (servera komponentes, bez bibliotēkām).
 // Viena sērija katrā grafikā (krāsa: --car transportam, --home īpašumiem); tīkls un asis fonā;
 // katram elementam <title> paskaidrojums uzbraucot; zem grafika tabulas skats.
@@ -18,13 +19,14 @@ function niceTicks(max: number, count = 4) {
   return ticks;
 }
 
-function TableView({ caption, head, rows }: { caption: string; head: string[]; rows: (string | number)[][] }) {
+async function TableView({ caption, head, rows }: { caption: string; head: string[]; rows: (string | number)[][] }) {
+  const { t } = await getT();
   return (
     <details className="chart-table">
-      <summary>Tabulas skats</summary>
+      <summary>{t("Tabulas skats")}</summary>
       <table>
         <caption className="sr-only">{caption}</caption>
-        <thead><tr>{head.map((h) => <th key={h}>{h}</th>)}</tr></thead>
+        <thead><tr>{head.map((h) => <th key={h}>{t(h)}</th>)}</tr></thead>
         <tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j}>{c}</td>)}</tr>)}</tbody>
       </table>
     </details>
@@ -32,7 +34,8 @@ function TableView({ caption, head, rows }: { caption: string; head: string[]; r
 }
 
 /** Stabiņi (piem. mediānas cena pa gadiem). */
-export function ColumnChart({ title, data, unit = "€", color = "var(--car)", xLabel }: { title: string; data: { label: string; value: number; n?: number }[]; unit?: string; color?: string; xLabel?: string }) {
+export async function ColumnChart({ title, data, unit = "€", color = "var(--car)", xLabel }: { title: string; data: { label: string; value: number; n?: number }[]; unit?: string; color?: string; xLabel?: string }) {
+  const { t, tp } = await getT();
   if (!data.length) return null;
   const H = 240, padL = 56, padR = 12, padT = 16, padB = 34;
   const ticks = niceTicks(Math.max(...data.map((d) => d.value)));
@@ -45,7 +48,7 @@ export function ColumnChart({ title, data, unit = "€", color = "var(--car)", x
   const maxI = data.reduce((m, d, i) => (d.value > data[m].value ? i : m), 0);
   return (
     <figure className="chart">
-      <figcaption>{title}</figcaption>
+      <figcaption>{t(title)}</figcaption>
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={title}>
         {ticks.map((t) => (
           <g key={t}>
@@ -58,7 +61,7 @@ export function ColumnChart({ title, data, unit = "€", color = "var(--car)", x
           const h = Math.max(1, padT + ih - y(d.value));
           return (
             <g key={d.label} className="mark">
-              <rect x={padL + slot * i} y={padT} width={slot} height={ih} className="hit"><title>{`${d.label}: ${fmt(d.value)} ${unit}${d.n ? ` (${d.n} sludinājumi)` : ""}`}</title></rect>
+              <rect x={padL + slot * i} y={padT} width={slot} height={ih} className="hit"><title>{`${d.label}: ${fmt(d.value)} ${unit}${d.n ? ` (${tp(d.n, "sludinājums", "sludinājumi")})` : ""}`}</title></rect>
               <path d={`M${x},${padT + ih} V${padT + ih - h + 4} q0,-4 4,-4 h${bw - 8} q4,0 4,4 V${padT + ih} Z`} fill={color} pointerEvents="none" />
               {i % every === 0 && <text x={x + bw / 2} y={H - padB + 16} className="tick" textAnchor="middle">{d.label}</text>}
               {i === maxI && <text x={x + bw / 2} y={y(d.value) - 6} className="val" textAnchor="middle">{fmt(d.value)}</text>}
@@ -67,34 +70,36 @@ export function ColumnChart({ title, data, unit = "€", color = "var(--car)", x
         })}
         {xLabel && <text x={W - padR} y={H - 2} className="tick" textAnchor="end">{xLabel}</text>}
       </svg>
-      <TableView caption={title} head={[xLabel ?? "", `Mediāna, ${unit}`, "Sludinājumi"]} rows={data.map((d) => [d.label, fmt(d.value), d.n ?? ""])} />
+      <TableView caption={title} head={[xLabel ? t(xLabel) : "", `${t("Mediāna")}, ${unit}`, "Sludinājumi"]} rows={data.map((d) => [d.label, fmt(d.value), d.n ?? ""])} />
     </figure>
   );
 }
 
 /** Horizontālas joslas (markas, reģioni) — HTML, lai garie nosaukumi būtu lasāmi telefonā. */
-export function BarList({ title, data, unit = "€", color = "var(--car)", valueLabel = "Mediāna", hrefFor }: { title: string; data: { label: string; value: number; n: number; key?: string | number }[]; unit?: string; color?: string; valueLabel?: string; hrefFor?: (d: { label: string; key?: string | number }) => string }) {
+export async function BarList({ title, data, unit = "€", color = "var(--car)", valueLabel = "Mediāna", hrefFor }: { title: string; data: { label: string; value: number; n: number; key?: string | number }[]; unit?: string; color?: string; valueLabel?: string; hrefFor?: (d: { label: string; key?: string | number }) => string }) {
+  const { t, tp } = await getT();
   if (!data.length) return null;
   const max = Math.max(...data.map((d) => d.value));
   return (
     <figure className="chart">
-      <figcaption>{title}</figcaption>
+      <figcaption>{t(title)}</figcaption>
       <ul className="barlist">
         {data.map((d) => (
-          <li key={d.label} title={`${d.label}: ${valueLabel.toLowerCase()} ${fmt(d.value)} ${unit}, ${d.n} sludinājumi`}>
+          <li key={d.label} title={`${d.label}: ${t(valueLabel).toLowerCase()} ${fmt(d.value)} ${unit}, ${tp(d.n, "sludinājums", "sludinājumi")}`}>
             <span className="bl-label">{hrefFor ? <a href={hrefFor(d)}>{d.label}</a> : d.label}</span>
             <span className="bl-track"><span className="bl-bar" style={{ width: `${Math.max(2, (d.value / max) * 100)}%`, background: color }} /></span>
             <span className="bl-val">{fmt(d.value)} {unit}<small> · {fmt(d.n)}</small></span>
           </li>
         ))}
       </ul>
-      <TableView caption={title} head={["", `${valueLabel}, ${unit}`, "Sludinājumi"]} rows={data.map((d) => [d.label, fmt(d.value), d.n])} />
+      <TableView caption={title} head={["", `${t(valueLabel)}, ${unit}`, "Sludinājumi"]} rows={data.map((d) => [d.label, fmt(d.value), d.n])} />
     </figure>
   );
 }
 
 /** Punkti: cena pret nobraukumu. Katrs punkts ved uz sludinājumu. */
-export function ScatterChart({ title, points, color = "var(--car)" }: { title: string; points: { id: string; price: number; km: number; year: number | null }[]; color?: string }) {
+export async function ScatterChart({ title, points, color = "var(--car)" }: { title: string; points: { id: string; price: number; km: number; year: number | null }[]; color?: string }) {
+  const { t } = await getT();
   if (points.length < 5) return null;
   const H = 280, padL = 56, padR = 16, padT = 14, padB = 34;
   const xt = niceTicks(Math.max(...points.map((p) => p.km)));
@@ -104,7 +109,7 @@ export function ScatterChart({ title, points, color = "var(--car)" }: { title: s
   const y = (v: number) => padT + ih - (v / yt[yt.length - 1]) * ih;
   return (
     <figure className="chart">
-      <figcaption>{title}</figcaption>
+      <figcaption>{t(title)}</figcaption>
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={title}>
         {yt.map((t) => (
           <g key={`y${t}`}>
@@ -113,11 +118,11 @@ export function ScatterChart({ title, points, color = "var(--car)" }: { title: s
           </g>
         ))}
         {xt.map((t) => <text key={`x${t}`} x={x(t)} y={H - padB + 16} className="tick" textAnchor="middle">{fmt(t / 1000)}</text>)}
-        <text x={W - padR} y={H - 2} className="tick" textAnchor="end">tūkst. km</text>
+        <text x={W - padR} y={H - 2} className="tick" textAnchor="end">{t("tūkst. km")}</text>
         {points.map((p) => (
           <a key={p.id} href={`/sludinajumi/${p.id}`}>
             <circle cx={x(p.km)} cy={y(p.price)} r={4.5} fill={color} className="dot">
-              <title>{`${fmt(p.price)} € · ${fmt(p.km)} km${p.year ? ` · ${p.year}. g.` : ""}`}</title>
+              <title>{`${fmt(p.price)} € · ${fmt(p.km)} km${p.year ? ` · ${p.year}` : ""}`}</title>
             </circle>
           </a>
         ))}
@@ -127,13 +132,14 @@ export function ScatterChart({ title, points, color = "var(--car)" }: { title: s
 }
 
 /** Mediāna laikā ar 25.–75. procentiles joslu. */
-export function TrendChart({ title, points, unit = "€", color = "var(--car)" }: { title: string; points: { day: string; median: number; p25: number; p75: number; n: number }[]; unit?: string; color?: string }) {
+export async function TrendChart({ title, points, unit = "€", color = "var(--car)" }: { title: string; points: { day: string; median: number; p25: number; p75: number; n: number }[]; unit?: string; color?: string }) {
+  const { t, tp } = await getT();
   if (points.length < 2) {
     return (
       <figure className="chart">
-        <figcaption>{title}</figcaption>
+        <figcaption>{t(title)}</figcaption>
         <p className="fine">
-          Cenu dinamika veidojas: tirgus momentuzņēmumu saglabājam katru dienu{points[0] ? ` (pirmais ${points[0].day}, mediāna ${fmt(points[0].median)} ${unit})` : ""}. Grafiks parādīsies pēc otrās dienas.
+          {t("Cenu dinamika veidojas: tirgus momentuzņēmumu saglabājam katru dienu.")}{points[0] ? ` (${points[0].day}: ${t("mediāna")} ${fmt(points[0].median)} ${unit})` : ""} {t("Grafiks parādīsies pēc otrās dienas.")}
         </p>
       </figure>
     );
@@ -152,7 +158,7 @@ export function TrendChart({ title, points, unit = "€", color = "var(--car)" }
   const last = points[points.length - 1];
   return (
     <figure className="chart">
-      <figcaption>{title}</figcaption>
+      <figcaption>{t(title)}</figcaption>
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={title}>
         {yt.filter((t) => t >= ymin).map((t) => (
           <g key={t}>
@@ -164,14 +170,14 @@ export function TrendChart({ title, points, unit = "€", color = "var(--car)" }
         <path d={line} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" />
         {points.map((p, i) => (
           <g key={p.day}>
-            <rect x={x(i) - iw / points.length / 2} y={padT} width={iw / points.length} height={ih} className="hit"><title>{`${p.day}: mediāna ${fmt(p.median)} ${unit} (25–75 %: ${fmt(p.p25)}–${fmt(p.p75)}), ${p.n} sludinājumi`}</title></rect>
+            <rect x={x(i) - iw / points.length / 2} y={padT} width={iw / points.length} height={ih} className="hit"><title>{`${p.day}: ${t("mediāna")} ${fmt(p.median)} ${unit} (25–75 %: ${fmt(p.p25)}–${fmt(p.p75)}), ${tp(p.n, "sludinājums", "sludinājumi")}`}</title></rect>
             {i % every === 0 && <text x={x(i)} y={H - 8} className="tick" textAnchor="middle">{p.day.slice(5)}</text>}
           </g>
         ))}
         <circle cx={x(points.length - 1)} cy={y(last.median)} r={4} fill={color} stroke="var(--surface)" strokeWidth={2} />
         <text x={x(points.length - 1) - 6} y={y(last.median) - 8} className="val" textAnchor="end">{fmt(last.median)}</text>
       </svg>
-      <TableView caption={title} head={["Diena", `Mediāna, ${unit}`, "25 %", "75 %", "Sludinājumi"]} rows={points.map((p) => [p.day, fmt(p.median), fmt(p.p25), fmt(p.p75), p.n])} />
+      <TableView caption={title} head={["Diena", `${t("Mediāna")}, ${unit}`, "25 %", "75 %", "Sludinājumi"]} rows={points.map((p) => [p.day, fmt(p.median), fmt(p.p25), fmt(p.p75), p.n])} />
     </figure>
   );
 }

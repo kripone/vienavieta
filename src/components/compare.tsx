@@ -1,4 +1,5 @@
 "use client";
+import { useT } from "@/i18n/client";
 import { useEffect, useState } from "react";
 import { MAX_COMPARE } from "@/lib/constants";
 
@@ -38,6 +39,7 @@ function useCompare() {
 
 /** Poga kartītē. Salīdzina tikai viena veida sludinājumus (transports ar transportu, īpašumi ar īpašumiem). */
 export function CompareToggle({ id, kind }: { id: string; kind: string }) {
+  const { t } = useT();
   const items = useCompare();
   const on = items.some((x) => x.id === id);
   function click() {
@@ -47,27 +49,28 @@ export function CompareToggle({ id, kind }: { id: string; kind: string }) {
     write([...same, { id, kind }].slice(-MAX_COMPARE));
   }
   return (
-    <button type="button" className={`cmp-btn${on ? " on" : ""}`} aria-pressed={on} onClick={click} title={on ? "Noņemt no salīdzināšanas" : `Salīdzināt (līdz ${MAX_COMPARE})`}>
-      ⇄<span className="hide-sm"> {on ? "Salīdzinu" : "Salīdzināt"}</span>
+    <button type="button" className={`cmp-btn${on ? " on" : ""}`} aria-pressed={on} onClick={click} title={on ? t("Noņemt no salīdzināšanas") : t("Salīdzināt (līdz {n})", { n: MAX_COMPARE })}>
+      ⇄<span className="hide-sm"> {on ? t("Salīdzinu") : t("Salīdzināt")}</span>
     </button>
   );
 }
 
 /** Josla ekrāna apakšā, kad izvēlēts vismaz viens sludinājums. */
 export function CompareBar() {
+  const { t } = useT();
   const items = useCompare();
   if (!items.length) return null;
   return (
-    <div className="cmp-bar" role="region" aria-label="Salīdzināšana">
+    <div className="cmp-bar" role="region" aria-label={t("Salīdzināšana")}>
       <span>
-        Salīdzināšanai: <b>{items.length}</b> no {MAX_COMPARE}
+        {t("Salīdzināšanai:")} <b>{items.length}</b> {t("no")} {MAX_COMPARE}
       </span>
       {items.length >= 2 ? (
-        <a className="btn primary small" href={`/salidzinat?ids=${items.map((x) => x.id).join(",")}`}>Salīdzināt</a>
+        <a className="btn primary small" href={`/salidzinat?ids=${items.map((x) => x.id).join(",")}`}>{t("Salīdzināt")}</a>
       ) : (
-        <span className="fine">izvēlies vēl vismaz vienu</span>
+        <span className="fine">{t("izvēlies vēl vismaz vienu")}</span>
       )}
-      <button type="button" className="btn small" onClick={() => write([])}>Notīrīt</button>
+      <button type="button" className="btn small" onClick={() => write([])}>{t("Notīrīt")}</button>
     </div>
   );
 }

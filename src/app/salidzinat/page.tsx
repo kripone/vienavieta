@@ -1,3 +1,5 @@
+import { trTitle } from "@/i18n/content";
+import { getT } from "@/i18n/server";
 import type { Metadata } from "next";
 import { EvalBadge } from "@/components/eval-badge";
 import { Ill } from "@/components/ill";
@@ -8,7 +10,10 @@ import { landLabel } from "@/lib/listing-input";
 import { getListing, locationLabel } from "@/lib/listings";
 import { priceEvals } from "@/lib/price-eval";
 
-export const metadata: Metadata = { title: "Salīdzināšana", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return { title: t("Salīdzināšana"), robots: { index: false } };
+}
 
 type D = NonNullable<Awaited<ReturnType<typeof getListing>>>;
 type Row = { label: string; value: (d: D) => React.ReactNode; best?: (d: D) => number | null; better?: "min" | "max" };
@@ -17,14 +22,15 @@ const n = (v: unknown) => (v == null || v === "" ? null : Number(v));
 const area = (d: D) => n(d.l.areaM2);
 
 export default async function ComparePage(props: { searchParams: Promise<{ ids?: string }> }) {
+  const { t } = await getT();
   const { ids = "" } = await props.searchParams;
   const list = [...new Set(ids.split(","))].filter((x) => /^[0-9a-f-]{36}$/.test(x)).slice(0, MAX_COMPARE);
   const found = (await Promise.all(list.map((id) => getListing(id)))).filter((d): d is D => Boolean(d && (d.l.status === "active" || d.l.status === "sold")));
   if (found.length < 2) {
     return (
       <main className="wrap">
-        <h1>Salīdzināšana</h1>
-        <div className="notice">Izvēlies vismaz divus sludinājumus ar pogu ⇄ Salīdzināt un spied "Salīdzināt" ekrāna apakšā.</div>
+        <h1>{t("Salīdzināšana")}</h1>
+        <div className="notice">{t("Izvēlies vismaz divus sludinājumus ar pogu ⇄ Salīdzināt un spied \"Salīdzināt\" ekrāna apakšā.")}</div>
       </main>
     );
   }
@@ -91,8 +97,8 @@ export default async function ComparePage(props: { searchParams: Promise<{ ids?:
 
   return (
     <main className="wrap">
-      <h1>Salīdzināšana</h1>
-      <p className="lead">Zaļi iezīmēta labākā vērtība katrā rindā.</p>
+      <h1>{t("Salīdzināšana")}</h1>
+      <p className="lead">{t("Zaļi iezīmēta labākā vērtība katrā rindā.")}</p>
       <div className="cmp-wrap">
         <table className="cmp">
           <thead>
@@ -106,7 +112,7 @@ export default async function ComparePage(props: { searchParams: Promise<{ ids?:
                   ) : (
                     <Ill svg={listingIll(d.l)} />
                   )}
-                  <a href={`/sludinajumi/${d.l.id}`} className="mod-title">{d.l.title}</a>
+                  <a href={`/sludinajumi/${d.l.id}`} className="mod-title">{trTitle(d.l.title, t)}</a>
                 </td>
               ))}
             </tr>
@@ -116,10 +122,11 @@ export default async function ComparePage(props: { searchParams: Promise<{ ids?:
               const best = bestOf(r);
               return (
                 <tr key={r.label} className={best != null ? "best" : undefined}>
-                  <th>{r.label}</th>
-                  {items.map((d) => (
-                    <td key={d.l.id} className={best != null && r.best!(d) === best ? "best" : undefined}>{r.value(d)}</td>
-                  ))}
+                  <th>{t(r.label)}</th>
+                  {items.map((d) => {
+                    const v = r.value(d);
+                    return <td key={d.l.id} className={best != null && r.best!(d) === best ? "best" : undefined}>{typeof v === "string" ? t(v) : v}</td>;
+                  })}
                 </tr>
               );
             })}
