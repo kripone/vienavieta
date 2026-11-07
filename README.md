@@ -2,7 +2,7 @@
 
 Latvijas sludinājumu portāls: transports un nekustamais īpašums vienā meklētājā.
 
-Šis ir portāla pirmkods. Pašlaik gatavs: sludinājumu pievienošana ar bildēm, sludinājuma lapa, mani sludinājumi, konti (pieteikšanās ar e-pastu un sociālajiem tīkliem, profils) un projekta pamats: datubāzes struktūra visām galvenajām funkcijām, vietu saraksts (novadi, pilsētas, rajoni, ciemi), transporta katalogs (vieglie auto, motocikli, kemperi, furgoni, kravas auto) un vienkārša sākumlapa. Tālākie soļi ir aprakstīti [docs/ROADMAP.md](docs/ROADMAP.md).
+Šis ir portāla pirmkods. Pašlaik gatavs: meklēšana ar filtriem un karti (zonas apvilkšana), sludinājumu pievienošana ar bildēm, sludinājuma lapa, mani sludinājumi, konti (pieteikšanās ar e-pastu un sociālajiem tīkliem, profils) un projekta pamats: datubāzes struktūra visām galvenajām funkcijām, vietu saraksts (novadi, pilsētas, rajoni, ciemi), transporta katalogs (vieglie auto, motocikli, kemperi, furgoni, kravas auto) un vienkārša sākumlapa. Tālākie soļi ir aprakstīti [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Tehnoloģijas
 

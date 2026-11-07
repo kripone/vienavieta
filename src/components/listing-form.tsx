@@ -7,7 +7,7 @@ import {
   PROPERTY_FIELDS, PROPERTY_GROUPS, PURPOSES, SERIES, VEHICLE_CLASS_LABEL, VEHICLE_CLASSES, type PropertyType, type VehicleClass,
 } from "@/lib/constants";
 
-export type RegionOption = { region: string; kind: "city" | "municipality"; places: { id: number; name: string }[] };
+export type RegionOption = { regionId: number; region: string; kind: "city" | "municipality"; places: { id: number; name: string }[] };
 export type PhotoItem = { id: string; thumbUrl: string };
 type Make = { id: number; name: string; popular: boolean; models: { id: number; name: string }[] };
 

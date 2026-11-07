@@ -92,12 +92,12 @@ export async function getListing(id: string) {
 /** Vietas grupētas pa novadiem formām. */
 export async function regionOptions() {
   const rows = await db
-    .select({ id: places.id, name: places.name, region: regions.name, kind: regions.kind })
+    .select({ id: places.id, name: places.name, regionId: regions.id, region: regions.name, kind: regions.kind })
     .from(places)
     .innerJoin(regions, eq(places.regionId, regions.id))
     .orderBy(asc(regions.id), asc(places.id));
-  const map = new Map<string, { region: string; kind: "city" | "municipality"; places: { id: number; name: string }[] }>();
-  for (const r of rows) (map.get(r.region) ?? map.set(r.region, { region: r.region, kind: r.kind, places: [] }).get(r.region)!).places.push({ id: r.id, name: r.name });
+  const map = new Map<string, { regionId: number; region: string; kind: "city" | "municipality"; places: { id: number; name: string }[] }>();
+  for (const r of rows) (map.get(r.region) ?? map.set(r.region, { regionId: r.regionId, region: r.region, kind: r.kind, places: [] }).get(r.region)!).places.push({ id: r.id, name: r.name });
   return [...map.values()];
 }
 

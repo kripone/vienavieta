@@ -1,40 +1,83 @@
+import { Suspense } from "react";
+import { FiltersBox } from "@/components/filters-box";
 import { ListingCard } from "@/components/listing-card";
-import { latestListings } from "@/lib/listings";
+import { SearchFilters } from "@/components/search-filters";
+import { SearchMapLazy } from "@/components/search-map-lazy";
+import { SortSelect } from "@/components/sort-select";
+import { VEHICLE_CLASS_LABEL, type VehicleClass } from "@/lib/constants";
+import { regionOptions } from "@/lib/listings";
+import { parseSearch, searchListings } from "@/lib/search";
 
-// Sākumlapa vienmēr rāda svaigus datus no datubāzes
 export const dynamic = "force-dynamic";
 
-export default async function HomePage() {
-  let rows: Awaited<ReturnType<typeof latestListings>> = [];
-  let dbError = false;
+type SP = Record<string, string | string[] | undefined>;
+
+export default async function SearchPage(props: { searchParams: Promise<SP> }) {
+  const raw = await props.searchParams;
+  const s = parseSearch(raw);
+  const flat: Record<string, string> = {};
+  for (const [k, v] of Object.entries(raw)) if (typeof v === "string" && v) flat[k] = v;
+
+  let result: Awaited<ReturnType<typeof searchListings>> | null = null;
+  let regions: Awaited<ReturnType<typeof regionOptions>> = [];
   try {
-    rows = await latestListings(50);
+    [result, regions] = await Promise.all([searchListings(s), regionOptions()]);
   } catch (err) {
-    console.error("Datubāze nav pieejama:", err);
-    dbError = true;
+    console.error("Meklēšana neizdevās:", err);
   }
 
-  return (
-    <main className="wrap">
-      <h1>Jaunākie sludinājumi</h1>
-      <p className="lead">Meklēšana, filtri un karte nāks nākamajā solī.</p>
+  const heading = s.cat === "vehicle" ? VEHICLE_CLASS_LABEL[(s.vc ?? "car") as VehicleClass] : s.cat === "property" ? "Nekustamais īpašums" : "Visi sludinājumi";
+  const pointsQuery = new URLSearchParams(Object.entries(flat).filter(([k]) => !["page", "sort", "zone"].includes(k))).toString();
+  const pageHref = (n: number) => {
+    const p = new URLSearchParams(flat);
+    if (n > 1) p.set("page", String(n));
+    else p.delete("page");
+    return p.toString() ? `/?${p}` : "/";
+  };
 
-      {dbError ? (
-        <div className="notice">
-          Neizdevās pieslēgties datubāzei. Pārbaudi, vai tā darbojas (<code>docker compose up -d</code>) un vai
-          <code>.env</code> failā ir pareizs <code>DATABASE_URL</code>.
+  return (
+    <main className="wrap search">
+      <aside className="side">
+        <FiltersBox active={Object.keys(flat).filter((k) => !["cat", "vc", "sort", "page"].includes(k)).length}>
+          <SearchFilters initial={flat} regions={regions} />
+        </FiltersBox>
+      </aside>
+      <section className="results">
+        <SearchMapLazy query={pointsQuery} zone={flat.zone} />
+        <div className="results-head">
+          <h1>{heading}</h1>
+          {result && <span className="count">{result.total.toLocaleString("lv-LV")} sludinājumi</span>}
+          <span className="grow" />
+          <Suspense>
+            <SortSelect value={s.sort} />
+          </Suspense>
         </div>
-      ) : rows.length === 0 ? (
-        <div className="notice">
-          Sludinājumu vēl nav. <a href="/pievienot">Pievieno pirmo</a> vai izstrādei ielādē paraugus: <code>npm run db:seed:demo</code>
-        </div>
-      ) : (
-        <div className="list">
-          {rows.map((l) => (
-            <ListingCard key={l.id} l={l} />
-          ))}
-        </div>
-      )}
+        {s.zone && <p className="zone-note">Rāda tikai sludinājumus iezīmētajā zonā.</p>}
+        {!result ? (
+          <div className="notice">
+            Neizdevās pieslēgties datubāzei. Pārbaudi, vai tā darbojas (<code>docker compose up -d</code>).
+          </div>
+        ) : result.rows.length === 0 ? (
+          <div className="notice">Nekas neatbilst izvēlētajiem filtriem. Pamēģini paplašināt meklēšanu.</div>
+        ) : (
+          <>
+            <div className="list">
+              {result.rows.map((l) => (
+                <ListingCard key={l.id} l={l} />
+              ))}
+            </div>
+            {result.pages > 1 && (
+              <nav className="pager" aria-label="Lapas">
+                {s.page > 1 && <a className="btn small" href={pageHref(s.page - 1)}>‹ Iepriekšējā</a>}
+                <span className="fine">
+                  {s.page}. lapa no {result.pages}
+                </span>
+                {s.page < result.pages && <a className="btn small" href={pageHref(s.page + 1)}>Nākamā ›</a>}
+              </nav>
+            )}
+          </>
+        )}
+      </section>
     </main>
   );
 }

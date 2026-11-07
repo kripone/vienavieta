@@ -14,7 +14,7 @@ export function ListingCard({ l, showStatus, actions }: { l: Card; showStatus?: 
   const meta =
     l.kind === "vehicle"
       ? [l.year, l.mileageKm != null ? `${formatNumber(l.mileageKm)} km` : null, l.fuel, l.gearbox, l.body]
-      : [l.propertyType, l.areaM2 ? `${l.areaM2} m²` : null, l.rooms ? `${l.rooms} ist.` : null, l.landM2 && !l.areaM2 ? landLabel(l.landM2) : null, l.deal ? DEAL_LABEL[l.deal] : null];
+      : [l.propertyType, l.areaM2 ? `${Number(l.areaM2)} m²` : null, l.rooms ? `${l.rooms} ist.` : null, l.landM2 && !l.areaM2 ? landLabel(l.landM2) : null, l.deal ? DEAL_LABEL[l.deal] : null];
   const unit = priceUnit(l.deal);
   return (
     <article className="card lcard">

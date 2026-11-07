@@ -23,10 +23,10 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] Mani sludinājumi: rediģēt, atzīmēt kā pārdotu, dzēst; cenu vēsture saglabājas
 - [x] Antispam: limits diennaktī, saišu un surogātvārdu pārbaude, lielie burti, dublikāti, slēptais lauks, aizpildīšanas laiks
 
-## 4. Meklēšana
-- [ ] Filtri ar URL parametriem (dalāmas saites)
-- [ ] Karte ar zonas apvilkšanu (Mapbox vai Google Maps, ielas un satelīts)
-- [ ] Kārtošana, lapas
+## 4. Meklēšana ✅ (izņemot cenas novērtējumu)
+- [x] Filtri ar URL parametriem (dalāmas saites): visi transporta un īpašuma lauki, vieta, pārdevējs, teksts
+- [x] Karte ar zonas apvilkšanu (Leaflet; ielas un satelīts no .env, sk. docs/MAPS.md)
+- [x] Kārtošana, lapas, TOP sludinājumi pirmie
 - [ ] Cenas novērtējums pret līdzīgiem sludinājumiem
 
 ## 5. Lietotāju funkcijas

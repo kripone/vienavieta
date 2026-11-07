@@ -11,3 +11,5 @@
 - React 19 atiestata nekontrolētus formas laukus pēc servera darbības, tāpēc formās ar kļūdu paziņojumiem lieto kontrolētus laukus.
 - Sludinājumu saglabāšana: `src/app/sludinajumi/actions.ts`; validācija `src/lib/listing-input.ts`; antispam `src/lib/antispam.ts`. Bildes: `src/lib/storage.ts` (lokāli vai S3) un `src/lib/images.ts`.
 - Antispam pārbauda, vai forma aizpildīta ne ātrāk kā 4 s pēc lapas atvēršanas; automātiskajos testos pirms iesniegšanas jāpagaida.
+- Meklēšana: parametri un SQL `src/lib/search.ts` (parseSearch → conditions); filtru UI `src/components/search-filters.tsx`; karte `src/components/search-map.tsx`. Jaunu filtru pievieno visās trijās vietās.
+- `getCurrentUser()` sauc `headers()` ārpus try/catch un `unstable_rethrow`, lai neapklusinātu Next dinamiskās renderēšanas signālus.

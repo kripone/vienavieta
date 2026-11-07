@@ -1,15 +1,17 @@
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { db, schema } from "@/db";
 import { auth } from "./auth";
 
 /** Pašreizējais lietotājs no datubāzes vai null. Bloķētie lietotāji tiek uzskatīti par neielogotiem. */
 export async function getCurrentUser() {
+  const h = await headers(); // padara lapu dinamisku; šo kļūdu nedrīkst noķert
   let session;
   try {
-    session = await auth.api.getSession({ headers: await headers() });
+    session = await auth.api.getSession({ headers: h });
   } catch (err) {
+    unstable_rethrow(err);
     // Piem. nav iestatīts BETTER_AUTH_SECRET vai nav datubāzes: lapu rāda kā neielogotam
     console.error("Sesiju neizdevās pārbaudīt:", err instanceof Error ? err.message : err);
     return null;
