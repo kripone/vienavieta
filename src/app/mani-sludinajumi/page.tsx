@@ -18,7 +18,10 @@ export default async function MyListingsPage() {
     <main className="wrap">
       <div className="row between">
         <h1>{t("Mani sludinājumi")}</h1>
-        <a className="btn primary" href="/pievienot">{t("+ Pievienot sludinājumu")}</a>
+        <div className="row">
+          {user.sellerType === "dealer" && <a className="btn" href="/importi">{t("Imports no salona sistēmas")}</a>}
+          <a className="btn primary" href="/pievienot">{t("+ Pievienot sludinājumu")}</a>
+        </div>
       </div>
       {rows.length === 0 ? (
         <div className="notice">{t("Tev vēl nav sludinājumu.")}</div>

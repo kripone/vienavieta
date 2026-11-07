@@ -169,6 +169,9 @@ export const listings = pgTable(
     externalId: text("external_id"),
     /** Ārējā sludinājuma sīktēla adrese oriģinālajā serverī (rādām no turienes, neglabājam) */
     externalThumbUrl: text("external_thumb_url"),
+    /** Salona plūsmas sludinājumiem: bilžu adreses salona serverī (rādām no turienes) un plūsmas ID */
+    remotePhotos: text("remote_photos").array().notNull().default(sql`'{}'::text[]`),
+    feedId: integer("feed_id"),
     /** Vienāda vērtība sludinājumiem, kas apraksta to pašu objektu dažādos portālos */
     groupKey: text("group_key"),
     userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
@@ -442,4 +445,24 @@ export const vzdDeals = pgTable(
     lon: doublePrecision("lon"),
   },
   (t) => [index("vzd_deals_house_idx").on(t.houseKey), index("vzd_deals_tail_idx").on(t.houseTail), index("vzd_deals_building_idx").on(t.buildingCadNr), index("vzd_deals_geo_idx").on(t.lat, t.lon)],
+);
+
+/**
+ * Salonu/aģentūru sludinājumu plūsmas (XML/CSV/JSON pēc saites). Imports: src/lib/importers/dealer-feed.ts.
+ * Sludinājumi tiek saglabāti kā salona paša (source "own", user_id = salons), external_id = "feed:<id>:<vienības id>".
+ */
+export const dealerFeeds = pgTable(
+  "dealer_feeds",
+  {
+    id: serial("id").primaryKey(),
+    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    url: text("url").notNull(),
+    /** "vehicle" | "property" — ja plūsmā nav norādīts katrai vienībai */
+    kind: listingKind("kind").notNull().default("vehicle"),
+    active: boolean("active").notNull().default(true),
+    lastRunAt: timestamp("last_run_at", { withTimezone: true }),
+    lastResult: jsonb("last_result"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("dealer_feeds_user_idx").on(t.userId)],
 );

@@ -128,6 +128,9 @@ export default async function ListingPage(props: Props) {
                 {d.sellerVerified ? ` · ✔ ${t("identitāte apstiprināta")}` : ""}
               </span>
               {l.status === "active" && !isOwner && <ContactReveal id={l.id} />}
+              {l.feedId && l.externalUrl && /^https?:\/\//.test(l.externalUrl) && (
+                <a className="fine" href={l.externalUrl} target="_blank" rel="nofollow noopener noreferrer">{t("Sludinājums salona mājaslapā")} ↗</a>
+              )}
             </div>
           )}
           {elsewhere.length > 0 && (

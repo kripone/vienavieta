@@ -94,7 +94,10 @@ export async function getListing(id: string) {
   const photos = await db.select().from(listingPhotos).where(eq(listingPhotos.listingId, id)).orderBy(asc(listingPhotos.position));
   return {
     ...row,
-    photos: photos.map((p) => ({ id: p.id, url: mediaUrl(p.storageKey), thumbUrl: mediaUrl(p.thumbKey), width: p.width, height: p.height })),
+    // salona plūsmas sludinājumiem bildes no salona servera (neglabājam)
+    photos: photos.length
+      ? photos.map((p) => ({ id: p.id, url: mediaUrl(p.storageKey), thumbUrl: mediaUrl(p.thumbKey), width: p.width, height: p.height }))
+      : row.l.remotePhotos.map((u, i) => ({ id: `r${i}`, url: u, thumbUrl: u, width: null, height: null })),
   };
 }
 

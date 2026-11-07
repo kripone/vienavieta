@@ -13,7 +13,7 @@ export function ExtThumb({ src, source, fallback }: { src: string; source: strin
     <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt="" loading="lazy" onError={() => setFailed(true)} />
-      <span className="ext-credit">Foto: {source}</span>
+      {source && <span className="ext-credit">Foto: {source}</span>}
     </>
   );
 }

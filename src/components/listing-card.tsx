@@ -57,6 +57,8 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
           <img src={mediaUrl(l.thumbKey)} alt="" loading="lazy" />
         ) : ext && l.externalThumbUrl && process.env.EXTERNAL_THUMBS !== "off" ? (
           <ExtThumb src={l.externalThumbUrl} source={src} fallback={listingIll(l)} />
+        ) : !ext && l.externalThumbUrl ? (
+          <ExtThumb src={l.externalThumbUrl} source="" fallback={listingIll(l)} />
         ) : (
           <Ill svg={listingIll(l)} />
         )}

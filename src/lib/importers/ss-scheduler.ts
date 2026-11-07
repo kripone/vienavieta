@@ -9,6 +9,7 @@ import { backfillBodies, backfillHouseTail, backfillMakeModel, ensureMotoModels,
 import { crawlSection } from "./ss-pages";
 import { detailsEnabled, fillVehicleCities } from "./ss-details";
 import { importVzdIfChanged } from "./vzd";
+import { runDueFeed } from "./dealer-feed";
 
 const g = globalThis as unknown as { ssCrawlerStarted?: boolean };
 
@@ -64,6 +65,15 @@ export function startSsCrawler() {
         console.error("ss.com ievākšana neizdevās:", err instanceof Error ? err.message : err);
       }
       await new Promise((r) => setTimeout(r, 60_000));
+    }
+  })();
+  // salonu plūsmas: pa vienai, katra reizi DEALER_FEED.EVERY_HOURS stundās
+  (async () => {
+    await new Promise((r) => setTimeout(r, 120_000));
+    for (;;) {
+      const r = await runDueFeed().catch((e) => (console.error("Salonu plūsmas:", e instanceof Error ? e.message : e), null));
+      if (r) console.log("Salona plūsma:", JSON.stringify({ ...r, errors: r.errors.slice(0, 3) }));
+      await new Promise((res) => setTimeout(res, r ? 10_000 : 300_000));
     }
   })();
   // VZD darījumu atvērtie dati: pārbauda reizi 12 h, ielādē, ja datu kopa mainījusies (reizi mēnesī)
