@@ -1,11 +1,13 @@
 # Render Blueprint: portāls + PostgreSQL datubāze vienā klikšķī.
+# Testam bezmaksas plāni: portāls "aizmieg" pēc 15 min bez apmeklētājiem, bezmaksas datubāze
+# Render tiek dzēsta pēc 30 dienām. Pastāvīgai versijai: web plan starter, db basic-256mb.
 # Render → New → Blueprint → izvēlies repozitoriju kripone/vienavieta.
 services:
   - type: web
     name: vienavieta
     runtime: node
     region: frankfurt
-    plan: starter
+    plan: free
     buildCommand: npm ci && npm run build
     # Pirms palaišanas: datubāzes migrācijas un vietu/kataloga dati (drīkst atkārtot)
     startCommand: npm run db:migrate && npm run db:seed && npm start
@@ -53,7 +55,7 @@ services:
 databases:
   - name: vienavieta-db
     region: frankfurt
-    plan: basic-256mb
+    plan: free
     postgresMajorVersion: "16"
     databaseName: vienavieta
     user: vienavieta
