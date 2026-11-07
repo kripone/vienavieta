@@ -1,4 +1,8 @@
 import { FavButton } from "@/components/fav-button";
+import { CompareToggle } from "@/components/compare";
+import { EvalBadge } from "@/components/eval-badge";
+import { ExtThumb } from "@/components/ext-thumb";
+import type { PriceEval } from "@/lib/price-eval";
 import { Ill } from "@/components/ill";
 import { DEAL_LABEL, SOURCE_LABEL } from "@/lib/constants";
 import { listingIll } from "@/lib/illustrations";
@@ -23,9 +27,13 @@ type CardProps = {
   oldPrice?: number | null;
   /** Tas pats objekts citos portālos (sk. src/lib/dedupe.ts). */
   also?: { id: string; source: string; url: string; price: number }[];
+  /** Cenas novērtējums pret līdzīgiem (src/lib/price-eval.ts). */
+  evaluation?: PriceEval | null;
+  /** Rādīt pogu "Salīdzināt". */
+  compare?: boolean;
 };
 
-export function ListingCard({ l, showStatus, actions, favorite, oldPrice, also }: CardProps) {
+export function ListingCard({ l, showStatus, actions, favorite, oldPrice, also, evaluation, compare }: CardProps) {
   const meta =
     l.kind === "vehicle"
       ? [l.year, l.mileageKm != null ? `${formatNumber(l.mileageKm)} km` : null, l.fuel, l.gearbox, l.body]
@@ -42,6 +50,8 @@ export function ListingCard({ l, showStatus, actions, favorite, oldPrice, also }
         {l.thumbKey ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={mediaUrl(l.thumbKey)} alt="" loading="lazy" />
+        ) : ext && l.externalThumbUrl && process.env.EXTERNAL_THUMBS !== "off" ? (
+          <ExtThumb src={l.externalThumbUrl} source={src} fallback={listingIll(l)} />
         ) : (
           <Ill svg={listingIll(l)} />
         )}
@@ -96,7 +106,11 @@ export function ListingCard({ l, showStatus, actions, favorite, oldPrice, also }
             <s>{formatPrice(oldPrice)}</s> −{formatPrice(oldPrice - l.price)}
           </div>
         )}
-        {favorite && <FavButton id={l.id} on={favorite.on} loggedIn={favorite.loggedIn} />}
+        {evaluation && <EvalBadge e={evaluation} />}
+        <div className="card-tools">
+          {compare && <CompareToggle id={l.id} kind={l.kind} />}
+          {favorite && <FavButton id={l.id} on={favorite.on} loggedIn={favorite.loggedIn} />}
+        </div>
       </div>
     </article>
   );

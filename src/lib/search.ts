@@ -194,7 +194,7 @@ export async function searchListings(s: SearchParams) {
       .select({
         id: listings.id, kind: listings.kind, status: listings.status, title: listings.title, price: listings.price, deal: listings.deal,
         createdAt: listings.createdAt, year: listings.year, mileageKm: listings.mileageKm, fuel: listings.fuel, gearbox: listings.gearbox,
-        body: listings.body, vehicleClass: listings.vehicleClass, color: listings.color, groupKey: listings.groupKey, source: listings.source, externalUrl: listings.externalUrl, propertyType: listings.propertyType, rooms: listings.rooms, areaM2: listings.areaM2, landM2: listings.landM2,
+        body: listings.body, vehicleClass: listings.vehicleClass, color: listings.color, groupKey: listings.groupKey, source: listings.source, externalUrl: listings.externalUrl, externalThumbUrl: listings.externalThumbUrl, makeId: listings.makeId, modelId: listings.modelId, placeId: listings.placeId, propertyType: listings.propertyType, rooms: listings.rooms, areaM2: listings.areaM2, landM2: listings.landM2,
         place: places.name, region: regions.name, regionKind: regions.kind, thumbKey: coverThumb, photoCount,
       })
       .from(listings)

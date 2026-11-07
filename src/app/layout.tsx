@@ -8,6 +8,7 @@ import "@fontsource/figtree/600.css";
 import "@fontsource/figtree/700.css";
 import "@fontsource/jetbrains-mono/500.css";
 import "./globals.css";
+import { CompareBar } from "@/components/compare";
 import { ThemeToggle, themeScript } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
         {children}
+        <CompareBar />
       </body>
     </html>
   );

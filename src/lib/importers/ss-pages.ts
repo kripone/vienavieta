@@ -10,7 +10,7 @@ import { makePlaceFinder, mapItem, type MakeRow, type ModelRow, type PlaceRow, t
 const { listings, places, regions, makes, models, priceHistory, crawlState } = schema;
 
 export type Section = (typeof SS_SECTIONS)[number];
-export type PageRow = { link: string; fields: Record<string, string[]> };
+export type PageRow = { link: string; fields: Record<string, string[]>; thumb?: string };
 
 const USER_AGENT = "VienaVietaBot/1.0 (+https://vienavieta-omew.onrender.com)";
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -34,7 +34,9 @@ export function parseListPage(html: string): { rows: PageRow[]; lastPage: number
     labels.forEach((label, i) => {
       if (label && cells[i]?.length) fields[label] = cells[i];
     });
-    rows.push({ link: `https://www.ss.com${href}`, fields });
+    // sīktēla adrese (rādām no ss.com servera, neglabājam un nelejupielādējam)
+    const thumb = body.match(/<img[^>]*src="(https:\/\/i\.ss\.com\/[^"]+\.th2\.jpg)"/)?.[1];
+    rows.push({ link: `https://www.ss.com${href}`, fields, thumb });
   }
   const pages = [...html.matchAll(/class="navi"[^>]*href="[^"]*?page(\d+)\.html"/g), ...html.matchAll(/href="[^"]*?page(\d+)\.html"[^>]*class="navi"/g)].map((x) => Number(x[1]));
   return { rows, lastPage: Math.max(1, ...pages) };
@@ -66,12 +68,15 @@ export type CrawlResult = { section: string; mode: "quick" | "full"; pages: numb
 async function saveRows(section: Section, pageRows: PageRow[], ctx: Ctx, res: CrawlResult) {
   const now = new Date();
   const mapped = pageRows
-    .map((r) => mapItem(section, { link: r.link, pubDate: now, fields: r.fields } as RssItem, ctx))
+    .map((r) => {
+      const m = mapItem(section, { link: r.link, pubDate: now, fields: r.fields } as RssItem, ctx);
+      return m ? { ...m, externalThumbUrl: r.thumb ?? null } : null;
+    })
     .filter((x): x is NonNullable<typeof x> => Boolean(x));
   const byId = new Map(mapped.map((m) => [m.externalId!, m]));
   if (!byId.size) return;
   const existing = await db
-    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status })
+    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl })
     .from(listings)
     .where(and(eq(listings.source, "ss.com"), inArray(listings.externalId, [...byId.keys()])));
   const seen = new Set<string>();
@@ -80,8 +85,8 @@ async function saveRows(section: Section, pageRows: PageRow[], ctx: Ctx, res: Cr
     seen.add(e.externalId!);
     const row = byId.get(e.externalId!)!;
     if (e.status === "hidden") continue; // paslēpis moderators: neaiztiekam
-    if (e.price !== row.price || e.status === "deleted") {
-      await db.update(listings).set({ price: row.price, status: "active", updatedAt: now }).where(eq(listings.id, e.id));
+    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl) {
+      await db.update(listings).set({ price: row.price, status: "active", externalThumbUrl: row.externalThumbUrl, updatedAt: now }).where(eq(listings.id, e.id));
       if (e.price !== row.price) {
         await db.insert(priceHistory).values({ listingId: e.id, price: row.price });
         res.priceChanged++;

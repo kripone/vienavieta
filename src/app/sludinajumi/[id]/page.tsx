@@ -10,7 +10,10 @@ import { DEAL_LABEL, SOURCE_LABEL, VEHICLE_CLASS_LABEL, type VehicleClass } from
 import { formatNumber, formatPrice, timeAgo } from "@/lib/format";
 import { listingIll } from "@/lib/illustrations";
 import { landLabel } from "@/lib/listing-input";
+import { CompareToggle } from "@/components/compare";
+import { EvalBadge } from "@/components/eval-badge";
 import { alsoAt } from "@/lib/dedupe";
+import { priceEvals } from "@/lib/price-eval";
 import { favoriteIds } from "@/lib/favorites";
 import { getListing, locationLabel } from "@/lib/listings";
 import { getCurrentUser, isModerator } from "@/lib/session";
@@ -66,6 +69,7 @@ export default async function ListingPage(props: Props) {
           ["Lietošanas mērķis", l.purpose],
           ["Ērtības", l.amenities.length ? l.amenities.join(", ") : null],
         ];
+  const evaluation = (await priceEvals([l.id]).catch(() => new Map())).get(l.id);
   const elsewhere = (await alsoAt([{ id: l.id, groupKey: l.groupKey }]).catch(() => new Map())).get(l.id) ?? [];
   const isFav = user && !isOwner ? (await favoriteIds(user.id, [l.id])).has(l.id) : false;
   const seller = d.sellerType === "dealer" && d.companyName ? d.companyName : d.sellerName || "Privātpersona";
@@ -86,11 +90,15 @@ export default async function ListingPage(props: Props) {
         <div className="det-side">
           <div className="det-title">
             <h1>{l.title}</h1>
-            {!isOwner && <FavButton id={l.id} on={isFav} loggedIn={Boolean(user)} big />}
+            <div className="card-tools">
+              <CompareToggle id={l.id} kind={l.kind} />
+              {!isOwner && <FavButton id={l.id} on={isFav} loggedIn={Boolean(user)} big />}
+            </div>
           </div>
           <div className="det-price">
             {formatPrice(l.price)} {unit && <small>{unit}</small>}
           </div>
+          {evaluation && <EvalBadge e={evaluation} long />}
           <p className="meta">
             {d.place && <span>📍 {locationLabel(d.place, d.region, d.regionKind)}</span>}
             <span>{ext ? `Pievienots ${timeAgo(l.createdAt)}` : `Ievietots ${timeAgo(l.createdAt)}`}</span>

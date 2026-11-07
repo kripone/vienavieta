@@ -28,7 +28,7 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] Karte ar zonas apvilkšanu (Leaflet; ielas un satelīts no .env, sk. docs/MAPS.md)
 - [x] Google karte un satelīts (Map Tiles API, NEXT_PUBLIC_GOOGLE_MAPS_KEY); rezerve OpenStreetMap
 - [x] Kārtošana, lapas, TOP sludinājumi pirmie
-- [ ] Cenas novērtējums pret līdzīgiem sludinājumiem
+- [x] Cenas novērtējums pret līdzīgiem sludinājumiem (Laba cena / Tirgus cena / Virs tirgus; auto pēc markas/modeļa/gada, īpašumi pēc €/m² reģionā)
 
 ## 5. Lietotāju funkcijas
 - [x] Favorīti: sirsniņa kartītē un sludinājuma lapā, lapa /favoriti, cenas kritums kopš saglabāšanas
@@ -36,7 +36,7 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] Saglabātās meklēšanas ar e-pasta paziņojumiem (reizi stundā vai dienā), lapa /pazinojumi, atrakstīšanās no e-pasta
 - [x] Paziņojumu kārta: /api/cron/notify, ko reizi stundā izsauc GitHub Actions (.github/workflows/notify.yml)
 - [ ] Ziņas starp pircēju un pārdevēju
-- [ ] Salīdzināšana
+- [x] Salīdzināšana (līdz 4, labākā vērtība iezīmēta)
 
 ## 6. Moderācija
 - [x] Sūdzības ("Ziņot par sludinājumu") un automātiska paslēpšana pēc 3 dažādu lietotāju sūdzībām
@@ -68,7 +68,8 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] ss.com oficiālās RSS plūsmas (auto, moto, dzīvokļi, mājas, zeme): fakti + saite, bez bildēm un teksta; reizi stundā; avota filtrs
 - [x] ss.com sarakstu lapas (pēc jurista atzinuma): visas lapas reizi diennaktī, jaunie ik 15 min, ss.com izdzēstie tiek noņemti
 - [ ] Citu portālu RSS/partneru plūsmas (reklama.lv, city24.lv, autoplius.lt …)
-- [ ] Bildes no citiem portāliem: netiek ņemtas
+- [x] ss.com sīktēli tieši no ss.com servera (neglabājam), ja nenāk: ilustrācija
+- [ ] Tirgus tendences: cenu grafiki pa modeļiem un reģioniem
 - [x] Dublikātu apvienošana starp portāliem (marka/modelis/gads/cena/nobraukums vai veids/istabas/platība/vieta): viena kartīte, "Arī: ss.com ↗"
 
 ## Palaišana produkcijā

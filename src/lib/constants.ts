@@ -158,3 +158,8 @@ export const SOURCE_LABEL: Record<string, string> = {
   own: "VienāVietā", "ss.com": "ss.com", "reklama.lv": "reklama.lv", "mm.lv": "mm.lv", "city24.lv": "city24.lv",
   "auto24.lv": "auto24.lv", "autoplius.lt": "autoplius.lt", "aruodas.lt": "aruodas.lt",
 };
+
+/** Cenas novērtējums pret līdzīgiem: zem GOOD — "Laba cena", virs HIGH — "Virs tirgus"; vajag vismaz MIN līdzīgus. */
+export const PRICE_EVAL = { GOOD: 0.88, HIGH: 1.15, MIN: 3, YEARS: 2 } as const;
+/** Cik sludinājumus var salīdzināt vienlaikus. */
+export const MAX_COMPARE = 4;

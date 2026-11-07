@@ -166,6 +166,8 @@ export const listings = pgTable(
     /** Saite uz oriģinālo sludinājumu citā portālā (ievāktajiem) */
     externalUrl: text("external_url"),
     externalId: text("external_id"),
+    /** Ārējā sludinājuma sīktēla adrese oriģinālajā serverī (rādām no turienes, neglabājam) */
+    externalThumbUrl: text("external_thumb_url"),
     /** Vienāda vērtība sludinājumiem, kas apraksta to pašu objektu dažādos portālos */
     groupKey: text("group_key"),
     userId: text("user_id").references(() => users.id, { onDelete: "set null" }),

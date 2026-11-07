@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ListingCard } from "@/components/listing-card";
 import { favoriteListings } from "@/lib/favorites";
+import { priceEvals } from "@/lib/price-eval";
 import { plural } from "@/lib/format";
 import { requireUser } from "@/lib/session";
 
@@ -9,6 +10,7 @@ export const metadata: Metadata = { title: "Favorīti" };
 export default async function FavoritesPage() {
   const user = await requireUser("/favoriti");
   const rows = await favoriteListings(user.id);
+  const evals = await priceEvals(rows.map((r) => r.id)).catch(() => new Map());
   const drops = rows.filter((r) => r.priceWhenSaved != null && r.priceWhenSaved > r.price).length;
   return (
     <main className="wrap">
@@ -27,7 +29,7 @@ export default async function FavoritesPage() {
           </p>
           <div className="list">
             {rows.map((l) => (
-              <ListingCard key={l.id} l={l} showStatus oldPrice={l.priceWhenSaved} favorite={{ on: true, loggedIn: true }} />
+              <ListingCard key={l.id} l={l} showStatus oldPrice={l.priceWhenSaved} favorite={{ on: true, loggedIn: true }} evaluation={evals.get(l.id)} compare />
             ))}
           </div>
         </>
