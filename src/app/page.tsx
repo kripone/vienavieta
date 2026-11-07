@@ -81,7 +81,7 @@ export default async function SearchPage(props: { searchParams: Promise<SP> }) {
           <>
             <div className="list">
               {result.rows.map((l) => (
-                <ListingCard key={l.id} l={l} favorite={{ on: favs.has(l.id), loggedIn: Boolean(user) }} also={also.get(l.id)} evaluation={evals.get(l.id)} compare />
+                <ListingCard key={l.id} l={l} favorite={{ on: favs.has(l.id), loggedIn: Boolean(user) }} also={also.get(l.id)} evaluation={evals.get(l.id)} oldPrice={l.firstPrice} compare />
               ))}
             </div>
             {result.pages > 1 && (

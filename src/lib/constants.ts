@@ -181,3 +181,7 @@ export const SOURCE_LABEL: Record<string, string> = {
 export const PRICE_EVAL = { GOOD: 0.88, HIGH: 1.15, MIN: 3, YEARS: 2 } as const;
 /** Cik sludinājumus var salīdzināt vienlaikus. */
 export const MAX_COMPARE = 4;
+
+/** ss.com transporta sludinājumu lapas pilsētai: cik minūtē un pauze starp pieprasījumiem. */
+export const SS_DETAIL_PER_MIN = 15;
+export const SS_DETAIL_DELAY_MS = 3000;

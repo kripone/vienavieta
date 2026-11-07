@@ -12,7 +12,7 @@ const LV_SOURCES = ["own", "ss.com", "reklama.lv", "mm.lv", "city24.lv"] as cons
 const LT_SOURCES = ["autoplius.lt", "aruodas.lt"] as const;
 
 export const PAGE_SIZE = 24;
-export const SORTS = ["new", "cheap", "dear"] as const;
+export const SORTS = ["new", "cheap", "dear", "drop", "old"] as const;
 
 type Raw = Record<string, string | string[] | undefined>;
 
@@ -195,7 +195,7 @@ export async function searchListings(s: SearchParams) {
         id: listings.id, kind: listings.kind, status: listings.status, title: listings.title, price: listings.price, deal: listings.deal,
         createdAt: listings.createdAt, year: listings.year, mileageKm: listings.mileageKm, fuel: listings.fuel, gearbox: listings.gearbox,
         body: listings.body, vehicleClass: listings.vehicleClass, color: listings.color, groupKey: listings.groupKey, source: listings.source, externalUrl: listings.externalUrl, externalThumbUrl: listings.externalThumbUrl, makeId: listings.makeId, modelId: listings.modelId, placeId: listings.placeId, propertyType: listings.propertyType, rooms: listings.rooms, areaM2: listings.areaM2, landM2: listings.landM2,
-        place: places.name, region: regions.name, regionKind: regions.kind, thumbKey: coverThumb, photoCount,
+        place: places.name, region: regions.name, regionKind: regions.kind, thumbKey: coverThumb, photoCount, firstPrice: listings.firstPrice,
       })
       .from(listings)
       .leftJoin(places, eq(listings.placeId, places.id))
@@ -208,7 +208,14 @@ export async function searchListings(s: SearchParams) {
   // TOP sludinājumi vienmēr pirmie, tad izvēlētā kārtošana; "uzcelt" skaitās kā jauns
   const top = sql`case when ${listings.topUntil} > ${now} then 0 else 1 end`;
   const fresh = sql`greatest(${listings.createdAt}, coalesce(${listings.bumpedAt}, ${listings.createdAt}))`;
-  const order = s.sort === "cheap" ? [asc(listings.price)] : s.sort === "dear" ? [desc(listings.price)] : [desc(fresh)];
+  // "drop": lielākais kritums % no sākuma cenas; "old": visilgāk tirgū
+  const dropPct = sql`coalesce((${listings.firstPrice} - ${listings.price})::float / nullif(${listings.firstPrice}, 0), 0)`;
+  const order =
+    s.sort === "cheap" ? [asc(listings.price)]
+    : s.sort === "dear" ? [desc(listings.price)]
+    : s.sort === "drop" ? [desc(dropPct)]
+    : s.sort === "old" ? [asc(listings.createdAt)]
+    : [desc(fresh)];
 
   const [rows, [{ total }]] = await Promise.all([
     base().where(where).orderBy(top, ...order, desc(listings.id)).limit(PAGE_SIZE).offset((s.page - 1) * PAGE_SIZE),

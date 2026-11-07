@@ -1,5 +1,5 @@
 "use server";
-import { and, count, eq, gt, inArray, isNull, ne, or } from "drizzle-orm";
+import { and, count, eq, gt, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db, schema } from "@/db";
 import { checkContent, isValidEmail, isValidPhone, normalizePhone, normalizeTitle } from "@/lib/antispam";
@@ -128,8 +128,14 @@ export async function saveListing(raw: unknown): Promise<SaveResult> {
     let listingId: string;
     if (existing) {
       listingId = existing.id;
-      if (existing.price !== v.price) await tx.insert(priceHistory).values({ listingId, price: existing.price });
-      await tx.update(listings).set({ ...base, ...specific }).where(eq(listings.id, listingId));
+      if (existing.price !== v.price) {
+        // price_history glabā cenu no katra izmaiņas brīža; ja vēstures vēl nav, vispirms sākuma cena
+        const [had] = await tx.select({ id: priceHistory.id }).from(priceHistory).where(eq(priceHistory.listingId, listingId)).limit(1);
+        if (!had) await tx.insert(priceHistory).values({ listingId, price: existing.price, changedAt: existing.createdAt });
+        await tx.insert(priceHistory).values({ listingId, price: v.price });
+      }
+      const firstPrice = existing.price !== v.price ? { firstPrice: sql`coalesce(${listings.firstPrice}, ${existing.price})` } : {};
+      await tx.update(listings).set({ ...base, ...specific, ...firstPrice }).where(eq(listings.id, listingId));
       const old = await tx.select().from(listingPhotos).where(eq(listingPhotos.listingId, listingId));
       const gone = old.filter((p) => !v.photoIds.includes(p.id));
       if (gone.length) {

@@ -7,6 +7,7 @@ import { geocodePending, geocodingEnabled } from "../geocode";
 import { ensureDailySnapshot } from "../market";
 import { backfillBodies, backfillMakeModel } from "./backfill";
 import { crawlSection } from "./ss-pages";
+import { detailsEnabled, fillVehicleCities } from "./ss-details";
 
 const g = globalThis as unknown as { ssCrawlerStarted?: boolean };
 
@@ -60,4 +61,15 @@ export function startSsCrawler() {
       await new Promise((r) => setTimeout(r, 60_000));
     }
   })();
+  // atsevišķa cilpa: transporta sludinājumu pilsētas no sludinājuma lapām (lēni, katra lapa vienreiz)
+  if (detailsEnabled()) {
+    (async () => {
+      await new Promise((r) => setTimeout(r, 90_000));
+      for (;;) {
+        const r = await fillVehicleCities().catch((e) => (console.error("ss.com pilsētas:", e instanceof Error ? e.message : e), null));
+        if (r && (r.found || r.errors)) console.log("ss.com pilsētas:", JSON.stringify(r));
+        await new Promise((res) => setTimeout(res, r ? 15_000 : 600_000));
+      }
+    })();
+  }
 }

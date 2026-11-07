@@ -19,6 +19,8 @@ export function SortSelect({ value }: { value: string }) {
       <option value="new">Jaunākie</option>
       <option value="cheap">Lētākie</option>
       <option value="dear">Dārgākie</option>
+      <option value="drop">Lielākais cenu kritums</option>
+      <option value="old">Visilgāk tirgū</option>
     </select>
   );
 }

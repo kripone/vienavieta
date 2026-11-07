@@ -73,6 +73,10 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] Dienas tirgus momentuzņēmumi (market_stats) cenu dinamikai laikā
 - [x] ss.com īpašumu ielas → precīza vieta kartē (Google Geocoding, kešs; ieslēdzas ar GOOGLE_GEOCODING_KEY)
 - [x] Dublikātu apvienošana starp portāliem (marka/modelis/gads/cena/nobraukums vai veids/istabas/platība/vieta): viena kartīte, "Arī: ss.com ↗"
+- [x] Sludinājuma vēsture (kā tirgusdati.lv): dienas tirgū, sākuma cena, cenu izmaiņas ar grafiku; /vesture pēc ss.com saites
+- [x] /cenu-kritumi (24 h / 7 / 30 dienas) un kārtošana "Lielākais cenu kritums", "Visilgāk tirgū"; kartītē sākuma cena nosvītrota
+- [x] ss.com auto pilsēta no sludinājuma lapas (tikai lauks "Vieta", katra lapa vienreiz, ~15 minūtē)
+- [ ] VZD darījumu cenas (kadastra atvērtie dati) īpašuma lapā
 
 ## Palaišana produkcijā
 - [x] Render Blueprint (render.yaml) un instrukcija docs/DEPLOY.md

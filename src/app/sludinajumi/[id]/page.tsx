@@ -13,6 +13,8 @@ import { landLabel } from "@/lib/listing-input";
 import { CompareToggle } from "@/components/compare";
 import { EvalBadge } from "@/components/eval-badge";
 import { alsoAt } from "@/lib/dedupe";
+import { listingHistory } from "@/lib/history";
+import { PriceHistory } from "@/components/price-history";
 import { priceEvals } from "@/lib/price-eval";
 import { favoriteIds } from "@/lib/favorites";
 import { getListing, locationLabel } from "@/lib/listings";
@@ -71,6 +73,7 @@ export default async function ListingPage(props: Props) {
         ];
   const evaluation = (await priceEvals([l.id]).catch(() => new Map())).get(l.id);
   const elsewhere = (await alsoAt([{ id: l.id, groupKey: l.groupKey }]).catch(() => new Map())).get(l.id) ?? [];
+  const history = await listingHistory({ id: l.id, price: l.price, createdAt: l.createdAt }).catch(() => null);
   const isFav = user && !isOwner ? (await favoriteIds(user.id, [l.id])).has(l.id) : false;
   const seller = d.sellerType === "dealer" && d.companyName ? d.companyName : d.sellerName || "Privātpersona";
   const unit = priceUnit(l.deal);
@@ -153,6 +156,7 @@ export default async function ListingPage(props: Props) {
             ))}
           </dl>
         </section>
+        {history && <PriceHistory h={history} external={l.source !== "own"} />}
         {l.description && (
           <section>
             <h2>Apraksts</h2>

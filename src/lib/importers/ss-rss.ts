@@ -1,7 +1,7 @@
 // ss.com RSS imports. Lieto tikai ss.com publicētās RSS plūsmas (sk. SS_FEEDS) un no tām ņem tikai faktus:
 // marka/modelis, gads, nobraukums, tilpums, cena, istabas, platība, stāvs, sērija, zeme un vieta (no adreses ceļa).
 // Pārdevēja teksts un bildes netiek kopētas; virsrakstu veidojam paši; kartītē ir saite uz oriģinālu.
-import { and, eq, lt } from "drizzle-orm";
+import { and, eq, lt, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { EXTERNAL_TTL_DAYS, SERIES, SS_FEEDS } from "../constants";
 import { linkDuplicate } from "../dedupe";
@@ -376,7 +376,10 @@ export async function importSsRss(fetchXml: (url: string) => Promise<string> = d
         }
       } else {
         // atkārtoti RSS (pacelts vai mainīta cena): atjaunojam cenu un "redzēts" laiku
-        await db.update(listings).set({ price: row.price, updatedAt: new Date() }).where(eq(listings.id, existing.id));
+        await db
+          .update(listings)
+          .set({ price: row.price, updatedAt: new Date(), ...(existing.price !== row.price ? { firstPrice: sql`coalesce(${listings.firstPrice}, ${existing.price})` } : {}) })
+          .where(eq(listings.id, existing.id));
         if (existing.price !== row.price) await db.insert(priceHistory).values({ listingId: existing.id, price: row.price });
         res.updated++;
       }

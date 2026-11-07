@@ -1,7 +1,7 @@
 // ss.com sarakstu lapu ievākšana (lietotājs 2026-11-07 apstiprināja jurista atzinumu, sk. CLAUDE.md).
 // Lasa tikai sadaļu sarakstu tabulas (marka, gads, cena, istabas, platība …) un saiti uz sludinājumu.
 // Sludinājumu lapas, bildes un pārdevēju aprakstus neatver un nekopē; virsrakstu veidojam paši (mapItem).
-import { and, eq, inArray, lt } from "drizzle-orm";
+import { and, eq, inArray, lt, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { SS_QUICK_PAGES, SS_REQUEST_DELAY_MS, SS_SECTIONS } from "../constants";
 import { linkDuplicate } from "../dedupe";
@@ -48,7 +48,7 @@ export function parseListPage(html: string): { rows: PageRow[]; lastPage: number
 
 const pageUrl = (s: Section, n: number) => (n <= 1 ? s.url : `${s.url}page${n}.html`);
 
-async function defaultFetch(url: string) {
+export async function defaultFetch(url: string) {
   const r = await fetch(url, { headers: { "user-agent": USER_AGENT, "accept-language": "lv" }, signal: AbortSignal.timeout(30_000), redirect: "follow" });
   if (r.status === 429 || r.status === 503) throw Object.assign(new Error(`HTTP ${r.status}`), { retryAfter: 60_000 });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -56,7 +56,7 @@ async function defaultFetch(url: string) {
 }
 
 type Ctx = { findPlace: ReturnType<typeof makePlaceFinder>; findCity: (t: string) => PlaceRow | null; makes: MakeRow[]; models: ModelRow[] };
-async function loadCtx(): Promise<Ctx> {
+export async function loadCtx(): Promise<Ctx> {
   const [placeRows, makeRows, modelRows] = await Promise.all([
     db.select({ id: places.id, name: places.name, lat: places.lat, lon: places.lon, region: regions.name })
       .from(places).innerJoin(regions, eq(places.regionId, regions.id)).where(eq(regions.country, "LV")),
@@ -109,6 +109,7 @@ async function saveRows(section: Section, pageRows: PageRow[], ctx: Ctx, res: Cr
         .update(listings)
         .set({
           price: row.price, status: "active", externalThumbUrl: row.externalThumbUrl, updatedAt: now,
+          ...(e.price !== row.price ? { firstPrice: sql`coalesce(${listings.firstPrice}, ${e.price})` } : {}),
           ...(newAddress ? { address: row.address, geoPrecision: "place" } : {}),
           ...(newPlace ? { placeId: row.placeId, lat: row.lat, lon: row.lon, geoPrecision: "place" } : {}),
           ...(better ? { makeId: row.makeId, modelId: row.modelId, makeText: row.makeText, modelText: row.modelText, title: row.title, ...(e.body ? {} : { body: row.body }) } : {}),

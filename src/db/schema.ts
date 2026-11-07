@@ -176,11 +176,15 @@ export const listings = pgTable(
     description: text("description"),
     /** Cena veselos eiro */
     price: integer("price").notNull(),
+    /** Sākuma cena, ja cena mainīta (null = nav mainīta); cenu kritumu kārtošanai */
+    firstPrice: integer("first_price"),
     placeId: integer("place_id").references(() => places.id),
     /** Iela un mājas numurs (ārējiem īpašumiem no saraksta), ģeokodēšanai */
     address: text("address"),
     /** Koordinātu precizitāte: "place" (vietas centrs) vai "street" (ģeokodēta adrese) */
     geoPrecision: text("geo_precision"),
+    /** Kad ārējā sludinājuma lapa atvērta pilsētas noteikšanai (ss.com transports; katra tikai vienreiz) */
+    detailCheckedAt: timestamp("detail_checked_at", { withTimezone: true }),
     lat: doublePrecision("lat"),
     lon: doublePrecision("lon"),
     contactPhone: text("contact_phone"),
