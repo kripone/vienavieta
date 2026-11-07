@@ -21,9 +21,11 @@ type CardProps = {
   favorite?: { on: boolean; loggedIn: boolean };
   /** Cena, kad sludinājums saglabāts favorītos (rāda, ja tagad lētāk). */
   oldPrice?: number | null;
+  /** Tas pats objekts citos portālos (sk. src/lib/dedupe.ts). */
+  also?: { id: string; source: string; url: string; price: number }[];
 };
 
-export function ListingCard({ l, showStatus, actions, favorite, oldPrice }: CardProps) {
+export function ListingCard({ l, showStatus, actions, favorite, oldPrice, also }: CardProps) {
   const meta =
     l.kind === "vehicle"
       ? [l.year, l.mileageKm != null ? `${formatNumber(l.mileageKm)} km` : null, l.fuel, l.gearbox, l.body]
@@ -67,6 +69,20 @@ export function ListingCard({ l, showStatus, actions, favorite, oldPrice }: Card
             <span className="src-badge">Avots: {src}</span>
             <a className="ext-link" href={ext} {...extLink}>Skatīt {src} ↗</a>
             <a className="fine" href={`/sludinajumi/${l.id}`}>Sīkāk</a>
+          </div>
+        )}
+        {also && also.length > 0 && (
+          <div className="ext-row also">
+            <span className="fine">Arī:</span>
+            {also.map((a) =>
+              a.source === "own" ? (
+                <a key={a.id} href={a.url}>VienāVietā</a>
+              ) : (
+                <a key={a.id} href={a.url} {...extLink}>
+                  {SOURCE_LABEL[a.source] ?? a.source}{a.price !== l.price ? ` (${formatPrice(a.price)})` : ""} ↗
+                </a>
+              ),
+            )}
           </div>
         )}
         {actions}

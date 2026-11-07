@@ -23,6 +23,33 @@ export const FUELS = ["Benzīns", "Dīzelis", "Hibrīds", "Elektro", "Benzīns/g
 export const GEARBOXES = ["Manuāla", "Automāts"] as const;
 export const DRIVES = ["Priekšpiedziņa", "Aizmugures", "Pilnpiedziņa"] as const;
 export const COLORS = ["Melna", "Balta", "Pelēka", "Sudraba", "Zila", "Sarkana", "Zaļa", "Brūna", "Cita"] as const;
+/** Ilustrāciju krāsa pēc sludinājuma krāsas ("Cita" un tukša: tēmas noklusētā). */
+export const COLOR_HEX: Partial<Record<(typeof COLORS)[number], string>> = {
+  Melna: "#23262d", Balta: "#f7f8fa", Pelēka: "#7d838f", Sudraba: "#c4c9d1", Zila: "#2f5fa8", Sarkana: "#b8323b", Zaļa: "#2f7a4f", Brūna: "#7a5236",
+};
+
+/**
+ * Virsbūves noteikšana pēc modeļa nosaukuma (ārējiem sludinājumiem, kur virsbūve nav norādīta).
+ * Atslēga: modeļa nosaukuma sākums bez atstarpēm un domuzīmēm, mazajiem burtiem.
+ */
+export const MODEL_BODY_HINTS: Record<string, readonly string[]> = {
+  Apvidus: [
+    "x1", "x2", "x3", "x4", "x5", "x6", "x7", "ix", "q2", "q3", "q4", "q5", "q7", "q8", "etron", "xc40", "xc60", "xc70", "xc90", "ex30", "ex90",
+    "rav4", "chr", "landcruiser", "highlander", "yariscross", "corollacross", "crv", "hrv", "tiguan", "touareg", "troc", "taigo", "id4", "id5",
+    "kodiaq", "karoq", "kamiq", "enyaq", "qashqai", "xtrail", "juke", "ariya", "sportage", "sorento", "niro", "ev6", "tucson", "santafe", "kona", "ioniq5",
+    "kuga", "puma", "explorer", "ecosport", "ml", "gle", "glc", "gla", "glb", "gls", "gl", "eqc", "rangerover", "discovery", "defender", "evoque",
+    "cx3", "cx30", "cx5", "cx60", "outlander", "asx", "eclipsecross", "pajero", "forester", "outback", "xv", "duster", "3008", "5008", "2008",
+    "captur", "kadjar", "austral", "c5aircross", "c3aircross", "mokka", "grandland", "crossland", "macan", "cayenne", "model y", "modely", "xceed",
+    "vitara", "sx4", "jimny", "ateca", "arona", "tarraco", "formentor", "compass", "renegade", "cherokee", "wrangler", "x-trail",
+  ],
+  Minivens: ["touran", "sharan", "galaxy", "smax", "cmax", "zafira", "scenic", "grandscenic", "espace", "berlingo", "partner", "rifter", "caddy", "verso", "alhambra", "picasso", "spacetourer", "bclass", "vito", "multivan", "carens"],
+  Pikaps: ["hilux", "ranger", "amarok", "l200", "navara", "dmax", "ram", "f150", "tacoma"],
+  Mikroautobuss: ["transporter", "caravelle", "transit", "sprinter", "vclass", "trafic", "vivaro", "expert", "jumpy", "proace", "crafter"],
+  Kupeja: ["tt", "rcz", "z4", "mx5", "911", "cayman", "boxster", "supra", "gt86", "brz"],
+};
+/** Modeļa nosaukuma vārdi, kas norāda universāli (Passat Variant, Octavia Combi, A4 Avant …). */
+export const WAGON_WORDS = ["variant", "combi", "kombi", "avant", "touring", "universal", "universāls", "estate", "sw", "sportswagon", "tourer", "break", "allroad"] as const;
+
 
 export const PROPERTY_GROUPS = {
   "Dzīvojamais": ["Dzīvoklis", "Istaba", "Māja", "Vasarnīca", "Lauku īpašums"],

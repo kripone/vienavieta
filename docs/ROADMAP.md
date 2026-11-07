@@ -55,6 +55,7 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 ## Izskats
 - [x] Gaišā/tumšā tēma (pārslēgs galvenē, atceras izvēli)
 - [x] Ilustrācijas sludinājumiem bez bildēm, transporta veidu ikonas, virsbūvju un īpašumu veidu josla ar skaitu
+- [x] Ilustrācija sludinājuma krāsā; ārējiem auto virsbūve pēc modeļa (MODEL_BODY_HINTS)
 
 ## Lietuva ✅ (pamats)
 - [x] Lietuvas apskritis, pilsētas un Viļņas/Kauņas/Klaipēdas rajoni; filtrs "Valsts"
@@ -67,7 +68,7 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] ss.com oficiālās RSS plūsmas (auto, moto, dzīvokļi, mājas, zeme): fakti + saite, bez bildēm un teksta; reizi stundā; avota filtrs
 - [ ] Citu portālu RSS/partneru plūsmas (reklama.lv, city24.lv, autoplius.lt …)
 - [ ] Lapu pārmeklēšana vai bildes: tikai pēc jurista atzinuma
-- [ ] Dublikātu apvienošana starp portāliem
+- [x] Dublikātu apvienošana starp portāliem (marka/modelis/gads/cena/nobraukums vai veids/istabas/platība/vieta): viena kartīte, "Arī: ss.com ↗"
 
 ## Palaišana produkcijā
 - [x] Render Blueprint (render.yaml) un instrukcija docs/DEPLOY.md

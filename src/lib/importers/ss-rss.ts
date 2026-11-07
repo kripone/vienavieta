@@ -4,6 +4,8 @@
 import { and, eq, lt } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { EXTERNAL_TTL_DAYS, SERIES, SS_FEEDS } from "../constants";
+import { linkDuplicate } from "../dedupe";
+import { inferBody } from "../illustrations";
 import { landLabel } from "../listing-input";
 
 const { listings, places, regions, makes, models, priceHistory } = schema;
@@ -208,6 +210,8 @@ export function mapItem(
       mileageKm: mileage(first(f, "Nobraukums")),
       engineL,
       fuel,
+      // virsbūve RSS nav norādīta: nosakām pēc modeļa (RAV4 → apvidus, Passat Variant → universāls), citādi nezināma
+      body: feed.vehicleClass === "car" ? inferBody(modelName) ?? inferBody(modelRaw) : null,
     };
   }
 
@@ -240,12 +244,12 @@ export function mapItem(
 }
 
 // ---------- imports ----------
-export type ImportResult = { feeds: number; items: number; created: number; updated: number; skipped: number; hidden: number; errors: string[] };
+export type ImportResult = { feeds: number; items: number; created: number; updated: number; skipped: number; hidden: number; duplicates: number; errors: string[] };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export async function importSsRss(fetchXml: (url: string) => Promise<string> = defaultFetch): Promise<ImportResult> {
-  const res: ImportResult = { feeds: 0, items: 0, created: 0, updated: 0, skipped: 0, hidden: 0, errors: [] };
+  const res: ImportResult = { feeds: 0, items: 0, created: 0, updated: 0, skipped: 0, hidden: 0, duplicates: 0, errors: [] };
   const [placeRows, makeRows, modelRows] = await Promise.all([
     db.select({ id: places.id, name: places.name, lat: places.lat, lon: places.lon, region: regions.name })
       .from(places).innerJoin(regions, eq(places.regionId, regions.id)).where(eq(regions.country, "LV")),
@@ -281,6 +285,7 @@ export async function importSsRss(fetchXml: (url: string) => Promise<string> = d
         if (ins) {
           await db.insert(priceHistory).values({ listingId: ins.id, price: row.price });
           res.created++;
+          if (await linkDuplicate(ins.id).catch(() => null)) res.duplicates++;
         }
       } else {
         // atkārtoti RSS (pacelts vai mainīta cena): atjaunojam cenu un "redzēts" laiku

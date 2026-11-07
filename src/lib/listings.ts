@@ -22,6 +22,8 @@ export const cardFields = {
   gearbox: listings.gearbox,
   body: listings.body,
   vehicleClass: listings.vehicleClass,
+  color: listings.color,
+  groupKey: listings.groupKey,
   source: listings.source,
   externalUrl: listings.externalUrl,
   propertyType: listings.propertyType,

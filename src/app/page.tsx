@@ -7,6 +7,7 @@ import { SearchMapLazy } from "@/components/search-map-lazy";
 import { SortSelect } from "@/components/sort-select";
 import { TypeStrip } from "@/components/type-strip";
 import { VEHICLE_CLASS_LABEL, type VehicleClass } from "@/lib/constants";
+import { alsoAt } from "@/lib/dedupe";
 import { favoriteIds } from "@/lib/favorites";
 import { plural } from "@/lib/format";
 import { regionOptions } from "@/lib/listings";
@@ -33,6 +34,7 @@ export default async function SearchPage(props: { searchParams: Promise<SP> }) {
   }
   const stripMode = s.cat === "vehicle" && (s.vc ?? "car") === "car" ? "car" : s.cat === "property" && !s.ptype?.startsWith("g:") ? "home" : null;
   const counts = stripMode && result ? await typeCounts(s).catch(() => ({})) : {};
+  const also = result ? await alsoAt(result.rows).catch(() => new Map()) : new Map();
   const favs = user && result ? await favoriteIds(user.id, result.rows.map((r) => r.id)).catch(() => new Set<string>()) : new Set<string>();
 
   const heading = s.cat === "vehicle" ? VEHICLE_CLASS_LABEL[(s.vc ?? "car") as VehicleClass] : s.cat === "property" ? "Nekustamais īpašums" : "Visi sludinājumi";
@@ -76,7 +78,7 @@ export default async function SearchPage(props: { searchParams: Promise<SP> }) {
           <>
             <div className="list">
               {result.rows.map((l) => (
-                <ListingCard key={l.id} l={l} favorite={{ on: favs.has(l.id), loggedIn: Boolean(user) }} />
+                <ListingCard key={l.id} l={l} favorite={{ on: favs.has(l.id), loggedIn: Boolean(user) }} also={also.get(l.id)} />
               ))}
             </div>
             {result.pages > 1 && (

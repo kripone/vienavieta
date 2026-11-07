@@ -282,3 +282,5 @@ main .fine { margin-top: 14px; }
 .src-badge { background: var(--surface-2); color: var(--muted); border-radius: 6px; padding: 1px 8px; font-weight: 600; font-size: 12px; }
 .ext-link { font-weight: 700; }
 .ext-note { font-size: 13px; color: var(--muted); margin: 0; }
+.also a { font-weight: 600; }
+.also-panel ul { margin: 6px 0 0; padding-left: 18px; }

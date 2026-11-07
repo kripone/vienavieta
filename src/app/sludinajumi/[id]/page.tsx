@@ -10,6 +10,7 @@ import { DEAL_LABEL, SOURCE_LABEL, VEHICLE_CLASS_LABEL, type VehicleClass } from
 import { formatNumber, formatPrice, timeAgo } from "@/lib/format";
 import { listingIll } from "@/lib/illustrations";
 import { landLabel } from "@/lib/listing-input";
+import { alsoAt } from "@/lib/dedupe";
 import { favoriteIds } from "@/lib/favorites";
 import { getListing, locationLabel } from "@/lib/listings";
 import { getCurrentUser, isModerator } from "@/lib/session";
@@ -65,6 +66,7 @@ export default async function ListingPage(props: Props) {
           ["Lietošanas mērķis", l.purpose],
           ["Ērtības", l.amenities.length ? l.amenities.join(", ") : null],
         ];
+  const elsewhere = (await alsoAt([{ id: l.id, groupKey: l.groupKey }]).catch(() => new Map())).get(l.id) ?? [];
   const isFav = user && !isOwner ? (await favoriteIds(user.id, [l.id])).has(l.id) : false;
   const seller = d.sellerType === "dealer" && d.companyName ? d.companyName : d.sellerName || "Privātpersona";
   const unit = priceUnit(l.deal);
@@ -109,6 +111,23 @@ export default async function ListingPage(props: Props) {
                 {d.sellerVerified ? " · ✔ identitāte apstiprināta" : ""}
               </span>
               {l.status === "active" && !isOwner && <ContactReveal id={l.id} />}
+            </div>
+          )}
+          {elsewhere.length > 0 && (
+            <div className="panel also-panel">
+              <b>Šis pats sludinājums arī:</b>
+              <ul>
+                {elsewhere.map((a: { id: string; source: string; url: string; price: number }) => (
+                  <li key={a.id}>
+                    {a.source === "own" ? (
+                      <a href={a.url}>VienāVietā</a>
+                    ) : (
+                      <a href={a.url} target="_blank" rel="nofollow noopener noreferrer">{SOURCE_LABEL[a.source] ?? a.source} ↗</a>
+                    )}{" "}
+                    <span className="fine">{formatPrice(a.price)}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
           {l.status === "active" && !isOwner && <ReportButton id={l.id} loggedIn={Boolean(user)} />}

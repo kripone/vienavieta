@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db, schema } from "@/db";
 import { checkContent, isValidEmail, isValidPhone, normalizePhone, normalizeTitle } from "@/lib/antispam";
 import { DAILY_LISTING_LIMIT } from "@/lib/constants";
+import { linkDuplicate } from "@/lib/dedupe";
 import { autoTitle, ListingInput, pickPropertyFields } from "@/lib/listing-input";
 import { getCurrentUser } from "@/lib/session";
 import { deleteObject } from "@/lib/storage";

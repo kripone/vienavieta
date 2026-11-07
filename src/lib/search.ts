@@ -1,5 +1,6 @@
 import { and, asc, count, desc, eq, gte, ilike, inArray, isNotNull, isNull, lte, ne, or, sql, type SQL } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { groupPrimaryOnly } from "./dedupe";
 import {
   AMENITIES, BODY_TYPES, COLORS, CONDITIONS, DEALS, DRIVES, FUELS, GEARBOXES, HEATING, MATERIALS, PROPERTY_GROUPS, PROPERTY_TYPES,
   PURPOSES, SERIES, VEHICLE_CLASSES, VEHICLE_CLASS_LABEL, DEAL_LABEL, type VehicleClass,
@@ -123,6 +124,8 @@ function conditions(s: SearchParams): SQL[] {
     // "Visi" un nekustamais īpašums: tikai Latvija; Lietuvas sludinājumi redzami auto sadaļā.
     add(inCountry("LV"));
   }
+  // dublikāti starp portāliem: viena kartīte grupai (sk. src/lib/dedupe.ts); ar avota filtru rāda visus no tā avota
+  if (!s.src) add(groupPrimaryOnly);
   if (s.src === "own") add(eq(listings.source, "own"));
   else if (s.src === "ext") add(ne(listings.source, "own"));
   if (s.seller === "verified") add(isNotNull(users.identityVerifiedAt));
@@ -191,7 +194,7 @@ export async function searchListings(s: SearchParams) {
       .select({
         id: listings.id, kind: listings.kind, status: listings.status, title: listings.title, price: listings.price, deal: listings.deal,
         createdAt: listings.createdAt, year: listings.year, mileageKm: listings.mileageKm, fuel: listings.fuel, gearbox: listings.gearbox,
-        body: listings.body, vehicleClass: listings.vehicleClass, source: listings.source, externalUrl: listings.externalUrl, propertyType: listings.propertyType, rooms: listings.rooms, areaM2: listings.areaM2, landM2: listings.landM2,
+        body: listings.body, vehicleClass: listings.vehicleClass, color: listings.color, groupKey: listings.groupKey, source: listings.source, externalUrl: listings.externalUrl, propertyType: listings.propertyType, rooms: listings.rooms, areaM2: listings.areaM2, landM2: listings.landM2,
         place: places.name, region: regions.name, regionKind: regions.kind, thumbKey: coverThumb, photoCount,
       })
       .from(listings)

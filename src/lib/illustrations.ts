@@ -2,6 +2,8 @@
 // Visas ir nemainīgas SVG virknes; krāsas nāk no CSS mainīgajiem --ill-*, tāpēc strādā abās tēmās.
 // Lieto ar <Ill svg={...} />, sk. src/components/ill.tsx.
 
+import { COLOR_HEX, MODEL_BODY_HINTS, WAGON_WORDS } from "./constants";
+
 type Shape = { b: string; g: string[]; w: number[]; r: number; cy: number; x?: string };
 
 const CAR_SHAPES: Record<string, Shape> = {
@@ -21,10 +23,16 @@ Object.assign(CAR_SHAPES,{
   "Kravas":{b:"M8,82 L8,40 C8,32 12,28 20,28 L28,10 C29,6 33,4 38,4 L64,4 C68,4 70,8 70,12 L70,82 Z M76,2 L234,2 L234,72 L76,72 Z",g:["M24,30 L32,12 C33,10 35,9 38,9 L62,9 L62,30 Z"],w:[40,170,202],r:16,cy:84,x:"M70,76 L234,76"}
 });
 
-export function carIll(body?: string | null) {
+/** Krāsa ilustrācijai: tikai mūsu pašu hex vērtības (nekad lietotāja teksts SVG iekšā). */
+const fillFor = (color?: string | null) => {
+  const hex = color ? COLOR_HEX[color as keyof typeof COLOR_HEX] : undefined;
+  return hex ? ` style="fill:${hex}"` : "";
+};
+
+export function carIll(body?: string | null, color?: string | null) {
   const s = CAR_SHAPES[body ?? ""] ?? CAR_SHAPES["Sedans"];
   const wheels = s.w.map((x) => `<circle class="it" cx="${x}" cy="${s.cy}" r="${s.r}"/><circle class="ir" cx="${x}" cy="${s.cy}" r="${s.r * 0.58}"/><circle class="it" cx="${x}" cy="${s.cy}" r="${s.r * 0.18}"/>`).join("");
-  return `<svg class="ill" viewBox="0 0 240 104" aria-hidden="true"><ellipse class="ish" cx="122" cy="${s.cy + s.r - 1}" rx="112" ry="5"/><path class="ib" d="${s.b}"/>${s.g.map((d) => `<path class="ig" d="${d}"/>`).join("")}${s.x ? `<path class="il" d="${s.x}"/>` : ""}<path class="il" d="M18,${s.cy - 12} l10,0"/>${wheels}</svg>`;
+  return `<svg class="ill" viewBox="0 0 240 104" aria-hidden="true"><ellipse class="ish" cx="122" cy="${s.cy + s.r - 1}" rx="112" ry="5"/><path class="ib" d="${s.b}"${fillFor(color)}/>${s.g.map((d) => `<path class="ig" d="${d}"/>`).join("")}${s.x ? `<path class="il" d="${s.x}"/>` : ""}<path class="il" d="M18,${s.cy - 12} l10,0"/>${wheels}</svg>`;
 }
 
 const HOME_ILL: Record<string, string> = {
@@ -45,23 +53,23 @@ export function homeIll(t?: string | null) {
   return `<svg class="ill" viewBox="0 0 240 104" aria-hidden="true"><path class="hgr0" d="M8,94 L232,94"/>${HOME_ILL[k]}</svg>`;
 }
 
-export function motoIll() {
+export function motoIll(color?: string | null) {
   const w = (x: number) =>`<circle class="it" cx="${x}" cy="76" r="21"/><circle class="ir" cx="${x}" cy="76" r="13"/><circle class="it" cx="${x}" cy="76" r="3.5"/>`;
-  return `<svg class="ill" viewBox="0 0 240 104" aria-hidden="true"><ellipse class="ish" cx="120" cy="97" rx="96" ry="4"/>${w(60)}${w(182)}<path class="il" style="stroke-width:5" d="M60,76 L84,34 M182,76 L150,50 L104,54"/><rect class="ig" x="98" y="52" width="38" height="22" rx="5"/><path class="ib" d="M88,44 C94,30 118,27 134,33 L150,40 L180,40 C186,40 190,44 188,49 L148,52 L98,54 Z"/><path class="il" style="stroke-width:4" d="M78,30 L96,24"/><circle class="ig" cx="84" cy="36" r="5"/><path class="il" style="stroke-width:4" d="M124,72 L176,64"/></svg>`}
+  return `<svg class="ill" viewBox="0 0 240 104" aria-hidden="true"><ellipse class="ish" cx="120" cy="97" rx="96" ry="4"/>${w(60)}${w(182)}<path class="il" style="stroke-width:5" d="M60,76 L84,34 M182,76 L150,50 L104,54"/><rect class="ig" x="98" y="52" width="38" height="22" rx="5"/><path class="ib"${fillFor(color)} d="M88,44 C94,30 118,27 134,33 L150,40 L180,40 C186,40 190,44 188,49 L148,52 L98,54 Z"/><path class="il" style="stroke-width:4" d="M78,30 L96,24"/><circle class="ig" cx="84" cy="36" r="5"/><path class="il" style="stroke-width:4" d="M124,72 L176,64"/></svg>`}
 
 /** Ilustrācija transportlīdzeklim pēc veida un virsbūves. */
-export function vehicleIll(vehicleClass?: string | null, body?: string | null) {
+export function vehicleIll(vehicleClass?: string | null, body?: string | null, color?: string | null) {
   const vc = vehicleClass || "car";
-  if (vc === "moto") return motoIll();
-  if (vc === "camper") return carIll(body === "Kemperfurgons" ? "Mikroautobuss" : "Kemperis");
-  if (vc === "van") return carIll(body === "Pasažieru" || body === "Kombi" ? "Mikroautobuss" : "Furgons");
-  if (vc === "truck") return carIll("Kravas");
-  return carIll(body);
+  if (vc === "moto") return motoIll(color);
+  if (vc === "camper") return carIll(body === "Kemperfurgons" ? "Mikroautobuss" : "Kemperis", color);
+  if (vc === "van") return carIll(body === "Pasažieru" || body === "Kombi" ? "Mikroautobuss" : "Furgons", color);
+  if (vc === "truck") return carIll("Kravas", color);
+  return carIll(body, color);
 }
 
 /** Ilustrācija jebkuram sludinājumam. */
-export function listingIll(l: { kind: string; vehicleClass?: string | null; body?: string | null; propertyType?: string | null }) {
-  return l.kind === "vehicle" ? vehicleIll(l.vehicleClass, l.body) : homeIll(l.propertyType);
+export function listingIll(l: { kind: string; vehicleClass?: string | null; body?: string | null; color?: string | null; propertyType?: string | null }) {
+  return l.kind === "vehicle" ? vehicleIll(l.vehicleClass, l.body, l.color) : homeIll(l.propertyType);
 }
 
 const VC_ICON: Record<string, string> = {
@@ -78,3 +86,15 @@ export const vcIcon = (vc: string) => `<svg viewBox="0 0 48 28" aria-hidden="tru
 /** Josla auto sadaļā (virsbūves ar ilustrācijām) un īpašumu sadaļā (veidi). */
 export const CAR_STRIP = ["Sedans", "Universāls", "Hečbeks", "Apvidus", "Kupeja", "Kabriolets", "Minivens", "Pikaps", "Mikroautobuss"] as const;
 export const HOME_STRIP = ["Dzīvoklis", "Māja", "Vasarnīca", "Zeme", "Mežs", "Birojs", "Tirdzniecības telpas", "Noliktava", "Garāža"] as const;
+
+/** Virsbūve pēc modeļa nosaukuma (ārējiem sludinājumiem); null, ja nevar noteikt. */
+export function inferBody(model?: string | null): string | null {
+  if (!model) return null;
+  const words = model.toLowerCase().split(/[\s/()-]+/);
+  if (words.some((w) => (WAGON_WORDS as readonly string[]).includes(w))) return "Universāls";
+  const key = model.toLowerCase().replace(/[\s\-().]/g, "");
+  for (const [body, list] of Object.entries(MODEL_BODY_HINTS)) {
+    if (list.some((m) => key === m.replace(/[\s-]/g, "") || (m.length >= 3 && key.startsWith(m.replace(/[\s-]/g, ""))))) return body;
+  }
+  return null;
+}
