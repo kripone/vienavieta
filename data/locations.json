@@ -1,0 +1,1425 @@
+[
+ {
+  "name": "Rīga",
+  "kind": "city",
+  "places": [
+   {
+    "name": "Vecrīga",
+    "lat": 56.948,
+    "lon": 24.108
+   },
+   {
+    "name": "Centrs",
+    "lat": 56.955,
+    "lon": 24.115
+   },
+   {
+    "name": "Avoti",
+    "lat": 56.947,
+    "lon": 24.14
+   },
+   {
+    "name": "Grīziņkalns",
+    "lat": 56.958,
+    "lon": 24.145
+   },
+   {
+    "name": "Brasa",
+    "lat": 56.968,
+    "lon": 24.13
+   },
+   {
+    "name": "Skanste",
+    "lat": 56.968,
+    "lon": 24.12
+   },
+   {
+    "name": "Teika",
+    "lat": 56.975,
+    "lon": 24.18
+   },
+   {
+    "name": "Purvciems",
+    "lat": 56.96,
+    "lon": 24.2
+   },
+   {
+    "name": "Dreiliņi",
+    "lat": 56.955,
+    "lon": 24.25
+   },
+   {
+    "name": "Pļavnieki",
+    "lat": 56.94,
+    "lon": 24.2
+   },
+   {
+    "name": "Dārzciems",
+    "lat": 56.94,
+    "lon": 24.19
+   },
+   {
+    "name": "Šķirotava",
+    "lat": 56.935,
+    "lon": 24.23
+   },
+   {
+    "name": "Ķengarags",
+    "lat": 56.915,
+    "lon": 24.18
+   },
+   {
+    "name": "Rumbula",
+    "lat": 56.895,
+    "lon": 24.22
+   },
+   {
+    "name": "Maskavas forštate",
+    "lat": 56.935,
+    "lon": 24.14
+   },
+   {
+    "name": "Katlakalns",
+    "lat": 56.9,
+    "lon": 24.15
+   },
+   {
+    "name": "Jugla",
+    "lat": 56.985,
+    "lon": 24.24
+   },
+   {
+    "name": "Mežciems",
+    "lat": 56.975,
+    "lon": 24.23
+   },
+   {
+    "name": "Berģi",
+    "lat": 56.99,
+    "lon": 24.29
+   },
+   {
+    "name": "Čiekurkalns",
+    "lat": 56.985,
+    "lon": 24.15
+   },
+   {
+    "name": "Mežaparks",
+    "lat": 57.0,
+    "lon": 24.15
+   },
+   {
+    "name": "Sarkandaugava",
+    "lat": 56.99,
+    "lon": 24.12
+   },
+   {
+    "name": "Mīlgrāvis",
+    "lat": 57.02,
+    "lon": 24.1
+   },
+   {
+    "name": "Vecmīlgrāvis",
+    "lat": 57.035,
+    "lon": 24.11
+   },
+   {
+    "name": "Jaunciems",
+    "lat": 57.04,
+    "lon": 24.18
+   },
+   {
+    "name": "Vecāķi",
+    "lat": 57.07,
+    "lon": 24.13
+   },
+   {
+    "name": "Bolderāja",
+    "lat": 57.03,
+    "lon": 24.02
+   },
+   {
+    "name": "Iļģuciems",
+    "lat": 56.96,
+    "lon": 24.05
+   },
+   {
+    "name": "Ķīpsala",
+    "lat": 56.955,
+    "lon": 24.085
+   },
+   {
+    "name": "Āgenskalns",
+    "lat": 56.94,
+    "lon": 24.07
+   },
+   {
+    "name": "Torņakalns",
+    "lat": 56.93,
+    "lon": 24.08
+   },
+   {
+    "name": "Zasulauks",
+    "lat": 56.945,
+    "lon": 24.04
+   },
+   {
+    "name": "Imanta",
+    "lat": 56.95,
+    "lon": 23.99
+   },
+   {
+    "name": "Zolitūde",
+    "lat": 56.94,
+    "lon": 24.0
+   },
+   {
+    "name": "Šampēteris",
+    "lat": 56.925,
+    "lon": 24.03
+   },
+   {
+    "name": "Bieriņi",
+    "lat": 56.91,
+    "lon": 24.06
+   },
+   {
+    "name": "Ziepniekkalns",
+    "lat": 56.9,
+    "lon": 24.09
+   }
+  ]
+ },
+ {
+  "name": "Jūrmala",
+  "kind": "city",
+  "places": [
+   {
+    "name": "Majori",
+    "lat": 56.97,
+    "lon": 23.805
+   },
+   {
+    "name": "Dzintari",
+    "lat": 56.975,
+    "lon": 23.82
+   },
+   {
+    "name": "Bulduri",
+    "lat": 56.98,
+    "lon": 23.85
+   },
+   {
+    "name": "Lielupe",
+    "lat": 56.99,
+    "lon": 23.88
+   },
+   {
+    "name": "Dubulti",
+    "lat": 56.97,
+    "lon": 23.78
+   },
+   {
+    "name": "Jaundubulti",
+    "lat": 56.968,
+    "lon": 23.765
+   },
+   {
+    "name": "Pumpuri",
+    "lat": 56.965,
+    "lon": 23.73
+   },
+   {
+    "name": "Melluži",
+    "lat": 56.962,
+    "lon": 23.72
+   },
+   {
+    "name": "Asari",
+    "lat": 56.96,
+    "lon": 23.7
+   },
+   {
+    "name": "Vaivari",
+    "lat": 56.96,
+    "lon": 23.67
+   },
+   {
+    "name": "Kauguri",
+    "lat": 56.97,
+    "lon": 23.64
+   },
+   {
+    "name": "Sloka",
+    "lat": 56.95,
+    "lon": 23.62
+   },
+   {
+    "name": "Jaunķemeri",
+    "lat": 56.98,
+    "lon": 23.5
+   },
+   {
+    "name": "Ķemeri",
+    "lat": 56.95,
+    "lon": 23.48
+   }
+  ]
+ },
+ {
+  "name": "Daugavpils",
+  "kind": "city",
+  "places": [
+   {
+    "name": "Centrs",
+    "lat": 55.875,
+    "lon": 26.53
+   },
+   {
+    "name": "Jaunbūve",
+    "lat": 55.89,
+    "lon": 26.56
+   },
+   {
+    "name": "Ķīmija",
+    "lat": 55.89,
+    "lon": 26.6
+   },
+   {
+    "name": "Gajoks",
+    "lat": 55.885,
+    "lon": 26.51
+   },
+   {
+    "name": "Grīva",
+    "lat": 55.85,
+    "lon": 26.5
+   },
+   {
+    "name": "Ruģeļi",
+    "lat": 55.905,
+    "lon": 26.62
+   }
+  ]
+ },
+ {
+  "name": "Jelgava",
+  "kind": "city",
+  "places": [
+   {
+    "name": "Centrs",
+    "lat": 56.65,
+    "lon": 23.72
+   },
+   {
+    "name": "Pārlielupe",
+    "lat": 56.66,
+    "lon": 23.75
+   },
+   {
+    "name": "Miezīte",
+    "lat": 56.63,
+    "lon": 23.7
+   }
+  ]
+ },
+ {
+  "name": "Liepāja",
+  "kind": "city",
+  "places": [
+   {
+    "name": "Centrs",
+    "lat": 56.51,
+    "lon": 21.01
+   },
+   {
+    "name": "Jaunliepāja",
+    "lat": 56.5,
+    "lon": 21.02
+   },
+   {
+    "name": "Ezerkrasts",
+    "lat": 56.52,
+    "lon": 21.05
+   },
+   {
+    "name": "Zaļā birzs",
+    "lat": 56.53,
+    "lon": 21.0
+   },
+   {
+    "name": "Karosta",
+    "lat": 56.55,
+    "lon": 21.02
+   },
+   {
+    "name": "Dienvidrietumi",
+    "lat": 56.49,
+    "lon": 21.02
+   }
+  ]
+ },
+ {
+  "name": "Rēzekne",
+  "kind": "city",
+  "places": [
+   {
+    "name": "Centrs",
+    "lat": 56.51,
+    "lon": 27.33
+   },
+   {
+    "name": "Ziemeļu rajons",
+    "lat": 56.525,
+    "lon": 27.33
+   },
+   {
+    "name": "Dienvidu rajons",
+    "lat": 56.495,
+    "lon": 27.32
+   }
+  ]
+ },
+ {
+  "name": "Ventspils",
+  "kind": "city",
+  "places": [
+   {
+    "name": "Centrs",
+    "lat": 57.39,
+    "lon": 21.57
+   },
+   {
+    "name": "Pārventa",
+    "lat": 57.4,
+    "lon": 21.6
+   },
+   {
+    "name": "Ostgals",
+    "lat": 57.4,
+    "lon": 21.55
+   }
+  ]
+ },
+ {
+  "name": "Ādažu novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Ādaži",
+    "lat": 57.07,
+    "lon": 24.33
+   },
+   {
+    "name": "Carnikava",
+    "lat": 57.13,
+    "lon": 24.27
+   },
+   {
+    "name": "Kadaga",
+    "lat": 57.11,
+    "lon": 24.34
+   },
+   {
+    "name": "Garciems",
+    "lat": 57.1,
+    "lon": 24.2
+   },
+   {
+    "name": "Gauja",
+    "lat": 57.15,
+    "lon": 24.28
+   }
+  ]
+ },
+ {
+  "name": "Aizkraukles novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Aizkraukle",
+    "lat": 56.6,
+    "lon": 25.25
+   },
+   {
+    "name": "Koknese",
+    "lat": 56.65,
+    "lon": 25.43
+   },
+   {
+    "name": "Jaunjelgava",
+    "lat": 56.61,
+    "lon": 25.08
+   },
+   {
+    "name": "Skrīveri",
+    "lat": 56.65,
+    "lon": 25.12
+   },
+   {
+    "name": "Pļaviņas",
+    "lat": 56.62,
+    "lon": 25.72
+   }
+  ]
+ },
+ {
+  "name": "Alūksnes novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Alūksne",
+    "lat": 57.42,
+    "lon": 27.05
+   },
+   {
+    "name": "Jaunlaicene",
+    "lat": 57.6,
+    "lon": 27.3
+   },
+   {
+    "name": "Zeltiņi",
+    "lat": 57.37,
+    "lon": 26.9
+   }
+  ]
+ },
+ {
+  "name": "Augšdaugavas novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Ilūkste",
+    "lat": 55.98,
+    "lon": 26.3
+   },
+   {
+    "name": "Subate",
+    "lat": 56.0,
+    "lon": 25.91
+   },
+   {
+    "name": "Kalkūni",
+    "lat": 55.85,
+    "lon": 26.58
+   },
+   {
+    "name": "Naujene",
+    "lat": 55.92,
+    "lon": 26.67
+   },
+   {
+    "name": "Līksna",
+    "lat": 56.03,
+    "lon": 26.38
+   }
+  ]
+ },
+ {
+  "name": "Balvu novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Balvi",
+    "lat": 57.13,
+    "lon": 27.26
+   },
+   {
+    "name": "Viļaka",
+    "lat": 57.18,
+    "lon": 27.67
+   },
+   {
+    "name": "Rugāji",
+    "lat": 57.0,
+    "lon": 27.13
+   }
+  ]
+ },
+ {
+  "name": "Bauskas novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Bauska",
+    "lat": 56.41,
+    "lon": 24.19
+   },
+   {
+    "name": "Iecava",
+    "lat": 56.6,
+    "lon": 24.2
+   },
+   {
+    "name": "Vecumnieki",
+    "lat": 56.61,
+    "lon": 24.52
+   },
+   {
+    "name": "Rundāle",
+    "lat": 56.41,
+    "lon": 24.03
+   },
+   {
+    "name": "Code",
+    "lat": 56.5,
+    "lon": 24.12
+   }
+  ]
+ },
+ {
+  "name": "Cēsu novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Cēsis",
+    "lat": 57.31,
+    "lon": 25.27
+   },
+   {
+    "name": "Līgatne",
+    "lat": 57.23,
+    "lon": 25.04
+   },
+   {
+    "name": "Priekuļi",
+    "lat": 57.32,
+    "lon": 25.36
+   },
+   {
+    "name": "Jaunpiebalga",
+    "lat": 57.18,
+    "lon": 25.98
+   },
+   {
+    "name": "Vecpiebalga",
+    "lat": 57.06,
+    "lon": 25.81
+   },
+   {
+    "name": "Rauna",
+    "lat": 57.33,
+    "lon": 25.61
+   }
+  ]
+ },
+ {
+  "name": "Dienvidkurzemes novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Grobiņa",
+    "lat": 56.54,
+    "lon": 21.17
+   },
+   {
+    "name": "Aizpute",
+    "lat": 56.72,
+    "lon": 21.6
+   },
+   {
+    "name": "Pāvilosta",
+    "lat": 56.89,
+    "lon": 21.18
+   },
+   {
+    "name": "Durbe",
+    "lat": 56.59,
+    "lon": 21.37
+   },
+   {
+    "name": "Priekule",
+    "lat": 56.45,
+    "lon": 21.59
+   },
+   {
+    "name": "Vaiņode",
+    "lat": 56.42,
+    "lon": 21.85
+   },
+   {
+    "name": "Nīca",
+    "lat": 56.35,
+    "lon": 21.06
+   },
+   {
+    "name": "Rucava",
+    "lat": 56.16,
+    "lon": 21.17
+   },
+   {
+    "name": "Medze",
+    "lat": 56.44,
+    "lon": 21.1
+   }
+  ]
+ },
+ {
+  "name": "Dobeles novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Dobele",
+    "lat": 56.63,
+    "lon": 23.28
+   },
+   {
+    "name": "Auce",
+    "lat": 56.46,
+    "lon": 22.9
+   },
+   {
+    "name": "Tērvete",
+    "lat": 56.48,
+    "lon": 23.38
+   },
+   {
+    "name": "Bērze",
+    "lat": 56.62,
+    "lon": 23.43
+   }
+  ]
+ },
+ {
+  "name": "Gulbenes novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Gulbene",
+    "lat": 57.18,
+    "lon": 26.75
+   },
+   {
+    "name": "Stāmeriena",
+    "lat": 57.22,
+    "lon": 26.89
+   },
+   {
+    "name": "Lizums",
+    "lat": 57.17,
+    "lon": 26.33
+   }
+  ]
+ },
+ {
+  "name": "Jelgavas novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Ozolnieki",
+    "lat": 56.69,
+    "lon": 23.79
+   },
+   {
+    "name": "Kalnciems",
+    "lat": 56.8,
+    "lon": 23.6
+   },
+   {
+    "name": "Valgunde",
+    "lat": 56.76,
+    "lon": 23.66
+   },
+   {
+    "name": "Eleja",
+    "lat": 56.43,
+    "lon": 23.69
+   },
+   {
+    "name": "Svēte",
+    "lat": 56.6,
+    "lon": 23.65
+   }
+  ]
+ },
+ {
+  "name": "Jēkabpils novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Jēkabpils",
+    "lat": 56.5,
+    "lon": 25.86
+   },
+   {
+    "name": "Krustpils",
+    "lat": 56.51,
+    "lon": 25.88
+   },
+   {
+    "name": "Viesīte",
+    "lat": 56.35,
+    "lon": 25.55
+   },
+   {
+    "name": "Aknīste",
+    "lat": 56.16,
+    "lon": 25.74
+   },
+   {
+    "name": "Sala",
+    "lat": 56.52,
+    "lon": 25.74
+   }
+  ]
+ },
+ {
+  "name": "Krāslavas novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Krāslava",
+    "lat": 55.9,
+    "lon": 27.17
+   },
+   {
+    "name": "Dagda",
+    "lat": 56.09,
+    "lon": 27.53
+   },
+   {
+    "name": "Indra",
+    "lat": 55.88,
+    "lon": 27.5
+   }
+  ]
+ },
+ {
+  "name": "Kuldīgas novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Kuldīga",
+    "lat": 56.97,
+    "lon": 21.96
+   },
+   {
+    "name": "Skrunda",
+    "lat": 56.68,
+    "lon": 22.02
+   },
+   {
+    "name": "Alsunga",
+    "lat": 56.98,
+    "lon": 21.56
+   },
+   {
+    "name": "Rudbārži",
+    "lat": 56.86,
+    "lon": 21.74
+   }
+  ]
+ },
+ {
+  "name": "Ķekavas novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Ķekava",
+    "lat": 56.83,
+    "lon": 24.23
+   },
+   {
+    "name": "Baloži",
+    "lat": 56.87,
+    "lon": 24.12
+   },
+   {
+    "name": "Valdlauči",
+    "lat": 56.89,
+    "lon": 24.13
+   },
+   {
+    "name": "Katlakalns",
+    "lat": 56.88,
+    "lon": 24.17
+   },
+   {
+    "name": "Daugmale",
+    "lat": 56.79,
+    "lon": 24.43
+   }
+  ]
+ },
+ {
+  "name": "Limbažu novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Limbaži",
+    "lat": 57.51,
+    "lon": 24.71
+   },
+   {
+    "name": "Salacgrīva",
+    "lat": 57.75,
+    "lon": 24.36
+   },
+   {
+    "name": "Ainaži",
+    "lat": 57.86,
+    "lon": 24.36
+   },
+   {
+    "name": "Aloja",
+    "lat": 57.77,
+    "lon": 24.88
+   },
+   {
+    "name": "Lēdurga",
+    "lat": 57.32,
+    "lon": 24.75
+   }
+  ]
+ },
+ {
+  "name": "Līvānu novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Līvāni",
+    "lat": 56.35,
+    "lon": 26.17
+   },
+   {
+    "name": "Jersika",
+    "lat": 56.24,
+    "lon": 26.24
+   }
+  ]
+ },
+ {
+  "name": "Ludzas novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Ludza",
+    "lat": 56.55,
+    "lon": 27.72
+   },
+   {
+    "name": "Kārsava",
+    "lat": 56.78,
+    "lon": 27.69
+   },
+   {
+    "name": "Zilupe",
+    "lat": 56.39,
+    "lon": 28.12
+   }
+  ]
+ },
+ {
+  "name": "Madonas novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Madona",
+    "lat": 56.85,
+    "lon": 26.22
+   },
+   {
+    "name": "Cesvaine",
+    "lat": 56.97,
+    "lon": 26.31
+   },
+   {
+    "name": "Lubāna",
+    "lat": 56.9,
+    "lon": 26.72
+   },
+   {
+    "name": "Ērgļi",
+    "lat": 56.9,
+    "lon": 25.64
+   },
+   {
+    "name": "Barkava",
+    "lat": 56.72,
+    "lon": 26.6
+   }
+  ]
+ },
+ {
+  "name": "Mārupes novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Mārupe",
+    "lat": 56.905,
+    "lon": 24.0
+   },
+   {
+    "name": "Tīraine",
+    "lat": 56.92,
+    "lon": 24.02
+   },
+   {
+    "name": "Jaunmārupe",
+    "lat": 56.88,
+    "lon": 23.94
+   },
+   {
+    "name": "Babīte",
+    "lat": 56.94,
+    "lon": 23.93
+   },
+   {
+    "name": "Piņķi",
+    "lat": 56.94,
+    "lon": 23.91
+   },
+   {
+    "name": "Spilve",
+    "lat": 56.98,
+    "lon": 23.98
+   }
+  ]
+ },
+ {
+  "name": "Ogres novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Ogre",
+    "lat": 56.82,
+    "lon": 24.6
+   },
+   {
+    "name": "Ikšķile",
+    "lat": 56.83,
+    "lon": 24.5
+   },
+   {
+    "name": "Ķegums",
+    "lat": 56.74,
+    "lon": 24.72
+   },
+   {
+    "name": "Lielvārde",
+    "lat": 56.72,
+    "lon": 24.82
+   },
+   {
+    "name": "Ciemupe",
+    "lat": 56.86,
+    "lon": 24.65
+   },
+   {
+    "name": "Madliena",
+    "lat": 56.85,
+    "lon": 25.12
+   }
+  ]
+ },
+ {
+  "name": "Olaines novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Olaine",
+    "lat": 56.79,
+    "lon": 23.94
+   },
+   {
+    "name": "Jaunolaine",
+    "lat": 56.77,
+    "lon": 23.93
+   },
+   {
+    "name": "Pārolaine",
+    "lat": 56.79,
+    "lon": 24.0
+   }
+  ]
+ },
+ {
+  "name": "Preiļu novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Preiļi",
+    "lat": 56.29,
+    "lon": 26.72
+   },
+   {
+    "name": "Riebiņi",
+    "lat": 56.34,
+    "lon": 26.8
+   },
+   {
+    "name": "Aglona",
+    "lat": 56.13,
+    "lon": 27.0
+   }
+  ]
+ },
+ {
+  "name": "Rēzeknes novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Viļāni",
+    "lat": 56.55,
+    "lon": 26.92
+   },
+   {
+    "name": "Malta",
+    "lat": 56.35,
+    "lon": 27.17
+   },
+   {
+    "name": "Kaunata",
+    "lat": 56.33,
+    "lon": 27.55
+   },
+   {
+    "name": "Lūznava",
+    "lat": 56.37,
+    "lon": 27.25
+   }
+  ]
+ },
+ {
+  "name": "Ropažu novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Ropaži",
+    "lat": 56.97,
+    "lon": 24.63
+   },
+   {
+    "name": "Vangaži",
+    "lat": 57.09,
+    "lon": 24.54
+   },
+   {
+    "name": "Garkalne",
+    "lat": 57.04,
+    "lon": 24.38
+   },
+   {
+    "name": "Upeslejas",
+    "lat": 57.0,
+    "lon": 24.43
+   },
+   {
+    "name": "Zaķumuiža",
+    "lat": 56.96,
+    "lon": 24.55
+   },
+   {
+    "name": "Ulbroka",
+    "lat": 56.94,
+    "lon": 24.29
+   },
+   {
+    "name": "Baltezers",
+    "lat": 57.03,
+    "lon": 24.33
+   }
+  ]
+ },
+ {
+  "name": "Salaspils novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Salaspils",
+    "lat": 56.86,
+    "lon": 24.35
+   },
+   {
+    "name": "Saulkalne",
+    "lat": 56.85,
+    "lon": 24.42
+   },
+   {
+    "name": "Acone",
+    "lat": 56.83,
+    "lon": 24.3
+   }
+  ]
+ },
+ {
+  "name": "Saldus novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Saldus",
+    "lat": 56.67,
+    "lon": 22.49
+   },
+   {
+    "name": "Brocēni",
+    "lat": 56.68,
+    "lon": 22.56
+   },
+   {
+    "name": "Kursīši",
+    "lat": 56.5,
+    "lon": 22.38
+   }
+  ]
+ },
+ {
+  "name": "Saulkrastu novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Saulkrasti",
+    "lat": 57.26,
+    "lon": 24.41
+   },
+   {
+    "name": "Zvejniekciems",
+    "lat": 57.3,
+    "lon": 24.42
+   },
+   {
+    "name": "Lilaste",
+    "lat": 57.18,
+    "lon": 24.35
+   }
+  ]
+ },
+ {
+  "name": "Siguldas novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Sigulda",
+    "lat": 57.15,
+    "lon": 24.86
+   },
+   {
+    "name": "Inčukalns",
+    "lat": 57.1,
+    "lon": 24.69
+   },
+   {
+    "name": "Allaži",
+    "lat": 57.2,
+    "lon": 24.81
+   },
+   {
+    "name": "Krimulda",
+    "lat": 57.17,
+    "lon": 24.82
+   },
+   {
+    "name": "Mālpils",
+    "lat": 57.01,
+    "lon": 24.95
+   },
+   {
+    "name": "More",
+    "lat": 57.03,
+    "lon": 25.07
+   }
+  ]
+ },
+ {
+  "name": "Smiltenes novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Smiltene",
+    "lat": 57.42,
+    "lon": 25.9
+   },
+   {
+    "name": "Ape",
+    "lat": 57.54,
+    "lon": 26.69
+   },
+   {
+    "name": "Palsmane",
+    "lat": 57.42,
+    "lon": 26.06
+   }
+  ]
+ },
+ {
+  "name": "Talsu novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Talsi",
+    "lat": 57.25,
+    "lon": 22.59
+   },
+   {
+    "name": "Sabile",
+    "lat": 57.05,
+    "lon": 22.57
+   },
+   {
+    "name": "Stende",
+    "lat": 57.15,
+    "lon": 22.53
+   },
+   {
+    "name": "Valdemārpils",
+    "lat": 57.37,
+    "lon": 22.59
+   },
+   {
+    "name": "Roja",
+    "lat": 57.5,
+    "lon": 22.8
+   },
+   {
+    "name": "Mērsrags",
+    "lat": 57.33,
+    "lon": 23.12
+   },
+   {
+    "name": "Dundaga",
+    "lat": 57.51,
+    "lon": 22.35
+   },
+   {
+    "name": "Kolka",
+    "lat": 57.75,
+    "lon": 22.59
+   }
+  ]
+ },
+ {
+  "name": "Tukuma novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Tukums",
+    "lat": 56.97,
+    "lon": 23.15
+   },
+   {
+    "name": "Kandava",
+    "lat": 57.04,
+    "lon": 22.78
+   },
+   {
+    "name": "Engure",
+    "lat": 57.16,
+    "lon": 23.22
+   },
+   {
+    "name": "Klapkalnciems",
+    "lat": 57.06,
+    "lon": 23.3
+   },
+   {
+    "name": "Jaunpils",
+    "lat": 56.73,
+    "lon": 23.02
+   },
+   {
+    "name": "Smārde",
+    "lat": 56.95,
+    "lon": 23.33
+   }
+  ]
+ },
+ {
+  "name": "Valkas novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Valka",
+    "lat": 57.77,
+    "lon": 26.02
+   },
+   {
+    "name": "Ērģeme",
+    "lat": 57.83,
+    "lon": 26.0
+   }
+  ]
+ },
+ {
+  "name": "Valmieras novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Valmiera",
+    "lat": 57.54,
+    "lon": 25.42
+   },
+   {
+    "name": "Kocēni",
+    "lat": 57.52,
+    "lon": 25.34
+   },
+   {
+    "name": "Burtnieki",
+    "lat": 57.7,
+    "lon": 25.27
+   },
+   {
+    "name": "Rūjiena",
+    "lat": 57.9,
+    "lon": 25.33
+   },
+   {
+    "name": "Mazsalaca",
+    "lat": 57.86,
+    "lon": 25.05
+   },
+   {
+    "name": "Naukšēni",
+    "lat": 57.88,
+    "lon": 25.45
+   },
+   {
+    "name": "Strenči",
+    "lat": 57.62,
+    "lon": 25.69
+   },
+   {
+    "name": "Seda",
+    "lat": 57.65,
+    "lon": 25.75
+   }
+  ]
+ },
+ {
+  "name": "Varakļānu novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Varakļāni",
+    "lat": 56.61,
+    "lon": 26.75
+   }
+  ]
+ },
+ {
+  "name": "Ventspils novads",
+  "kind": "municipality",
+  "places": [
+   {
+    "name": "Piltene",
+    "lat": 57.22,
+    "lon": 21.67
+   },
+   {
+    "name": "Ugāle",
+    "lat": 57.27,
+    "lon": 21.99
+   },
+   {
+    "name": "Užava",
+    "lat": 57.22,
+    "lon": 21.43
+   },
+   {
+    "name": "Tārgale",
+    "lat": 57.48,
+    "lon": 21.6
+   }
+  ]
+ }
+]
