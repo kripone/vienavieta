@@ -26,6 +26,7 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 ## 4. Meklēšana ✅ (izņemot cenas novērtējumu)
 - [x] Filtri ar URL parametriem (dalāmas saites): visi transporta un īpašuma lauki, vieta, pārdevējs, teksts
 - [x] Karte ar zonas apvilkšanu (Leaflet; ielas un satelīts no .env, sk. docs/MAPS.md)
+- [x] Google karte un satelīts (Map Tiles API, NEXT_PUBLIC_GOOGLE_MAPS_KEY); rezerve OpenStreetMap
 - [x] Kārtošana, lapas, TOP sludinājumi pirmie
 - [ ] Cenas novērtējums pret līdzīgiem sludinājumiem
 

@@ -42,6 +42,9 @@ services:
       - key: EMAIL_FROM
         sync: false
       # Bildes: Cloudflare R2 ("s3"); bez R2 atslēgām var izmantot "db" (sk. docs/DEPLOY.md)
+      # Google karte (Map Tiles API), sk. docs/MAPS.md
+      - key: NEXT_PUBLIC_GOOGLE_MAPS_KEY
+        sync: false
       - key: STORAGE_DRIVER
         value: s3
       - key: S3_BUCKET
