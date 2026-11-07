@@ -190,3 +190,15 @@ export const SS_DETAILS_V2_AT = new Date("2026-11-07T21:45:00Z");
 
 /** Salonu sludinājumu plūsmas (src/lib/importers/dealer-feed.ts). */
 export const DEALER_FEED = { MAX_FEEDS_PER_USER: 3, MAX_ITEMS: 1000, MAX_BYTES: 15_000_000, MAX_PHOTOS: 20, EVERY_HOURS: 6 } as const;
+
+/**
+ * Portāla uzturētājs (juridiskās lapas un kājene). null = vēl nav izlemts, lapās rāda "tiks norādīts".
+ * Aizpildīt pirms publiskas palaišanas.
+ */
+export const OPERATOR: { name: string | null; regNo: string | null; address: string | null; email: string | null; since: string } = {
+  name: null,
+  regNo: null,
+  address: null,
+  email: null,
+  since: "2026-11-07",
+};

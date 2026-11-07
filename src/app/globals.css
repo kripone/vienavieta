@@ -372,3 +372,11 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .features { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px 24px; }
 .features h3 { font-size: 14px; margin: 0 0 4px; color: var(--muted); }
 .features ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; font-size: 14px; }
+
+/* Kājene un juridiskās lapas */
+.foot { border-top: 1px solid var(--line); margin-top: 40px; padding: 20px 0 80px; font-size: 13px; color: var(--muted); }
+.foot .wrap { display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; align-items: center; }
+.foot nav { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.foot a { color: inherit; }
+.legal section { margin-top: 20px; }
+.legal p { line-height: 1.6; }

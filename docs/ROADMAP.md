@@ -80,6 +80,11 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] VZD atzīme dzīvokļu kartītēs („VZD: šajā mājā … €/m²”) un lapa /darijumi (meklēšana pēc adreses)
 - [ ] VZD darījumi mājām un zemei (datu kopas „Darījumi ar zemes vienībām (un būvēm)”)
 
+## Juridiskais
+- [x] Privātuma politika, lietošanas noteikumi (ar DSA kontaktpunktu), lapa „Par mums” ar datu avotiem, kājene; 4 valodās (src/content/legal.ts)
+- [ ] Uzturētāja dati (`OPERATOR` src/lib/constants.ts): nosaukums, reģ. nr., adrese, e-pasts — pirms publiskas palaišanas; tekstus pārskata jurists
+- [x] robots.txt, sitemap.xml
+
 ## Palaišana produkcijā
 - [x] Render Blueprint (render.yaml) un instrukcija docs/DEPLOY.md
 - [x] Testa versija internetā: Render + Cloudflare R2 + Brevo + Google karte

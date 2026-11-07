@@ -15,6 +15,8 @@ import { LangSwitch } from "@/components/lang-switch";
 import { I18nProvider } from "@/i18n/client";
 import { getLocale, getT } from "@/i18n/server";
 import { DICTS } from "@/i18n/dicts";
+import { LEGAL } from "@/content/legal";
+import { OPERATOR } from "@/lib/constants";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
@@ -52,6 +54,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </header>
         {children}
+        <footer className="foot">
+          <div className="wrap">
+            <span>© {new Date().getFullYear()} VienāVietā{OPERATOR.name ? ` · ${OPERATOR.name}` : ""}</span>
+            <nav aria-label={LEGAL[locale].footer.about}>
+              <a href="/par-mums">{LEGAL[locale].footer.about}</a>
+              <a href="/noteikumi">{LEGAL[locale].footer.terms}</a>
+              <a href="/privatums">{LEGAL[locale].footer.privacy}</a>
+              <a href="/par-mums#avoti">{LEGAL[locale].footer.sources}</a>
+            </nav>
+          </div>
+        </footer>
         <CompareBar />
         </I18nProvider>
       </body>
