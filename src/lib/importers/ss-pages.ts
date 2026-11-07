@@ -113,7 +113,8 @@ export async function crawlSection(section: Section, mode: "quick" | "full", fet
     try {
       const html = await fetchHtml(pageUrl(section, n));
       const { rows, lastPage } = parseListPage(html);
-      last = Math.min(last, lastPage);
+      // kopējo lapu skaitu rāda tikai 1. lapa (saite "atpakaļ" uz pēdējo); tālākajās redzams tikai ~10 lapu logs
+      if (n === 1) last = Math.min(last, lastPage);
       res.pages++;
       res.rows += rows.length;
       await saveRows(section, rows, ctx, res);
@@ -134,7 +135,8 @@ export async function crawlSection(section: Section, mode: "quick" | "full", fet
     const quick = await crawlSection(section, "quick", fetchHtml, delayMs);
     res.created += quick.created;
     res.updated += quick.updated;
-    const complete = res.errors.length <= Math.max(2, res.pages * 0.02) && res.pages >= Math.min(last, 1);
+    // dzēšam neredzētos tikai, ja tiešām izietas gandrīz visas lapas un kļūdu maz
+    const complete = Number.isFinite(last) && res.pages >= last * 0.95 && res.errors.length <= Math.max(2, res.pages * 0.02);
     if (complete && Number.isFinite(last)) {
       const sameCategory =
         section.kind === "vehicle" ? eq(listings.vehicleClass, section.vehicleClass) : eq(listings.propertyType, section.propertyType);

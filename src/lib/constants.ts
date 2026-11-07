@@ -139,11 +139,11 @@ export const SS_FEEDS = [
  * Ņemam tikai faktus no sarakstu tabulas un saiti; sludinājuma lapas, bildes un aprakstus neatveram.
  */
 export const SS_SECTIONS = [
-  { key: "ss:cars", url: "https://www.ss.com/lv/transport/cars/", kind: "vehicle", vehicleClass: "car" },
-  { key: "ss:moto", url: "https://www.ss.com/lv/transport/moto-transport/motorcycles/", kind: "vehicle", vehicleClass: "moto" },
-  { key: "ss:flats", url: "https://www.ss.com/lv/real-estate/flats/", kind: "property", propertyType: "Dzīvoklis" },
-  { key: "ss:homes", url: "https://www.ss.com/lv/real-estate/homes-summer-residences/", kind: "property", propertyType: "Māja" },
-  { key: "ss:land", url: "https://www.ss.com/lv/real-estate/plots-and-lands/", kind: "property", propertyType: "Zeme" },
+  { key: "ss2:cars", url: "https://www.ss.com/lv/transport/cars/", kind: "vehicle", vehicleClass: "car" },
+  { key: "ss2:moto", url: "https://www.ss.com/lv/transport/moto-transport/motorcycles/", kind: "vehicle", vehicleClass: "moto" },
+  { key: "ss2:flats", url: "https://www.ss.com/lv/real-estate/flats/", kind: "property", propertyType: "Dzīvoklis" },
+  { key: "ss2:homes", url: "https://www.ss.com/lv/real-estate/homes-summer-residences/", kind: "property", propertyType: "Māja" },
+  { key: "ss2:land", url: "https://www.ss.com/lv/real-estate/plots-and-lands/", kind: "property", propertyType: "Zeme" },
 ] as const;
 /** Pauze starp pieprasījumiem uz ss.com (ms) un ātrās kārtas lapu skaits katrā sadaļā. */
 export const SS_REQUEST_DELAY_MS = 2000;
