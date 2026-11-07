@@ -186,6 +186,17 @@ function conditions(s: SearchParams): SQL[] {
 const coverThumb = sql<string | null>`(select ${listingPhotos.thumbKey} from ${listingPhotos} where ${listingPhotos.listingId} = ${listings.id} order by ${listingPhotos.position} limit 1)`;
 const photoCount = sql<number>`(select count(*)::int from ${listingPhotos} where ${listingPhotos.listingId} = ${listings.id})`;
 
+/** Kopējais skaits nemainās bieži: kešojam 60 s (lēna datubāze). */
+const countCache = new Map<string, { total: number; at: number }>();
+let topCheck = { at: 0, has: false };
+/** Vai ir kāds aktīvs TOP sludinājums (pārbauda reizi minūtē). */
+async function hasTopListings() {
+  if (Date.now() - topCheck.at < 60_000) return topCheck.has;
+  const r = await db.execute(sql`select 1 from listings where top_until > now() and status = 'active' limit 1`).catch(() => ({ rows: [1] }));
+  topCheck = { at: Date.now(), has: r.rows.length > 0 };
+  return topCheck.has;
+}
+
 /** Atrod sludinājumus vienai lapai un kopējo skaitu. */
 export async function searchListings(s: SearchParams) {
   const where = and(...conditions(s));
@@ -228,7 +239,8 @@ export async function searchListings(s: SearchParams) {
     .leftJoin(models, eq(listings.modelId, models.id))
     .leftJoin(users, eq(listings.userId, users.id))
     .where(where)
-    .orderBy(top, ...order, desc(listings.id))
+    // TOP kārtojums tikai, ja kāds TOP vispār ir (citādi izmanto indeksu listings_fresh_idx)
+    .orderBy(...((await hasTopListings()) ? [top] : []), ...order, desc(listings.id))
     .limit(PAGE_SIZE)
     .offset((s.page - 1) * PAGE_SIZE);
   const pageRows = idsQuery.then(async (ids) => {
@@ -237,9 +249,9 @@ export async function searchListings(s: SearchParams) {
     const byId = new Map(full.map((r) => [r.id, r]));
     return ids.map((r) => byId.get(r.id)!).filter(Boolean);
   });
-  const [rows, [{ total }]] = await Promise.all([
-    pageRows,
-    db
+  const countKey = JSON.stringify({ ...s, page: 1, sort: "" });
+  const cached = countCache.get(countKey);
+  const countQuery = cached && cached.at > Date.now() - 60_000 ? Promise.resolve([{ total: cached.total }]) : db
       .select({ total: count() })
       .from(listings)
       .leftJoin(places, eq(listings.placeId, places.id))
@@ -247,8 +259,13 @@ export async function searchListings(s: SearchParams) {
       .leftJoin(makes, eq(listings.makeId, makes.id))
       .leftJoin(models, eq(listings.modelId, models.id))
       .leftJoin(users, eq(listings.userId, users.id))
-      .where(where),
-  ]);
+      .where(where)
+      .then((r) => {
+        countCache.set(countKey, { total: r[0].total, at: Date.now() });
+        if (countCache.size > 500) countCache.delete(countCache.keys().next().value!);
+        return r;
+      });
+  const [rows, [{ total }]] = await Promise.all([pageRows, countQuery]);
   return { rows, total, pages: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
 }
 

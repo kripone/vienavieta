@@ -240,6 +240,9 @@ export const listings = pgTable(
     index("listings_property_idx").on(t.propertyType, t.deal),
     index("listings_user_idx").on(t.userId),
     index("listings_group_idx").on(t.groupKey),
+    // "Jaunākie" kārtojums aktīvajiem (bez pilnas kārtošanas katrā lapā)
+    index("listings_fresh_idx").on(sql`greatest(${t.createdAt}, coalesce(${t.bumpedAt}, ${t.createdAt})) desc`, t.id.desc()).where(sql`${t.status} = 'active'`),
+    index("listings_top_idx").on(t.topUntil).where(sql`${t.topUntil} is not null`),
     uniqueIndex("listings_external_uq").on(t.source, t.externalId),
   ],
 );

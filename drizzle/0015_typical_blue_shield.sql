@@ -1,0 +1,2 @@
+CREATE INDEX "listings_fresh_idx" ON "listings" USING btree (greatest("created_at", coalesce("bumped_at", "created_at")) desc,"id" DESC) WHERE "listings"."status" = 'active';--> statement-breakpoint
+CREATE INDEX "listings_top_idx" ON "listings" USING btree ("top_until") WHERE "listings"."top_until" is not null;
