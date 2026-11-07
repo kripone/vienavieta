@@ -1,10 +1,10 @@
-import { formatNumber, formatPrice, plural } from "@/lib/format";
+import { formatNumber, formatPrice } from "@/lib/format";
 import type { VzdDeal } from "@/lib/vzd";
 
 const fmtDay = (d: string) => new Date(d + "T12:00:00Z").toLocaleDateString("lv-LV", { month: "short", year: "numeric", timeZone: "Europe/Riga" });
 
 /** Reālie darījumi no VZD (tā pati māja + apkārtne) salīdzinājumā ar sludinājuma €/m². */
-export function VzdDeals({ data, perM2 }: { data: { same: VzdDeal[]; median: number | null; area: { n: number; median: number | null } | null }; perM2: number | null }) {
+export function VzdDeals({ data, perM2 }: { data: { same: VzdDeal[]; median: number | null; medianN: number; medianRecent: boolean; area: { n: number; median: number | null } | null }; perM2: number | null }) {
   const cmp = (m: number | null) => {
     if (!m || !perM2) return null;
     const pct = Math.round(((perM2 - m) / m) * 100);
@@ -17,7 +17,7 @@ export function VzdDeals({ data, perM2 }: { data: { same: VzdDeal[]; median: num
         {data.median != null && (
           <div className="stat">
             <b>{formatNumber(data.median)} €/m²</b>
-            <span>šajā mājā, {plural(data.same.length, "darījums", "darījumi")}{cmp(data.median) ? ` · sludinājums ${cmp(data.median)}` : ""}</span>
+            <span>šajā mājā {data.medianRecent ? "3 gados" : "kopš 2016"} ({data.medianN}){cmp(data.median) ? ` · sludinājums ${cmp(data.median)}` : ""}</span>
           </div>
         )}
         {data.area?.median != null && (

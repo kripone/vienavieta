@@ -41,7 +41,11 @@ export async function dealsForListing(l: { address: string | null; lat: number |
     area = r.n >= 3 ? { n: r.n, median: r.median ? Math.round(r.median) : null } : null;
   }
   if (!same.length && !area) return null;
-  const perM2 = same.map((d) => d.amount / Number(d.areaM2)).sort((a, b) => a - b);
+  // mājas mediāna: pēdējie 3 gadi, ja tajos ir vismaz 3 darījumi, citādi visi kopš 2016
+  const cut = new Date(Date.now() - 3 * 365 * 86_400_000).toISOString().slice(0, 10);
+  const recent = same.filter((d) => d.day >= cut);
+  const basis = recent.length >= 3 ? recent : same;
+  const perM2 = basis.map((d) => d.amount / Number(d.areaM2)).sort((a, b) => a - b);
   const median = perM2.length ? Math.round(perM2[Math.floor((perM2.length - 1) / 2)]) : null;
-  return { same, median, area };
+  return { same, median, medianN: basis.length, medianRecent: basis === recent, area };
 }
