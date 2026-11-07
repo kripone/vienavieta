@@ -15,3 +15,4 @@
 - `getCurrentUser()` sauc `headers()` ārpus try/catch un `unstable_rethrow`, lai neapklusinātu Next dinamiskās renderēšanas signālus.
 - Bilžu krātuve: `STORAGE_DRIVER` = s3 | db | local; startējot `src/instrumentation.ts` pārbauda krātuvi un ieraksta rezultātu žurnālā.
 - Sludinājumu vēsture: `price_history` glabā cenu no katra izmaiņas brīža (arī sākuma cenu); `listings.first_price` = sākuma cena, ja cena mainīta (kārtošanai "Lielākais cenu kritums"). Lapas `/cenu-kritumi`, `/vesture`; loģika `src/lib/history.ts`.
+- VZD darījumi: `src/lib/importers/vzd.ts` ielādē data.gov.lv „Darījumi ar telpu grupām” (CC BY 4.0; failu saites no CKAN API, jo nosaukumi mainās) tabulā `vzd_deals`; vaicājumi `src/lib/vzd.ts`; atsauce uz avotu obligāta. Izslēdz ar `VZD_IMPORT=off`.

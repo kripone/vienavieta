@@ -76,7 +76,8 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] Sludinājuma vēsture (kā tirgusdati.lv): dienas tirgū, sākuma cena, cenu izmaiņas ar grafiku; /vesture pēc ss.com saites
 - [x] /cenu-kritumi (24 h / 7 / 30 dienas) un kārtošana "Lielākais cenu kritums", "Visilgāk tirgū"; kartītē sākuma cena nosvītrota
 - [x] ss.com auto pilsēta no sludinājuma lapas (tikai lauks "Vieta", katra lapa vienreiz, ~15 minūtē)
-- [ ] VZD darījumu cenas (kadastra atvērtie dati) īpašuma lapā
+- [x] VZD darījumu cenas dzīvokļiem (data.gov.lv „Darījumi ar telpu grupām”, CC BY 4.0): tajā pašā mājā un ~400 m apkārtnē, €/m² salīdzinājums; atjauno reizi mēnesī
+- [ ] VZD darījumi mājām un zemei (datu kopas „Darījumi ar zemes vienībām (un būvēm)”)
 
 ## Palaišana produkcijā
 - [x] Render Blueprint (render.yaml) un instrukcija docs/DEPLOY.md

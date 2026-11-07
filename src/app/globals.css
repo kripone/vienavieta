@@ -353,3 +353,10 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .drop-item > .fine { margin: 0 0 4px; }
 .lookup { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
 .lookup input { flex: 1 1 280px; min-width: 0; }
+
+/* VZD darījumi */
+.tbl-wrap { overflow-x: auto; margin-bottom: 8px; }
+.tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 14px; }
+.tbl th, .tbl td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.tbl th:first-child, .tbl td:first-child { text-align: left; }
+.tbl th { font-weight: 600; color: var(--muted); }

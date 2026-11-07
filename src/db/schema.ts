@@ -410,3 +410,31 @@ export const geocodeCache = pgTable("geocode_cache", {
   ok: boolean("ok").notNull(),
   createdAt: createdAt(),
 });
+
+/**
+ * VZD NĪTIS darījumi ar dzīvokļiem (atvērtie dati, CC BY 4.0, data.gov.lv "Darījumi ar telpu grupām").
+ * Tikai veseli dzīvokļi (viens dzīvoklis darījumā, 1/1 daļa). Atjauno reizi mēnesī (src/lib/importers/vzd.ts).
+ */
+export const vzdDeals = pgTable(
+  "vzd_deals",
+  {
+    dealId: integer("deal_id").primaryKey(),
+    day: date("day").notNull(),
+    amount: integer("amount").notNull(),
+    areaM2: numeric("area_m2", { precision: 7, scale: 1 }).notNull(),
+    rooms: integer("rooms"),
+    floor: integer("floor"),
+    floors: integer("floors"),
+    builtYear: integer("built_year"),
+    material: text("material"),
+    /** Adrese bez dzīvokļa numura un indeksa, piem. "Kalna iela 13A, Rīga" */
+    address: text("address").notNull(),
+    /** Ielas nosaukums bez tipa + mājas numurs, piem. "kalna 13a" (sasaistei ar sludinājumu adresi) */
+    houseKey: text("house_key").notNull(),
+    city: text("city"),
+    buildingCadNr: text("building_cad_nr"),
+    lat: doublePrecision("lat"),
+    lon: doublePrecision("lon"),
+  },
+  (t) => [index("vzd_deals_house_idx").on(t.houseKey), index("vzd_deals_building_idx").on(t.buildingCadNr), index("vzd_deals_geo_idx").on(t.lat, t.lon)],
+);

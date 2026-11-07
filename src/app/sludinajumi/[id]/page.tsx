@@ -15,6 +15,8 @@ import { EvalBadge } from "@/components/eval-badge";
 import { alsoAt } from "@/lib/dedupe";
 import { listingHistory } from "@/lib/history";
 import { PriceHistory } from "@/components/price-history";
+import { dealsForListing } from "@/lib/vzd";
+import { VzdDeals } from "@/components/vzd-deals";
 import { priceEvals } from "@/lib/price-eval";
 import { favoriteIds } from "@/lib/favorites";
 import { getListing, locationLabel } from "@/lib/listings";
@@ -74,6 +76,7 @@ export default async function ListingPage(props: Props) {
   const evaluation = (await priceEvals([l.id]).catch(() => new Map())).get(l.id);
   const elsewhere = (await alsoAt([{ id: l.id, groupKey: l.groupKey }]).catch(() => new Map())).get(l.id) ?? [];
   const history = await listingHistory({ id: l.id, price: l.price, createdAt: l.createdAt }).catch(() => null);
+  const vzd = l.kind === "property" && l.propertyType === "Dzīvoklis" && l.deal === "sell" ? await dealsForListing(l).catch(() => null) : null;
   const isFav = user && !isOwner ? (await favoriteIds(user.id, [l.id])).has(l.id) : false;
   const seller = d.sellerType === "dealer" && d.companyName ? d.companyName : d.sellerName || "Privātpersona";
   const unit = priceUnit(l.deal);
@@ -156,6 +159,7 @@ export default async function ListingPage(props: Props) {
             ))}
           </dl>
         </section>
+        {vzd && <VzdDeals data={vzd} perM2={l.areaM2 ? Math.round(l.price / Number(l.areaM2)) : null} />}
         {history && <PriceHistory h={history} external={l.source !== "own"} />}
         {l.description && (
           <section>

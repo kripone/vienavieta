@@ -8,6 +8,7 @@ import { ensureDailySnapshot } from "../market";
 import { backfillBodies, backfillMakeModel } from "./backfill";
 import { crawlSection } from "./ss-pages";
 import { detailsEnabled, fillVehicleCities } from "./ss-details";
+import { importVzdIfChanged } from "./vzd";
 
 const g = globalThis as unknown as { ssCrawlerStarted?: boolean };
 
@@ -61,6 +62,21 @@ export function startSsCrawler() {
       await new Promise((r) => setTimeout(r, 60_000));
     }
   })();
+  // VZD darījumu atvērtie dati: pārbauda reizi 12 h, ielādē, ja datu kopa mainījusies (reizi mēnesī)
+  if (process.env.VZD_IMPORT !== "off") {
+    (async () => {
+      await new Promise((r) => setTimeout(r, 180_000));
+      for (;;) {
+        try {
+          const r = await importVzdIfChanged();
+          if (r) console.log("VZD darījumi:", JSON.stringify(r));
+        } catch (e) {
+          console.error("VZD darījumi:", e instanceof Error ? e.message : e);
+        }
+        await new Promise((res) => setTimeout(res, 3600_000));
+      }
+    })();
+  }
   // atsevišķa cilpa: transporta sludinājumu pilsētas no sludinājuma lapām (lēni, katra lapa vienreiz)
   if (detailsEnabled()) {
     (async () => {
