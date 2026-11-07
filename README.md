@@ -75,6 +75,10 @@ drizzle/          SQL migrācijas
 docs/             plāns un dokumentācija
 ```
 
+## Palaišana internetā
+
+Sk. [docs/DEPLOY.md](docs/DEPLOY.md): Render (portāls + datubāze), Cloudflare R2 (bildes), Brevo (e-pasts).
+
 ## Svarīgi
 
 - `.env` fails ar parolēm un atslēgām **nekad** netiek augšupielādēts GitHub.

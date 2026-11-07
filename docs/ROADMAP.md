@@ -58,6 +58,8 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [ ] Dublikātu apvienošana starp portāliem
 
 ## Palaišana produkcijā
+- [x] Render Blueprint (render.yaml) un instrukcija docs/DEPLOY.md
+- [ ] Testa versija internetā
 - [ ] Domēns, hostings, pārvaldīta PostgreSQL
 - [ ] E-pasta sūtīšana, kļūdu uzraudzība, rezerves kopijas
 - [ ] Lietošanas noteikumi, privātuma politika, sīkdatnes
