@@ -13,3 +13,16 @@ export function houseKey(address: string): string | null {
   const k = slug(first.replace(STREET_TYPES, " "));
   return k || null;
 }
+
+/**
+ * Īsā atslēga: ielas nosaukuma pēdējais vārds + mājas numurs. ss.com bieži raksta ielu saīsināti
+ * ("Lejiņa 5" pret VZD "Paula Lejiņa iela 5", "Valdemāra 38" pret "Krišjāņa Valdemāra iela 38").
+ */
+export function houseTail(address: string): string | null {
+  const key = houseKey(address);
+  if (!key) return null;
+  const m = key.match(/^(.*?)-?(\d+[a-z]?(?:-k-?\d+)?(?:-\d+)?)$/);
+  if (!m || !m[1]) return null;
+  const last = m[1].split("-").filter((w) => !/^\d+$/.test(w)).at(-1);
+  return last && last.length >= 3 ? `${last}-${m[2]}` : null;
+}

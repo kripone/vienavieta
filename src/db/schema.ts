@@ -431,10 +431,12 @@ export const vzdDeals = pgTable(
     address: text("address").notNull(),
     /** Ielas nosaukums bez tipa + mājas numurs, piem. "kalna 13a" (sasaistei ar sludinājumu adresi) */
     houseKey: text("house_key").notNull(),
+    /** Ielas pēdējais vārds + numurs, piem. "lejina-5" no "Paula Lejiņa iela 5" (saīsinātām ss.com adresēm) */
+    houseTail: text("house_tail"),
     city: text("city"),
     buildingCadNr: text("building_cad_nr"),
     lat: doublePrecision("lat"),
     lon: doublePrecision("lon"),
   },
-  (t) => [index("vzd_deals_house_idx").on(t.houseKey), index("vzd_deals_building_idx").on(t.buildingCadNr), index("vzd_deals_geo_idx").on(t.lat, t.lon)],
+  (t) => [index("vzd_deals_house_idx").on(t.houseKey), index("vzd_deals_tail_idx").on(t.houseTail), index("vzd_deals_building_idx").on(t.buildingCadNr), index("vzd_deals_geo_idx").on(t.lat, t.lon)],
 );

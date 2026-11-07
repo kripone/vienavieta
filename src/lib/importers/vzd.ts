@@ -6,11 +6,11 @@ import { createInterface } from "node:readline";
 import { Readable } from "node:stream";
 import { sql } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { houseKey } from "../vzd-key";
+import { houseKey, houseTail } from "../vzd-key";
 
 const { vzdDeals, crawlState } = schema;
 const API = "https://data.gov.lv/dati/api/3/action/package_show?id=darijumi-ar-telpu-grupam";
-const STATE = "vzd:tg";
+const STATE = "vzd:tg:v2"; // v2: house_tail
 const UA = "VienaVietaBot/1.0 (+https://vienavieta-omew.onrender.com)";
 
 /** Viena CSV rinda ar pēdiņām ("a","b ""c""",""). Datu kopā rindās nav pārnesumu. */
@@ -89,6 +89,7 @@ export function mapDeal(r: Record<string, string>, coords?: [number, number]): D
     material: r.MaterialKind ? r.MaterialKind.replace(/^\d+\s*-\s*/, "").slice(0, 80) : null,
     address,
     houseKey: key,
+    houseTail: houseTail(r.Std),
     city: r.ArCity || r.ArParish || null,
     buildingCadNr: r.BuiCadNr || null,
     lat: coords?.[0] ?? null,
@@ -139,7 +140,7 @@ export async function importVzdIfChanged(force = false) {
       .values(batch)
       .onConflictDoUpdate({
         target: vzdDeals.dealId,
-        set: { amount: sql`excluded.amount`, areaM2: sql`excluded.area_m2`, lat: sql`excluded.lat`, lon: sql`excluded.lon`, rooms: sql`excluded.rooms`, floor: sql`excluded.floor` },
+        set: { amount: sql`excluded.amount`, areaM2: sql`excluded.area_m2`, lat: sql`excluded.lat`, lon: sql`excluded.lon`, rooms: sql`excluded.rooms`, floor: sql`excluded.floor`, houseKey: sql`excluded.house_key`, houseTail: sql`excluded.house_tail` },
       });
     saved += batch.length;
     batch = [];

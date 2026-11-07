@@ -183,8 +183,20 @@ export function findMake(makes: MakeRow[], vehicleClass: string, raw: string) {
 }
 
 /** ss.com modeļu pieraksts → mūsu katalogs: BMW "320d" → "3. sērija", Mercedes "E220" → "E klase", "ML350" → "M klase". */
+/** ss.com modeļu nosaukumi, kas mūsu katalogā saucas citādi (pēc markas, slug formā). */
+const MODEL_ALIASES: Record<string, Record<string, string>> = {
+  audi: { allroad: "A6 Allroad" },
+  volkswagen: { t3: "Transporter", t4: "Transporter", t5: "Transporter", t6: "Transporter", "t6-1": "Transporter", t7: "Transporter" },
+  skoda: { praktik: "Roomster" },
+};
+
 function normalizeModel(makeName: string, raw: string) {
-  const r = raw.replace(/\(.*?\)/g, "").trim();
+  let r = raw.replace(/\(.*?\)/g, "").trim();
+  // "Mazda6", "Mazda CX-60" → "6", "CX-60"
+  const mk = makeName.split(/[\s-]/)[0];
+  if (mk && r.toLowerCase().startsWith(mk.toLowerCase()) && r.length > mk.length) r = r.slice(mk.length).replace(/^[\s-]+/, "");
+  const alias = MODEL_ALIASES[slug(makeName)]?.[slug(r)];
+  if (alias) return alias;
   if (/^bmw$/i.test(makeName)) {
     const m = r.match(/^(\d)\d{2}\s?[a-z]{0,3}$/i);
     if (m) return `${m[1]}. sērija`;
@@ -209,6 +221,11 @@ export function matchModel(list: ModelRow[], makeId: number, raw: string, makeNa
     mine.find((m) => slug(m.name) === r) ??
     mine.find((m) => slug(m.name).replace(/-/g, "") === r.replace(/-/g, "")) ??
     mine.find((m) => r.startsWith(slug(m.name)) && slug(m.name).length >= 2) ??
+    // "21" → "21 Volga", ja tāds ir tikai viens
+    (() => {
+      const pre = mine.filter((m) => slug(m.name).startsWith(r + "-"));
+      return pre.length === 1 ? pre[0] : null;
+    })() ??
     null
   );
 }
@@ -273,7 +290,8 @@ export function mapItem(
     const isOther = /^(citi|cits|cita|other|another)$/i.test(modelRaw0.trim()); // ss.com "Citi" = modelis nav viņu sarakstā
     const modelRaw = isOther ? "" : modelRaw0;
     const make = findMake(ctx.makes, feed.vehicleClass, makeRaw);
-    const model = make ? (matchModel(ctx.models, make.id, modelRaw, make.name) ?? (isOther || !modelRaw ? modelFromText(ctx.models, make.id, item.snippet) : null)) : null;
+    // neatpazīts vai "Citi": mēģinām atrast modeli sludinājuma teksta sākumā (piem. "Tourneo" → "Tourneo Custom")
+    const model = make ? (matchModel(ctx.models, make.id, modelRaw, make.name) ?? modelFromText(ctx.models, make.id, item.snippet)) : null;
     const year = int(first(f, "Gads"));
     const { engineL, fuel } = engine(first(f, "Tilpums"));
     const makeName = make?.name ?? (makeRaw ? makeRaw[0].toUpperCase() + makeRaw.slice(1) : "");

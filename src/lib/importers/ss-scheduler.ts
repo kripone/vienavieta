@@ -5,7 +5,7 @@ import { db, schema } from "@/db";
 import { SS_FULL_EVERY_HOURS, SS_QUICK_EVERY_MIN, SS_SECTIONS } from "../constants";
 import { geocodePending, geocodingEnabled } from "../geocode";
 import { ensureDailySnapshot } from "../market";
-import { backfillBodies, backfillMakeModel } from "./backfill";
+import { backfillBodies, backfillMakeModel, ensureMotoModels, forceModelRecrawl } from "./backfill";
 import { crawlSection } from "./ss-pages";
 import { detailsEnabled, fillVehicleCities } from "./ss-details";
 import { importVzdIfChanged } from "./vzd";
@@ -20,6 +20,9 @@ export function ssCrawlerEnabled() {
 async function tick() {
   const mm = await backfillMakeModel().catch((e) => (console.error("Marku/modeļu pārrēķins neizdevās:", e), null));
   if (mm) console.log("Marku/modeļu pārrēķins:", JSON.stringify(mm));
+  const mo = await ensureMotoModels().catch((e) => (console.error("Moto modeļi:", e), null));
+  if (mo) console.log("Moto modeļi:", JSON.stringify(mo));
+  if (await forceModelRecrawl().catch(() => false)) console.log("Auto/moto pilnā kārta sākta no jauna modeļu atpazīšanai");
   const bf = await backfillBodies().catch((e) => (console.error("Virsbūvju pārrēķins neizdevās:", e), null));
   if (bf) console.log("Virsbūvju pārrēķins:", JSON.stringify(bf));
   // tirgus momentuzņēmums reizi dienā (pēc 3:00 UTC, kad nakts pilnās kārtas parasti beigušās)
