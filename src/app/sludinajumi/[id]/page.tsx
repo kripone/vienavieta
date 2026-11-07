@@ -59,6 +59,8 @@ export default async function ListingPage(props: Props) {
           ["Jauda", l.powerKw ? `${l.powerKw} kW (${Math.round(l.powerKw * 1.36)} ZS)` : null],
           ["Piedziņa", l.drive],
           ["Krāsa", l.color],
+          ["Vietu skaits", l.seats],
+          ["Tehniskā apskate", l.inspectionUntil ? t("līdz {d}", { d: l.inspectionUntil }) : null],
         ]
       : [
           ["Īpašuma veids", l.propertyType],
@@ -165,6 +167,26 @@ export default async function ListingPage(props: Props) {
             ))}
           </dl>
         </section>
+        {l.features.length > 0 && (
+          <section>
+            <h2>{t("Aprīkojums")}</h2>
+            <div className="features">
+              {Object.entries(
+                l.features.reduce<Record<string, string[]>>((acc, f) => {
+                  const [g, item] = f.includes("|") ? f.split("|") : ["Aprīkojums", f];
+                  (acc[g] ??= []).push(item);
+                  return acc;
+                }, {}),
+              ).map(([g, items]) => (
+                <div key={g}>
+                  <h3>{t(g)}</h3>
+                  <ul>{items.map((i) => <li key={i}>{t(i)}</li>)}</ul>
+                </div>
+              ))}
+            </div>
+            {l.source !== "own" && <p className="fine">{t("Aprīkojums pēc pārdevēja norādītā {src}.", { src: SOURCE_LABEL[l.source] ?? l.source })}</p>}
+          </section>
+        )}
         {vzd && <VzdDeals data={vzd} perM2={l.areaM2 ? Math.round(l.price / Number(l.areaM2)) : null} />}
         {history && <PriceHistory h={history} external={l.source !== "own"} />}
         {l.description && (

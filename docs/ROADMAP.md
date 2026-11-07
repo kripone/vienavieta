@@ -75,7 +75,7 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] Dublikātu apvienošana starp portāliem (marka/modelis/gads/cena/nobraukums vai veids/istabas/platība/vieta): viena kartīte, "Arī: ss.com ↗"
 - [x] Sludinājuma vēsture (kā tirgusdati.lv): dienas tirgū, sākuma cena, cenu izmaiņas ar grafiku; /vesture pēc ss.com saites
 - [x] /cenu-kritumi (24 h / 7 / 30 dienas) un kārtošana "Lielākais cenu kritums", "Visilgāk tirgū"; kartītē sākuma cena nosvītrota
-- [x] ss.com auto pilsēta no sludinājuma lapas (tikai lauks "Vieta", katra lapa vienreiz, ~15 minūtē)
+- [x] ss.com auto no sludinājuma lapas (katra lapa vienreiz, ~24 minūtē): pilsēta, ātrumkārba, krāsa, virsbūve, vietu skaits, tehniskā apskate, aprīkojums
 - [x] VZD darījumu cenas dzīvokļiem (data.gov.lv „Darījumi ar telpu grupām”, CC BY 4.0): tajā pašā mājā un ~400 m apkārtnē, €/m² salīdzinājums; atjauno reizi mēnesī
 - [x] VZD atzīme dzīvokļu kartītēs („VZD: šajā mājā … €/m²”) un lapa /darijumi (meklēšana pēc adreses)
 - [ ] VZD darījumi mājām un zemei (datu kopas „Darījumi ar zemes vienībām (un būvēm)”)

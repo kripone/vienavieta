@@ -367,3 +367,8 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .sugg { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; }
 /* Valodas izvēle galvenē */
 .lang { font: inherit; font-size: 13px; font-weight: 600; padding: 6px 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: inherit; cursor: pointer; }
+
+/* Transporta aprīkojums */
+.features { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px 24px; }
+.features h3 { font-size: 14px; margin: 0 0 4px; color: var(--muted); }
+.features ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; font-size: 14px; }

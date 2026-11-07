@@ -183,8 +183,10 @@ export const PRICE_EVAL = { GOOD: 0.88, HIGH: 1.15, MIN: 3, YEARS: 2 } as const;
 export const MAX_COMPARE = 4;
 
 /** ss.com transporta sludinājumu lapas pilsētai: cik minūtē un pauze starp pieprasījumiem. */
-export const SS_DETAIL_PER_MIN = 15;
-export const SS_DETAIL_DELAY_MS = 3000;
+export const SS_DETAIL_PER_MIN = 24;
+export const SS_DETAIL_DELAY_MS = 2000;
+/** Lapas, kas atvērtas pirms šī laika, atver vēlreiz (tad vēl nenolasījām ātrumkārbu, krāsu un aprīkojumu). */
+export const SS_DETAILS_V2_AT = new Date("2026-11-07T21:45:00Z");
 
 /** Salonu sludinājumu plūsmas (src/lib/importers/dealer-feed.ts). */
 export const DEALER_FEED = { MAX_FEEDS_PER_USER: 3, MAX_ITEMS: 1000, MAX_BYTES: 15_000_000, MAX_PHOTOS: 20, EVERY_HOURS: 6 } as const;

@@ -170,6 +170,11 @@ export const listings = pgTable(
     /** Ārējā sludinājuma sīktēla adrese oriģinālajā serverī (rādām no turienes, neglabājam) */
     externalThumbUrl: text("external_thumb_url"),
     /** Salona plūsmas sludinājumiem: bilžu adreses salona serverī (rādām no turienes) un plūsmas ID */
+    /** Transporta aprīkojums "Grupa|Elements" (ss.com sludinājuma lapā atzīmētie; salonu plūsmās) */
+    features: text("features").array().notNull().default(sql`'{}'::text[]`),
+    seats: smallint("seats"),
+    /** Tehniskā apskate līdz, piem. "09.2027" */
+    inspectionUntil: text("inspection_until"),
     remotePhotos: text("remote_photos").array().notNull().default(sql`'{}'::text[]`),
     feedId: integer("feed_id"),
     /** Vienāda vērtība sludinājumiem, kas apraksta to pašu objektu dažādos portālos */
