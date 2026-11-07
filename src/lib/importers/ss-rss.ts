@@ -11,7 +11,8 @@ const { listings, places, regions, makes, models, priceHistory } = schema;
 type Feed = (typeof SS_FEEDS)[number];
 export type RssItem = { link: string; pubDate: Date; fields: Record<string, string[]> };
 
-const USER_AGENT = "VienaVietaBot/1.0 (+https://vienavieta-omew.onrender.com; RSS lasītājs)";
+// tikai ASCII: HTTP galvenēs nedrīkst būt garumzīmes
+const USER_AGENT = "VienaVietaBot/1.0 (+https://vienavieta-omew.onrender.com; RSS reader)";
 
 // ---------- RSS parsēšana ----------
 const decode = (s: string) =>
