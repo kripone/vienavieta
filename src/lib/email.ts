@@ -59,7 +59,7 @@ export async function sendMail(mail: Mail) {
   await transport.sendMail({ from: fromHeader(), ...mail });
 }
 
-const escapeHtml = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+export const escapeHtml = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
 export function magicLinkEmail(url: string): Omit<Mail, "to"> {
   const safe = escapeHtml(url);

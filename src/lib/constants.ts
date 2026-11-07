@@ -85,3 +85,12 @@ export const MAX_PHOTOS = 12;
 export const COUNTRIES = ["LV", "LT"] as const;
 export type Country = (typeof COUNTRIES)[number];
 export const COUNTRY_LABEL: Record<Country, string> = { LV: "Latvija", LT: "Lietuva" };
+
+/** Saglabāto meklēšanu paziņojumu biežums. */
+export const NOTIFY_FREQUENCIES = ["hourly", "daily"] as const;
+export type NotifyFrequency = (typeof NOTIFY_FREQUENCIES)[number];
+export const NOTIFY_FREQUENCY_LABEL: Record<NotifyFrequency, string> = { hourly: "Uzreiz (reizi stundā)", daily: "Reizi dienā" };
+/** Cik meklēšanas viens lietotājs drīkst saglabāt. */
+export const MAX_SAVED_SEARCHES = 20;
+/** Cik e-pastu viena paziņojumu kārta drīkst nosūtīt (Brevo bezmaksas plānā 300 dienā). */
+export const MAX_EMAILS_PER_RUN = 100;

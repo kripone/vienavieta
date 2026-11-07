@@ -2,7 +2,7 @@ import { and, asc, count, desc, eq, gte, ilike, inArray, isNotNull, lte, or, sql
 import { db, schema } from "@/db";
 import {
   AMENITIES, BODY_TYPES, COLORS, CONDITIONS, DEALS, DRIVES, FUELS, GEARBOXES, HEATING, MATERIALS, PROPERTY_GROUPS, PROPERTY_TYPES,
-  PURPOSES, SERIES, VEHICLE_CLASSES, type VehicleClass,
+  PURPOSES, SERIES, VEHICLE_CLASSES, VEHICLE_CLASS_LABEL, DEAL_LABEL, type VehicleClass,
 } from "./constants";
 
 const { listings, places, regions, makes, models, users, listingPhotos } = schema;
@@ -238,4 +238,71 @@ export function toQuery(s: Partial<Record<string, unknown>>) {
     else p.set(k, Array.isArray(v) ? v.join(",") : v === true ? "1" : String(v));
   }
   return p.toString();
+}
+
+/** Saglabātajai meklēšanai: jaunie sludinājumi kopš `since` (jaunākie pirmie) un to kopskaits. */
+export async function newListingsSince(s: SearchParams, since: Date, until: Date, limit = 10) {
+  const where = and(...conditions(s), sql`${listings.createdAt} > ${since}`, sql`${listings.createdAt} <= ${until}`);
+  const [rows, [{ total }]] = await Promise.all([
+    db
+      .select({
+        id: listings.id, title: listings.title, price: listings.price, deal: listings.deal, kind: listings.kind,
+        place: places.name, region: regions.name, regionKind: regions.kind, thumbKey: coverThumb,
+      })
+      .from(listings)
+      .leftJoin(places, eq(listings.placeId, places.id))
+      .leftJoin(regions, eq(places.regionId, regions.id))
+      .leftJoin(makes, eq(listings.makeId, makes.id))
+      .leftJoin(models, eq(listings.modelId, models.id))
+      .leftJoin(users, eq(listings.userId, users.id))
+      .where(where)
+      .orderBy(desc(listings.createdAt))
+      .limit(limit),
+    db
+      .select({ total: count() })
+      .from(listings)
+      .leftJoin(places, eq(listings.placeId, places.id))
+      .leftJoin(regions, eq(places.regionId, regions.id))
+      .leftJoin(makes, eq(listings.makeId, makes.id))
+      .leftJoin(models, eq(listings.modelId, models.id))
+      .leftJoin(users, eq(listings.userId, users.id))
+      .where(where),
+  ]);
+  return { rows, total };
+}
+
+/** Meklēšanas parametri glabāšanai: tikai derīgie filtri, bez lapas un kārtošanas. */
+export function normalizeFilters(raw: Raw): Record<string, string> {
+  const s = parseSearch(raw);
+  const q = new URLSearchParams(toQuery({ ...s, page: 1, sort: "new" }));
+  if (!s.cat) q.delete("vc");
+  return Object.fromEntries(q);
+}
+
+/** Cilvēkam saprotams saglabātās meklēšanas nosaukums, piem. "Vieglie auto · BMW 3. sērija · līdz 15 000 € · Rīga". */
+export async function describeSearch(s: SearchParams) {
+  const parts: string[] = [];
+  parts.push(s.cat === "vehicle" ? VEHICLE_CLASS_LABEL[(s.vc ?? "car") as VehicleClass] : s.cat === "property" ? (s.ptype?.replace(/^g:/, "") ?? "Nekustamais īpašums") : "Visi sludinājumi");
+  if (s.cat === "property" && s.deal) parts.push(DEAL_LABEL[s.deal]);
+  if (s.make) {
+    const mk = await db.query.makes.findFirst({ where: eq(makes.id, s.make), columns: { name: true } });
+    const md = s.model ? await db.query.models.findFirst({ where: eq(models.id, s.model), columns: { name: true } }) : null;
+    if (mk) parts.push([mk.name, md?.name].filter(Boolean).join(" "));
+  }
+  if (s.q) parts.push(`“${s.q}”`);
+  const nf = new Intl.NumberFormat("lv-LV");
+  if (s.pmin != null && s.pmax != null) parts.push(`${nf.format(s.pmin)}–${nf.format(s.pmax)} €`);
+  else if (s.pmax != null) parts.push(`līdz ${nf.format(s.pmax)} €`);
+  else if (s.pmin != null) parts.push(`no ${nf.format(s.pmin)} €`);
+  if (s.ymin) parts.push(`no ${s.ymin}. g.`);
+  if (s.rmin) parts.push(`${s.rmin}+ ist.`);
+  if (s.loc) {
+    const id = Number(s.loc.slice(2));
+    const row = s.loc[0] === "p"
+      ? await db.query.places.findFirst({ where: eq(places.id, id), columns: { name: true } })
+      : await db.query.regions.findFirst({ where: eq(regions.id, id), columns: { name: true } });
+    if (row) parts.push(row.name);
+  } else if (s.country === "LT") parts.push("Lietuva");
+  if (s.zone) parts.push("zona kartē");
+  return parts.join(" · ").slice(0, 120);
 }

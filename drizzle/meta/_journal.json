@@ -36,6 +36,13 @@
       "when": 1794049800248,
       "tag": "0004_favorites_price",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794051606469,
+      "tag": "0005_notifications",
+      "breakpoints": true
     }
   ]
 }

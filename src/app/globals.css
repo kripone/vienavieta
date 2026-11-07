@@ -225,3 +225,13 @@ main .fine { margin-top: 14px; }
 .mod-search { margin-bottom: 14px; }
 .mod-search input[type=search] { flex: 1; min-width: 0; font: inherit; font-size: 15px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
 .mod .mod-item .row.between { flex-wrap: wrap; gap: 4px 10px; }
+
+/* Paziņojumi */
+.save-search { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: -4px 0 12px; }
+.ss-row { display: flex; justify-content: space-between; align-items: center; gap: 10px 16px; flex-wrap: wrap; padding: 10px 0; border-top: 1px solid var(--line); }
+.ss-row:first-of-type { border-top: 0; }
+.ss-main { display: grid; gap: 2px; min-width: 0; }
+.ss-name { font-weight: 700; }
+.ss-row select { font: inherit; font-size: 14px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+.check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.check input { accent-color: var(--accent); margin: 0; }

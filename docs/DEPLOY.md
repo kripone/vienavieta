@@ -42,3 +42,9 @@ Katrs jauns commit `main` zarā GitHub automātiski tiek palaists Render.
 - **Savs domēns** (piem. `vienavieta.lv`): Render → Settings → Custom Domains; DNS var turēt Cloudflare.
 - **Karte**: MapTiler atslēga, sk. docs/MAPS.md.
 - **Google/Facebook pieteikšanās**: sk. docs/AUTH-SETUP.md (atgriešanās adresēs izmanto īsto domēnu).
+
+## Paziņojumi (saglabātās meklēšanas, cenu kritumi)
+E-pastus sūta `/api/cron/notify`. To reizi stundā izsauc GitHub Actions (`.github/workflows/notify.yml`), un tas arī pamodina Render bezmaksas serveri.
+- Ja portāla adrese mainās (savs domēns), GitHub repozitorijā **Settings → Secrets and variables → Actions → Variables** pievieno `APP_URL`.
+- Pēc izvēles: Render iestati `CRON_SECRET` un to pašu vērtību GitHub **Secrets** sadaļā `CRON_SECRET`. Bez tā izsaukums arī ir drošs, jo e-pasti netiek sūtīti biežāk, nekā atļauj katras meklēšanas biežums.
+- Vienā kārtā tiek nosūtīti ne vairāk kā `MAX_EMAILS_PER_RUN` e-pasti (Brevo bezmaksas plānā 300 dienā).

@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { FiltersBox } from "@/components/filters-box";
 import { ListingCard } from "@/components/listing-card";
+import { SaveSearchButton } from "@/components/save-search-button";
 import { SearchFilters } from "@/components/search-filters";
 import { SearchMapLazy } from "@/components/search-map-lazy";
 import { SortSelect } from "@/components/sort-select";
@@ -57,6 +58,9 @@ export default async function SearchPage(props: { searchParams: Promise<SP> }) {
             <SortSelect value={s.sort} />
           </Suspense>
         </div>
+        <Suspense>
+          <SaveSearchButton loggedIn={Boolean(user)} />
+        </Suspense>
         {s.zone && <p className="zone-note">Rāda tikai sludinājumus iezīmētajā zonā.</p>}
         {!result ? (
           <div className="notice">

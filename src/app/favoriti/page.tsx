@@ -12,7 +12,10 @@ export default async function FavoritesPage() {
   const drops = rows.filter((r) => r.priceWhenSaved != null && r.priceWhenSaved > r.price).length;
   return (
     <main className="wrap">
-      <h1>Favorīti</h1>
+      <div className="row between">
+        <h1>Favorīti</h1>
+        <a className="btn small" href="/pazinojumi">🔔 Cenu krituma paziņojumi</a>
+      </div>
       {rows.length === 0 ? (
         <div className="notice">
           Tev vēl nav saglabātu sludinājumu. Spied sirsniņu pie sludinājuma, lai to saglabātu šeit.

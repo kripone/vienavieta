@@ -25,6 +25,8 @@ export default async function ProfilePage(props: { searchParams: Promise<{ jauns
         <ProfileForm name={user.name} phone={user.phone ?? ""} sellerType={user.sellerType} companyName={user.companyName ?? ""} />
       </div>
       <div className="row" style={{ marginTop: 16 }}>
+        <a className="btn" href="/pazinojumi">🔔 Paziņojumi</a>
+        <a className="btn" href="/favoriti">♥ Favorīti</a>
         <SignOutButton />
       </div>
     </main>

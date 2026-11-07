@@ -57,6 +57,8 @@ export const users = pgTable("users", {
   companyName: text("company_name"),
   blockedAt: timestamp("blocked_at", { withTimezone: true }),
   locale: text("locale").notNull().default("lv"),
+  /** E-pasts, ja favorītos saglabātam sludinājumam samazinās cena. */
+  notifyPriceDrops: boolean("notify_price_drops").notNull().default(true),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -269,6 +271,8 @@ export const favorites = pgTable(
     listingId: text("listing_id").notNull().references(() => listings.id, { onDelete: "cascade" }),
     /** Cena brīdī, kad sludinājums saglabāts (cenu krituma paziņojumiem). */
     priceAtSave: integer("price_at_save"),
+    /** Cena, par kuru pēdējo reizi sūtīts cenu krituma paziņojums. */
+    notifiedPrice: integer("notified_price"),
     createdAt: createdAt(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.listingId] })],
@@ -283,6 +287,8 @@ export const savedSearches = pgTable(
     /** Filtru vērtības tādā pašā formā kā meklēšanas URL parametri */
     filters: jsonb("filters").notNull().$type<Record<string, string | string[]>>(),
     notifyEmail: boolean("notify_email").notNull().default(true),
+    /** "hourly" | "daily", sk. NOTIFY_FREQUENCIES */
+    frequency: text("frequency").notNull().default("daily"),
     notifyPush: boolean("notify_push").notNull().default(false),
     lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
     lastNotifiedAt: timestamp("last_notified_at", { withTimezone: true }),

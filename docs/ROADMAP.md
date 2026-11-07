@@ -32,8 +32,9 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 
 ## 5. Lietotāju funkcijas
 - [x] Favorīti: sirsniņa kartītē un sludinājuma lapā, lapa /favoriti, cenas kritums kopš saglabāšanas
-- [ ] Cenu krituma paziņojumi e-pastā
-- [ ] Saglabātās meklēšanas ar e-pasta paziņojumiem
+- [x] Cenu krituma paziņojumi e-pastā (favorīti)
+- [x] Saglabātās meklēšanas ar e-pasta paziņojumiem (reizi stundā vai dienā), lapa /pazinojumi, atrakstīšanās no e-pasta
+- [x] Paziņojumu kārta: /api/cron/notify, ko reizi stundā izsauc GitHub Actions (.github/workflows/notify.yml)
 - [ ] Ziņas starp pircēju un pārdevēju
 - [ ] Salīdzināšana
 

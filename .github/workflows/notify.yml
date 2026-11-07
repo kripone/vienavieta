@@ -1,0 +1,26 @@
+# Paziņojumu kārta: reizi stundā izsauc portāla /api/cron/notify.
+# Render bezmaksas serveris dīkstāvē aizmieg, tāpēc pirmais pieprasījums to pamodina (līdz ~1 min).
+# Portāla adresi var mainīt repozitorija mainīgajā APP_URL (Settings → Secrets and variables → Actions → Variables).
+# Ja Render iestatīts CRON_SECRET, to pašu vērtību ieliec repozitorija noslēpumā CRON_SECRET.
+name: Paziņojumi
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Palaist paziņojumu kārtu
+        env:
+          APP_URL: ${{ vars.APP_URL || 'https://vienavieta-omew.onrender.com' }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          auth=()
+          if [ -n "$CRON_SECRET" ]; then auth=(-H "Authorization: Bearer $CRON_SECRET"); fi
+          # pamodina serveri
+          curl -sS -o /dev/null -m 120 --retry 3 --retry-delay 20 "$APP_URL/api/health" || true
+          curl -fsS -m 280 --retry 2 --retry-delay 30 "${auth[@]}" -X POST "$APP_URL/api/cron/notify"
