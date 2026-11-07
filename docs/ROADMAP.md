@@ -66,8 +66,9 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 
 ## 8. Citu portālu sludinājumi
 - [x] ss.com oficiālās RSS plūsmas (auto, moto, dzīvokļi, mājas, zeme): fakti + saite, bez bildēm un teksta; reizi stundā; avota filtrs
+- [x] ss.com sarakstu lapas (pēc jurista atzinuma): visas lapas reizi diennaktī, jaunie ik 15 min, ss.com izdzēstie tiek noņemti
 - [ ] Citu portālu RSS/partneru plūsmas (reklama.lv, city24.lv, autoplius.lt …)
-- [ ] Lapu pārmeklēšana vai bildes: tikai pēc jurista atzinuma
+- [ ] Bildes no citiem portāliem: netiek ņemtas
 - [x] Dublikātu apvienošana starp portāliem (marka/modelis/gads/cena/nobraukums vai veids/istabas/platība/vieta): viena kartīte, "Arī: ss.com ↗"
 
 ## Palaišana produkcijā

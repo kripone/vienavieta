@@ -43,6 +43,13 @@
       "when": 1794051606469,
       "tag": "0005_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794058789533,
+      "tag": "0006_crawl_state",
+      "breakpoints": true
     }
   ]
 }

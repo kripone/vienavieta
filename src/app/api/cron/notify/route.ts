@@ -1,4 +1,5 @@
 import { importSsRss } from "@/lib/importers/ss-rss";
+import { ssCrawlerEnabled } from "@/lib/importers/ss-scheduler";
 import { runNotifications } from "@/lib/notify";
 
 export const dynamic = "force-dynamic";
@@ -23,9 +24,10 @@ async function handle(req: Request) {
   running = true;
   lastRun = Date.now();
   try {
-    // 1) ārējie sludinājumi no oficiālajām RSS plūsmām (izslēdzams ar EXTERNAL_IMPORT=off)
-    let imported: unknown = "off";
-    if (process.env.EXTERNAL_IMPORT !== "off") {
+    // 1) ārējie sludinājumi: ja darbojas ss.com sarakstu ievākšana (ss-scheduler), RSS nav vajadzīgs;
+    //    citādi RSS plūsmas kā rezerve (izslēdzams ar EXTERNAL_IMPORT=off)
+    let imported: unknown = ssCrawlerEnabled() ? "ss.com sarakstu ievākšana darbojas fonā" : "off";
+    if (!ssCrawlerEnabled() && process.env.EXTERNAL_IMPORT !== "off") {
       try {
         imported = await importSsRss();
         console.log("ss.com RSS imports:", JSON.stringify(imported));

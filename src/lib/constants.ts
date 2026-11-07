@@ -134,7 +134,24 @@ export const SS_FEEDS = [
   { url: "https://www.ss.com/lv/real-estate/homes-summer-residences/rss/", kind: "property", propertyType: "Māja" },
   { url: "https://www.ss.com/lv/real-estate/plots-and-lands/rss/", kind: "property", propertyType: "Zeme" },
 ] as const;
-/** Ārējie sludinājumi tiek paslēpti, ja nav atjaunoti tik dienas (RSS nerāda, kad oriģināls izdzēsts). */
+/**
+ * ss.com sarakstu lapas (lietotājs 2026-11-07 apstiprināja jurista atzinumu, sk. CLAUDE.md).
+ * Ņemam tikai faktus no sarakstu tabulas un saiti; sludinājuma lapas, bildes un aprakstus neatveram.
+ */
+export const SS_SECTIONS = [
+  { key: "ss:cars", url: "https://www.ss.com/lv/transport/cars/", kind: "vehicle", vehicleClass: "car" },
+  { key: "ss:moto", url: "https://www.ss.com/lv/transport/moto-transport/motorcycles/", kind: "vehicle", vehicleClass: "moto" },
+  { key: "ss:flats", url: "https://www.ss.com/lv/real-estate/flats/", kind: "property", propertyType: "Dzīvoklis" },
+  { key: "ss:homes", url: "https://www.ss.com/lv/real-estate/homes-summer-residences/", kind: "property", propertyType: "Māja" },
+  { key: "ss:land", url: "https://www.ss.com/lv/real-estate/plots-and-lands/", kind: "property", propertyType: "Zeme" },
+] as const;
+/** Pauze starp pieprasījumiem uz ss.com (ms) un ātrās kārtas lapu skaits katrā sadaļā. */
+export const SS_REQUEST_DELAY_MS = 2000;
+export const SS_QUICK_PAGES = 3;
+/** Cik bieži ātrā kārta (jaunie sludinājumi) un pilnā kārta (visas lapas, izdzēsto paslēpšana). */
+export const SS_QUICK_EVERY_MIN = 15;
+export const SS_FULL_EVERY_HOURS = 24;
+/** Ārējie sludinājumi tiek paslēpti, ja nav redzēti tik dienas (drošībai, ja pilnā kārta ilgi neizdodas). */
 export const EXTERNAL_TTL_DAYS = 21;
 /** Avotu nosaukumi kartītēs. */
 export const SOURCE_LABEL: Record<string, string> = {

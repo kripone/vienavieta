@@ -362,3 +362,13 @@ export const mediaObjects = pgTable("media_objects", {
   data: bytea("data").notNull(),
   createdAt: createdAt(),
 });
+
+// ---------- ārējo sludinājumu ievākšana ----------
+/** Ievākšanas stāvoklis pa sadaļām (piem. "ss:cars"): kad pēdējo reizi pilnā un ātrā kārta. */
+export const crawlState = pgTable("crawl_state", {
+  name: text("name").primaryKey(),
+  lastFullAt: timestamp("last_full_at", { withTimezone: true }),
+  lastQuickAt: timestamp("last_quick_at", { withTimezone: true }),
+  /** Pēdējās pilnās kārtas kopsavilkums (lapas, jauni, atjaunoti, paslēpti, kļūdas) */
+  lastResult: jsonb("last_result").$type<Record<string, unknown>>(),
+});

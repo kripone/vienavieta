@@ -10,7 +10,8 @@ import { landLabel } from "../listing-input";
 
 const { listings, places, regions, makes, models, priceHistory } = schema;
 
-type Feed = (typeof SS_FEEDS)[number];
+/** Plūsmas vai sadaļas apraksts: kas tajā ir (transports ar klasi vai īpašums ar veidu). */
+type Feed = { kind: "vehicle"; vehicleClass: "car" | "moto" } | { kind: "property"; propertyType: "Dzīvoklis" | "Māja" | "Zeme" };
 export type RssItem = { link: string; pubDate: Date; fields: Record<string, string[]> };
 
 // tikai ASCII: HTTP galvenēs nedrīkst būt garumzīmes
@@ -85,6 +86,7 @@ export function parseLand(v?: string) {
 
 /** "1.8H" → { engineL: 1.8, fuel: Hibrīds } */
 function engine(v?: string) {
+  if (v?.trim().toUpperCase() === "E") return { engineL: null, fuel: "Elektro" };
   const m = v?.match(/^(\d+(?:\.\d+)?)\s*([A-Z]*)$/i);
   if (!m) return { engineL: null, fuel: null };
   const l = Number(m[1]);
@@ -141,9 +143,12 @@ export function makePlaceFinder(rows: PlaceRow[]) {
         if (pre.length) return pre.find((p) => p.region === region) ?? pre[0];
       }
     }
-    // tikai pilsēta bez apkaimes (piem. ".../flats/riga/x.html") → tās centrs; citādi vietu labāk neminēt nekā minēt nepareizi
-    if (region && norm.length === 1 && !segs[0].endsWith("-and-reg")) {
-      return rows.find((p) => p.region === region && slug(p.name) === "centrs") ?? null;
+    // tikai pilsēta bez apkaimes (".../flats/riga/x.html" vai ".../jelgava-and-reg/jelgava/x.html") → pilsētas centrs;
+    // citādi vietu labāk neminēt nekā minēt nepareizi
+    const citySlug = region ? slug(region) : "";
+    if (region && norm.length && norm.every((s) => s === citySlug)) {
+      const inCity = rows.filter((p) => p.region === region);
+      return inCity.find((p) => slug(p.name) === "centrs") ?? (inCity.length === 1 ? inCity[0] : inCity.find((p) => slug(p.name) === citySlug) ?? inCity[0] ?? null);
     }
     return null;
   };
@@ -161,6 +166,7 @@ function matchModel(list: ModelRow[], makeId: number, raw: string) {
 
 // ---------- viena ieraksta pārveide ----------
 export type ImportRow = typeof listings.$inferInsert;
+export type { Feed, PlaceRow, MakeRow, ModelRow };
 
 export function mapItem(
   feed: Feed,
@@ -188,7 +194,8 @@ export function mapItem(
     if (feed.vehicleClass === "moto" && !path.includes("/motorcycles/")) return null; // rezerves daļas, skuteri u.c.
     // marka: no "Marka" lauka (auto) vai adreses ceļa (moto: …/motorcycles/kawasaki/…)
     const makeRaw = first(f, "Marka") ?? path.split("/").filter(Boolean).at(-2) ?? "";
-    const modelRaw = feed.vehicleClass === "car" ? (f["Modelis"]?.[0] ?? f["Marka"]?.[1] ?? "") : (first(f, "Modelis") ?? "");
+    const modelRaw0 = feed.vehicleClass === "car" ? (f["Modelis"]?.[0] ?? f["Marka"]?.[1] ?? "") : (first(f, "Modelis") ?? "");
+    const modelRaw = /^(citi|cits|cita|other|another)$/i.test(modelRaw0.trim()) ? "" : modelRaw0; // ss.com "Citi" = modelis nav sarakstā
     const make = ctx.makes.find((m) => m.vehicleClass === feed.vehicleClass && slug(m.name) === slug(makeRaw));
     const model = make ? matchModel(ctx.models, make.id, modelRaw) : null;
     const year = int(first(f, "Gads"));
@@ -221,7 +228,7 @@ export function mapItem(
   const area = feed.propertyType === "Zeme" ? null : int(first(f, "m²"));
   const land = feed.propertyType === "Zeme" ? parseLand(first(f, "m²")) : parseLand(first(f, "Zem. pl."));
   const floorRaw = first(f, "Stāvs")?.match(/^(-?\d+)\/(\d+)/);
-  const where = place ? `, ${place.name}` : "";
+  const where = place ? `, ${slug(place.name) === "centrs" ? place.region : place.name}` : "";
   const title =
     feed.propertyType === "Dzīvoklis" ? `${rooms ?? 1}-istabu dzīvoklis${area ? `, ${area} m²` : ""}${where}`
     : feed.propertyType === "Māja" ? `Privātmāja${area ? ` ${area} m²` : ""}${land ? `, zeme ${landLabel(land)}` : ""}${where}`
@@ -259,7 +266,7 @@ export async function importSsRss(fetchXml: (url: string) => Promise<string> = d
   const ctx = { findPlace: makePlaceFinder(placeRows as PlaceRow[]), makes: makeRows as MakeRow[], models: modelRows };
 
   const seen = new Set<string>();
-  for (const feed of SS_FEEDS) {
+  for (const feed of SS_FEEDS as readonly (Feed & { url: string })[]) {
     let xml: string;
     try {
       xml = await fetchXml(feed.url);
