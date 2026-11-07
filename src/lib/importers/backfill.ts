@@ -3,6 +3,8 @@ import { and, eq, inArray, isNotNull, isNull, or } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { inferBody } from "../illustrations";
 import { findMake, matchModel, vehicleTitle } from "./ss-rss";
+import { houseTail } from "../vzd-key";
+import { sql } from "drizzle-orm";
 
 const { listings, models, makes, crawlState } = schema;
 const BODY_KEY = "backfill:body:v3";
@@ -129,4 +131,16 @@ export async function ensureMotoModels() {
     linked++;
   }
   return { checked: rows.length, created, linked };
+}
+
+/**
+ * VZD darījumiem īsā adreses atslēga (house_tail) pa daļām, lai nenoslogotu datubāzi (pilna pārielāde to noslogo stundu).
+ * Bez atslēgas paliek tukša virkne, lai neapstrādātu atkārtoti.
+ */
+export async function backfillHouseTail(limit = 3000) {
+  const rows = await db.execute<{ deal_id: number; address: string }>(sql`select deal_id, address from vzd_deals where house_tail is null limit ${limit}`);
+  if (!rows.rows.length) return null;
+  const vals = rows.rows.map((r) => sql`(${r.deal_id}::int, ${houseTail(r.address) ?? ""})`);
+  await db.execute(sql`update vzd_deals d set house_tail = v.t from (values ${sql.join(vals, sql`, `)}) as v(id, t) where d.deal_id = v.id`);
+  return rows.rows.length;
 }

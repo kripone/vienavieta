@@ -5,7 +5,7 @@ import { db, schema } from "@/db";
 import { SS_FULL_EVERY_HOURS, SS_QUICK_EVERY_MIN, SS_SECTIONS } from "../constants";
 import { geocodePending, geocodingEnabled } from "../geocode";
 import { ensureDailySnapshot } from "../market";
-import { backfillBodies, backfillMakeModel, ensureMotoModels, forceModelRecrawl } from "./backfill";
+import { backfillBodies, backfillHouseTail, backfillMakeModel, ensureMotoModels, forceModelRecrawl } from "./backfill";
 import { crawlSection } from "./ss-pages";
 import { detailsEnabled, fillVehicleCities } from "./ss-details";
 import { importVzdIfChanged } from "./vzd";
@@ -20,6 +20,7 @@ export function ssCrawlerEnabled() {
 async function tick() {
   const mm = await backfillMakeModel().catch((e) => (console.error("Marku/modeļu pārrēķins neizdevās:", e), null));
   if (mm) console.log("Marku/modeļu pārrēķins:", JSON.stringify(mm));
+  await backfillHouseTail().catch((e) => console.error("VZD īsās adreses:", e));
   const mo = await ensureMotoModels().catch((e) => (console.error("Moto modeļi:", e), null));
   if (mo) console.log("Moto modeļi:", JSON.stringify(mo));
   if (await forceModelRecrawl().catch(() => false)) console.log("Auto/moto pilnā kārta sākta no jauna modeļu atpazīšanai");
