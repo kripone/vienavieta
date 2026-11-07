@@ -9,8 +9,9 @@ Aptuvenās izmaksas: Render ~7 $ portālam + ~6 $ datubāzei mēnesī. R2 un Bre
 
 ## 1. Cloudflare R2 (bildēm)
 
-Testa versijā bildes glabājas datubāzē (`STORAGE_DRIVER=db`), tāpēc šo soli var izdarīt vēlāk.
-Kad R2 ir iestatīts, Render nomaini `STORAGE_DRIVER` uz `s3`. Jau augšupielādētās bildes paliek datubāzē un R2 netiek pārceltas.
+Bez R2 bildes var glabāt datubāzē (`STORAGE_DRIVER=db`). Pēc pārslēgšanas uz `s3` agrāk datubāzē saglabātās bildes joprojām tiek rādītas.
+`MEDIA_PUBLIC_URL` nav obligāts: ja tas ir tukšs, bildes izsniedz pats portāls caur `/media/…`, un R2 publiskā piekļuve nav vajadzīga.
+Pēc palaišanas servera žurnālā jābūt rindai `Bilžu krātuve (s3): darbojas`.
 
 1. Cloudflare panelī atver **R2 Object Storage** un ieslēdz R2 (prasīs maksājuma karti, bet līdz 10 GB nemaksā).
 2. **Create bucket**: nosaukums `vienavieta-photos`, atrašanās vieta "Automatic" vai "Eastern Europe".

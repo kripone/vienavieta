@@ -13,3 +13,4 @@
 - Antispam pārbauda, vai forma aizpildīta ne ātrāk kā 4 s pēc lapas atvēršanas; automātiskajos testos pirms iesniegšanas jāpagaida.
 - Meklēšana: parametri un SQL `src/lib/search.ts` (parseSearch → conditions); filtru UI `src/components/search-filters.tsx`; karte `src/components/search-map.tsx`. Jaunu filtru pievieno visās trijās vietās.
 - `getCurrentUser()` sauc `headers()` ārpus try/catch un `unstable_rethrow`, lai neapklusinātu Next dinamiskās renderēšanas signālus.
+- Bilžu krātuve: `STORAGE_DRIVER` = s3 | db | local; startējot `src/instrumentation.ts` pārbauda krātuvi un ieraksta rezultātu žurnālā.

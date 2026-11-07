@@ -52,8 +52,14 @@ export async function getObject(key: string): Promise<Buffer | null> {
   checkKey(key);
   try {
     if (s3) {
-      const r = await s3.send(new GetObjectCommand({ Bucket: process.env.S3_BUCKET, Key: key }));
-      return r.Body ? Buffer.from(await r.Body.transformToByteArray()) : null;
+      try {
+        const r = await s3.send(new GetObjectCommand({ Bucket: process.env.S3_BUCKET, Key: key }));
+        if (r.Body) return Buffer.from(await r.Body.transformToByteArray());
+      } catch {
+        // nav S3: varbūt bilde augšupielādēta, kad glabāšana bija datubāzē
+      }
+      const old = await db.query.mediaObjects.findFirst({ where: eq(schema.mediaObjects.key, key) }).catch(() => undefined);
+      return old ? Buffer.from(old.data) : null;
     }
     if (useDb) {
       const row = await db.query.mediaObjects.findFirst({ where: eq(schema.mediaObjects.key, key) });
@@ -82,4 +88,18 @@ export async function deleteObject(key: string) {
 export function mediaUrl(key: string) {
   const base = process.env.MEDIA_PUBLIC_URL?.replace(/\/$/, "");
   return base ? `${base}/${key}` : `/media/${key}`;
+}
+
+/** Pārbauda krātuvi startējot: ieraksta, nolasa un izdzēš testa failu. Rezultāts redzams servera žurnālā. */
+export async function checkStorage() {
+  const key = "healthcheck/ping.txt";
+  try {
+    await putObject(key, Buffer.from("ok"), "text/plain");
+    const back = await getObject(key);
+    await deleteObject(key);
+    if (back?.toString() !== "ok") throw new Error("nolasītais saturs nesakrīt");
+    console.log(`Bilžu krātuve (${driver}): darbojas`);
+  } catch (err) {
+    console.error(`Bilžu krātuve (${driver}): KĻŪDA`, err instanceof Error ? err.message : err);
+  }
 }
