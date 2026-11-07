@@ -10,3 +10,9 @@ export function timeAgo(date: Date, now = new Date()): string {
   const d = Math.floor(h / 24);
   return d === 1 ? "vakar" : `pirms ${d} d.`;
 }
+
+/** Latviešu skaitlis + vārds: 1, 21, 31… vienskaitlī (izņemot 11), pārējie daudzskaitlī. */
+export function plural(n: number, one: string, many: string) {
+  const word = n % 10 === 1 && n % 100 !== 11 ? one : many;
+  return `${n.toLocaleString("lv-LV")} ${word}`;
+}

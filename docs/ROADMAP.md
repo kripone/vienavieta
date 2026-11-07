@@ -39,7 +39,9 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 
 ## 6. Moderācija
 - [x] Sūdzības ("Ziņot par sludinājumu") un automātiska paslēpšana pēc 3 dažādu lietotāju sūdzībām
-- [ ] Moderatora panelis: sūdzības, bloķēšana, dublikāti
+- [x] Moderatora panelis /moderacija: sūdzības (viss kārtībā / paslēpt / bloķēt autoru), paslēptie sludinājumi, lietotāju meklēšana un bloķēšana
+- [x] Piekļuve: loma moderator/admin vai e-pasts ADMIN_EMAILS sarakstā
+- [ ] Dublikātu meklēšana moderatoriem
 
 ## 7. Ienākumi un papildu
 - [ ] Maksājumi (Stripe vai Montonio): TOP, izcelšana, uzcelšana

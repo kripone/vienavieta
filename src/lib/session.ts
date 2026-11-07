@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
-import { redirect, unstable_rethrow } from "next/navigation";
+import { notFound, redirect, unstable_rethrow } from "next/navigation";
 import { db, schema } from "@/db";
 import { auth } from "./auth";
 
@@ -32,4 +32,25 @@ export async function requireUser(nextPath: string) {
 /** Atļauj tikai drošus iekšējos ceļus pāradresācijai pēc pieteikšanās. */
 export function safeNext(next: string | undefined | null, fallback = "/profils") {
   return next && next.startsWith("/") && !next.startsWith("//") ? next : fallback;
+}
+
+type Who = { role: string; email: string };
+
+/** E-pasti no ADMIN_EMAILS (atdalīti ar komatu) vienmēr ir administratori. */
+const adminEmails = () =>
+  (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+
+export function isModerator(user: Who | null | undefined): boolean {
+  if (!user) return false;
+  return user.role === "moderator" || user.role === "admin" || adminEmails().includes(user.email.toLowerCase());
+}
+
+/** Moderācijas lapām: neielogotus sūta pieteikties, pārējiem lapa "neeksistē". */
+export async function requireModerator(nextPath: string) {
+  const user = await requireUser(nextPath);
+  if (!isModerator(user)) notFound();
+  return user;
 }

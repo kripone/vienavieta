@@ -6,6 +6,7 @@ import { SearchMapLazy } from "@/components/search-map-lazy";
 import { SortSelect } from "@/components/sort-select";
 import { VEHICLE_CLASS_LABEL, type VehicleClass } from "@/lib/constants";
 import { favoriteIds } from "@/lib/favorites";
+import { plural } from "@/lib/format";
 import { regionOptions } from "@/lib/listings";
 import { parseSearch, searchListings } from "@/lib/search";
 import { getCurrentUser } from "@/lib/session";
@@ -50,7 +51,7 @@ export default async function SearchPage(props: { searchParams: Promise<SP> }) {
         <SearchMapLazy query={pointsQuery} zone={flat.zone} />
         <div className="results-head">
           <h1>{heading}</h1>
-          {result && <span className="count">{result.total.toLocaleString("lv-LV")} sludinājumi</span>}
+          {result && <span className="count">{plural(result.total, "sludinājums", "sludinājumi")}</span>}
           <span className="grow" />
           <Suspense>
             <SortSelect value={s.sort} />

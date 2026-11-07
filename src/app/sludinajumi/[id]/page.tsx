@@ -11,7 +11,7 @@ import { formatNumber, formatPrice, timeAgo } from "@/lib/format";
 import { landLabel } from "@/lib/listing-input";
 import { favoriteIds } from "@/lib/favorites";
 import { getListing, locationLabel } from "@/lib/listings";
-import { getCurrentUser } from "@/lib/session";
+import { getCurrentUser, isModerator } from "@/lib/session";
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ saglabats?: string }> };
 
@@ -29,7 +29,8 @@ export default async function ListingPage(props: Props) {
   if (!d) notFound();
   const l = d.l;
   const isOwner = Boolean(user && l.userId === user.id);
-  if (l.status === "deleted" || ((l.status === "hidden" || l.status === "pending") && !isOwner)) notFound();
+  const isMod = isModerator(user);
+  if (l.status === "deleted" || ((l.status === "hidden" || l.status === "pending") && !isOwner && !isMod)) notFound();
 
   const rows: [string, string | number | null | undefined][] =
     l.kind === "vehicle"
@@ -71,6 +72,8 @@ export default async function ListingPage(props: Props) {
     <main className="wrap">
       {saglabats && isOwner && <p className="welcome">Sludinājums saglabāts{l.status === "active" ? " un redzams visiem" : ""}.</p>}
       {l.status === "sold" && <p className="alert">Šis sludinājums ir atzīmēts kā pārdots.</p>}
+      {l.status === "hidden" && (isOwner || isMod) && <p className="alert">Sludinājumu paslēpis moderators, un citi to neredz.</p>}
+      {l.status === "pending" && isMod && !isOwner && <p className="alert">Paslēpts pēc lietotāju sūdzībām. Izlem sadaļā <a href="/moderacija">Moderācija</a>.</p>}
       {l.status === "pending" && isOwner && <p className="alert">Sludinājums ir paslēpts pēc vairāku lietotāju sūdzībām. Moderators to pārbaudīs, un pēc tam tas atkal būs redzams.</p>}
       {isOwner && <OwnerActions id={l.id} status={l.status} />}
       <div className="det">

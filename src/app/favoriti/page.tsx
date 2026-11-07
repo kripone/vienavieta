@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ListingCard } from "@/components/listing-card";
 import { favoriteListings } from "@/lib/favorites";
+import { plural } from "@/lib/format";
 import { requireUser } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Favorīti" };
@@ -19,7 +20,7 @@ export default async function FavoritesPage() {
       ) : (
         <>
           <p className="lead">
-            {rows.length} saglabāti sludinājumi{drops > 0 ? ` · ${drops} ar samazinātu cenu kopš saglabāšanas` : ""}
+            {plural(rows.length, "saglabāts sludinājums", "saglabāti sludinājumi")}{drops > 0 ? ` · ${drops} ar samazinātu cenu kopš saglabāšanas` : ""}
           </p>
           <div className="list">
             {rows.map((l) => (
