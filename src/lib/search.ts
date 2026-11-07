@@ -217,8 +217,28 @@ export async function searchListings(s: SearchParams) {
     : s.sort === "old" ? [asc(listings.createdAt)]
     : [desc(fresh)];
 
+  // Divos soļos: vispirms tikai lapas ID (lēts kārtojums), tad pilnie dati 24 rindām.
+  // Citādi apakšvaicājumi (bildes) izpildās visām atbilstošajām rindām pirms kārtošanas.
+  const idsQuery = db
+    .select({ id: listings.id })
+    .from(listings)
+    .leftJoin(places, eq(listings.placeId, places.id))
+    .leftJoin(regions, eq(places.regionId, regions.id))
+    .leftJoin(makes, eq(listings.makeId, makes.id))
+    .leftJoin(models, eq(listings.modelId, models.id))
+    .leftJoin(users, eq(listings.userId, users.id))
+    .where(where)
+    .orderBy(top, ...order, desc(listings.id))
+    .limit(PAGE_SIZE)
+    .offset((s.page - 1) * PAGE_SIZE);
+  const pageRows = idsQuery.then(async (ids) => {
+    if (!ids.length) return [];
+    const full = await base().where(inArray(listings.id, ids.map((r) => r.id)));
+    const byId = new Map(full.map((r) => [r.id, r]));
+    return ids.map((r) => byId.get(r.id)!).filter(Boolean);
+  });
   const [rows, [{ total }]] = await Promise.all([
-    base().where(where).orderBy(top, ...order, desc(listings.id)).limit(PAGE_SIZE).offset((s.page - 1) * PAGE_SIZE),
+    pageRows,
     db
       .select({ total: count() })
       .from(listings)
