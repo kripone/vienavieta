@@ -110,13 +110,20 @@ export function SearchFilters({ initial, regions }: { initial: FilterValues; reg
         {numIn("pmin", "Cena no, €")}
         {numIn("pmax", "Cena līdz, €")}
       </div>
+      <div className="seg seg-sm" role="group" aria-label="Valsts">
+        {([["", "Latvija un Lietuva"], ["LV", "Latvija"], ["LT", "Lietuva"]] as const).map(([c, l]) => (
+          <button key={c} type="button" aria-pressed={(v.country ?? "") === c} onClick={() => update({ country: c, loc: "" })}>
+            {l}
+          </button>
+        ))}
+      </div>
       <label className="field">
         Vieta
         <select value={v.loc ?? ""} onChange={(e) => update({ loc: e.target.value })}>
-          <option value="">Visa Latvija</option>
-          {regions.map((r) => (
-            <optgroup key={r.region} label={r.region}>
-              <option value={`r:${r.regionId}`}>{r.kind === "city" ? `Visa ${r.region}` : `Viss ${r.region}`}</option>
+          <option value="">{v.country === "LT" ? "Visa Lietuva" : v.country === "LV" ? "Visa Latvija" : "Visas vietas"}</option>
+          {regions.filter((r) => !v.country || r.country === v.country).map((r) => (
+            <optgroup key={r.region} label={!v.country && r.country === "LT" ? `Lietuva · ${r.region}` : r.region}>
+              <option value={`r:${r.regionId}`}>{r.country === "LT" && r.kind !== "city" ? `Visa ${r.region}` : r.kind === "city" ? `Visa ${r.region}` : `Viss ${r.region}`}</option>
               {r.places.map((p) => <option key={p.id} value={`p:${p.id}`}>{p.name}</option>)}
             </optgroup>
           ))}

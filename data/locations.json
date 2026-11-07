@@ -188,7 +188,8 @@
     "lat": 56.9,
     "lon": 24.09
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Jūrmala",
@@ -264,7 +265,8 @@
     "lat": 56.95,
     "lon": 23.48
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Daugavpils",
@@ -300,7 +302,8 @@
     "lat": 55.905,
     "lon": 26.62
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Jelgava",
@@ -321,7 +324,8 @@
     "lat": 56.63,
     "lon": 23.7
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Liepāja",
@@ -357,7 +361,8 @@
     "lat": 56.49,
     "lon": 21.02
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Rēzekne",
@@ -378,7 +383,8 @@
     "lat": 56.495,
     "lon": 27.32
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Ventspils",
@@ -399,7 +405,8 @@
     "lat": 57.4,
     "lon": 21.55
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Ādažu novads",
@@ -430,7 +437,8 @@
     "lat": 57.15,
     "lon": 24.28
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Aizkraukles novads",
@@ -461,7 +469,8 @@
     "lat": 56.62,
     "lon": 25.72
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Alūksnes novads",
@@ -482,7 +491,8 @@
     "lat": 57.37,
     "lon": 26.9
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Augšdaugavas novads",
@@ -513,7 +523,8 @@
     "lat": 56.03,
     "lon": 26.38
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Balvu novads",
@@ -534,7 +545,8 @@
     "lat": 57.0,
     "lon": 27.13
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Bauskas novads",
@@ -565,7 +577,8 @@
     "lat": 56.5,
     "lon": 24.12
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Cēsu novads",
@@ -601,7 +614,8 @@
     "lat": 57.33,
     "lon": 25.61
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Dienvidkurzemes novads",
@@ -652,7 +666,8 @@
     "lat": 56.44,
     "lon": 21.1
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Dobeles novads",
@@ -678,7 +693,8 @@
     "lat": 56.62,
     "lon": 23.43
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Gulbenes novads",
@@ -699,7 +715,8 @@
     "lat": 57.17,
     "lon": 26.33
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Jelgavas novads",
@@ -730,7 +747,8 @@
     "lat": 56.6,
     "lon": 23.65
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Jēkabpils novads",
@@ -761,7 +779,8 @@
     "lat": 56.52,
     "lon": 25.74
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Krāslavas novads",
@@ -782,7 +801,8 @@
     "lat": 55.88,
     "lon": 27.5
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Kuldīgas novads",
@@ -808,7 +828,8 @@
     "lat": 56.86,
     "lon": 21.74
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Ķekavas novads",
@@ -839,7 +860,8 @@
     "lat": 56.79,
     "lon": 24.43
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Limbažu novads",
@@ -870,7 +892,8 @@
     "lat": 57.32,
     "lon": 24.75
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Līvānu novads",
@@ -886,7 +909,8 @@
     "lat": 56.24,
     "lon": 26.24
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Ludzas novads",
@@ -907,7 +931,8 @@
     "lat": 56.39,
     "lon": 28.12
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Madonas novads",
@@ -938,7 +963,8 @@
     "lat": 56.72,
     "lon": 26.6
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Mārupes novads",
@@ -974,7 +1000,8 @@
     "lat": 56.98,
     "lon": 23.98
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Ogres novads",
@@ -1010,7 +1037,8 @@
     "lat": 56.85,
     "lon": 25.12
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Olaines novads",
@@ -1031,7 +1059,8 @@
     "lat": 56.79,
     "lon": 24.0
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Preiļu novads",
@@ -1052,7 +1081,8 @@
     "lat": 56.13,
     "lon": 27.0
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Rēzeknes novads",
@@ -1078,7 +1108,8 @@
     "lat": 56.37,
     "lon": 27.25
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Ropažu novads",
@@ -1119,7 +1150,8 @@
     "lat": 57.03,
     "lon": 24.33
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Salaspils novads",
@@ -1140,7 +1172,8 @@
     "lat": 56.83,
     "lon": 24.3
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Saldus novads",
@@ -1161,7 +1194,8 @@
     "lat": 56.5,
     "lon": 22.38
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Saulkrastu novads",
@@ -1182,7 +1216,8 @@
     "lat": 57.18,
     "lon": 24.35
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Siguldas novads",
@@ -1218,7 +1253,8 @@
     "lat": 57.03,
     "lon": 25.07
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Smiltenes novads",
@@ -1239,7 +1275,8 @@
     "lat": 57.42,
     "lon": 26.06
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Talsu novads",
@@ -1285,7 +1322,8 @@
     "lat": 57.75,
     "lon": 22.59
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Tukuma novads",
@@ -1321,7 +1359,8 @@
     "lat": 56.95,
     "lon": 23.33
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Valkas novads",
@@ -1337,7 +1376,8 @@
     "lat": 57.83,
     "lon": 26.0
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Valmieras novads",
@@ -1383,7 +1423,8 @@
     "lat": 57.65,
     "lon": 25.75
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Varakļānu novads",
@@ -1394,7 +1435,8 @@
     "lat": 56.61,
     "lon": 26.75
    }
-  ]
+  ],
+  "country": "LV"
  },
  {
   "name": "Ventspils novads",
@@ -1419,6 +1461,553 @@
     "name": "Tārgale",
     "lat": 57.48,
     "lon": 21.6
+   }
+  ],
+  "country": "LV"
+ },
+ {
+  "name": "Vilnius",
+  "kind": "city",
+  "country": "LT",
+  "places": [
+   {
+    "name": "Senamiestis",
+    "lat": 54.681,
+    "lon": 25.287
+   },
+   {
+    "name": "Naujamiestis",
+    "lat": 54.68,
+    "lon": 25.265
+   },
+   {
+    "name": "Užupis",
+    "lat": 54.68,
+    "lon": 25.3
+   },
+   {
+    "name": "Antakalnis",
+    "lat": 54.705,
+    "lon": 25.313
+   },
+   {
+    "name": "Žirmūnai",
+    "lat": 54.711,
+    "lon": 25.3
+   },
+   {
+    "name": "Šnipiškės",
+    "lat": 54.698,
+    "lon": 25.282
+   },
+   {
+    "name": "Žvėrynas",
+    "lat": 54.693,
+    "lon": 25.255
+   },
+   {
+    "name": "Pašilaičiai",
+    "lat": 54.731,
+    "lon": 25.226
+   },
+   {
+    "name": "Pilaitė",
+    "lat": 54.708,
+    "lon": 25.18
+   },
+   {
+    "name": "Fabijoniškės",
+    "lat": 54.735,
+    "lon": 25.245
+   },
+   {
+    "name": "Justiniškės",
+    "lat": 54.719,
+    "lon": 25.214
+   },
+   {
+    "name": "Viršuliškės",
+    "lat": 54.709,
+    "lon": 25.227
+   },
+   {
+    "name": "Šeškinė",
+    "lat": 54.719,
+    "lon": 25.244
+   },
+   {
+    "name": "Karoliniškės",
+    "lat": 54.689,
+    "lon": 25.214
+   },
+   {
+    "name": "Lazdynai",
+    "lat": 54.674,
+    "lon": 25.2
+   },
+   {
+    "name": "Naujininkai",
+    "lat": 54.661,
+    "lon": 25.29
+   },
+   {
+    "name": "Baltupiai",
+    "lat": 54.733,
+    "lon": 25.266
+   },
+   {
+    "name": "Verkiai",
+    "lat": 54.743,
+    "lon": 25.29
+   }
+  ]
+ },
+ {
+  "name": "Kaunas",
+  "kind": "city",
+  "country": "LT",
+  "places": [
+   {
+    "name": "Centras",
+    "lat": 54.896,
+    "lon": 23.92
+   },
+   {
+    "name": "Senamiestis",
+    "lat": 54.897,
+    "lon": 23.89
+   },
+   {
+    "name": "Žaliakalnis",
+    "lat": 54.905,
+    "lon": 23.937
+   },
+   {
+    "name": "Dainava",
+    "lat": 54.92,
+    "lon": 23.965
+   },
+   {
+    "name": "Šilainiai",
+    "lat": 54.93,
+    "lon": 23.88
+   },
+   {
+    "name": "Eiguliai",
+    "lat": 54.921,
+    "lon": 23.93
+   },
+   {
+    "name": "Aleksotas",
+    "lat": 54.88,
+    "lon": 23.9
+   },
+   {
+    "name": "Vilijampolė",
+    "lat": 54.915,
+    "lon": 23.88
+   },
+   {
+    "name": "Petrašiūnai",
+    "lat": 54.88,
+    "lon": 24.01
+   },
+   {
+    "name": "Panemunė",
+    "lat": 54.877,
+    "lon": 23.96
+   }
+  ]
+ },
+ {
+  "name": "Klaipėda",
+  "kind": "city",
+  "country": "LT",
+  "places": [
+   {
+    "name": "Centras",
+    "lat": 55.711,
+    "lon": 21.135
+   },
+   {
+    "name": "Senamiestis",
+    "lat": 55.706,
+    "lon": 21.132
+   },
+   {
+    "name": "Melnragė",
+    "lat": 55.734,
+    "lon": 21.088
+   },
+   {
+    "name": "Smiltynė",
+    "lat": 55.69,
+    "lon": 21.11
+   },
+   {
+    "name": "Debrecenas",
+    "lat": 55.68,
+    "lon": 21.17
+   },
+   {
+    "name": "Vėtrungė",
+    "lat": 55.698,
+    "lon": 21.165
+   }
+  ]
+ },
+ {
+  "name": "Vilniaus apskritis",
+  "kind": "municipality",
+  "country": "LT",
+  "places": [
+   {
+    "name": "Trakai",
+    "lat": 54.638,
+    "lon": 24.934
+   },
+   {
+    "name": "Elektrėnai",
+    "lat": 54.786,
+    "lon": 24.663
+   },
+   {
+    "name": "Lentvaris",
+    "lat": 54.644,
+    "lon": 25.052
+   },
+   {
+    "name": "Grigiškės",
+    "lat": 54.677,
+    "lon": 25.083
+   },
+   {
+    "name": "Ukmergė",
+    "lat": 55.245,
+    "lon": 24.776
+   },
+   {
+    "name": "Širvintos",
+    "lat": 55.044,
+    "lon": 24.957
+   },
+   {
+    "name": "Šalčininkai",
+    "lat": 54.309,
+    "lon": 25.383
+   },
+   {
+    "name": "Švenčionys",
+    "lat": 55.133,
+    "lon": 26.159
+   },
+   {
+    "name": "Pabradė",
+    "lat": 54.98,
+    "lon": 25.766
+   },
+   {
+    "name": "Nemenčinė",
+    "lat": 54.848,
+    "lon": 25.481
+   }
+  ]
+ },
+ {
+  "name": "Kauno apskritis",
+  "kind": "municipality",
+  "country": "LT",
+  "places": [
+   {
+    "name": "Jonava",
+    "lat": 55.073,
+    "lon": 24.28
+   },
+   {
+    "name": "Kėdainiai",
+    "lat": 55.288,
+    "lon": 23.974
+   },
+   {
+    "name": "Garliava",
+    "lat": 54.817,
+    "lon": 23.868
+   },
+   {
+    "name": "Kaišiadorys",
+    "lat": 54.866,
+    "lon": 24.453
+   },
+   {
+    "name": "Prienai",
+    "lat": 54.634,
+    "lon": 23.946
+   },
+   {
+    "name": "Birštonas",
+    "lat": 54.605,
+    "lon": 24.031
+   },
+   {
+    "name": "Raseiniai",
+    "lat": 55.382,
+    "lon": 23.116
+   }
+  ]
+ },
+ {
+  "name": "Klaipėdos apskritis",
+  "kind": "municipality",
+  "country": "LT",
+  "places": [
+   {
+    "name": "Palanga",
+    "lat": 55.918,
+    "lon": 21.068
+   },
+   {
+    "name": "Kretinga",
+    "lat": 55.889,
+    "lon": 21.243
+   },
+   {
+    "name": "Gargždai",
+    "lat": 55.712,
+    "lon": 21.395
+   },
+   {
+    "name": "Šilutė",
+    "lat": 55.349,
+    "lon": 21.483
+   },
+   {
+    "name": "Skuodas",
+    "lat": 56.27,
+    "lon": 21.528
+   },
+   {
+    "name": "Nida",
+    "lat": 55.303,
+    "lon": 21.007
+   }
+  ]
+ },
+ {
+  "name": "Šiaulių apskritis",
+  "kind": "municipality",
+  "country": "LT",
+  "places": [
+   {
+    "name": "Šiauliai",
+    "lat": 55.934,
+    "lon": 23.314
+   },
+   {
+    "name": "Radviliškis",
+    "lat": 55.811,
+    "lon": 23.546
+   },
+   {
+    "name": "Joniškis",
+    "lat": 56.242,
+    "lon": 23.616
+   },
+   {
+    "name": "Kelmė",
+    "lat": 55.629,
+    "lon": 22.932
+   },
+   {
+    "name": "Kuršėnai",
+    "lat": 56.004,
+    "lon": 22.937
+   },
+   {
+    "name": "Naujoji Akmenė",
+    "lat": 56.316,
+    "lon": 22.9
+   },
+   {
+    "name": "Pakruojis",
+    "lat": 55.973,
+    "lon": 23.858
+   }
+  ]
+ },
+ {
+  "name": "Panevėžio apskritis",
+  "kind": "municipality",
+  "country": "LT",
+  "places": [
+   {
+    "name": "Panevėžys",
+    "lat": 55.735,
+    "lon": 24.357
+   },
+   {
+    "name": "Biržai",
+    "lat": 56.201,
+    "lon": 24.756
+   },
+   {
+    "name": "Rokiškis",
+    "lat": 55.962,
+    "lon": 25.586
+   },
+   {
+    "name": "Pasvalys",
+    "lat": 56.059,
+    "lon": 24.403
+   },
+   {
+    "name": "Kupiškis",
+    "lat": 55.84,
+    "lon": 24.975
+   }
+  ]
+ },
+ {
+  "name": "Alytaus apskritis",
+  "kind": "municipality",
+  "country": "LT",
+  "places": [
+   {
+    "name": "Alytus",
+    "lat": 54.396,
+    "lon": 24.045
+   },
+   {
+    "name": "Druskininkai",
+    "lat": 54.015,
+    "lon": 23.973
+   },
+   {
+    "name": "Varėna",
+    "lat": 54.221,
+    "lon": 24.578
+   },
+   {
+    "name": "Lazdijai",
+    "lat": 54.233,
+    "lon": 23.517
+   }
+  ]
+ },
+ {
+  "name": "Marijampolės apskritis",
+  "kind": "municipality",
+  "country": "LT",
+  "places": [
+   {
+    "name": "Marijampolė",
+    "lat": 54.559,
+    "lon": 23.354
+   },
+   {
+    "name": "Vilkaviškis",
+    "lat": 54.652,
+    "lon": 23.035
+   },
+   {
+    "name": "Šakiai",
+    "lat": 54.953,
+    "lon": 23.048
+   },
+   {
+    "name": "Kazlų Rūda",
+    "lat": 54.749,
+    "lon": 23.493
+   },
+   {
+    "name": "Kalvarija",
+    "lat": 54.414,
+    "lon": 23.225
+   }
+  ]
+ },
+ {
+  "name": "Tauragės apskritis",
+  "kind": "municipality",
+  "country": "LT",
+  "places": [
+   {
+    "name": "Tauragė",
+    "lat": 55.252,
+    "lon": 22.29
+   },
+   {
+    "name": "Jurbarkas",
+    "lat": 55.078,
+    "lon": 22.765
+   },
+   {
+    "name": "Šilalė",
+    "lat": 55.493,
+    "lon": 22.186
+   }
+  ]
+ },
+ {
+  "name": "Telšių apskritis",
+  "kind": "municipality",
+  "country": "LT",
+  "places": [
+   {
+    "name": "Telšiai",
+    "lat": 55.981,
+    "lon": 22.247
+   },
+   {
+    "name": "Mažeikiai",
+    "lat": 56.312,
+    "lon": 22.333
+   },
+   {
+    "name": "Plungė",
+    "lat": 55.911,
+    "lon": 21.846
+   },
+   {
+    "name": "Rietavas",
+    "lat": 55.723,
+    "lon": 21.932
+   }
+  ]
+ },
+ {
+  "name": "Utenos apskritis",
+  "kind": "municipality",
+  "country": "LT",
+  "places": [
+   {
+    "name": "Utena",
+    "lat": 55.497,
+    "lon": 25.6
+   },
+   {
+    "name": "Visaginas",
+    "lat": 55.597,
+    "lon": 26.437
+   },
+   {
+    "name": "Anykščiai",
+    "lat": 55.526,
+    "lon": 25.103
+   },
+   {
+    "name": "Zarasai",
+    "lat": 55.731,
+    "lon": 26.247
+   },
+   {
+    "name": "Molėtai",
+    "lat": 55.229,
+    "lon": 25.418
+   },
+   {
+    "name": "Ignalina",
+    "lat": 55.34,
+    "lon": 26.162
    }
   ]
  }

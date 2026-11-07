@@ -27,13 +27,13 @@ const pick = <T extends readonly string[]>(v: string | string[] | undefined, lis
   return s && (list as readonly string[]).includes(s) ? (s as T[number]) : undefined;
 };
 
-/** Zona kartē: "lat,lon;lat,lon;…" (3–80 punkti Latvijas apkaimē). */
+/** Zona kartē: "lat,lon;lat,lon;…" (3–80 punkti Latvijas un Lietuvas apkaimē). */
 function parseZone(v: string | string[] | undefined): [number, number][] | undefined {
   const s = one(v);
   if (!s) return;
   const pts = s.split(";").map((p) => p.split(",").map(Number) as [number, number]);
   if (pts.length < 3 || pts.length > 80) return;
-  if (!pts.every(([la, lo]) => la > 54 && la < 59 && lo > 19 && lo < 30)) return;
+  if (!pts.every(([la, lo]) => la > 53.5 && la < 58.5 && lo > 20 && lo < 29)) return;
   return pts;
 }
 
@@ -52,6 +52,7 @@ export function parseSearch(raw: Raw) {
     pmin: int(raw.pmin, 0),
     pmax: int(raw.pmax, 0),
     loc,
+    country: pick(raw.country, ["LV", "LT"] as const),
     seller: pick(raw.seller, ["private", "dealer", "verified"] as const),
     sort: pick(raw.sort, SORTS) ?? "new",
     page: int(raw.page, 1, 1000) ?? 1,
@@ -107,6 +108,7 @@ function conditions(s: SearchParams): SQL[] {
     const id = Number(s.loc.slice(2));
     add(s.loc[0] === "p" ? eq(listings.placeId, id) : eq(places.regionId, id));
   }
+  if (s.country) add(eq(regions.country, s.country));
   if (s.seller === "verified") add(isNotNull(users.identityVerifiedAt));
   else if (s.seller) add(eq(users.sellerType, s.seller));
   if (s.q) {
@@ -195,6 +197,7 @@ export async function searchListings(s: SearchParams) {
       .select({ total: count() })
       .from(listings)
       .leftJoin(places, eq(listings.placeId, places.id))
+      .leftJoin(regions, eq(places.regionId, regions.id))
       .leftJoin(makes, eq(listings.makeId, makes.id))
       .leftJoin(models, eq(listings.modelId, models.id))
       .leftJoin(users, eq(listings.userId, users.id))
@@ -210,6 +213,7 @@ export async function searchPoints(s: SearchParams, limit = 3000) {
     .select({ id: listings.id, lat: listings.lat, lon: listings.lon, kind: listings.kind, price: listings.price, title: listings.title })
     .from(listings)
     .leftJoin(places, eq(listings.placeId, places.id))
+    .leftJoin(regions, eq(places.regionId, regions.id))
     .leftJoin(makes, eq(listings.makeId, makes.id))
     .leftJoin(models, eq(listings.modelId, models.id))
     .leftJoin(users, eq(listings.userId, users.id))

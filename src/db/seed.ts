@@ -19,11 +19,11 @@ type Db = NodePgDatabase<typeof schema>;
 
 /** Vietas un katalogs. Droši palaist atkārtoti: esošie ieraksti netiek dublēti. */
 export async function seedReference(db: Db) {
-  for (const r of locations as { name: string; kind: "city" | "municipality"; places: { name: string; lat: number; lon: number }[] }[]) {
+  for (const r of locations as { name: string; kind: "city" | "municipality"; country: "LV" | "LT"; places: { name: string; lat: number; lon: number }[] }[]) {
     const [region] = await db
       .insert(schema.regions)
-      .values({ name: r.name, kind: r.kind })
-      .onConflictDoUpdate({ target: schema.regions.name, set: { kind: r.kind } })
+      .values({ name: r.name, kind: r.kind, country: r.country })
+      .onConflictDoUpdate({ target: schema.regions.name, set: { kind: r.kind, country: r.country } })
       .returning({ id: schema.regions.id });
     await db
       .insert(schema.places)
@@ -56,12 +56,15 @@ export async function seedDemo(db: Db) {
   const vw = await db.query.makes.findFirst({ where: (m, { and, eq }) => and(eq(m.vehicleClass, "car"), eq(m.name, "Volkswagen")) });
   const golf = vw ? await db.query.models.findFirst({ where: (m, { and, eq }) => and(eq(m.makeId, vw.id), eq(m.name, "Golf")) }) : undefined;
   const at = (name: string) => allPlaces.find((p) => p.name === name) ?? allPlaces[0];
-  const teika = at("Teika"), ogre = at("Ogre"), majori = at("Majori");
+  const teika = at("Teika"), ogre = at("Ogre"), majori = at("Majori"), antakalnis = at("Antakalnis");
+  const toyota = await db.query.makes.findFirst({ where: (m, { and, eq }) => and(eq(m.vehicleClass, "car"), eq(m.name, "Toyota")) });
+  const rav4 = toyota ? await db.query.models.findFirst({ where: (m, { and, eq }) => and(eq(m.makeId, toyota.id), eq(m.name, "RAV4")) }) : undefined;
 
   await db.insert(schema.listings).values([
     { kind: "vehicle", vehicleClass: "car", title: "Volkswagen Golf 2.0 TDI", price: 12900, makeId: vw?.id, modelId: golf?.id, year: 2017, mileageKm: 168000, fuel: "Dīzelis", gearbox: "Manuāla", body: "Hečbeks", engineL: "2.0", powerKw: 110, drive: "Priekšpiedziņa", color: "Pelēka", placeId: teika.id, lat: teika.lat, lon: teika.lon, contactPhone: "+37120000000" },
     { kind: "property", propertyType: "Dzīvoklis", deal: "sell", title: "2-istabu dzīvoklis, Brīvības iela", price: 98000, rooms: 2, areaM2: "54", floor: 3, floors: 5, series: "467. sērija", material: "Paneļu", heating: "Centrālā", condition: "Labs", builtYear: 1978, amenities: ["Balkons"], placeId: teika.id, lat: teika.lat, lon: teika.lon, contactPhone: "+37120000001" },
     { kind: "property", propertyType: "Māja", deal: "sell", title: "Privātmāja 160 m², zeme 1200 m²", price: 189000, rooms: 5, areaM2: "160", landM2: 1200, floors: 2, material: "Ķieģeļu", heating: "Siltumsūknis", condition: "Pēc kapitālā remonta", builtYear: 1998, amenities: ["Terase", "Pirts"], placeId: ogre.id, lat: ogre.lat, lon: ogre.lon, contactEmail: "pardod@example.lv" },
+    { kind: "vehicle", vehicleClass: "car", title: "Toyota RAV4 2.5 hibrīds", price: 24500, makeId: toyota?.id, modelId: rav4?.id, year: 2020, mileageKm: 92000, fuel: "Hibrīds", gearbox: "Automāts", body: "Apvidus", engineL: "2.5", powerKw: 160, drive: "Pilnpiedziņa", color: "Balta", placeId: antakalnis.id, lat: antakalnis.lat, lon: antakalnis.lon, contactPhone: "+37060000000" },
     { kind: "property", propertyType: "Dzīvoklis", deal: "day", title: "Dzīvoklis pie jūras, Majori", price: 85, rooms: 2, areaM2: "48", floor: 2, floors: 4, series: "Jaunais projekts", heating: "Gāzes", condition: "Jauns projekts", amenities: ["Balkons", "Mēbelēts"], placeId: majori.id, lat: majori.lat, lon: majori.lon, contactPhone: "+37120000002" },
   ]);
 }

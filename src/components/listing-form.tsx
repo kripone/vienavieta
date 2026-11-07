@@ -7,7 +7,7 @@ import {
   PROPERTY_FIELDS, PROPERTY_GROUPS, PURPOSES, SERIES, VEHICLE_CLASS_LABEL, VEHICLE_CLASSES, type PropertyType, type VehicleClass,
 } from "@/lib/constants";
 
-export type RegionOption = { regionId: number; region: string; kind: "city" | "municipality"; places: { id: number; name: string }[] };
+export type RegionOption = { regionId: number; region: string; kind: "city" | "municipality"; country: "LV" | "LT"; places: { id: number; name: string }[] };
 export type PhotoItem = { id: string; thumbUrl: string };
 type Make = { id: number; name: string; popular: boolean; models: { id: number; name: string }[] };
 
@@ -223,7 +223,7 @@ export function ListingForm(props: {
           <select value={v.placeId} onChange={set("placeId")} aria-invalid={Boolean(errors.placeId)}>
             <option value="">— izvēlies —</option>
             {props.regions.map((r) => (
-              <optgroup key={r.region} label={r.region}>
+              <optgroup key={r.region} label={r.country === "LT" ? `Lietuva · ${r.region}` : r.region}>
                 {r.places.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </optgroup>
             ))}

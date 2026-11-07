@@ -81,3 +81,7 @@ export const REPORT_HIDE_THRESHOLD = 3;
 /** Cik jaunu sludinājumu viens lietotājs drīkst ievietot diennaktī. */
 export const DAILY_LISTING_LIMIT = 5;
 export const MAX_PHOTOS = 12;
+
+export const COUNTRIES = ["LV", "LT"] as const;
+export type Country = (typeof COUNTRIES)[number];
+export const COUNTRY_LABEL: Record<Country, string> = { LV: "Latvija", LT: "Lietuva" };

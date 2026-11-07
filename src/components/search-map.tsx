@@ -34,13 +34,13 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
   // kartes izveide
   useEffect(() => {
     if (!box.current || map.current) return;
-    const m = L.map(box.current, { center: [56.95, 24.6], zoom: 7, minZoom: 6, maxZoom: 18, zoomControl: true, worldCopyJump: false });
+    const m = L.map(box.current, { center: [56.0, 24.0], zoom: 6, minZoom: 6, maxZoom: 18, zoomControl: true, worldCopyJump: false });
     const streets = L.tileLayer(STREETS, { attribution: STREETS_ATTR, maxZoom: 19 }).addTo(m);
     if (SATELLITE) {
       const sat = L.tileLayer(SATELLITE, { attribution: SATELLITE_ATTR, maxZoom: 19 });
       L.control.layers({ "Karte": streets, "Satelīts": sat }, {}, { position: "topright" }).addTo(m);
     }
-    m.setMaxBounds([[54.8, 19.5], [58.8, 29.5]]);
+    m.setMaxBounds([[53.3, 19.5], [58.8, 29.5]]); // Latvija un Lietuva
     markers.current = L.layerGroup().addTo(m);
     map.current = m;
     return () => { m.remove(); map.current = null; };

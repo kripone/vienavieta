@@ -92,17 +92,17 @@ export async function getListing(id: string) {
 /** Vietas grupētas pa novadiem formām. */
 export async function regionOptions() {
   const rows = await db
-    .select({ id: places.id, name: places.name, regionId: regions.id, region: regions.name, kind: regions.kind })
+    .select({ id: places.id, name: places.name, regionId: regions.id, region: regions.name, kind: regions.kind, country: regions.country })
     .from(places)
     .innerJoin(regions, eq(places.regionId, regions.id))
-    .orderBy(asc(regions.id), asc(places.id));
-  const map = new Map<string, { regionId: number; region: string; kind: "city" | "municipality"; places: { id: number; name: string }[] }>();
-  for (const r of rows) (map.get(r.region) ?? map.set(r.region, { regionId: r.regionId, region: r.region, kind: r.kind, places: [] }).get(r.region)!).places.push({ id: r.id, name: r.name });
+    .orderBy(asc(regions.country), asc(regions.id), asc(places.id));
+  const map = new Map<string, { regionId: number; region: string; kind: "city" | "municipality"; country: "LV" | "LT"; places: { id: number; name: string }[] }>();
+  for (const r of rows) (map.get(r.region) ?? map.set(r.region, { regionId: r.regionId, region: r.region, kind: r.kind, country: r.country, places: [] }).get(r.region)!).places.push({ id: r.id, name: r.name });
   return [...map.values()];
 }
 
 export function locationLabel(place: string | null, region: string | null, regionKind: string | null) {
   if (!place || !region) return "";
-  return regionKind === "city" ? `${region}, ${place}` : `${place}, ${region.replace(" novads", " nov.")}`;
+  return regionKind === "city" ? `${region}, ${place}` : `${place}, ${region.replace(" novads", " nov.").replace(" apskritis", " apskr.")}`;
 }
 

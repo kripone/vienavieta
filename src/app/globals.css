@@ -187,3 +187,4 @@ main .fine { margin-top: 14px; }
 .leaflet-container { font-family: var(--f-body); }
 @media (max-width: 900px) { .filters-box > summary { font-size: 15px; } .filters-box > summary::after { content: " ▾"; color: var(--muted); } .filters-box[open] > summary::after { content: " ▴"; } }
 @media (max-width: 560px) { .filters .grid2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .mapwrap .map { height: 260px; } }
+.seg-sm button { padding: 6px 10px; font-size: 13px; }

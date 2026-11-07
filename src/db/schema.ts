@@ -21,10 +21,11 @@ export const userRole = pgEnum("user_role", ["user", "moderator", "admin"]);
 export const vehicleClass = pgEnum("vehicle_class", ["car", "moto", "camper", "van", "truck"]);
 export const listingKind = pgEnum("listing_kind", ["vehicle", "property"]);
 export const listingStatus = pgEnum("listing_status", ["active", "pending", "hidden", "sold", "deleted"]);
-export const listingSource = pgEnum("listing_source", ["own", "ss.com", "reklama.lv", "mm.lv", "city24.lv", "auto24.lv"]);
+export const listingSource = pgEnum("listing_source", ["own", "ss.com", "reklama.lv", "mm.lv", "city24.lv", "auto24.lv", "autoplius.lt", "aruodas.lt"]);
 export const sellerType = pgEnum("seller_type", ["private", "dealer"]);
 export const dealType = pgEnum("deal_type", ["sell", "rent", "day", "buy"]);
 export const regionKind = pgEnum("region_kind", ["city", "municipality"]);
+export const country = pgEnum("country", ["LV", "LT"]);
 export const reportReason = pgEnum("report_reason", ["spam", "fraud", "sold", "wrong", "dup", "bad"]);
 export const reportStatus = pgEnum("report_status", ["open", "dismissed", "actioned"]);
 export const promotionType = pgEnum("promotion_type", ["bump", "highlight", "top"]);
@@ -114,6 +115,7 @@ export const regions = pgTable("regions", {
   id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
   kind: regionKind("kind").notNull(),
+  country: country("country").notNull().default("LV"),
 });
 
 export const places = pgTable(

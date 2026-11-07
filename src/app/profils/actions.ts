@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db, schema } from "@/db";
+import { isValidPhone } from "@/lib/antispam";
 import { getCurrentUser } from "@/lib/session";
 
 const ProfileSchema = z
@@ -12,7 +13,7 @@ const ProfileSchema = z
       .string()
       .trim()
       .transform((v) => v.replace(/[\s-]/g, ""))
-      .refine((v) => v === "" || /^(\+371)?[2689]\d{7}$/.test(v) || /^\+\d{8,15}$/.test(v), "Ievadi derīgu tālruni, piem. +371 20000000."),
+      .refine((v) => v === "" || isValidPhone(v), "Ievadi derīgu tālruni, piem. +371 20000000 vai +370 60000000."),
     sellerType: z.enum(["private", "dealer"]),
     companyName: z.string().trim().max(100, "Nosaukums ir pārāk garš."),
   })

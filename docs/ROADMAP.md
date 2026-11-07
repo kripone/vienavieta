@@ -47,6 +47,12 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [ ] Valodas: LV, RU, EN
 - [ ] PWA lietotne ar paziņojumiem
 
+## Lietuva ✅ (pamats)
+- [x] Lietuvas apskritis, pilsētas un Viļņas/Kauņas/Klaipēdas rajoni; filtrs "Valsts"
+- [x] Karte ietver Lietuvu; Lietuvas tālruņi (+370)
+- [ ] Lietuviešu valoda saskarnē
+- [ ] Sadarbība ar autoplius.lt / aruodas.lt (abi pieder Baltic Classifieds Group, tāpat kā city24.lv)
+
 ## 8. Citu portālu sludinājumi
 - [ ] Tikai pēc jurista atzinuma: partneru datu plūsmas vai ievākšana (virsraksts, cena, saite)
 - [ ] Dublikātu apvienošana starp portāliem

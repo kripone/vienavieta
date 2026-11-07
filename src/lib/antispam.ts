@@ -23,7 +23,8 @@ export function checkContent(i: SpamInput, now = Date.now()): string | null {
 }
 
 export const normalizePhone = (v: string) => v.replace(/[\s()-]/g, "");
-export const isValidPhone = (v: string) => /^(\+371)?[2689]\d{7}$/.test(v) || /^\+\d{8,15}$/.test(v);
+/** Latvijas (+371) un Lietuvas (+370 vai 8…) numuri, kā arī citi starptautiskie. */
+export const isValidPhone = (v: string) => /^(\+371)?[2689]\d{7}$/.test(v) || /^(\+370|8)[3-9]\d{7}$/.test(v) || /^\+\d{8,15}$/.test(v);
 export const isValidEmail = (v: string) => /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(v);
 
 export const normalizeTitle = (s: string) => s.toLocaleLowerCase("lv").replace(/[^\p{L}\p{N}]+/gu, "");

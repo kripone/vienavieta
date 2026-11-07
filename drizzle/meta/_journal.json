@@ -15,6 +15,13 @@
       "when": 1794011961742,
       "tag": "0001_listing_photos_upload",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794013769456,
+      "tag": "0002_lithuania",
+      "breakpoints": true
     }
   ]
 }

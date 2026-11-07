@@ -1,6 +1,6 @@
 # VienāVietā
 
-Latvijas sludinājumu portāls: transports un nekustamais īpašums vienā meklētājā.
+Latvijas un Lietuvas sludinājumu portāls: transports un nekustamais īpašums vienā meklētājā.
 
 Šis ir portāla pirmkods. Pašlaik gatavs: meklēšana ar filtriem un karti (zonas apvilkšana), sludinājumu pievienošana ar bildēm, sludinājuma lapa, mani sludinājumi, konti (pieteikšanās ar e-pastu un sociālajiem tīkliem, profils) un projekta pamats: datubāzes struktūra visām galvenajām funkcijām, vietu saraksts (novadi, pilsētas, rajoni, ciemi), transporta katalogs (vieglie auto, motocikli, kemperi, furgoni, kravas auto) un vienkārša sākumlapa. Tālākie soļi ir aprakstīti [docs/ROADMAP.md](docs/ROADMAP.md).
 
@@ -69,7 +69,7 @@ src/
   lib/
     constants.ts  kopīgās vērtības: transporta veidi, īpašumu veidi, sērijas u.c.
 data/
-  locations.json        43 novadi un valstspilsētas, 233 vietas ar koordinātām
+  locations.json        Latvija: 43 novadi un valstspilsētas, 233 vietas; Lietuva: 10 apskritis un 3 lielpilsētas, 91 vieta
   vehicle-catalog.json  183 markas un ~1900 modeļi pa transporta veidiem
 drizzle/          SQL migrācijas
 docs/             plāns un dokumentācija
