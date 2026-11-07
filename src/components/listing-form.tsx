@@ -117,7 +117,7 @@ export function ListingForm(props: {
       {!isEdit && (
         <div className="seg" role="group" aria-label="Kategorija">
           <button type="button" aria-pressed={v.kind === "vehicle"} onClick={() => setV((p) => ({ ...p, kind: "vehicle" }))}>Transports</button>
-          <button type="button" aria-pressed={v.kind === "property"} onClick={() => setV((p) => ({ ...p, kind: "property" }))}>Nekustamais īpašums</button>
+          <button type="button" aria-pressed={v.kind === "property"} onClick={() => setV((p) => ({ ...p, kind: "property", placeId: props.regions.some((r) => r.country === "LT" && r.places.some((pl) => String(pl.id) === p.placeId)) ? "" : p.placeId }))}>Nekustamais īpašums</button>
         </div>
       )}
 
@@ -222,7 +222,7 @@ export function ListingForm(props: {
           Vieta *
           <select value={v.placeId} onChange={set("placeId")} aria-invalid={Boolean(errors.placeId)}>
             <option value="">— izvēlies —</option>
-            {props.regions.map((r) => (
+            {props.regions.filter((r) => v.kind === "vehicle" || r.country === "LV").map((r) => (
               <optgroup key={r.region} label={r.country === "LT" ? `Lietuva · ${r.region}` : r.region}>
                 {r.places.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </optgroup>

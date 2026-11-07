@@ -43,6 +43,11 @@ export async function saveListing(raw: unknown): Promise<SaveResult> {
   // vieta
   const place = await db.query.places.findFirst({ where: eq(places.id, v.placeId) });
   if (!place) return fail("placeId", "Izvēlies vietu no saraksta.");
+  if (v.kind === "property") {
+    // Nekustamais īpašums pagaidām tikai Latvijā.
+    const region = await db.query.regions.findFirst({ where: eq(schema.regions.id, place.regionId) });
+    if (region?.country !== "LV") return fail("placeId", "Nekustamo īpašumu var ievietot tikai Latvijā.");
+  }
 
   // marka un modelis
   let makeName: string | undefined, modelName: string | undefined;

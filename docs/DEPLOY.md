@@ -23,8 +23,10 @@ Pēc palaišanas servera žurnālā jābūt rindai `Bilžu krātuve (s3): darboj
 ## 2. Brevo (e-pastam)
 1. Reģistrējies https://www.brevo.com.
 2. **Senders, Domains → Domains**: pievieno savu domēnu un DNS ierakstus. Kamēr domēna nav, var apstiprināt vienu sūtītāja e-pastu (piem. savu Gmail) testam.
-3. **SMTP & API → SMTP**: `SMTP_HOST=smtp-relay.brevo.com`, `SMTP_PORT=587`, `SMTP_USER` (tavs Brevo login), `SMTP_PASS` (SMTP atslēga).
-4. `EMAIL_FROM="VienāVietā <apstiprinatais@epasts>"`
+3. **SMTP & API → API Keys → Generate a new API key** → `BREVO_API_KEY`.
+   Render bezmaksas plānā izejošie SMTP porti (25, 465, 587) ir bloķēti, tāpēc portāls sūta caur Brevo API (HTTPS), nevis SMTP.
+   SMTP (`SMTP_HOST` u.c.) der tikai maksas plānā vai citā hostingā.
+4. `EMAIL_FROM="VienāVietā <apstiprinatais@epasts>"`. Adresei jābūt apstiprinātai Brevo **Senders** sadaļā.
 
 ## 3. Render (portāls un datubāze)
 1. Reģistrējies https://render.com ar savu GitHub kontu.

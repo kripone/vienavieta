@@ -52,7 +52,8 @@ export function parseSearch(raw: Raw) {
     pmin: int(raw.pmin, 0),
     pmax: int(raw.pmax, 0),
     loc,
-    country: pick(raw.country, ["LV", "LT"] as const),
+    // Lietuva ir tikai transportam; pārējās sadaļās meklē Latvijā.
+    country: cat === "vehicle" ? pick(raw.country, ["LV", "LT"] as const) : undefined,
     seller: pick(raw.seller, ["private", "dealer", "verified"] as const),
     sort: pick(raw.sort, SORTS) ?? "new",
     page: int(raw.page, 1, 1000) ?? 1,
@@ -108,7 +109,12 @@ function conditions(s: SearchParams): SQL[] {
     const id = Number(s.loc.slice(2));
     add(s.loc[0] === "p" ? eq(listings.placeId, id) : eq(places.regionId, id));
   }
-  if (s.country) add(eq(regions.country, s.country));
+  if (s.cat === "vehicle") {
+    if (s.country) add(eq(regions.country, s.country));
+  } else {
+    // "Visi" un nekustamais īpašums: tikai Latvija; Lietuvas sludinājumi redzami auto sadaļā.
+    add(eq(regions.country, "LV"));
+  }
   if (s.seller === "verified") add(isNotNull(users.identityVerifiedAt));
   else if (s.seller) add(eq(users.sellerType, s.seller));
   if (s.q) {

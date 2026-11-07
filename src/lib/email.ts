@@ -10,22 +10,53 @@ const transport = smtpConfigured
       port: Number(process.env.SMTP_PORT ?? 587),
       secure: Number(process.env.SMTP_PORT) === 465,
       auth: process.env.SMTP_USER ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } : undefined,
+      connectionTimeout: 10_000,
     })
   : null;
 
+const fromHeader = () => process.env.EMAIL_FROM ?? "VienāVietā <noreply@vienavieta.lv>";
+
+/** "Vārds <adrese>" → { name, email } */
+function parseFrom(from: string) {
+  const m = from.match(/^\s*(.*?)\s*<([^>]+)>\s*$/);
+  return m ? { name: m[1].replace(/^"|"$/g, "") || undefined, email: m[2] } : { email: from.trim() };
+}
+
 /**
- * Nosūta e-pastu. Ja SMTP nav iestatīts (lokālā izstrāde), vēstule tiek izdrukāta servera konsolē.
- * Produkcijā bez SMTP iestatījumiem sūtīšana neizdodas, lai kļūda nepaliktu nepamanīta.
+ * Brevo transakciju API caur HTTPS (ports 443). Vajadzīgs, jo Render bezmaksas plānā
+ * izejošie SMTP porti (25, 465, 587) ir bloķēti.
+ */
+async function sendViaBrevo(mail: Mail) {
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: { "api-key": process.env.BREVO_API_KEY!, "content-type": "application/json", accept: "application/json" },
+    body: JSON.stringify({
+      sender: parseFrom(fromHeader()),
+      to: [{ email: mail.to }],
+      subject: mail.subject,
+      textContent: mail.text,
+      htmlContent: mail.html,
+    }),
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (!res.ok) throw new Error(`Brevo API kļūda ${res.status}: ${(await res.text()).slice(0, 300)}`);
+}
+
+/**
+ * Nosūta e-pastu: vispirms Brevo API (ja BREVO_API_KEY), citādi SMTP (ja SMTP_HOST).
+ * Bez abiem (lokālā izstrāde) vēstule tiek izdrukāta servera konsolē;
+ * produkcijā tad sūtīšana neizdodas, lai kļūda nepaliktu nepamanīta.
  */
 export async function sendMail(mail: Mail) {
+  if (process.env.BREVO_API_KEY) return sendViaBrevo(mail);
   if (!transport) {
     if (process.env.NODE_ENV === "production" && !process.env.ALLOW_CONSOLE_EMAIL) {
-      throw new Error("E-pasta sūtīšana nav iestatīta (SMTP_HOST).");
+      throw new Error("E-pasta sūtīšana nav iestatīta (BREVO_API_KEY vai SMTP_HOST).");
     }
     console.log(`\n[e-pasts] Kam: ${mail.to}\n[e-pasts] Tēma: ${mail.subject}\n${mail.text}\n`);
     return;
   }
-  await transport.sendMail({ from: process.env.EMAIL_FROM ?? "VienāVietā <noreply@vienavieta.lv>", ...mail });
+  await transport.sendMail({ from: fromHeader(), ...mail });
 }
 
 const escapeHtml = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);

@@ -49,6 +49,7 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 
 ## Lietuva ✅ (pamats)
 - [x] Lietuvas apskritis, pilsētas un Viļņas/Kauņas/Klaipēdas rajoni; filtrs "Valsts"
+- [x] Lietuva tikai transporta sadaļā; "Visi" un nekustamais īpašums rāda tikai Latviju
 - [x] Karte ietver Lietuvu; Lietuvas tālruņi (+370)
 - [ ] Lietuviešu valoda saskarnē
 - [ ] Sadarbība ar autoplius.lt / aruodas.lt (abi pieder Baltic Classifieds Group, tāpat kā city24.lv)

@@ -86,7 +86,7 @@ export function SearchFilters({ initial, regions }: { initial: FilterValues; reg
     <div className="filters">
       <div className="seg full" role="group" aria-label="Kategorija">
         {([["", "Visi"], ["vehicle", "Transports"], ["property", "Īpašumi"]] as const).map(([c, l]) => (
-          <button key={c} type="button" aria-pressed={(v.cat ?? "") === c} onClick={() => update({ cat: c, vc: c === "vehicle" ? "car" : "", make: "", model: "", body: "", ptype: "" })}>
+          <button key={c} type="button" aria-pressed={(v.cat ?? "") === c} onClick={() => update({ cat: c, vc: c === "vehicle" ? "car" : "", make: "", model: "", body: "", ptype: "", country: "", loc: "" })}>
             {l}
           </button>
         ))}
@@ -110,19 +110,19 @@ export function SearchFilters({ initial, regions }: { initial: FilterValues; reg
         {numIn("pmin", "Cena no, €")}
         {numIn("pmax", "Cena līdz, €")}
       </div>
-      <div className="seg seg-sm" role="group" aria-label="Valsts">
+      {v.cat === "vehicle" && <div className="seg seg-sm" role="group" aria-label="Valsts">
         {([["", "Latvija un Lietuva"], ["LV", "Latvija"], ["LT", "Lietuva"]] as const).map(([c, l]) => (
           <button key={c} type="button" aria-pressed={(v.country ?? "") === c} onClick={() => update({ country: c, loc: "" })}>
             {l}
           </button>
         ))}
-      </div>
+      </div>}
       <label className="field">
         Vieta
         <select value={v.loc ?? ""} onChange={(e) => update({ loc: e.target.value })}>
-          <option value="">{v.country === "LT" ? "Visa Lietuva" : v.country === "LV" ? "Visa Latvija" : "Visas vietas"}</option>
-          {regions.filter((r) => !v.country || r.country === v.country).map((r) => (
-            <optgroup key={r.region} label={!v.country && r.country === "LT" ? `Lietuva · ${r.region}` : r.region}>
+          <option value="">{v.cat !== "vehicle" || v.country === "LV" ? "Visa Latvija" : v.country === "LT" ? "Visa Lietuva" : "Visas vietas"}</option>
+          {regions.filter((r) => (v.cat === "vehicle" ? !v.country || r.country === v.country : r.country === "LV")).map((r) => (
+            <optgroup key={r.region} label={v.cat === "vehicle" && !v.country && r.country === "LT" ? `Lietuva · ${r.region}` : r.region}>
               <option value={`r:${r.regionId}`}>{r.country === "LT" && r.kind !== "city" ? `Visa ${r.region}` : r.kind === "city" ? `Visa ${r.region}` : `Viss ${r.region}`}</option>
               {r.places.map((p) => <option key={p.id} value={`p:${p.id}`}>{p.name}</option>)}
             </optgroup>

@@ -50,6 +50,8 @@ export const auth = betterAuth({
       apple: { clientId: process.env.APPLE_CLIENT_ID!, clientSecret: process.env.APPLE_CLIENT_SECRET! },
     }),
   },
+  // Render (un citi starpniekserveri) klienta IP nodod x-forwarded-for galvenē.
+  advanced: { ipAddress: { ipAddressHeaders: ["x-forwarded-for"] } },
   rateLimit: {
     enabled: true,
     window: 60,

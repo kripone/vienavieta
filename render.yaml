@@ -27,7 +27,10 @@ services:
         sync: false
       - key: BETTER_AUTH_URL
         sync: false
-      # E-pasts (Brevo vai cits SMTP), sk. docs/AUTH-SETUP.md
+      # E-pasts: Render bezmaksas plānā SMTP porti bloķēti, tāpēc lieto Brevo API (HTTPS).
+      - key: BREVO_API_KEY
+        sync: false
+      # SMTP tikai maksas plānā vai citā hostingā
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT
