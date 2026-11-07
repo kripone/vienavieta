@@ -52,6 +52,10 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [ ] Valodas: LV, RU, EN
 - [ ] PWA lietotne ar paziņojumiem
 
+## Izskats
+- [x] Gaišā/tumšā tēma (pārslēgs galvenē, atceras izvēli)
+- [x] Ilustrācijas sludinājumiem bez bildēm, transporta veidu ikonas, virsbūvju un īpašumu veidu josla ar skaitu
+
 ## Lietuva ✅ (pamats)
 - [x] Lietuvas apskritis, pilsētas un Viļņas/Kauņas/Klaipēdas rajoni; filtrs "Valsts"
 - [x] Lietuva tikai transporta sadaļā; "Visi" un nekustamais īpašums rāda tikai Latviju
@@ -60,7 +64,9 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [ ] Sadarbība ar autoplius.lt / aruodas.lt (abi pieder Baltic Classifieds Group, tāpat kā city24.lv)
 
 ## 8. Citu portālu sludinājumi
-- [ ] Tikai pēc jurista atzinuma: partneru datu plūsmas vai ievākšana (virsraksts, cena, saite)
+- [x] ss.com oficiālās RSS plūsmas (auto, moto, dzīvokļi, mājas, zeme): fakti + saite, bez bildēm un teksta; reizi stundā; avota filtrs
+- [ ] Citu portālu RSS/partneru plūsmas (reklama.lv, city24.lv, autoplius.lt …)
+- [ ] Lapu pārmeklēšana vai bildes: tikai pēc jurista atzinuma
 - [ ] Dublikātu apvienošana starp portāliem
 
 ## Palaišana produkcijā

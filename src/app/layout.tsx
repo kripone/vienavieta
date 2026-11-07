@@ -8,6 +8,7 @@ import "@fontsource/figtree/600.css";
 import "@fontsource/figtree/700.css";
 import "@fontsource/jetbrains-mono/500.css";
 import "./globals.css";
+import { ThemeToggle, themeScript } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 
 export const metadata: Metadata = {
@@ -17,7 +18,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="lv">
+    <html lang="lv" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body>
         <header className="top">
           <div className="wrap">
@@ -26,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </a>
             <span className="tag">Visi Latvijas sludinājumi vienā meklētājā</span>
             <nav className="nav">
+              <ThemeToggle />
               <UserMenu />
               <a href="/pievienot" className="btn primary">+ Pievienot</a>
             </nav>

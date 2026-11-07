@@ -6,8 +6,9 @@ import { ReportButton } from "@/components/report-button";
 import { Gallery } from "@/components/gallery";
 import { priceUnit } from "@/components/listing-card";
 import { OwnerActions } from "@/components/owner-actions";
-import { DEAL_LABEL, VEHICLE_CLASS_LABEL, type VehicleClass } from "@/lib/constants";
+import { DEAL_LABEL, SOURCE_LABEL, VEHICLE_CLASS_LABEL, type VehicleClass } from "@/lib/constants";
 import { formatNumber, formatPrice, timeAgo } from "@/lib/format";
+import { listingIll } from "@/lib/illustrations";
 import { landLabel } from "@/lib/listing-input";
 import { favoriteIds } from "@/lib/favorites";
 import { getListing, locationLabel } from "@/lib/listings";
@@ -67,6 +68,8 @@ export default async function ListingPage(props: Props) {
   const isFav = user && !isOwner ? (await favoriteIds(user.id, [l.id])).has(l.id) : false;
   const seller = d.sellerType === "dealer" && d.companyName ? d.companyName : d.sellerName || "Privātpersona";
   const unit = priceUnit(l.deal);
+  const ext = l.source !== "own" && l.externalUrl ? l.externalUrl : null;
+  const src = SOURCE_LABEL[l.source] ?? l.source;
 
   return (
     <main className="wrap">
@@ -77,7 +80,7 @@ export default async function ListingPage(props: Props) {
       {l.status === "pending" && isOwner && <p className="alert">Sludinājums ir paslēpts pēc vairāku lietotāju sūdzībām. Moderators to pārbaudīs, un pēc tam tas atkal būs redzams.</p>}
       {isOwner && <OwnerActions id={l.id} status={l.status} />}
       <div className="det">
-        <Gallery photos={d.photos} title={l.title} placeholder={l.kind === "vehicle" ? "🚗" : "🏠"} />
+        <Gallery photos={d.photos} title={l.title} placeholder={listingIll(l)} />
         <div className="det-side">
           <div className="det-title">
             <h1>{l.title}</h1>
@@ -87,17 +90,27 @@ export default async function ListingPage(props: Props) {
             {formatPrice(l.price)} {unit && <small>{unit}</small>}
           </div>
           <p className="meta">
-            <span>📍 {locationLabel(d.place, d.region, d.regionKind)}</span>
-            <span>Ievietots {timeAgo(l.createdAt)}</span>
+            {d.place && <span>📍 {locationLabel(d.place, d.region, d.regionKind)}</span>}
+            <span>{ext ? `Pievienots ${timeAgo(l.createdAt)}` : `Ievietots ${timeAgo(l.createdAt)}`}</span>
           </p>
-          <div className="panel seller">
-            <b>{seller}</b>
-            <span className="fine">
-              {d.sellerType === "dealer" ? (l.kind === "vehicle" ? "Auto salons" : "Aģentūra") : "Privātpersona"}
-              {d.sellerVerified ? " · ✔ identitāte apstiprināta" : ""}
-            </span>
-            {l.status === "active" && !isOwner && <ContactReveal id={l.id} />}
-          </div>
+          {ext ? (
+            <div className="panel seller">
+              <b>Sludinājums no {src}</b>
+              <p className="ext-note">
+                Šeit redzami tikai galvenie fakti. Bildes, aprakstu un pārdevēja kontaktus skaties oriģinālajā sludinājumā {src}.
+              </p>
+              <a className="btn primary" href={ext} target="_blank" rel="nofollow noopener noreferrer">Atvērt {src} ↗</a>
+            </div>
+          ) : (
+            <div className="panel seller">
+              <b>{seller}</b>
+              <span className="fine">
+                {d.sellerType === "dealer" ? (l.kind === "vehicle" ? "Auto salons" : "Aģentūra") : "Privātpersona"}
+                {d.sellerVerified ? " · ✔ identitāte apstiprināta" : ""}
+              </span>
+              {l.status === "active" && !isOwner && <ContactReveal id={l.id} />}
+            </div>
+          )}
           {l.status === "active" && !isOwner && <ReportButton id={l.id} loggedIn={Boolean(user)} />}
         </div>
       </div>

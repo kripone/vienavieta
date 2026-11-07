@@ -1,11 +1,13 @@
 "use client";
+import { Ill } from "./ill";
 import { useState } from "react";
 
 type Photo = { id: string; url: string; thumbUrl: string };
 
 export function Gallery({ photos, title, placeholder }: { photos: Photo[]; title: string; placeholder: string }) {
+  // placeholder: SVG ilustrācija no src/lib/illustrations.ts
   const [i, setI] = useState(0);
-  if (!photos.length) return <div className="gal-main empty"><span>{placeholder}</span></div>;
+  if (!photos.length) return <div className="gal-main empty"><Ill svg={placeholder} /></div>;
   const n = photos.length;
   const go = (d: number) => setI((x) => (x + d + n) % n);
   return (

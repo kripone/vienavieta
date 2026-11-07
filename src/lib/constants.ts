@@ -94,3 +94,23 @@ export const NOTIFY_FREQUENCY_LABEL: Record<NotifyFrequency, string> = { hourly:
 export const MAX_SAVED_SEARCHES = 20;
 /** Cik e-pastu viena paziņojumu kārta drīkst nosūtīt (Brevo bezmaksas plānā 300 dienā). */
 export const MAX_EMAILS_PER_RUN = 100;
+
+/**
+ * Ārējie sludinājumi: tikai oficiālās RSS plūsmas (portāls pats tās publicē).
+ * Ņemam tikai faktus (marka, gads, cena, platība, vieta) un saiti; bez bildēm un apraksta teksta.
+ */
+export const SS_FEEDS = [
+  { url: "https://www.ss.com/lv/transport/cars/rss/", kind: "vehicle", vehicleClass: "car" },
+  { url: "https://www.ss.com/lv/transport/moto-transport/rss/", kind: "vehicle", vehicleClass: "moto" },
+  { url: "https://www.ss.com/lv/real-estate/flats/rss/", kind: "property", propertyType: "Dzīvoklis" },
+  { url: "https://www.ss.com/lv/real-estate/flats/riga/rss/", kind: "property", propertyType: "Dzīvoklis" },
+  { url: "https://www.ss.com/lv/real-estate/homes-summer-residences/rss/", kind: "property", propertyType: "Māja" },
+  { url: "https://www.ss.com/lv/real-estate/plots-and-lands/rss/", kind: "property", propertyType: "Zeme" },
+] as const;
+/** Ārējie sludinājumi tiek paslēpti, ja nav atjaunoti tik dienas (RSS nerāda, kad oriģināls izdzēsts). */
+export const EXTERNAL_TTL_DAYS = 21;
+/** Avotu nosaukumi kartītēs. */
+export const SOURCE_LABEL: Record<string, string> = {
+  own: "VienāVietā", "ss.com": "ss.com", "reklama.lv": "reklama.lv", "mm.lv": "mm.lv", "city24.lv": "city24.lv",
+  "auto24.lv": "auto24.lv", "autoplius.lt": "autoplius.lt", "aruodas.lt": "aruodas.lt",
+};

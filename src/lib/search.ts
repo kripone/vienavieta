@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gte, ilike, inArray, isNotNull, lte, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, ilike, inArray, isNotNull, isNull, lte, ne, or, sql, type SQL } from "drizzle-orm";
 import { db, schema } from "@/db";
 import {
   AMENITIES, BODY_TYPES, COLORS, CONDITIONS, DEALS, DRIVES, FUELS, GEARBOXES, HEATING, MATERIALS, PROPERTY_GROUPS, PROPERTY_TYPES,
@@ -6,6 +6,9 @@ import {
 } from "./constants";
 
 const { listings, places, regions, makes, models, users, listingPhotos } = schema;
+
+const LV_SOURCES = ["own", "ss.com", "reklama.lv", "mm.lv", "city24.lv"] as const;
+const LT_SOURCES = ["autoplius.lt", "aruodas.lt"] as const;
 
 export const PAGE_SIZE = 24;
 export const SORTS = ["new", "cheap", "dear"] as const;
@@ -55,6 +58,8 @@ export function parseSearch(raw: Raw) {
     // Lietuva ir tikai transportam; pārējās sadaļās meklē Latvijā.
     country: cat === "vehicle" ? pick(raw.country, ["LV", "LT"] as const) : undefined,
     seller: pick(raw.seller, ["private", "dealer", "verified"] as const),
+    /** own = tikai VienāVietā, ext = no citiem portāliem */
+    src: pick(raw.src, ["own", "ext"] as const),
     sort: pick(raw.sort, SORTS) ?? "new",
     page: int(raw.page, 1, 1000) ?? 1,
     zone: parseZone(raw.zone),
@@ -109,12 +114,17 @@ function conditions(s: SearchParams): SQL[] {
     const id = Number(s.loc.slice(2));
     add(s.loc[0] === "p" ? eq(listings.placeId, id) : eq(places.regionId, id));
   }
+  // Ārējiem sludinājumiem vieta var nebūt zināma (piem. ss.com auto RSS); valsti tad nosaka avots.
+  const inCountry = (c: "LV" | "LT") =>
+    or(eq(regions.country, c), and(isNull(listings.placeId), inArray(listings.source, c === "LV" ? [...LV_SOURCES] : [...LT_SOURCES])));
   if (s.cat === "vehicle") {
-    if (s.country) add(eq(regions.country, s.country));
+    if (s.country) add(inCountry(s.country));
   } else {
     // "Visi" un nekustamais īpašums: tikai Latvija; Lietuvas sludinājumi redzami auto sadaļā.
-    add(eq(regions.country, "LV"));
+    add(inCountry("LV"));
   }
+  if (s.src === "own") add(eq(listings.source, "own"));
+  else if (s.src === "ext") add(ne(listings.source, "own"));
   if (s.seller === "verified") add(isNotNull(users.identityVerifiedAt));
   else if (s.seller) add(eq(users.sellerType, s.seller));
   if (s.q) {
@@ -181,7 +191,7 @@ export async function searchListings(s: SearchParams) {
       .select({
         id: listings.id, kind: listings.kind, status: listings.status, title: listings.title, price: listings.price, deal: listings.deal,
         createdAt: listings.createdAt, year: listings.year, mileageKm: listings.mileageKm, fuel: listings.fuel, gearbox: listings.gearbox,
-        body: listings.body, propertyType: listings.propertyType, rooms: listings.rooms, areaM2: listings.areaM2, landM2: listings.landM2,
+        body: listings.body, vehicleClass: listings.vehicleClass, source: listings.source, externalUrl: listings.externalUrl, propertyType: listings.propertyType, rooms: listings.rooms, areaM2: listings.areaM2, landM2: listings.landM2,
         place: places.name, region: regions.name, regionKind: regions.kind, thumbKey: coverThumb, photoCount,
       })
       .from(listings)
@@ -304,5 +314,24 @@ export async function describeSearch(s: SearchParams) {
     if (row) parts.push(row.name);
   } else if (s.country === "LT") parts.push("Lietuva");
   if (s.zone) parts.push("zona kartē");
+  if (s.src === "own") parts.push("tikai VienāVietā");
+  else if (s.src === "ext") parts.push("no citiem portāliem");
   return parts.join(" · ").slice(0, 120);
+}
+
+/** Joslai: sludinājumu skaits pa virsbūvēm (auto) vai īpašuma veidiem, ievērojot pārējos filtrus. */
+export async function typeCounts(s: SearchParams): Promise<Record<string, number>> {
+  const isCar = s.cat === "vehicle";
+  const col = isCar ? listings.body : listings.propertyType;
+  const rows = await db
+    .select({ k: col, n: count() })
+    .from(listings)
+    .leftJoin(places, eq(listings.placeId, places.id))
+    .leftJoin(regions, eq(places.regionId, regions.id))
+    .leftJoin(makes, eq(listings.makeId, makes.id))
+    .leftJoin(models, eq(listings.modelId, models.id))
+    .leftJoin(users, eq(listings.userId, users.id))
+    .where(and(...conditions(isCar ? { ...s, body: undefined } : { ...s, ptype: undefined })))
+    .groupBy(col);
+  return Object.fromEntries(rows.filter((r) => r.k).map((r) => [r.k as string, r.n]));
 }

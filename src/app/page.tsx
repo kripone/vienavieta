@@ -5,11 +5,12 @@ import { SaveSearchButton } from "@/components/save-search-button";
 import { SearchFilters } from "@/components/search-filters";
 import { SearchMapLazy } from "@/components/search-map-lazy";
 import { SortSelect } from "@/components/sort-select";
+import { TypeStrip } from "@/components/type-strip";
 import { VEHICLE_CLASS_LABEL, type VehicleClass } from "@/lib/constants";
 import { favoriteIds } from "@/lib/favorites";
 import { plural } from "@/lib/format";
 import { regionOptions } from "@/lib/listings";
-import { parseSearch, searchListings } from "@/lib/search";
+import { parseSearch, searchListings, typeCounts } from "@/lib/search";
 import { getCurrentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +31,8 @@ export default async function SearchPage(props: { searchParams: Promise<SP> }) {
   } catch (err) {
     console.error("Meklēšana neizdevās:", err);
   }
+  const stripMode = s.cat === "vehicle" && (s.vc ?? "car") === "car" ? "car" : s.cat === "property" && !s.ptype?.startsWith("g:") ? "home" : null;
+  const counts = stripMode && result ? await typeCounts(s).catch(() => ({})) : {};
   const favs = user && result ? await favoriteIds(user.id, result.rows.map((r) => r.id)).catch(() => new Set<string>()) : new Set<string>();
 
   const heading = s.cat === "vehicle" ? VEHICLE_CLASS_LABEL[(s.vc ?? "car") as VehicleClass] : s.cat === "property" ? "Nekustamais īpašums" : "Visi sludinājumi";
@@ -49,6 +52,7 @@ export default async function SearchPage(props: { searchParams: Promise<SP> }) {
         </FiltersBox>
       </aside>
       <section className="results">
+        {stripMode && <TypeStrip mode={stripMode} flat={flat} counts={counts} />}
         <SearchMapLazy query={pointsQuery} zone={flat.zone} />
         <div className="results-head">
           <h1>{heading}</h1>

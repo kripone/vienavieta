@@ -1,3 +1,4 @@
+import { importSsRss } from "@/lib/importers/ss-rss";
 import { runNotifications } from "@/lib/notify";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +9,7 @@ let running = false;
 let lastRun = 0;
 
 /**
- * Paziņojumu kārta. Izsauc GitHub Actions grafiks (.github/workflows/notify.yml).
+ * Stundas kārta: ārējo sludinājumu imports (ss.com RSS) un paziņojumi. Izsauc GitHub Actions grafiks (.github/workflows/notify.yml).
  * Ja iestatīts CRON_SECRET, pieprasījumam jābūt ar galveni "Authorization: Bearer <CRON_SECRET>".
  * Bez tā izsaukums ir drošs: e-pasti netiek sūtīti biežāk, kā atļauj katras meklēšanas biežums.
  */
@@ -22,9 +23,21 @@ async function handle(req: Request) {
   running = true;
   lastRun = Date.now();
   try {
+    // 1) ārējie sludinājumi no oficiālajām RSS plūsmām (izslēdzams ar EXTERNAL_IMPORT=off)
+    let imported: unknown = "off";
+    if (process.env.EXTERNAL_IMPORT !== "off") {
+      try {
+        imported = await importSsRss();
+        console.log("ss.com RSS imports:", JSON.stringify(imported));
+      } catch (err) {
+        imported = "failed";
+        console.error("ss.com RSS imports neizdevās:", err);
+      }
+    }
+    // 2) paziņojumi (ietver arī tikko ievāktos)
     const result = await runNotifications();
     console.log("Paziņojumu kārta:", JSON.stringify(result));
-    return Response.json(result);
+    return Response.json({ imported, ...result });
   } catch (err) {
     console.error("Paziņojumu kārta neizdevās:", err);
     return Response.json({ error: "failed" }, { status: 500 });

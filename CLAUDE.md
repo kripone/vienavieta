@@ -6,7 +6,7 @@
 - Cenas glabājas veselos eiro (`integer`). Maksājumu summas centos (`amount_cents`).
 - Pirms commit: `npm run typecheck` un `npm run build`.
 - Plāns un statuss: `docs/ROADMAP.md`. Pabeigtos punktus atzīmē tur.
-- Neveido citu portālu sludinājumu ievākšanu, kamēr lietotājs nav apstiprinājis jurista atzinumu.
+- Citu portālu sludinājumi (lietotāja lēmums 2026-11-07): tikai no portālu oficiālajām RSS plūsmām (`src/lib/importers/ss-rss.ts`, plūsmas `SS_FEEDS`). Ņem tikai faktus (marka, gads, cena, platība, vieta) un saiti uz oriģinālu; virsrakstu veido pats; bildes un pārdevēja tekstu nekopē. Saites uz oriģinālu: jaunā cilnē, `rel="nofollow noopener noreferrer"`, avots norādīts. Lapu pārmeklēšanu (scraping) un bilžu ņemšanu neveido, kamēr lietotājs nav apstiprinājis jurista atzinumu.
 - Pieteikšanās: `src/lib/auth.ts` (Better Auth). Serverī lietotāju iegūst ar `getCurrentUser()` / `requireUser()` no `src/lib/session.ts`, kas arī izslēdz bloķētos.
 - React 19 atiestata nekontrolētus formas laukus pēc servera darbības, tāpēc formās ar kļūdu paziņojumiem lieto kontrolētus laukus.
 - Sludinājumu saglabāšana: `src/app/sludinajumi/actions.ts`; validācija `src/lib/listing-input.ts`; antispam `src/lib/antispam.ts`. Bildes: `src/lib/storage.ts` (lokāli vai S3) un `src/lib/images.ts`.

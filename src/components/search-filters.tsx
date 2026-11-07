@@ -1,4 +1,5 @@
 "use client";
+import { vcIcon } from "@/lib/illustrations";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -96,7 +97,8 @@ export function SearchFilters({ initial, regions }: { initial: FilterValues; reg
         <div className="vc-row" role="group" aria-label="Transporta veids">
           {VEHICLE_CLASSES.map((c) => (
             <button key={c} type="button" aria-pressed={vc === c} onClick={() => update({ vc: c, make: "", model: "", body: "" })}>
-              {VEHICLE_CLASS_LABEL[c]}
+              <span dangerouslySetInnerHTML={{ __html: vcIcon(c) }} style={{ display: "contents" }} />
+              <span>{VEHICLE_CLASS_LABEL[c]}</span>
             </button>
           ))}
         </div>
@@ -228,6 +230,14 @@ export function SearchFilters({ initial, regions }: { initial: FilterValues; reg
           <option value="private">Privātpersonas</option>
           <option value="dealer">Saloni un aģentūras</option>
           <option value="verified">Tikai ar apstiprinātu identitāti</option>
+        </select>
+      </label>
+      <label className="field">
+        Avots
+        <select value={v.src ?? ""} onChange={(e) => update({ src: e.target.value })}>
+          <option value="">Visi sludinājumi</option>
+          <option value="own">Tikai VienāVietā</option>
+          <option value="ext">No citiem portāliem (ss.com)</option>
         </select>
       </label>
 
