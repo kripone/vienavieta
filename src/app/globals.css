@@ -380,3 +380,17 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .foot a { color: inherit; }
 .legal section { margin-top: 20px; }
 .legal p { line-height: 1.6; }
+
+/* Telefonā: kategorijas virs filtriem */
+.quick-cats { display: none; }
+@media (max-width: 900px) {
+  .quick-cats { display: grid; gap: 8px; margin-bottom: 10px; }
+  .quick-cats .seg { display: flex; }
+  .quick-cats .seg a { flex: 1; text-align: center; text-decoration: none; padding: 8px 10px; border-radius: 7px; font-weight: 600; color: var(--muted); }
+  .quick-cats .seg a[aria-current="page"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+  .quick-vc { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+  .quick-vc a { flex: none; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: inherit; text-decoration: none; font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .quick-vc a[aria-current="page"] { border-color: var(--car); color: var(--car); }
+}
+/* Telefonā galvenes pogas pārnes jaunā rindā, nevis izgriež */
+@media (max-width: 560px) { .nav { flex-wrap: wrap; margin-left: 0; } .nav .btn, .nav .lang { padding-inline: 10px; } }

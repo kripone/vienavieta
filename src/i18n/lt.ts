@@ -2,6 +2,8 @@
 import type { Dict } from "./core";
 
 export const lt: Dict = {
+  "{n} kartē": "{n} žemėlapyje",
+  "Filtri": "Filtrai",
   "* Skaitīts no brīža, kad sludinājumu pirmo reizi redzējām portālā.": "* Skaičiuojama nuo tada, kai skelbimą pirmą kartą pamatėme portale.",
   "+ Pievienot bildes": "+ Pridėti nuotraukų",
   "+ Pievienot sludinājumu": "+ Įdėti skelbimą",

@@ -194,7 +194,7 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
         </button>
         {zone && <button type="button" className="btn small" onClick={clearZone}>{t("Notīrīt zonu")}</button>}
         <button type="button" className="btn small" onClick={() => setFull((f) => !f)}>{full ? `✕ ${t("Aizvērt")}` : `⤢ ${t("Lielā karte")}`}</button>
-        {count != null && <span className="fine">{count} kartē</span>}
+        {count != null && <span className="fine">{t("{n} kartē", { n: count })}</span>}
         {count === 0 && /(^|&)cat=vehicle(&|$)/.test(query) && (
           <span className="fine">{t("· ss.com auto sarakstā vieta nav norādīta, tāpēc tie kartē nav redzami")}</span>
         )}

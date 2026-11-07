@@ -7,7 +7,7 @@ import { SearchFilters } from "@/components/search-filters";
 import { SearchMapLazy } from "@/components/search-map-lazy";
 import { SortSelect } from "@/components/sort-select";
 import { TypeStrip } from "@/components/type-strip";
-import { VEHICLE_CLASS_LABEL, type VehicleClass } from "@/lib/constants";
+import { VEHICLE_CLASS_LABEL, VEHICLE_CLASSES, type VehicleClass } from "@/lib/constants";
 import { alsoAt } from "@/lib/dedupe";
 import { priceEvals } from "@/lib/price-eval";
 import { vzdBadges } from "@/lib/vzd";
@@ -58,6 +58,21 @@ export default async function SearchPage(props: { searchParams: Promise<SP> }) {
   return (
     <main className="wrap search">
       <aside className="side">
+        {/* telefonā kategorijas redzamas uzreiz, virs aizvērtajiem filtriem */}
+        <nav className="quick-cats" aria-label={t("Kategorija")}>
+          <div className="seg full">
+            {([["", "Visi"], ["vehicle", "Transports"], ["property", "Īpašumi"]] as const).map(([c, l]) => (
+              <a key={c} href={c ? `/?cat=${c}` : "/"} aria-current={(s.cat ?? "") === c ? "page" : undefined}>{t(l)}</a>
+            ))}
+          </div>
+          {s.cat === "vehicle" && (
+            <div className="quick-vc">
+              {VEHICLE_CLASSES.map((c) => (
+                <a key={c} href={`/?cat=vehicle&vc=${c}`} aria-current={(s.vc ?? "car") === c ? "page" : undefined}>{t(VEHICLE_CLASS_LABEL[c])}</a>
+              ))}
+            </div>
+          )}
+        </nav>
         <FiltersBox active={Object.keys(flat).filter((k) => !["cat", "vc", "sort", "page"].includes(k)).length}>
           <SearchFilters initial={flat} regions={regions} />
         </FiltersBox>
