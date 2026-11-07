@@ -8,6 +8,7 @@ import "@fontsource/figtree/600.css";
 import "@fontsource/figtree/700.css";
 import "@fontsource/jetbrains-mono/500.css";
 import "./globals.css";
+import { UserMenu } from "@/components/user-menu";
 
 export const metadata: Metadata = {
   title: { default: "VienāVietā", template: "%s · VienāVietā" },
@@ -24,6 +25,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               Vienā<b>Vietā</b>
             </a>
             <span className="tag">Visi Latvijas sludinājumi vienā meklētājā</span>
+            <nav className="nav">
+              <UserMenu />
+            </nav>
           </div>
         </header>
         {children}

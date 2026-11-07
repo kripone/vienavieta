@@ -2,13 +2,14 @@
 
 Latvijas sludinājumu portāls: transports un nekustamais īpašums vienā meklētājā.
 
-Šis ir portāla pirmkods. Pašlaik gatavs projekta pamats: datubāzes struktūra visām galvenajām funkcijām, vietu saraksts (novadi, pilsētas, rajoni, ciemi), transporta katalogs (vieglie auto, motocikli, kemperi, furgoni, kravas auto) un vienkārša sākumlapa. Tālākie soļi ir aprakstīti [docs/ROADMAP.md](docs/ROADMAP.md).
+Šis ir portāla pirmkods. Pašlaik gatavs: konti (pieteikšanās ar e-pastu un sociālajiem tīkliem, profils) un projekta pamats: datubāzes struktūra visām galvenajām funkcijām, vietu saraksts (novadi, pilsētas, rajoni, ciemi), transporta katalogs (vieglie auto, motocikli, kemperi, furgoni, kravas auto) un vienkārša sākumlapa. Tālākie soļi ir aprakstīti [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Tehnoloģijas
 
 - **Next.js 16** (React 19, TypeScript): lapas un serveris vienā projektā
 - **PostgreSQL 16**: datubāze
 - **Drizzle ORM**: darbs ar datubāzi un migrācijas
+- **Better Auth**: pieteikšanās ar e-pasta saiti, Google, Facebook un Apple
 - Burti (Bricolage Grotesque, Figtree, JetBrains Mono) ir iekļauti projektā, tāpēc lapa nav atkarīga no Google Fonts
 
 ## Palaišana savā datorā
@@ -23,8 +24,9 @@ cd vienavieta
 # 2. Uzstādi bibliotēkas
 npm install
 
-# 3. Izveido iestatījumu failu
+# 3. Izveido iestatījumu failu un ieraksti tajā BETTER_AUTH_SECRET
 cp .env.example .env
+openssl rand -base64 32
 
 # 4. Palaid datubāzi
 docker compose up -d
@@ -40,7 +42,7 @@ npm run db:seed:demo
 npm run dev
 ```
 
-Portāls atveras http://localhost:3000. Datubāzes stāvokli var pārbaudīt http://localhost:3000/api/health.
+Portāls atveras http://localhost:3000. Lai ielogotos izstrādē, ievadi jebkuru e-pastu: pieteikšanās saite parādīsies terminālī, kur darbojas `npm run dev`. E-pasta un sociālo tīklu iestatīšana: [docs/AUTH-SETUP.md](docs/AUTH-SETUP.md). Datubāzes stāvokli var pārbaudīt http://localhost:3000/api/health.
 
 ## Komandas
 

@@ -8,11 +8,12 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] Vietas (novadi, pilsētas, rajoni, ciemi) un transporta katalogs
 - [x] Sākumlapa un veselības pārbaude
 
-## 2. Konti
-- [ ] Reģistrācija un pieteikšanās ar e-pastu (saite e-pastā, bez paroles)
-- [ ] Google, Facebook un Apple pieteikšanās (Auth.js)
+## 2. Konti ✅ (izņemot SMS)
+- [x] Reģistrācija un pieteikšanās ar e-pastu (saite e-pastā, bez paroles)
+- [x] Google, Facebook un Apple pieteikšanās (Better Auth; ieslēdzas, kad ir atslēgas, sk. docs/AUTH-SETUP.md)
 - [ ] Tālruņa apstiprināšana ar SMS
-- [ ] Profils: vārds, privātpersona vai salons/aģentūra
+- [x] Profils: vārds, tālrunis, privātpersona vai salons/aģentūra
+- [x] Bloķētie lietotāji nevar pieteikties
 
 ## 3. Sludinājumi
 - [ ] Pievienošanas un rediģēšanas forma (transports un īpašumi, lauki pēc veida)

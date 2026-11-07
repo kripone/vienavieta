@@ -32,12 +32,18 @@ export const promotionType = pgEnum("promotion_type", ["bump", "highlight", "top
 const id = () => text("id").primaryKey().$defaultFn(() => crypto.randomUUID());
 const createdAt = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
 
-// ---------- lietotāji un pieteikšanās (Auth.js saderīgas tabulas) ----------
+// ---------- lietotāji un pieteikšanās (Better Auth tabulas) ----------
+const updatedAt = () =>
+  timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date());
+
 export const users = pgTable("users", {
   id: id(),
-  name: text("name"),
-  email: text("email").unique(),
-  emailVerified: timestamp("email_verified", { withTimezone: true, mode: "date" }),
+  name: text("name").notNull().default(""),
+  email: text("email").notNull().unique(),
+  emailVerified: boolean("email_verified").notNull().default(false),
   image: text("image"),
   phone: text("phone"),
   phoneVerifiedAt: timestamp("phone_verified_at", { withTimezone: true }),
@@ -50,40 +56,57 @@ export const users = pgTable("users", {
   blockedAt: timestamp("blocked_at", { withTimezone: true }),
   locale: text("locale").notNull().default("lv"),
   createdAt: createdAt(),
+  updatedAt: updatedAt(),
 });
 
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: id(),
+    token: text("token").notNull().unique(),
+    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index("sessions_user_idx").on(t.userId)],
+);
+
+/** Pieteikšanās veidi: Google, Facebook, Apple u.c. (viens lietotājs var būt piesaistījis vairākus) */
 export const accounts = pgTable(
   "accounts",
   {
+    id: id(),
+    accountId: text("account_id").notNull(),
+    providerId: text("provider_id").notNull(),
     userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-    type: text("type").notNull(),
-    provider: text("provider").notNull(),
-    providerAccountId: text("provider_account_id").notNull(),
-    refresh_token: text("refresh_token"),
-    access_token: text("access_token"),
-    expires_at: integer("expires_at"),
-    token_type: text("token_type"),
+    accessToken: text("access_token"),
+    refreshToken: text("refresh_token"),
+    idToken: text("id_token"),
+    accessTokenExpiresAt: timestamp("access_token_expires_at", { withTimezone: true }),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { withTimezone: true }),
     scope: text("scope"),
-    id_token: text("id_token"),
-    session_state: text("session_state"),
+    password: text("password"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
-  (t) => [primaryKey({ columns: [t.provider, t.providerAccountId] })],
+  (t) => [index("accounts_user_idx").on(t.userId), uniqueIndex("accounts_provider_uq").on(t.providerId, t.accountId)],
 );
 
-export const sessions = pgTable("sessions", {
-  sessionToken: text("session_token").primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  expires: timestamp("expires", { withTimezone: true, mode: "date" }).notNull(),
-});
-
-export const verificationTokens = pgTable(
-  "verification_tokens",
+/** Vienreizējie kodi: e-pasta pieteikšanās saites u.c. */
+export const verifications = pgTable(
+  "verifications",
   {
+    id: id(),
     identifier: text("identifier").notNull(),
-    token: text("token").notNull(),
-    expires: timestamp("expires", { withTimezone: true, mode: "date" }).notNull(),
+    value: text("value").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
-  (t) => [primaryKey({ columns: [t.identifier, t.token] })],
+  (t) => [index("verifications_identifier_idx").on(t.identifier)],
 );
 
 // ---------- vietas ----------

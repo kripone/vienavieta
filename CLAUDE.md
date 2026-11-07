@@ -7,3 +7,5 @@
 - Pirms commit: `npm run typecheck` un `npm run build`.
 - Plāns un statuss: `docs/ROADMAP.md`. Pabeigtos punktus atzīmē tur.
 - Neveido citu portālu sludinājumu ievākšanu, kamēr lietotājs nav apstiprinājis jurista atzinumu.
+- Pieteikšanās: `src/lib/auth.ts` (Better Auth). Serverī lietotāju iegūst ar `getCurrentUser()` / `requireUser()` no `src/lib/session.ts`, kas arī izslēdz bloķētos.
+- React 19 atiestata nekontrolētus formas laukus pēc servera darbības, tāpēc formās ar kļūdu paziņojumiem lieto kontrolētus laukus.

@@ -10,18 +10,19 @@ CREATE TYPE "public"."seller_type" AS ENUM('private', 'dealer');--> statement-br
 CREATE TYPE "public"."user_role" AS ENUM('user', 'moderator', 'admin');--> statement-breakpoint
 CREATE TYPE "public"."vehicle_class" AS ENUM('car', 'moto', 'camper', 'van', 'truck');--> statement-breakpoint
 CREATE TABLE "accounts" (
+	"id" text PRIMARY KEY NOT NULL,
+	"account_id" text NOT NULL,
+	"provider_id" text NOT NULL,
 	"user_id" text NOT NULL,
-	"type" text NOT NULL,
-	"provider" text NOT NULL,
-	"provider_account_id" text NOT NULL,
-	"refresh_token" text,
 	"access_token" text,
-	"expires_at" integer,
-	"token_type" text,
-	"scope" text,
+	"refresh_token" text,
 	"id_token" text,
-	"session_state" text,
-	CONSTRAINT "accounts_provider_provider_account_id_pk" PRIMARY KEY("provider","provider_account_id")
+	"access_token_expires_at" timestamp with time zone,
+	"refresh_token_expires_at" timestamp with time zone,
+	"scope" text,
+	"password" text,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "favorites" (
@@ -172,9 +173,15 @@ CREATE TABLE "saved_searches" (
 );
 --> statement-breakpoint
 CREATE TABLE "sessions" (
-	"session_token" text PRIMARY KEY NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
+	"token" text NOT NULL,
 	"user_id" text NOT NULL,
-	"expires" timestamp with time zone NOT NULL
+	"expires_at" timestamp with time zone NOT NULL,
+	"ip_address" text,
+	"user_agent" text,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "sessions_token_unique" UNIQUE("token")
 );
 --> statement-breakpoint
 CREATE TABLE "threads" (
@@ -190,9 +197,9 @@ CREATE TABLE "threads" (
 --> statement-breakpoint
 CREATE TABLE "users" (
 	"id" text PRIMARY KEY NOT NULL,
-	"name" text,
-	"email" text,
-	"email_verified" timestamp with time zone,
+	"name" text DEFAULT '' NOT NULL,
+	"email" text NOT NULL,
+	"email_verified" boolean DEFAULT false NOT NULL,
 	"image" text,
 	"phone" text,
 	"phone_verified_at" timestamp with time zone,
@@ -203,14 +210,17 @@ CREATE TABLE "users" (
 	"blocked_at" timestamp with time zone,
 	"locale" text DEFAULT 'lv' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
-CREATE TABLE "verification_tokens" (
+CREATE TABLE "verifications" (
+	"id" text PRIMARY KEY NOT NULL,
 	"identifier" text NOT NULL,
-	"token" text NOT NULL,
-	"expires" timestamp with time zone NOT NULL,
-	CONSTRAINT "verification_tokens_identifier_token_pk" PRIMARY KEY("identifier","token")
+	"value" text NOT NULL,
+	"expires_at" timestamp with time zone NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -235,6 +245,8 @@ ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY
 ALTER TABLE "threads" ADD CONSTRAINT "threads_listing_id_listings_id_fk" FOREIGN KEY ("listing_id") REFERENCES "public"."listings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "threads" ADD CONSTRAINT "threads_buyer_id_users_id_fk" FOREIGN KEY ("buyer_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "threads" ADD CONSTRAINT "threads_seller_id_users_id_fk" FOREIGN KEY ("seller_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "accounts_user_idx" ON "accounts" USING btree ("user_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "accounts_provider_uq" ON "accounts" USING btree ("provider_id","account_id");--> statement-breakpoint
 CREATE INDEX "photos_listing_idx" ON "listing_photos" USING btree ("listing_id","position");--> statement-breakpoint
 CREATE INDEX "listings_feed_idx" ON "listings" USING btree ("status","kind","created_at");--> statement-breakpoint
 CREATE INDEX "listings_price_idx" ON "listings" USING btree ("price");--> statement-breakpoint
@@ -252,5 +264,7 @@ CREATE INDEX "price_history_listing_idx" ON "price_history" USING btree ("listin
 CREATE UNIQUE INDEX "reports_listing_user_uq" ON "reports" USING btree ("listing_id","user_id");--> statement-breakpoint
 CREATE INDEX "reports_status_idx" ON "reports" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "saved_searches_user_idx" ON "saved_searches" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "sessions_user_idx" ON "sessions" USING btree ("user_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "threads_listing_buyer_uq" ON "threads" USING btree ("listing_id","buyer_id");--> statement-breakpoint
-CREATE INDEX "threads_seller_idx" ON "threads" USING btree ("seller_id");
+CREATE INDEX "threads_seller_idx" ON "threads" USING btree ("seller_id");--> statement-breakpoint
+CREATE INDEX "verifications_identifier_idx" ON "verifications" USING btree ("identifier");
