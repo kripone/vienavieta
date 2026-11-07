@@ -177,6 +177,10 @@ export const listings = pgTable(
     /** Cena veselos eiro */
     price: integer("price").notNull(),
     placeId: integer("place_id").references(() => places.id),
+    /** Iela un mājas numurs (ārējiem īpašumiem no saraksta), ģeokodēšanai */
+    address: text("address"),
+    /** Koordinātu precizitāte: "place" (vietas centrs) vai "street" (ģeokodēta adrese) */
+    geoPrecision: text("geo_precision"),
     lat: doublePrecision("lat"),
     lon: doublePrecision("lon"),
     contactPhone: text("contact_phone"),
@@ -392,3 +396,13 @@ export const marketStats = pgTable(
   },
   (t) => [primaryKey({ columns: [t.day, t.segment] }), index("market_stats_segment_idx").on(t.segment, t.day)],
 );
+
+/** Ģeokodēšanas kešs: katra adrese tiek vaicāta tikai vienreiz (Google Geocoding API). */
+export const geocodeCache = pgTable("geocode_cache", {
+  query: text("query").primaryKey(),
+  lat: doublePrecision("lat"),
+  lon: doublePrecision("lon"),
+  /** false: adrese netika atrasta pietiekami precīzi */
+  ok: boolean("ok").notNull(),
+  createdAt: createdAt(),
+});

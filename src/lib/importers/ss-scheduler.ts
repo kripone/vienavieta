@@ -3,6 +3,7 @@
 // Stāvoklis glabājas tabulā crawl_state, tāpēc pēc pārstartēšanas pilnā kārta neatkārtojas lieki.
 import { db, schema } from "@/db";
 import { SS_FULL_EVERY_HOURS, SS_QUICK_EVERY_MIN, SS_SECTIONS } from "../constants";
+import { geocodePending, geocodingEnabled } from "../geocode";
 import { ensureDailySnapshot } from "../market";
 import { crawlSection } from "./ss-pages";
 
@@ -18,6 +19,11 @@ async function tick() {
   if (new Date().getUTCHours() >= 3) {
     const snap = await ensureDailySnapshot().catch((e) => console.error("Tirgus momentuzņēmums neizdevās:", e));
     if (snap) console.log("Tirgus momentuzņēmums:", JSON.stringify(snap));
+  }
+  // īpašumu adreses → precīza vieta kartē (līdz 40 adresēm minūtē; katra tikai vienreiz)
+  if (geocodingEnabled()) {
+    const g = await geocodePending(40).catch((e) => (console.error("Ģeokodēšana:", e), null));
+    if (g && (g.done || g.errors)) console.log("Ģeokodēšana:", JSON.stringify(g));
   }
   const state = new Map((await db.select().from(schema.crawlState)).map((s) => [s.name, s]));
   const now = Date.now();

@@ -71,6 +71,7 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] ss.com sīktēli tieši no ss.com servera (neglabājam), ja nenāk: ilustrācija
 - [x] Tirgus tendences /tirgus: populārākās markas, modeļi, cena pa gadiem, cena pret nobraukumu, €/m² pa reģioniem un vietām
 - [x] Dienas tirgus momentuzņēmumi (market_stats) cenu dinamikai laikā
+- [x] ss.com īpašumu ielas → precīza vieta kartē (Google Geocoding, kešs; ieslēdzas ar GOOGLE_GEOCODING_KEY)
 - [x] Dublikātu apvienošana starp portāliem (marka/modelis/gads/cena/nobraukums vai veids/istabas/platība/vieta): viena kartīte, "Arī: ss.com ↗"
 
 ## Palaišana produkcijā

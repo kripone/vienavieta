@@ -233,9 +233,14 @@ export function mapItem(
     feed.propertyType === "Dzīvoklis" ? `${rooms ?? 1}-istabu dzīvoklis${area ? `, ${area} m²` : ""}${where}`
     : feed.propertyType === "Māja" ? `Privātmāja${area ? ` ${area} m²` : ""}${land ? `, zeme ${landLabel(land)}` : ""}${where}`
     : `Zemes gabals${land ? ` ${landLabel(land)}` : ""}${where}`;
+  // iela no saraksta ("Rīga<br>Gaigalas 17" vai RSS laukā "Iela"); ģeokodēšanai (src/lib/geocode.ts)
+  const streetRaw = f["Rajons"]?.[1] ?? f["Pagasts"]?.[1] ?? f["Pilsēta"]?.[1] ?? first(f, "Iela");
+  const street = streetRaw && /\p{L}{3,}/u.test(streetRaw) && !/(nov\.|pag\.)$/i.test(streetRaw) ? streetRaw.replace(/\s+/g, " ").trim().slice(0, 80) : null;
   return {
     ...base,
     title: title.slice(0, 120),
+    address: street && place ? `${street}, ${slug(place.name) === "centrs" ? place.region : `${place.name}, ${place.region}`}` : null,
+    geoPrecision: place ? "place" : null,
     propertyType: feed.propertyType,
     deal: priced.deal,
     rooms: rooms && rooms > 0 && rooms < 50 ? rooms : null,

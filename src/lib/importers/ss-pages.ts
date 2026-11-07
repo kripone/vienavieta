@@ -65,18 +65,21 @@ async function loadCtx(): Promise<Ctx> {
 export type CrawlResult = { section: string; mode: "quick" | "full"; pages: number; rows: number; created: number; updated: number; priceChanged: number; duplicates: number; removed: number; errors: string[]; ms: number };
 
 /** Saglabā vienas lapas rindas: jaunos ievieto, esošajiem atjauno cenu un "redzēts" laiku. */
-async function saveRows(section: Section, pageRows: PageRow[], ctx: Ctx, res: CrawlResult) {
+async function saveRows(section: Section, pageRows: PageRow[], ctx: Ctx, res: CrawlResult, mode: "quick" | "full") {
   const now = new Date();
+  // pilnajā kārtā atrastie (bet ātrajās nepamanītie) ir vecāki sludinājumi: lai tie neaizsprosto "jaunākos",
+  // tiem ievietošanas laiks ir diennakti agrāk
+  const createdAt = mode === "full" ? new Date(now.getTime() - 86_400_000) : now;
   const mapped = pageRows
     .map((r) => {
       const m = mapItem(section, { link: r.link, pubDate: now, fields: r.fields } as RssItem, ctx);
-      return m ? { ...m, externalThumbUrl: r.thumb ?? null } : null;
+      return m ? { ...m, externalThumbUrl: r.thumb ?? null, createdAt } : null;
     })
     .filter((x): x is NonNullable<typeof x> => Boolean(x));
   const byId = new Map(mapped.map((m) => [m.externalId!, m]));
   if (!byId.size) return;
   const existing = await db
-    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl })
+    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl, address: listings.address })
     .from(listings)
     .where(and(eq(listings.source, "ss.com"), inArray(listings.externalId, [...byId.keys()])));
   const seen = new Set<string>();
@@ -85,8 +88,12 @@ async function saveRows(section: Section, pageRows: PageRow[], ctx: Ctx, res: Cr
     seen.add(e.externalId!);
     const row = byId.get(e.externalId!)!;
     if (e.status === "hidden") continue; // paslēpis moderators: neaiztiekam
-    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl) {
-      await db.update(listings).set({ price: row.price, status: "active", externalThumbUrl: row.externalThumbUrl, updatedAt: now }).where(eq(listings.id, e.id));
+    const newAddress = row.address && row.address !== e.address;
+    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl || newAddress) {
+      await db
+        .update(listings)
+        .set({ price: row.price, status: "active", externalThumbUrl: row.externalThumbUrl, ...(newAddress ? { address: row.address, geoPrecision: "place" } : {}), updatedAt: now })
+        .where(eq(listings.id, e.id));
       if (e.price !== row.price) {
         await db.insert(priceHistory).values({ listingId: e.id, price: row.price });
         res.priceChanged++;
@@ -122,7 +129,7 @@ export async function crawlSection(section: Section, mode: "quick" | "full", fet
       if (n === 1) last = Math.min(last, lastPage);
       res.pages++;
       res.rows += rows.length;
-      await saveRows(section, rows, ctx, res);
+      await saveRows(section, rows, ctx, res, mode);
       failsInRow = 0;
       if (!rows.length) break;
     } catch (err) {

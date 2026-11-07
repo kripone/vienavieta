@@ -64,6 +64,20 @@
       "when": 1794062690210,
       "tag": "0008_market_stats",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794063611633,
+      "tag": "0009_address_geocode",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794063620219,
+      "tag": "0010_ss_backdate",
+      "breakpoints": true
     }
   ]
 }
