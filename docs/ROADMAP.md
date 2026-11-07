@@ -15,11 +15,13 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] Profils: vārds, tālrunis, privātpersona vai salons/aģentūra
 - [x] Bloķētie lietotāji nevar pieteikties
 
-## 3. Sludinājumi
-- [ ] Pievienošanas un rediģēšanas forma (transports un īpašumi, lauki pēc veida)
-- [ ] Bilžu augšupielāde un samazināšana (S3 saderīga krātuve)
-- [ ] Sludinājuma lapa ar bildēm, parametriem un kalkulatoru
-- [ ] Antispam: limits diennaktī, saišu un surogātvārdu pārbaude, dublikāti, slēptais lauks
+## 3. Sludinājumi ✅ (izņemot kalkulatoru)
+- [x] Pievienošanas un rediģēšanas forma (transports un īpašumi, lauki pēc veida)
+- [x] Bilžu augšupielāde: samazināšana līdz 1600 px, sīktēli, EXIF/GPS dzēšana; lokāla mape vai S3/R2
+- [x] Sludinājuma lapa ar galeriju, parametriem, aprakstu un kontaktiem pēc pieprasījuma
+- [ ] Līzinga un hipotēkas kalkulators sludinājuma lapā
+- [x] Mani sludinājumi: rediģēt, atzīmēt kā pārdotu, dzēst; cenu vēsture saglabājas
+- [x] Antispam: limits diennaktī, saišu un surogātvārdu pārbaude, lielie burti, dublikāti, slēptais lauks, aizpildīšanas laiks
 
 ## 4. Meklēšana
 - [ ] Filtri ar URL parametriem (dalāmas saites)

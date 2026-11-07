@@ -232,15 +232,19 @@ export const listingPhotos = pgTable(
   "listing_photos",
   {
     id: id(),
-    listingId: text("listing_id").notNull().references(() => listings.id, { onDelete: "cascade" }),
-    /** Atslēga failu krātuvē (S3 vai līdzīgā) */
+    /** Tukšs, kamēr bilde ir augšupielādēta, bet sludinājums vēl nav saglabāts */
+    listingId: text("listing_id").references(() => listings.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    /** Atslēga failu krātuvē: pilna izmēra bilde (max 1600 px) */
     storageKey: text("storage_key").notNull(),
+    /** Sīktēls sarakstiem (max 480 px) */
+    thumbKey: text("thumb_key").notNull(),
     position: smallint("position").notNull().default(0),
     width: smallint("width"),
     height: smallint("height"),
     createdAt: createdAt(),
   },
-  (t) => [index("photos_listing_idx").on(t.listingId, t.position)],
+  (t) => [index("photos_listing_idx").on(t.listingId, t.position), index("photos_user_idx").on(t.userId)],
 );
 
 export const priceHistory = pgTable(

@@ -1,6 +1,5 @@
-import { DEAL_LABEL } from "@/lib/constants";
-import { formatNumber, formatPrice, timeAgo } from "@/lib/format";
-import { latestListings, locationLabel } from "@/lib/listings";
+import { ListingCard } from "@/components/listing-card";
+import { latestListings } from "@/lib/listings";
 
 // Sākumlapa vienmēr rāda svaigus datus no datubāzes
 export const dynamic = "force-dynamic";
@@ -18,7 +17,7 @@ export default async function HomePage() {
   return (
     <main className="wrap">
       <h1>Jaunākie sludinājumi</h1>
-      <p className="lead">Šī ir pirmā versija. Meklēšana, filtri, karte un konti nāks nākamajos soļos.</p>
+      <p className="lead">Meklēšana, filtri un karte nāks nākamajā solī.</p>
 
       {dbError ? (
         <div className="notice">
@@ -27,35 +26,13 @@ export default async function HomePage() {
         </div>
       ) : rows.length === 0 ? (
         <div className="notice">
-          Sludinājumu vēl nav. Izstrādei vari ielādēt paraugus: <code>npm run db:seed:demo</code>
+          Sludinājumu vēl nav. <a href="/pievienot">Pievieno pirmo</a> vai izstrādei ielādē paraugus: <code>npm run db:seed:demo</code>
         </div>
       ) : (
         <div className="list">
-          {rows.map((l) => {
-            const meta =
-              l.kind === "vehicle"
-                ? [l.year, l.mileageKm != null ? `${formatNumber(l.mileageKm)} km` : null, l.fuel, l.gearbox]
-                : [l.propertyType, l.areaM2 ? `${l.areaM2} m²` : null, l.rooms ? `${l.rooms} ist.` : null, l.deal ? DEAL_LABEL[l.deal] : null];
-            const unit = l.deal === "rent" ? "/mēn." : l.deal === "day" ? "/dienā" : "";
-            return (
-              <article className="card" key={l.id}>
-                <div>
-                  <span className={`kind ${l.kind}`}>{l.kind === "vehicle" ? "Transports" : "Īpašums"}</span>
-                  <h2>{l.title}</h2>
-                  <div className="meta">
-                    {meta.filter(Boolean).map((m, i) => (
-                      <span key={i}>{m}</span>
-                    ))}
-                    <span>📍 {locationLabel(l.place, l.region, l.regionKind)}</span>
-                    <span>{timeAgo(l.createdAt)}</span>
-                  </div>
-                </div>
-                <div className="price">
-                  {formatPrice(l.price)} {unit && <small>{unit}</small>}
-                </div>
-              </article>
-            );
-          })}
+          {rows.map((l) => (
+            <ListingCard key={l.id} l={l} />
+          ))}
         </div>
       )}
     </main>

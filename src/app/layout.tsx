@@ -27,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <span className="tag">Visi Latvijas sludinājumi vienā meklētājā</span>
             <nav className="nav">
               <UserMenu />
+              <a href="/pievienot" className="btn primary">+ Pievienot</a>
             </nav>
           </div>
         </header>
