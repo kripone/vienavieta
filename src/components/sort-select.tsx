@@ -2,7 +2,7 @@
 import { useT } from "@/i18n/client";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export function SortSelect({ value }: { value: string }) {
+export function SortSelect({ value, base }: { value: string; base?: Record<string, string> }) {
   const { t } = useT();
   const router = useRouter();
   const sp = useSearchParams();
@@ -11,7 +11,7 @@ export function SortSelect({ value }: { value: string }) {
       aria-label={t("Kārtot")}
       value={value}
       onChange={(e) => {
-        const p = new URLSearchParams(sp.toString());
+        const p = new URLSearchParams(base ?? sp.toString());
         if (e.target.value === "new") p.delete("sort");
         else p.set("sort", e.target.value);
         p.delete("page");

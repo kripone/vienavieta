@@ -5,7 +5,7 @@ import { useState } from "react";
 import { saveSearch } from "@/app/pazinojumi/actions";
 
 /** "🔔 Saglabāt meklēšanu": saglabā pašreizējos filtrus un ieslēdz e-pasta paziņojumus. */
-export function SaveSearchButton({ loggedIn }: { loggedIn: boolean }) {
+export function SaveSearchButton({ loggedIn, filters }: { loggedIn: boolean; filters?: Record<string, string> }) {
   const { t } = useT();
   const router = useRouter();
   const path = usePathname();
@@ -17,7 +17,7 @@ export function SaveSearchButton({ loggedIn }: { loggedIn: boolean }) {
     const here = `${path}${sp.toString() ? `?${sp}` : ""}`;
     if (!loggedIn) return router.push(`/ielogoties?next=${encodeURIComponent(here)}`);
     setState("busy");
-    const r = await saveSearch(Object.fromEntries(sp.entries()));
+    const r = await saveSearch(filters ?? Object.fromEntries(sp.entries()));
     if (r.ok) {
       setState("saved");
       setMsg(t("Saglabāts: {name}. Paziņosim e-pastā par jauniem sludinājumiem.", { name: r.name }));

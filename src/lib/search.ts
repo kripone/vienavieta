@@ -382,3 +382,54 @@ export async function typeCounts(s: SearchParams): Promise<Record<string, number
     .groupBy(col);
   return Object.fromEntries(rows.filter((r) => r.k).map((r) => [r.k as string, r.n]));
 }
+
+// ---------- SEO lapām: skaiti pa markām/modeļiem/reģioniem un cenu kopsavilkums (kešots 10 min) ----------
+const facetCache = new Map<string, { at: number; v: unknown }>();
+async function cached<T>(key: string, fn: () => Promise<T>): Promise<T> {
+  const hit = facetCache.get(key);
+  if (hit && hit.at > Date.now() - 10 * 60_000) return hit.v as T;
+  const v = await fn();
+  facetCache.set(key, { at: Date.now(), v });
+  if (facetCache.size > 2000) facetCache.delete(facetCache.keys().next().value!);
+  return v;
+}
+
+export type Facet = { id: number; name: string; n: number };
+
+/** Sludinājumu skaits pa markām, modeļiem vai reģioniem pie dotajiem filtriem (pašu dimensiju neskaitot). */
+export function facetCounts(s: SearchParams, by: "make" | "model" | "region"): Promise<Facet[]> {
+  const base = { ...s, page: 1, sort: "new" as const, ...(by === "make" ? { make: undefined, model: undefined } : by === "model" ? { model: undefined } : { loc: undefined }) };
+  return cached(`facet:${by}:${JSON.stringify(base)}`, async () => {
+    const idCol = by === "make" ? makes.id : by === "model" ? models.id : regions.id;
+    const nameCol = by === "make" ? makes.name : by === "model" ? models.name : regions.name;
+    const rows = await db
+      .select({ id: idCol, name: nameCol, n: count() })
+      .from(listings)
+      .leftJoin(places, eq(listings.placeId, places.id))
+      .leftJoin(regions, eq(places.regionId, regions.id))
+      .leftJoin(makes, eq(listings.makeId, makes.id))
+      .leftJoin(models, eq(listings.modelId, models.id))
+      .leftJoin(users, eq(listings.userId, users.id))
+      .where(and(...conditions(base), isNotNull(idCol)))
+      .groupBy(idCol, nameCol)
+      .orderBy(desc(count()));
+    return rows.filter((r) => r.id != null && r.name).map((r) => ({ id: Number(r.id), name: String(r.name), n: Number(r.n) }));
+  });
+}
+
+/** Skaits un cenas mediāna (bez nulles cenām). */
+export function priceSummary(s: SearchParams): Promise<{ n: number; median: number | null }> {
+  const base = { ...s, page: 1, sort: "new" as const };
+  return cached(`sum:${JSON.stringify(base)}`, async () => {
+    const [r] = await db
+      .select({ n: count(), median: sql<number | null>`percentile_cont(0.5) within group (order by ${listings.price}) filter (where ${listings.price} > 0)` })
+      .from(listings)
+      .leftJoin(places, eq(listings.placeId, places.id))
+      .leftJoin(regions, eq(places.regionId, regions.id))
+      .leftJoin(makes, eq(listings.makeId, makes.id))
+      .leftJoin(models, eq(listings.modelId, models.id))
+      .leftJoin(users, eq(listings.userId, users.id))
+      .where(and(...conditions(base)));
+    return { n: Number(r?.n ?? 0), median: r?.median != null ? Math.round(Number(r.median)) : null };
+  });
+}

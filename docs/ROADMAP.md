@@ -95,3 +95,5 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [ ] Lietošanas noteikumi, privātuma politika, sīkdatnes
 - [x] PWA: instalējama aplikācija (manifest, ikonas, servisa darbinieks) un push paziņojumi par saglabātajām meklēšanām un cenu kritumiem favorītos
 - [ ] Veikalu aplikācijas (Capacitor) – kad būs lietotāji
+- [x] SEO: Search Console, SEO lapas (/auto/<marka>/<modelis>, /moto, /ipasumi/<veids>[-ire]/<reģions>), sitemap ar tām, noindex filtru lapām un citu portālu sludinājumiem, JSON-LD (Car/Product, BreadcrumbList, WebSite), OG attēls
+- [ ] SEO: valodas ar atsevišķām adresēm (/ru/…, hreflang)

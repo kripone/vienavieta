@@ -79,6 +79,20 @@ export const PROPERTY_GROUPS = {
 export const PROPERTY_TYPES = Object.values(PROPERTY_GROUPS).flat();
 export type PropertyType = (typeof PROPERTY_TYPES)[number];
 
+/** SEO lapu adreses (/ipasumi/<slug>) un daudzskaitļa nosaukumi virsrakstiem. */
+export const PROPERTY_SLUG: Record<PropertyType, string> = {
+  "Dzīvoklis": "dzivokli", "Istaba": "istabas", "Māja": "majas", "Vasarnīca": "vasarnicas", "Lauku īpašums": "lauku-ipasumi",
+  "Zeme": "zeme", "Mežs": "mezi", "Birojs": "biroji", "Tirdzniecības telpas": "tirdzniecibas-telpas", "Noliktava": "noliktavas",
+  "Ražošanas telpas": "razosanas-telpas", "Komercēka": "komercekas", "Garāža": "garazas", "Stāvvieta": "stavvietas",
+};
+export const PROPERTY_PLURAL: Record<PropertyType, string> = {
+  "Dzīvoklis": "Dzīvokļi", "Istaba": "Istabas", "Māja": "Mājas", "Vasarnīca": "Vasarnīcas un dārza mājas", "Lauku īpašums": "Lauku īpašumi",
+  "Zeme": "Zemes gabali", "Mežs": "Meža īpašumi", "Birojs": "Biroji", "Tirdzniecības telpas": "Tirdzniecības telpas", "Noliktava": "Noliktavas",
+  "Ražošanas telpas": "Ražošanas telpas", "Komercēka": "Komercēkas", "Garāža": "Garāžas", "Stāvvieta": "Stāvvietas",
+};
+/** SEO lapu adreses transportam (citas klases pagaidām tikai meklēšanā). */
+export const VEHICLE_SLUG: Partial<Record<VehicleClass, string>> = { car: "auto", moto: "moto" };
+
 /** Kuri lauki attiecas uz katru īpašuma veidu (formā un filtros rāda tikai tos). */
 export const PROPERTY_FIELDS: Record<PropertyType, readonly string[]> = {
   "Dzīvoklis": ["rooms", "areaM2", "floor", "floors", "series", "material", "heating", "condition", "builtYear", "amenities"],

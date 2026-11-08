@@ -24,7 +24,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { default: "VienāVietā", template: "%s · VienāVietā" },
     description: t("Visi Latvijas sludinājumi vienā meklētājā: transports un nekustamais īpašums."),
+    metadataBase: new URL((process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "")),
     applicationName: "VienāVietā",
+    openGraph: { siteName: "VienāVietā", type: "website", locale: "lv_LV", images: [{ url: "/og.png", width: 1200, height: 630 }] },
+    twitter: { card: "summary_large_image" },
     appleWebApp: { capable: true, title: "VienāVietā", statusBarStyle: "default" },
     formatDetection: { telephone: false },
   };
@@ -68,6 +71,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <footer className="foot">
           <div className="wrap">
             <span>© {new Date().getFullYear()} VienāVietā{OPERATOR.name ? ` · ${OPERATOR.name}` : ""}</span>
+            <nav className="foot-cats" aria-label={t("Kategorijas")}>
+              <a href="/auto">{t("Auto")}</a>
+              <a href="/moto">{t("Moto")}</a>
+              <a href="/ipasumi/dzivokli">{t("Dzīvokļi")}</a>
+              <a href="/ipasumi/dzivokli-ire">{t("Dzīvokļu īre")}</a>
+              <a href="/ipasumi/majas">{t("Mājas")}</a>
+              <a href="/ipasumi/vasarnicas">{t("Vasarnīcas")}</a>
+              <a href="/ipasumi/zeme">{t("Zeme")}</a>
+              <a href="/ipasumi">{t("Visi īpašumi")}</a>
+            </nav>
             <nav aria-label={LEGAL[locale].footer.about}>
               <a href="/par-mums">{LEGAL[locale].footer.about}</a>
               <a href="/noteikumi">{LEGAL[locale].footer.terms}</a>

@@ -74,6 +74,7 @@ export async function getListing(id: string) {
       l: listings,
       place: places.name,
       region: regions.name,
+      regionCountry: regions.country,
       regionKind: regions.kind,
       make: makes.name,
       model: models.name,

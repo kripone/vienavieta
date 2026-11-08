@@ -9,7 +9,7 @@ import { Gallery } from "@/components/gallery";
 import { ExtThumb } from "@/components/ext-thumb";
 import { priceUnit } from "@/components/listing-card";
 import { OwnerActions } from "@/components/owner-actions";
-import { DEAL_LABEL, SOURCE_LABEL, VEHICLE_CLASS_LABEL, type VehicleClass } from "@/lib/constants";
+import { DEAL_LABEL, PROPERTY_PLURAL, SOURCE_LABEL, VEHICLE_CLASS_LABEL, type VehicleClass } from "@/lib/constants";
 import { formatNumber, formatPrice, timeAgo } from "@/lib/format";
 import { listingIll } from "@/lib/illustrations";
 import { landLabel } from "@/lib/listing-input";
@@ -18,6 +18,9 @@ import { EvalBadge } from "@/components/eval-badge";
 import { alsoAt } from "@/lib/dedupe";
 import { listingHistory } from "@/lib/history";
 import { ListingMapLazy } from "@/components/listing-map-lazy";
+import { JsonLd } from "@/components/json-ld";
+import { appBase, propertyHref, vehicleHref, type Crumb } from "@/lib/seo";
+import type { PropertyType } from "@/lib/constants";
 import { PriceHistory } from "@/components/price-history";
 import { dealsForListing } from "@/lib/vzd";
 import { VzdDeals } from "@/components/vzd-deals";
@@ -32,7 +35,15 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const { id } = await props.params;
   const d = await getListing(id).catch(() => null);
   if (!d || d.l.status === "deleted") return { title: (await getT()).t("Sludinājums nav atrasts") };
-  return { title: trTitle(d.l.title, (await getT()).t), description: `${formatPrice(d.l.price)} · ${locationLabel(d.place, d.region, d.regionKind)}`, openGraph: { images: d.photos[0] ? [d.photos[0].url] : [] } };
+  const external = d.l.source !== "own";
+  return {
+    title: trTitle(d.l.title, (await getT()).t),
+    description: `${formatPrice(d.l.price)} · ${locationLabel(d.place, d.region, d.regionKind)}`,
+    alternates: { canonical: `/sludinajumi/${d.l.id}` },
+    // citu portālu sludinājumi ir tikai fakti + saite: meklētājos tos nerādām (indeksējam SEO lapas un pašu sludinājumus)
+    robots: external || d.l.status !== "active" ? { index: false, follow: true } : undefined,
+    openGraph: { images: d.photos[0] ? [d.photos[0].url] : d.l.externalThumbUrl ? [d.l.externalThumbUrl] : ["/og.png"] },
+  };
 }
 
 export default async function ListingPage(props: Props) {
@@ -90,8 +101,52 @@ export default async function ListingPage(props: Props) {
   const ext = l.source !== "own" && l.externalUrl ? l.externalUrl : null;
   const src = SOURCE_LABEL[l.source] ?? l.source;
 
+  // ceļš uz SEO lapām (iekšējās saites)
+  const crumbs: Crumb[] = [];
+  if (l.kind === "vehicle" && l.vehicleClass) {
+    const root = vehicleHref(l.vehicleClass as VehicleClass);
+    if (root) {
+      crumbs.push({ name: l.vehicleClass === "car" ? "Auto" : "Moto", href: root });
+      if (d.make) crumbs.push({ name: d.make, href: vehicleHref(l.vehicleClass as VehicleClass, d.make)! });
+      if (d.make && d.model) crumbs.push({ name: d.model, href: vehicleHref(l.vehicleClass as VehicleClass, d.make, d.model)! });
+    }
+  } else if (l.kind === "property") {
+    crumbs.push({ name: "Īpašumi", href: "/ipasumi" });
+    if (l.propertyType) {
+      const pt = l.propertyType as PropertyType;
+      const deal = l.deal === "rent" ? "rent" : "sell";
+      crumbs.push({ name: PROPERTY_PLURAL[pt], href: propertyHref(pt, deal) });
+      if (d.region && d.regionCountry !== "LT") crumbs.push({ name: d.region, href: propertyHref(pt, deal, d.region) });
+    }
+  }
+  const ld = l.source === "own" && l.status === "active"
+    ? {
+        "@context": "https://schema.org",
+        "@type": l.kind === "vehicle" && l.vehicleClass === "car" ? "Car" : "Product",
+        name: l.title,
+        url: `${appBase()}/sludinajumi/${l.id}`,
+        ...(d.photos.length ? { image: d.photos.slice(0, 5).map((p: { url: string }) => (p.url.startsWith("http") ? p.url : `${appBase()}${p.url}`)) } : {}),
+        ...(l.description ? { description: l.description.slice(0, 500) } : {}),
+        ...(d.make ? { brand: { "@type": "Brand", name: d.make } } : {}),
+        ...(d.model ? { model: d.model } : {}),
+        ...(l.kind === "vehicle" && l.year ? { vehicleModelDate: String(l.year) } : {}),
+        ...(l.kind === "vehicle" && l.mileageKm != null ? { mileageFromOdometer: { "@type": "QuantitativeValue", value: l.mileageKm, unitCode: "KMT" } } : {}),
+        offers: { "@type": "Offer", price: l.price, priceCurrency: "EUR", availability: "https://schema.org/InStock", url: `${appBase()}/sludinajumi/${l.id}`, itemCondition: "https://schema.org/UsedCondition" },
+      }
+    : null;
+
   return (
     <main className="wrap">
+      {crumbs.length > 0 && (
+        <nav className="crumbs" aria-label={t("Ceļš")}>
+          <a href="/">VienāVietā</a>
+          {crumbs.map((c) => <span key={c.href}> › <a href={c.href}>{t(c.name)}</a></span>)}
+        </nav>
+      )}
+      {crumbs.length > 0 && l.source === "own" && (
+        <JsonLd data={{ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ name: "VienāVietā", href: "/" }, ...crumbs].map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: `${appBase()}${c.href}` })) }} />
+      )}
+      {ld && <JsonLd data={ld} />}
       {saglabats && isOwner && <p className="welcome">{l.status === "active" ? t("Sludinājums saglabāts un redzams visiem.") : t("Sludinājums saglabāts.")}</p>}
       {l.status === "sold" && <p className="alert">{t("Šis sludinājums ir atzīmēts kā pārdots.")}</p>}
       {l.status === "hidden" && (isOwner || isMod) && <p className="alert">{t("Sludinājumu paslēpis moderators, un citi to neredz.")}</p>}

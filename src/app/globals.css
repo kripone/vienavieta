@@ -416,3 +416,15 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .listing-map .lmap { height: 320px; border-radius: 10px; overflow: hidden; z-index: 0; border: 1px solid var(--line); background: var(--surface-2); }
 .lmap.loading { height: 320px; border-radius: 10px; background: var(--surface-2); }
 @media (max-width: 560px) { .listing-map .lmap, .lmap.loading { height: 240px; } }
+
+/* SEO: ceļš, kopsavilkums un iekšējās saites */
+.crumbs { font-size: 13px; color: var(--muted); margin: 0 0 10px; }
+.crumbs a { color: var(--muted); text-decoration: none; }
+.crumbs a:hover { color: var(--accent); text-decoration: underline; }
+.seo-box { margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; line-height: 1.55; }
+.seo-box a { color: var(--accent); }
+.seo-links { list-style: none; padding: 0; margin: 12px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px 16px; }
+.seo-links a { text-decoration: none; color: var(--fg); }
+.seo-links a:hover { color: var(--accent); text-decoration: underline; }
+.foot-cats { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.foot .foot-cats { flex-basis: 100%; order: -1; padding-bottom: 6px; }
