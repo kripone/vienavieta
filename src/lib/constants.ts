@@ -162,6 +162,12 @@ export const SS_SECTIONS = [
   { key: "ss2:flats", url: "https://www.ss.com/lv/real-estate/flats/", kind: "property", propertyType: "Dzīvoklis" },
   { key: "ss2:homes", url: "https://www.ss.com/lv/real-estate/homes-summer-residences/", kind: "property", propertyType: "Māja" },
   { key: "ss2:land", url: "https://www.ss.com/lv/real-estate/plots-and-lands/", kind: "property", propertyType: "Zeme" },
+  // komercīpašumi, meži, garāžas (2026-11-08). alt = rezerves adreses, ja pirmā nerāda sarakstu
+  { key: "ss2:wood", url: "https://www.ss.com/lv/real-estate/wood/all/", alt: ["https://www.ss.com/lv/real-estate/wood/all-regions/", "https://www.ss.com/lv/real-estate/wood/"], kind: "property", propertyType: "Mežs" },
+  { key: "ss2:offices", url: "https://www.ss.com/lv/real-estate/offices/all/", alt: ["https://www.ss.com/lv/real-estate/offices/", "https://www.ss.com/lv/real-estate/premises/offices/all/"], kind: "property", propertyType: "Birojs" },
+  { key: "ss2:shops", url: "https://www.ss.com/lv/real-estate/premises/shops/all/", alt: ["https://www.ss.com/lv/real-estate/premises/shops/"], kind: "property", propertyType: "Tirdzniecības telpas" },
+  { key: "ss2:storage", url: "https://www.ss.com/lv/real-estate/premises/storehouses-and-storages/all/", alt: ["https://www.ss.com/lv/real-estate/premises/storehouses-and-storages/"], kind: "property", propertyType: "Noliktava" },
+  { key: "ss2:garages", url: "https://www.ss.com/lv/real-estate/premises/garages/all/", alt: ["https://www.ss.com/lv/real-estate/premises/garages/"], kind: "property", propertyType: "Garāža" },
 ] as const;
 /** Pauze starp pieprasījumiem uz ss.com (ms) un ātrās kārtas lapu skaits katrā sadaļā. */
 export const SS_REQUEST_DELAY_MS = 2000;

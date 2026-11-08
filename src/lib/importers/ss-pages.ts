@@ -46,7 +46,7 @@ export function parseListPage(html: string): { rows: PageRow[]; lastPage: number
   return { rows, lastPage: Math.max(1, ...pages) };
 }
 
-const pageUrl = (s: Section, n: number) => (n <= 1 ? s.url : `${s.url}page${n}.html`);
+const pageUrl = (base: string, n: number) => (n <= 1 ? base : `${base}page${n}.html`);
 
 export async function defaultFetch(url: string) {
   const r = await fetch(url, { headers: { "user-agent": USER_AGENT, "accept-language": "lv" }, signal: AbortSignal.timeout(30_000), redirect: "follow" });
@@ -142,10 +142,20 @@ export async function crawlSection(section: Section, mode: "quick" | "full", fet
   const ctx = await loadCtx();
   let last = mode === "quick" ? SS_QUICK_PAGES : Infinity;
   let failsInRow = 0;
+  // pirmā adrese, kas rāda sludinājumu sarakstu (dažām sadaļām ss.com galvenā lapa ir reģionu izvēle)
+  const candidates = [section.url, ...("alt" in section ? section.alt : [])];
+  let base = candidates[0];
   for (let n = 1; n <= last; n++) {
     try {
-      const html = await fetchHtml(pageUrl(section, n));
-      const { rows, lastPage } = parseListPage(html);
+      let html = await fetchHtml(pageUrl(base, n));
+      let parsed = parseListPage(html);
+      for (let i = 1; n === 1 && !parsed.rows.length && i < candidates.length; i++) {
+        await sleep(delayMs);
+        base = candidates[i];
+        html = await fetchHtml(base);
+        parsed = parseListPage(html);
+      }
+      const { rows, lastPage } = parsed;
       // kopējo lapu skaitu rāda tikai 1. lapa (saite "atpakaļ" uz pēdējo); tālākajās redzams tikai ~10 lapu logs
       if (n === 1) last = Math.min(last, lastPage);
       res.pages++;

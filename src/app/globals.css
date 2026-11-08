@@ -394,3 +394,13 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 }
 /* Telefonā galvenes pogas pārnes jaunā rindā, nevis izgriež */
 @media (max-width: 560px) { .nav { flex-wrap: wrap; margin-left: 0; } .nav .btn, .nav .lang { padding-inline: 10px; } }
+
+/* Ārējā sludinājuma sīktēls un aprīkojums zem pogas */
+.ext-hero { position: relative; border-radius: 14px; overflow: hidden; background: var(--surface-2); display: grid; place-items: center; aspect-ratio: 4 / 3; max-height: 420px; }
+.ext-hero img { width: 100%; height: 100%; object-fit: contain; }
+.feat-box { margin: 16px 0; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: var(--surface); }
+.feat-box > summary { cursor: pointer; font-family: var(--f-display); font-weight: 600; font-size: 16px; list-style: none; }
+.feat-box > summary::-webkit-details-marker { display: none; }
+.feat-box > summary::after { content: " ▾"; color: var(--muted); }
+.feat-box[open] > summary::after { content: " ▴"; }
+.feat-box[open] .features { margin-top: 12px; }

@@ -82,7 +82,7 @@ export default async function ComparePage(props: { searchParams: Promise<{ ids?:
         d.l.source === "own" ? (
           "VienāVietā"
         ) : (
-          <a href={d.l.externalUrl!} target="_blank" rel="nofollow noopener noreferrer">{SOURCE_LABEL[d.l.source] ?? d.l.source} ↗</a>
+          <a href={d.l.externalUrl!} rel="nofollow noopener noreferrer">{SOURCE_LABEL[d.l.source] ?? d.l.source} ↗</a>
         ),
     },
   ];

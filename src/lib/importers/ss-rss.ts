@@ -3,7 +3,7 @@
 // Pārdevēja teksts un bildes netiek kopētas; virsrakstu veidojam paši; kartītē ir saite uz oriģinālu.
 import { and, eq, lt, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { EXTERNAL_TTL_DAYS, SERIES, SS_FEEDS } from "../constants";
+import { EXTERNAL_TTL_DAYS, SERIES, SS_FEEDS, type PropertyType } from "../constants";
 import { linkDuplicate } from "../dedupe";
 import { inferBody } from "../illustrations";
 import { landLabel } from "../listing-input";
@@ -11,7 +11,7 @@ import { landLabel } from "../listing-input";
 const { listings, places, regions, makes, models, priceHistory } = schema;
 
 /** Plūsmas vai sadaļas apraksts: kas tajā ir (transports ar klasi vai īpašums ar veidu). */
-type Feed = { kind: "vehicle"; vehicleClass: "car" | "moto" } | { kind: "property"; propertyType: "Dzīvoklis" | "Māja" | "Zeme" };
+type Feed = { kind: "vehicle"; vehicleClass: "car" | "moto" } | { kind: "property"; propertyType: PropertyType; url?: string };
 export type RssItem = { link: string; pubDate: Date; fields: Record<string, string[]>; /** sludinājuma teksta sākums, tikai modeļa atpazīšanai */ snippet?: string };
 
 // tikai ASCII: HTTP galvenēs nedrīkst būt garumzīmes
@@ -316,16 +316,22 @@ export function mapItem(
   }
 
   // nekustamais īpašums
-  const place = ctx.findPlace(item.link, 2);
+  // kategorijas dziļums sludinājuma adresē: real-estate/flats = 2, real-estate/premises/garages = 3
+  const place = ctx.findPlace(item.link, feed.url?.includes("/premises/") ? 3 : 2);
   const rooms = int(first(f, "Ist."));
-  const area = feed.propertyType === "Zeme" ? null : int(first(f, "m²"));
-  const land = feed.propertyType === "Zeme" ? parseLand(first(f, "m²")) : parseLand(first(f, "Zem. pl."));
+  // zemei un mežam saraksta "m²"/"Platība" ir zemes platība; pārējiem — telpu platība
+  const isLand = feed.propertyType === "Zeme" || feed.propertyType === "Mežs";
+  const areaRaw = first(f, "m²") ?? first(f, "Platība");
+  const area = isLand ? null : int(areaRaw);
+  const land = isLand ? parseLand(areaRaw ?? first(f, "ha")) : parseLand(first(f, "Zem. pl."));
   const floorRaw = first(f, "Stāvs")?.match(/^(-?\d+)\/(\d+)/);
   const where = place ? `, ${slug(place.name) === "centrs" ? place.region : place.name}` : "";
   const title =
     feed.propertyType === "Dzīvoklis" ? `${rooms ?? 1}-istabu dzīvoklis${area ? `, ${area} m²` : ""}${where}`
     : feed.propertyType === "Māja" ? `Privātmāja${area ? ` ${area} m²` : ""}${land ? `, zeme ${landLabel(land)}` : ""}${where}`
-    : `Zemes gabals${land ? ` ${landLabel(land)}` : ""}${where}`;
+    : feed.propertyType === "Zeme" ? `Zemes gabals${land ? ` ${landLabel(land)}` : ""}${where}`
+    : feed.propertyType === "Mežs" ? `Meža īpašums${land ? ` ${landLabel(land)}` : ""}${where}`
+    : `${feed.propertyType}${area ? ` ${area} m²` : ""}${where}`;
   // iela no saraksta ("Rīga<br>Gaigalas 17" vai RSS laukā "Iela"); ģeokodēšanai (src/lib/geocode.ts)
   const streetRaw = f["Rajons"]?.[1] ?? f["Pagasts"]?.[1] ?? f["Pilsēta"]?.[1] ?? first(f, "Iela");
   const street = streetRaw && /\p{L}{3,}/u.test(streetRaw) && !/(nov\.|pag\.)$/i.test(streetRaw) ? streetRaw.replace(/\s+/g, " ").trim().slice(0, 80) : null;

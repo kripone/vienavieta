@@ -52,7 +52,7 @@ export async function VzdDeals({ data, perM2 }: { data: { same: VzdDeal[]; media
         </div>
       )}
       <p className="fine">
-        Dati: Valsts zemes dienests, NĪTIS (<a href="https://data.gov.lv/dati/lv/dataset/darijumi-ar-telpu-grupam" target="_blank" rel="noopener noreferrer">{t("data.gov.lv")}</a>, CC BY 4.0), dzīvokļu pirkuma darījumi kopš 2016. gada. Zemesgrāmatā reģistrētā summa var atšķirties no tirgus vērtības.
+        Dati: Valsts zemes dienests, NĪTIS (<a href="https://data.gov.lv/dati/lv/dataset/darijumi-ar-telpu-grupam" rel="noopener noreferrer">{t("data.gov.lv")}</a>, CC BY 4.0), dzīvokļu pirkuma darījumi kopš 2016. gada. Zemesgrāmatā reģistrētā summa var atšķirties no tirgus vērtības.
       </p>
     </section>
   );

@@ -39,7 +39,7 @@ export const lt: Dict = {
   "Atjaunot": "Atkurti",
   "Atrakstīties": "Atsisakyti prenumeratos",
   "Atver to šajā pašā ierīcē. Saite ir derīga 15 minūtes.": "Atidaryk ją šiame pačiame įrenginyje. Nuoroda galioja 15 minučių.",
-  "Atvērt sludinājumu {src} (jaunā cilnē)": "Atidaryti skelbimą {src} (naujame skirtuke)",
+  "Atvērt sludinājumu {src}": "Atidaryti skelbimą {src}",
   "Atvērt {src}": "Atidaryti {src}",
   "Atzīmēt kā pārdotu": "Pažymėti kaip parduotą",
   "Augšupielādē bildi {i} no {n}…": "Įkeliama nuotrauka {i} iš {n}…",

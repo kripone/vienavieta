@@ -39,7 +39,7 @@ export const en: Dict = {
   "Atjaunot": "Restore",
   "Atrakstīties": "Unsubscribe",
   "Atver to šajā pašā ierīcē. Saite ir derīga 15 minūtes.": "Open it on this same device. The link is valid for 15 minutes.",
-  "Atvērt sludinājumu {src} (jaunā cilnē)": "Open the listing on {src} (new tab)",
+  "Atvērt sludinājumu {src}": "Open the listing on {src}",
   "Atvērt {src}": "Open {src}",
   "Atzīmēt kā pārdotu": "Mark as sold",
   "Augšupielādē bildi {i} no {n}…": "Uploading photo {i} of {n}…",

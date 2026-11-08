@@ -80,7 +80,7 @@ export default async function DealsPage(props: { searchParams: Promise<Record<st
         </section>
       ))}
       <p className="fine">
-        Dati: Valsts zemes dienests, NĪTIS (<a href="https://data.gov.lv/dati/lv/dataset/darijumi-ar-telpu-grupam" target="_blank" rel="noopener noreferrer">{t("data.gov.lv")}</a>, CC BY 4.0). Tikai veseli dzīvokļi; atjaunots reizi mēnesī. Zemesgrāmatā reģistrētā summa var atšķirties no tirgus vērtības.
+        Dati: Valsts zemes dienests, NĪTIS (<a href="https://data.gov.lv/dati/lv/dataset/darijumi-ar-telpu-grupam" rel="noopener noreferrer">{t("data.gov.lv")}</a>, CC BY 4.0). Tikai veseli dzīvokļi; atjaunots reizi mēnesī. Zemesgrāmatā reģistrētā summa var atšķirties no tirgus vērtības.
       </p>
     </main>
   );

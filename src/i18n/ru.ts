@@ -39,7 +39,7 @@ export const ru: Dict = {
   "Atjaunot": "Восстановить",
   "Atrakstīties": "Отписаться",
   "Atver to šajā pašā ierīcē. Saite ir derīga 15 minūtes.": "Открой её на этом же устройстве. Ссылка действительна 15 минут.",
-  "Atvērt sludinājumu {src} (jaunā cilnē)": "Открыть объявление на {src} (в новой вкладке)",
+  "Atvērt sludinājumu {src}": "Открыть объявление на {src}",
   "Atvērt {src}": "Открыть {src}",
   "Atzīmēt kā pārdotu": "Отметить как проданное",
   "Augšupielādē bildi {i} no {n}…": "Загружаю фото {i} из {n}…",

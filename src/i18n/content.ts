@@ -11,6 +11,7 @@ const PATTERNS: [RegExp, (t: T, m: RegExpMatchArray) => string][] = [
   [/^Lauku īpašums/, (t) => t("Lauku īpašums")],
   [/^Zemes gabals/, (t) => t("Zemes gabals")],
   [/^Meža īpašums/, (t) => t("Meža īpašums")],
+  [/^(Birojs|Tirdzniecības telpas|Noliktava|Garāža|Stāvvieta|Ražošanas telpas|Komercēka)(?= |,|$)/, (t, m) => t(m[1])],
   [/, zeme /, (t) => `, ${t("zeme")} `],
   [/ dīzelis(?= |$)/, (t) => " " + t("dīzelis")],
   [/ hibrīds(?= |$)/, (t) => " " + t("hibrīds")],

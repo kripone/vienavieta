@@ -6,6 +6,7 @@ import { ContactReveal } from "@/components/contact-reveal";
 import { FavButton } from "@/components/fav-button";
 import { ReportButton } from "@/components/report-button";
 import { Gallery } from "@/components/gallery";
+import { ExtThumb } from "@/components/ext-thumb";
 import { priceUnit } from "@/components/listing-card";
 import { OwnerActions } from "@/components/owner-actions";
 import { DEAL_LABEL, SOURCE_LABEL, VEHICLE_CLASS_LABEL, type VehicleClass } from "@/lib/constants";
@@ -97,7 +98,14 @@ export default async function ListingPage(props: Props) {
       {l.status === "pending" && isOwner && <p className="alert">{t("Sludinājums ir paslēpts pēc vairāku lietotāju sūdzībām. Moderators to pārbaudīs, un pēc tam tas atkal būs redzams.")}</p>}
       {isOwner && <OwnerActions id={l.id} status={l.status} />}
       <div className="det">
-        <Gallery photos={d.photos} title={l.title} placeholder={listingIll(l)} />
+        {!d.photos.length && l.source !== "own" && l.externalThumbUrl && process.env.EXTERNAL_THUMBS !== "off" ? (
+          // ārējam sludinājumam: saraksta sīktēls no avota servera (lielākas bildes ir oriģinālajā sludinājumā)
+          <div className="ext-hero">
+            <ExtThumb src={l.externalThumbUrl} source={SOURCE_LABEL[l.source] ?? l.source} fallback={listingIll(l)} />
+          </div>
+        ) : (
+          <Gallery photos={d.photos} title={l.title} placeholder={listingIll(l)} />
+        )}
         <div className="det-side">
           <div className="det-title">
             <h1>{trTitle(l.title, t)}</h1>
@@ -120,7 +128,7 @@ export default async function ListingPage(props: Props) {
               <p className="ext-note">
                 {t("Šeit redzami tikai galvenie fakti. Bildes, aprakstu un pārdevēja kontaktus skaties oriģinālajā sludinājumā {src}.", { src })}
               </p>
-              <a className="btn primary" href={ext} target="_blank" rel="nofollow noopener noreferrer">{t("Atvērt {src}", { src })} ↗</a>
+              <a className="btn primary" href={ext} rel="nofollow noopener noreferrer">{t("Atvērt {src}", { src })} ↗</a>
             </div>
           ) : (
             <div className="panel seller">
@@ -131,7 +139,7 @@ export default async function ListingPage(props: Props) {
               </span>
               {l.status === "active" && !isOwner && <ContactReveal id={l.id} />}
               {l.feedId && l.externalUrl && /^https?:\/\//.test(l.externalUrl) && (
-                <a className="fine" href={l.externalUrl} target="_blank" rel="nofollow noopener noreferrer">{t("Sludinājums salona mājaslapā")} ↗</a>
+                <a className="fine" href={l.externalUrl} rel="nofollow noopener noreferrer">{t("Sludinājums salona mājaslapā")} ↗</a>
               )}
             </div>
           )}
@@ -144,7 +152,7 @@ export default async function ListingPage(props: Props) {
                     {a.source === "own" ? (
                       <a href={a.url}>VienāVietā</a>
                     ) : (
-                      <a href={a.url} target="_blank" rel="nofollow noopener noreferrer">{SOURCE_LABEL[a.source] ?? a.source} ↗</a>
+                      <a href={a.url} rel="nofollow noopener noreferrer">{SOURCE_LABEL[a.source] ?? a.source} ↗</a>
                     )}{" "}
                     <span className="fine">{formatPrice(a.price)}</span>
                   </li>
@@ -168,8 +176,8 @@ export default async function ListingPage(props: Props) {
           </dl>
         </section>
         {l.features.length > 0 && (
-          <section>
-            <h2>{t("Aprīkojums")}</h2>
+          <details className="feat-box">
+            <summary>{t("Aprīkojums")} ({l.features.length})</summary>
             <div className="features">
               {Object.entries(
                 l.features.reduce<Record<string, string[]>>((acc, f) => {
@@ -185,7 +193,7 @@ export default async function ListingPage(props: Props) {
               ))}
             </div>
             {l.source !== "own" && <p className="fine">{t("Aprīkojums pēc pārdevēja norādītā {src}.", { src: SOURCE_LABEL[l.source] ?? l.source })}</p>}
-          </section>
+          </details>
         )}
         {vzd && <VzdDeals data={vzd} perM2={l.areaM2 ? Math.round(l.price / Number(l.areaM2)) : null} />}
         {history && <PriceHistory h={history} external={l.source !== "own"} />}

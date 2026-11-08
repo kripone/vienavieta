@@ -46,8 +46,8 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
   const unit = priceUnit(l.deal, t);
   const ext = l.source !== "own" && l.externalUrl ? l.externalUrl : null;
   const src = SOURCE_LABEL[l.source] ?? l.source;
-  // Ārējie sludinājumi: virsraksts ved uz oriģinālu (jaunā cilnē); mūsu lapā ir tikai fakti un saite.
-  const extLink = { target: "_blank", rel: "nofollow noopener noreferrer" } as const;
+  // Ārējie sludinājumi: virsraksts ved uz oriģinālu; mūsu lapā ir tikai fakti un saite.
+  const extLink = { rel: "nofollow noopener noreferrer" } as const; // tajā pašā cilnē, lai darbojas poga "Atpakaļ"
   const where = locationLabel(l.place, l.region, l.regionKind);
   return (
     <article className="card lcard">
@@ -69,7 +69,7 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
         {showStatus && l.status !== "active" && <span className="status">{t(STATUS[l.status])}</span>}
         <h2>
           {ext ? (
-            <a href={ext} {...extLink} title={t("Atvērt sludinājumu {src} (jaunā cilnē)", { src })}>{trTitle(l.title, t)}</a>
+            <a href={ext} {...extLink} title={t("Atvērt sludinājumu {src}", { src })}>{trTitle(l.title, t)}</a>
           ) : (
             <a href={`/sludinajumi/${l.id}`}>{trTitle(l.title, t)}</a>
           )}
