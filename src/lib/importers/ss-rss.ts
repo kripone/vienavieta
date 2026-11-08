@@ -260,6 +260,16 @@ export function vehicleTitle(make: string, model: string, engineL: string | null
 export type ImportRow = typeof listings.$inferInsert;
 export type { Feed, PlaceRow, MakeRow, ModelRow };
 
+/**
+ * ss.com "Mājas, vasarnīcas" sadaļā ir gan privātmājas, gan vasarnīcas/dārza mājas. Atšķiram pēc sludinājuma
+ * teksta sākuma saraksta rindā (tekstu neglabājam, tikai nosakām veidu).
+ */
+export function isSummerHouse(snippet?: string) {
+  if (!snippet) return false;
+  const s = snippet.toLowerCase();
+  return /vasarn[iī]c|d[aā]rza\s*m[aā]j|d[aā]rzkop[iī]bas|d[aā]rzi[nņ][aā]\s*m[aā]j|br[iī]vdienu\s*m[aā]j|vasaras\s*m[aā]j|(^|[^а-яё])дач|садов\S*\s*(дом|участ)|дачн/.test(s);
+}
+
 export function mapItem(
   feed: Feed,
   item: RssItem,
@@ -321,6 +331,7 @@ export function mapItem(
   const rooms = int(first(f, "Ist."));
   // zemei un mežam saraksta "m²"/"Platība" ir zemes platība; pārējiem — telpu platība
   const isLand = feed.propertyType === "Zeme" || feed.propertyType === "Mežs";
+  const ptype: PropertyType = feed.propertyType === "Māja" && isSummerHouse(item.snippet) ? "Vasarnīca" : feed.propertyType;
   const areaRaw = first(f, "m²") ?? first(f, "Platība");
   const area = isLand ? null : int(areaRaw);
   const land = isLand ? parseLand(areaRaw ?? first(f, "ha")) : parseLand(first(f, "Zem. pl."));
@@ -328,6 +339,7 @@ export function mapItem(
   const where = place ? `, ${slug(place.name) === "centrs" ? place.region : place.name}` : "";
   const title =
     feed.propertyType === "Dzīvoklis" ? `${rooms ?? 1}-istabu dzīvoklis${area ? `, ${area} m²` : ""}${where}`
+    : ptype === "Vasarnīca" ? `Vasarnīca${area ? ` ${area} m²` : ""}${land ? `, zeme ${landLabel(land)}` : ""}${where}`
     : feed.propertyType === "Māja" ? `Privātmāja${area ? ` ${area} m²` : ""}${land ? `, zeme ${landLabel(land)}` : ""}${where}`
     : feed.propertyType === "Zeme" ? `Zemes gabals${land ? ` ${landLabel(land)}` : ""}${where}`
     : feed.propertyType === "Mežs" ? `Meža īpašums${land ? ` ${landLabel(land)}` : ""}${where}`
@@ -340,7 +352,7 @@ export function mapItem(
     title: title.slice(0, 120),
     address: street && place ? `${street}, ${slug(place.name) === "centrs" ? place.region : `${place.name}, ${place.region}`}` : null,
     geoPrecision: place ? "place" : null,
-    propertyType: feed.propertyType,
+    propertyType: ptype,
     deal: priced.deal,
     rooms: rooms && rooms > 0 && rooms < 50 ? rooms : null,
     areaM2: area && area > 0 ? String(area) : null,

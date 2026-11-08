@@ -91,7 +91,7 @@ async function saveRows(section: Section, pageRows: PageRow[], ctx: Ctx, res: Cr
   const byId = new Map(mapped.map((m) => [m.externalId!, m]));
   if (!byId.size) return;
   const existing = await db
-    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl, address: listings.address, makeId: listings.makeId, modelId: listings.modelId, body: listings.body, placeId: listings.placeId })
+    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl, address: listings.address, makeId: listings.makeId, modelId: listings.modelId, body: listings.body, placeId: listings.placeId, propertyType: listings.propertyType })
     .from(listings)
     .where(and(eq(listings.source, "ss.com"), inArray(listings.externalId, [...byId.keys()])));
   const seen = new Set<string>();
@@ -104,13 +104,16 @@ async function saveRows(section: Section, pageRows: PageRow[], ctx: Ctx, res: Cr
     // labāk atpazīta marka/modelis (piem. "Citi" → EV6, "Mercedes" → Mercedes-Benz): atjaunojam arī virsrakstu un virsbūvi
     const better = (row.makeId && !e.makeId) || (row.modelId && !e.modelId);
     const newPlace = row.kind === "vehicle" && row.placeId && !e.placeId;
-    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl || newAddress || better || newPlace) {
+    // īpašuma veids precizēts (piem. "Māja" → "Vasarnīca" pēc teksta): atjaunojam veidu un virsrakstu
+    const newType = row.kind === "property" && row.propertyType && row.propertyType !== e.propertyType;
+    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl || newAddress || better || newPlace || newType) {
       await db
         .update(listings)
         .set({
           price: row.price, status: "active", externalThumbUrl: row.externalThumbUrl, updatedAt: now,
           ...(e.price !== row.price ? { firstPrice: sql`coalesce(${listings.firstPrice}, ${e.price})` } : {}),
           ...(newAddress ? { address: row.address, geoPrecision: "place" } : {}),
+          ...(newType ? { propertyType: row.propertyType, title: row.title } : {}),
           ...(newPlace ? { placeId: row.placeId, lat: row.lat, lon: row.lon, geoPrecision: "place" } : {}),
           ...(better ? { makeId: row.makeId, modelId: row.modelId, makeText: row.makeText, modelText: row.modelText, title: row.title, ...(e.body ? {} : { body: row.body }) } : {}),
         })
@@ -182,7 +185,9 @@ export async function crawlSection(section: Section, mode: "quick" | "full", fet
     const complete = Number.isFinite(last) && res.pages >= last * 0.95 && res.errors.length <= Math.max(2, res.pages * 0.02);
     if (complete && Number.isFinite(last)) {
       const sameCategory =
-        section.kind === "vehicle" ? eq(listings.vehicleClass, section.vehicleClass) : eq(listings.propertyType, section.propertyType);
+        section.kind === "vehicle" ? eq(listings.vehicleClass, section.vehicleClass)
+        : section.propertyType === "Māja" ? inArray(listings.propertyType, ["Māja", "Vasarnīca"]) // sadaļā ir arī vasarnīcas
+        : eq(listings.propertyType, section.propertyType);
       const gone = await db
         .update(listings)
         .set({ status: "deleted" })
