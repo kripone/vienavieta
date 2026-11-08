@@ -17,6 +17,7 @@ import { CompareToggle } from "@/components/compare";
 import { EvalBadge } from "@/components/eval-badge";
 import { alsoAt } from "@/lib/dedupe";
 import { listingHistory } from "@/lib/history";
+import { ListingMapLazy } from "@/components/listing-map-lazy";
 import { PriceHistory } from "@/components/price-history";
 import { dealsForListing } from "@/lib/vzd";
 import { VzdDeals } from "@/components/vzd-deals";
@@ -195,6 +196,7 @@ export default async function ListingPage(props: Props) {
             {l.source !== "own" && <p className="fine">{t("Aprīkojums pēc pārdevēja norādītā {src}.", { src: SOURCE_LABEL[l.source] ?? l.source })}</p>}
           </details>
         )}
+        {l.kind === "property" && l.lat != null && l.lon != null && <ListingMapLazy lat={l.lat} lon={l.lon} exact={l.geoPrecision === "street"} />}
         {vzd && <VzdDeals data={vzd} perM2={l.areaM2 ? Math.round(l.price / Number(l.areaM2)) : null} />}
         {history && <PriceHistory h={history} external={l.source !== "own"} />}
         {l.description && (

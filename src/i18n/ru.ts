@@ -2,6 +2,10 @@
 import type { Dict } from "./core";
 
 export const ru: Dict = {
+  "Atrašanās vieta": "Местоположение",
+  "Atzīme pēc sludinājumā norādītās adreses.": "Отметка по адресу, указанному в объявлении.",
+  "Aptuvena vieta: sludinājumā nav precīzas adreses, rādām apkaimi vai pagastu.": "Примерное место: в объявлении нет точного адреса, показываем район или волость.",
+  "Atvērt Google Maps": "Открыть в Google Maps",
   "Tu izmanto VienāVietā aplikāciju.": "Вы используете приложение VienāVietā.",
   "Instalēt aplikāciju": "Установить приложение",
   "Lai instalētu iPhone: Safari spied „Kopīgot” (kvadrāts ar bultu) un izvēlies „Pievienot sākuma ekrānam”.": "Чтобы установить на iPhone: в Safari нажмите «Поделиться» (квадрат со стрелкой) и выберите «На экран „Домой“».",

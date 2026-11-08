@@ -2,6 +2,10 @@
 import type { Dict } from "./core";
 
 export const en: Dict = {
+  "Atrašanās vieta": "Location",
+  "Atzīme pēc sludinājumā norādītās adreses.": "Marker based on the address in the listing.",
+  "Aptuvena vieta: sludinājumā nav precīzas adreses, rādām apkaimi vai pagastu.": "Approximate location: the listing has no exact address, so we show the neighbourhood or parish.",
+  "Atvērt Google Maps": "Open in Google Maps",
   "Tu izmanto VienāVietā aplikāciju.": "You're using the VienāVietā app.",
   "Instalēt aplikāciju": "Install the app",
   "Lai instalētu iPhone: Safari spied „Kopīgot” (kvadrāts ar bultu) un izvēlies „Pievienot sākuma ekrānam”.": "To install on iPhone: in Safari tap “Share” (square with an arrow) and choose “Add to Home Screen”.",

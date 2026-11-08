@@ -411,3 +411,8 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .pwa-banner span { flex: 1; }
 .pwa-banner .btn { flex: none; }
 .pwa-x { flex: none; background: none; border: 0; color: var(--muted); font-size: 22px; line-height: 1; padding: 4px; cursor: pointer; }
+
+/* sludinājuma karte */
+.listing-map .lmap { height: 320px; border-radius: 10px; overflow: hidden; z-index: 0; border: 1px solid var(--line); background: var(--surface-2); }
+.lmap.loading { height: 320px; border-radius: 10px; background: var(--surface-2); }
+@media (max-width: 560px) { .listing-map .lmap, .lmap.loading { height: 240px; } }

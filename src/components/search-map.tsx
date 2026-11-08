@@ -4,12 +4,12 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { GOOGLE_KEY, googleCopyright, googleSession, googleTileUrl, type GoogleMapType } from "@/lib/google-tiles";
+import { GOOGLE_KEY } from "@/lib/google-tiles";
+import { addGoogleLayers, STREETS_ATTR } from "./map-layers";
 
 type Point = [string, number, number, 1 | 2, number, string];
 
 const STREETS = process.env.NEXT_PUBLIC_MAP_TILES_URL || "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-const STREETS_ATTR = process.env.NEXT_PUBLIC_MAP_TILES_ATTRIBUTION || '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 const SATELLITE = process.env.NEXT_PUBLIC_MAP_SATELLITE_URL || "";
 const SATELLITE_ATTR = process.env.NEXT_PUBLIC_MAP_SATELLITE_ATTRIBUTION || "";
 
@@ -21,46 +21,6 @@ function simplify(pts: L.Point[], min = 8) {
   const out: L.Point[] = [];
   for (const p of pts) if (!out.length || out[out.length - 1].distanceTo(p) >= min) out.push(p);
   return out;
-}
-
-/**
- * Google ielu karte un satelīts. Ja Google nav pieejams (atslēga, kvota), pārslēdzas uz OpenStreetMap.
- * Atsauce "Google Maps" + autortiesības no viewport atbildes tiek atjaunotas pēc katras kustības.
- */
-function addGoogleLayers(m: L.Map) {
-  m.attributionControl.setPrefix('<span aria-label="Google Maps" style="font-weight:700">Google Maps</span>');
-  const layers: Partial<Record<GoogleMapType, { layer: L.TileLayer; session: string }>> = {};
-  let active: GoogleMapType = "roadmap";
-  let lastCopyright = "";
-
-  const refreshCopyright = () => {
-    const cur = layers[active];
-    if (!cur) return;
-    const b = m.getBounds();
-    googleCopyright(cur.session, m.getZoom(), { north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() })
-      .then((text) => {
-        if (lastCopyright) m.attributionControl.removeAttribution(lastCopyright);
-        lastCopyright = text ? esc(text) : "";
-        if (lastCopyright) m.attributionControl.addAttribution(lastCopyright);
-      })
-      .catch(() => {});
-  };
-
-  Promise.all((["roadmap", "satellite"] as const).map((t) => googleSession(t).then((session) => [t, session] as const)))
-    .then((sessions) => {
-      for (const [t, session] of sessions) layers[t] = { session, layer: L.tileLayer(googleTileUrl(session), { maxZoom: 20, tileSize: 256 }) };
-      layers.roadmap!.layer.addTo(m);
-      L.control.layers({ "Karte": layers.roadmap!.layer, "Satelīts": layers.satellite!.layer }, {}, { position: "topright" }).addTo(m);
-      m.on("baselayerchange", (e: L.LayersControlEvent) => { active = e.name === "Satelīts" ? "satellite" : "roadmap"; refreshCopyright(); });
-      let t: ReturnType<typeof setTimeout> | undefined;
-      m.on("moveend", () => { clearTimeout(t); t = setTimeout(refreshCopyright, 400); });
-      refreshCopyright();
-    })
-    .catch(() => {
-      // rezerve: OpenStreetMap
-      m.attributionControl.setPrefix(false);
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: STREETS_ATTR, maxZoom: 19 }).addTo(m);
-    });
 }
 
 export function SearchMap({ query, zone }: { query: string; zone?: string }) {

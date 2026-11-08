@@ -2,6 +2,10 @@
 import type { Dict } from "./core";
 
 export const lt: Dict = {
+  "Atrašanās vieta": "Vieta",
+  "Atzīme pēc sludinājumā norādītās adreses.": "Žymė pagal skelbime nurodytą adresą.",
+  "Aptuvena vieta: sludinājumā nav precīzas adreses, rādām apkaimi vai pagastu.": "Apytikslė vieta: skelbime nėra tikslaus adreso, rodome rajoną ar seniūniją.",
+  "Atvērt Google Maps": "Atidaryti Google Maps",
   "Tu izmanto VienāVietā aplikāciju.": "Naudojate VienāVietā programėlę.",
   "Instalēt aplikāciju": "Įdiegti programėlę",
   "Lai instalētu iPhone: Safari spied „Kopīgot” (kvadrāts ar bultu) un izvēlies „Pievienot sākuma ekrānam”.": "Norėdami įdiegti iPhone: Safari bakstelėkite „Bendrinti“ (kvadratas su rodykle) ir pasirinkite „Įtraukti į pradžios ekraną“.",
