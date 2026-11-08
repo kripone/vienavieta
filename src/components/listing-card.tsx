@@ -38,7 +38,7 @@ type CardProps = {
 };
 
 export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, also, evaluation, compare, vzd }: CardProps) {
-  const { t } = await getT();
+  const { t, lp } = await getT();
   const meta =
     l.kind === "vehicle"
       ? [l.year, l.mileageKm != null ? `${formatNumber(l.mileageKm)} km` : null, l.fuel && t(l.fuel), l.gearbox && t(l.gearbox), l.body && t(l.body)]
@@ -51,7 +51,7 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
   const where = locationLabel(l.place, l.region, l.regionKind);
   return (
     <article className="card lcard">
-      <a href={`/sludinajumi/${l.id}`} className="thumb" aria-hidden="true" tabIndex={-1}>
+      <a href={lp(`/sludinajumi/${l.id}`)} className="thumb" aria-hidden="true" tabIndex={-1}>
         {l.thumbKey ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={mediaUrl(l.thumbKey)} alt="" loading="lazy" />
@@ -71,7 +71,7 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
           {ext ? (
             <a href={ext} {...extLink} title={t("Atvērt sludinājumu {src}", { src })}>{trTitle(l.title, t)}</a>
           ) : (
-            <a href={`/sludinajumi/${l.id}`}>{trTitle(l.title, t)}</a>
+            <a href={lp(`/sludinajumi/${l.id}`)}>{trTitle(l.title, t)}</a>
           )}
         </h2>
         <div className="meta">
@@ -85,7 +85,7 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
           <div className="ext-row">
             <span className="src-badge">{t("Avots: {src}", { src })}</span>
             <a className="ext-link" href={ext} {...extLink}>{t("Skatīt {src}", { src })} ↗</a>
-            <a className="fine" href={`/sludinajumi/${l.id}`}>{t("Sīkāk")}</a>
+            <a className="fine" href={lp(`/sludinajumi/${l.id}`)}>{t("Sīkāk")}</a>
           </div>
         )}
         {also && also.length > 0 && (
@@ -103,7 +103,7 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
           </div>
         )}
         {vzd && (
-          <a className="vzd-badge" href={`/sludinajumi/${l.id}#vzd`} title={t("Reālās pirkuma cenas šajā mājā (Valsts zemes dienests)")}>
+          <a className="vzd-badge" href={lp(`/sludinajumi/${l.id}`) + "#vzd"} title={t("Reālās pirkuma cenas šajā mājā (Valsts zemes dienests)")}>
             {t("VZD: šajā mājā {v} €/m² ({n})", { v: formatNumber(vzd.median), n: vzd.n })}
             {l.areaM2 ? <> · {t("šis {v} €/m²", { v: formatNumber(Math.round(l.price / Number(l.areaM2))) })}</> : null}
           </a>

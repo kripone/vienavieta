@@ -19,7 +19,8 @@ import { getCurrentUser } from "@/lib/session";
 
 import { formatPrice } from "@/lib/format";
 import { facetCounts, priceSummary } from "@/lib/search";
-import { appBase, propertyHref, vehicleHref, seoSlug, type Landing } from "@/lib/seo";
+import { appBase, propertyHref, regionName, vehicleHref, seoSlug, type Landing } from "@/lib/seo";
+import { trTitle } from "@/i18n/content";
 import { PROPERTY_PLURAL, PROPERTY_TYPES, type PropertyType } from "@/lib/constants";
 
 export type SP = Record<string, string | string[] | undefined>;
@@ -29,7 +30,7 @@ export type SP = Record<string, string | string[] | undefined>;
  * Filtru maiņa vienmēr ved uz "/?…".
  */
 export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing }) {
-  const { t, tp } = await getT();
+  const { t, tp, lp, locale } = await getT();
   const s = parseSearch(raw);
   const flat: Record<string, string> = {};
   for (const [k, v] of Object.entries(raw)) if (typeof v === "string" && v) flat[k] = v;
@@ -56,7 +57,7 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
   const heading = s.cat === "vehicle" ? t(VEHICLE_CLASS_LABEL[(s.vc ?? "car") as VehicleClass]) : s.cat === "property" ? t("Nekustamais īpašums") : t("Visi sludinājumi");
   const pointsQuery = new URLSearchParams(Object.entries(flat).filter(([k]) => !["page", "sort", "zone"].includes(k))).toString();
   const pageHref = (n: number) => {
-    if (landing) return n > 1 ? `${landing.path}?page=${n}` : landing.path;
+    if (landing) return n > 1 ? `${lp(landing.path)}?page=${n}` : lp(landing.path);
     const p = new URLSearchParams(flat);
     if (n > 1) p.set("page", String(n));
     else p.delete("page");
@@ -78,13 +79,13 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
         <nav className="quick-cats" aria-label={t("Kategorija")}>
           <div className="seg full">
             {([["", "Visi"], ["vehicle", "Transports"], ["property", "Īpašumi"]] as const).map(([c, l]) => (
-              <a key={c} href={c === "vehicle" ? "/auto" : c === "property" ? "/ipasumi" : "/"} aria-current={(s.cat ?? "") === c ? "page" : undefined}>{t(l)}</a>
+              <a key={c} href={lp(c === "vehicle" ? "/auto" : c === "property" ? "/ipasumi" : "/")} aria-current={(s.cat ?? "") === c ? "page" : undefined}>{t(l)}</a>
             ))}
           </div>
           {s.cat === "vehicle" && (
             <div className="quick-vc">
               {VEHICLE_CLASSES.map((c) => (
-                <a key={c} href={vehicleHref(c) ?? `/?cat=vehicle&vc=${c}`} aria-current={(s.vc ?? "car") === c ? "page" : undefined}>{t(VEHICLE_CLASS_LABEL[c])}</a>
+                <a key={c} href={vehicleHref(c) ? lp(vehicleHref(c)!) : `/?cat=vehicle&vc=${c}`} aria-current={(s.vc ?? "car") === c ? "page" : undefined}>{t(VEHICLE_CLASS_LABEL[c])}</a>
               ))}
             </div>
           )}
@@ -97,19 +98,19 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
         {landing && (
           <>
             <nav className="crumbs" aria-label={t("Ceļš")}>
-              <a href="/">VienāVietā</a>
-              {landing.crumbs.map((c) => <span key={c.href}> › <a href={c.href}>{t(c.name)}</a></span>)}
+              <a href={lp("/")}>VienāVietā</a>
+              {landing.crumbs.map((c) => <span key={c.href}> › <a href={lp(c.href)}>{c.name}</a></span>)}
             </nav>
             <JsonLd data={{
               "@context": "https://schema.org", "@type": "BreadcrumbList",
-              itemListElement: [{ name: "VienāVietā", href: "/" }, ...landing.crumbs].map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: `${appBase()}${c.href}` })),
+              itemListElement: [{ name: "VienāVietā", href: "/" }, ...landing.crumbs].map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: `${appBase()}${lp(c.href)}` })),
             }} />
           </>
         )}
         {stripMode && <TypeStrip mode={stripMode} flat={flat} counts={counts} />}
         <SearchMapLazy query={pointsQuery} zone={flat.zone} />
         <div className="results-head">
-          {landing ? <h1>{t(landing.h1)}</h1> : <h1>{heading}</h1>}
+          {landing ? <h1>{landing.h1}</h1> : <h1>{heading}</h1>}
           {result && <span className="count">{tp(result.total, "sludinājums", "sludinājumi")}</span>}
           <span className="grow" />
           <Suspense>
@@ -147,7 +148,7 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
         {landing && (
           <div className="seo-box">
             <p>
-              {t(landing.about)}{" "}
+              {landing.about}{" "}
               {summary && summary.n > 0 && (
                 <>
                   {tp(summary.n, "sludinājums", "sludinājumi")}
@@ -156,17 +157,18 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
               )}{" "}
               {t("Salīdzini cenas, skaties cenu vēsturi un saņem paziņojumus par jauniem sludinājumiem.")}
             </p>
-            {landing.dealSwitch && <p><a href={landing.dealSwitch.href}>{t(landing.dealSwitch.label)} →</a></p>}
+            {landing.dealSwitch && <p><a href={lp(landing.dealSwitch.href)}>{landing.dealSwitch.label} →</a></p>}
             {landing.facet === "ptype" && (
               <ul className="seo-links">
-                {PROPERTY_TYPES.map((pt: PropertyType) => <li key={pt}><a href={propertyHref(pt, "sell")}>{t(PROPERTY_PLURAL[pt])}</a></li>)}
+                {PROPERTY_TYPES.map((pt: PropertyType) => <li key={pt}><a href={lp(propertyHref(pt, "sell"))}>{t(PROPERTY_PLURAL[pt])}</a></li>)}
               </ul>
             )}
             {facets.length > 0 && (
               <ul className="seo-links">
                 {facets.slice(0, 80).map((f) => {
                   const href = facetHref(f);
-                  return href ? <li key={f.id}><a href={href}>{f.name}</a> <span className="fine">{f.n}</span></li> : null;
+                  const label = facetBy === "region" ? regionName(f.name, locale) : facetBy === "model" ? trTitle(f.name, t) : f.name;
+                  return href ? <li key={f.id}><a href={lp(href)}>{label}</a> <span className="fine">{f.n}</span></li> : null;
                 })}
               </ul>
             )}

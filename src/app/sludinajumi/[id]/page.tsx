@@ -19,7 +19,7 @@ import { alsoAt } from "@/lib/dedupe";
 import { listingHistory } from "@/lib/history";
 import { ListingMapLazy } from "@/components/listing-map-lazy";
 import { JsonLd } from "@/components/json-ld";
-import { appBase, propertyHref, vehicleHref, type Crumb } from "@/lib/seo";
+import { appBase, langAlternates, propertyHref, regionName, vehicleHref, type Crumb } from "@/lib/seo";
 import type { PropertyType } from "@/lib/constants";
 import { PriceHistory } from "@/components/price-history";
 import { dealsForListing } from "@/lib/vzd";
@@ -39,7 +39,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return {
     title: trTitle(d.l.title, (await getT()).t),
     description: `${formatPrice(d.l.price)} · ${locationLabel(d.place, d.region, d.regionKind)}`,
-    alternates: { canonical: `/sludinajumi/${d.l.id}` },
+    alternates: external ? { canonical: `/sludinajumi/${d.l.id}` } : langAlternates(`/sludinajumi/${d.l.id}`, (await getT()).locale),
     // citu portālu sludinājumi ir tikai fakti + saite: meklētājos tos nerādām (indeksējam SEO lapas un pašu sludinājumus)
     robots: external || d.l.status !== "active" ? { index: false, follow: true } : undefined,
     openGraph: { images: d.photos[0] ? [d.photos[0].url] : d.l.externalThumbUrl ? [d.l.externalThumbUrl] : ["/og.png"] },
@@ -47,7 +47,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 }
 
 export default async function ListingPage(props: Props) {
-  const { t } = await getT();
+  const { t, lp, locale } = await getT();
   const { id } = await props.params;
   const { saglabats } = await props.searchParams;
   const [d, user] = await Promise.all([getListing(id), getCurrentUser()]);
@@ -108,15 +108,15 @@ export default async function ListingPage(props: Props) {
     if (root) {
       crumbs.push({ name: l.vehicleClass === "car" ? "Auto" : "Moto", href: root });
       if (d.make) crumbs.push({ name: d.make, href: vehicleHref(l.vehicleClass as VehicleClass, d.make)! });
-      if (d.make && d.model) crumbs.push({ name: d.model, href: vehicleHref(l.vehicleClass as VehicleClass, d.make, d.model)! });
+      if (d.make && d.model) crumbs.push({ name: trTitle(d.model, t), href: vehicleHref(l.vehicleClass as VehicleClass, d.make, d.model)! });
     }
   } else if (l.kind === "property") {
     crumbs.push({ name: "Īpašumi", href: "/ipasumi" });
     if (l.propertyType) {
       const pt = l.propertyType as PropertyType;
       const deal = l.deal === "rent" ? "rent" : "sell";
-      crumbs.push({ name: PROPERTY_PLURAL[pt], href: propertyHref(pt, deal) });
-      if (d.region && d.regionCountry !== "LT") crumbs.push({ name: d.region, href: propertyHref(pt, deal, d.region) });
+      crumbs.push({ name: t(PROPERTY_PLURAL[pt]), href: propertyHref(pt, deal) });
+      if (d.region && d.regionCountry !== "LT") crumbs.push({ name: regionName(d.region, locale), href: propertyHref(pt, deal, d.region) });
     }
   }
   const ld = l.source === "own" && l.status === "active"
@@ -124,7 +124,7 @@ export default async function ListingPage(props: Props) {
         "@context": "https://schema.org",
         "@type": l.kind === "vehicle" && l.vehicleClass === "car" ? "Car" : "Product",
         name: l.title,
-        url: `${appBase()}/sludinajumi/${l.id}`,
+        url: `${appBase()}${lp(`/sludinajumi/${l.id}`)}`,
         ...(d.photos.length ? { image: d.photos.slice(0, 5).map((p: { url: string }) => (p.url.startsWith("http") ? p.url : `${appBase()}${p.url}`)) } : {}),
         ...(l.description ? { description: l.description.slice(0, 500) } : {}),
         ...(d.make ? { brand: { "@type": "Brand", name: d.make } } : {}),
@@ -139,12 +139,12 @@ export default async function ListingPage(props: Props) {
     <main className="wrap">
       {crumbs.length > 0 && (
         <nav className="crumbs" aria-label={t("Ceļš")}>
-          <a href="/">VienāVietā</a>
-          {crumbs.map((c) => <span key={c.href}> › <a href={c.href}>{t(c.name)}</a></span>)}
+          <a href={lp("/")}>VienāVietā</a>
+          {crumbs.map((c) => <span key={c.href}> › <a href={lp(c.href)}>{t(c.name)}</a></span>)}
         </nav>
       )}
       {crumbs.length > 0 && l.source === "own" && (
-        <JsonLd data={{ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ name: "VienāVietā", href: "/" }, ...crumbs].map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: `${appBase()}${c.href}` })) }} />
+        <JsonLd data={{ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ name: "VienāVietā", href: "/" }, ...crumbs].map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: `${appBase()}${lp(c.href)}` })) }} />
       )}
       {ld && <JsonLd data={ld} />}
       {saglabats && isOwner && <p className="welcome">{l.status === "active" ? t("Sludinājums saglabāts un redzams visiem.") : t("Sludinājums saglabāts.")}</p>}
@@ -206,7 +206,7 @@ export default async function ListingPage(props: Props) {
                 {elsewhere.map((a: { id: string; source: string; url: string; price: number }) => (
                   <li key={a.id}>
                     {a.source === "own" ? (
-                      <a href={a.url}>VienāVietā</a>
+                      <a href={lp(a.url)}>VienāVietā</a>
                     ) : (
                       <a href={a.url} rel="nofollow noopener noreferrer">{SOURCE_LABEL[a.source] ?? a.source} ↗</a>
                     )}{" "}

@@ -1,12 +1,14 @@
 import { getT } from "@/i18n/server";
 import type { Metadata } from "next";
+import { langAlternates } from "@/lib/seo";
 import { dealsByAddress } from "@/lib/vzd";
 import { formatNumber, formatPrice } from "@/lib/format";
 import { INTL_LOCALE, type Locale } from "@/i18n/core";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getT();
-  return { title: t("Dzīvokļu darījumu cenas"), description: t("Par cik dzīvokļi patiešām pārdoti konkrētā mājā: Valsts zemes dienesta darījumu dati kopš 2016. gada.") };
+export async function generateMetadata(props: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
+  const { t, locale } = await getT();
+  const filtered = Object.keys(await props.searchParams).length > 0;
+  return { alternates: langAlternates("/darijumi", locale), robots: filtered ? { index: false, follow: true } : undefined, title: t("Dzīvokļu darījumu cenas"), description: t("Par cik dzīvokļi patiešām pārdoti konkrētā mājā: Valsts zemes dienesta darījumu dati kopš 2016. gada.") };
 }
 export const dynamic = "force-dynamic";
 

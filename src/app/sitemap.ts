@@ -2,7 +2,8 @@ import type { MetadataRoute } from "next";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import type { PropertyType, VehicleClass } from "@/lib/constants";
-import { appBase, propertyHref, vehicleHref } from "@/lib/seo";
+import { appBase, langAlternates, propertyHref, vehicleHref } from "@/lib/seo";
+import { LOCALES } from "@/i18n/core";
 
 export const dynamic = "force-dynamic";
 let memo: { at: number; v: MetadataRoute.Sitemap } | null = null;
@@ -13,8 +14,8 @@ const MIN = 3;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (memo && memo.at > Date.now() - 3600_000) return memo.v;
   const b = appBase();
-  const urls: MetadataRoute.Sitemap = ["", "/auto", "/moto", "/ipasumi", "/tirgus", "/cenu-kritumi", "/darijumi", "/vesture", "/par-mums", "/noteikumi", "/privatums"].map((p) => ({ url: `${b}${p}`, changeFrequency: "daily" as const }));
-  const add = (path: string) => urls.push({ url: `${b}${path}`, changeFrequency: "daily" });
+  const urls: { path: string; lastModified?: Date }[] = ["/", "/auto", "/moto", "/ipasumi", "/tirgus", "/cenu-kritumi", "/darijumi", "/vesture", "/par-mums", "/noteikumi", "/privatums"].map((path) => ({ path }));
+  const add = (path: string) => urls.push({ path });
 
   try {
     // vienā vaicājumā: skaiti pa markām/modeļiem un īpašumu veidiem/reģioniem
@@ -48,7 +49,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .orderBy(desc(schema.listings.updatedAt))
     .limit(10000)
     .catch(() => []);
-  const v = [...urls, ...own.map((l) => ({ url: `${b}/sludinajumi/${l.id}`, lastModified: l.updatedAt }))];
+  for (const l of own) urls.push({ path: `/sludinajumi/${l.id}`, lastModified: l.updatedAt });
+  // katra lapa visās valodās ar hreflang norādēm
+  const v: MetadataRoute.Sitemap = urls.flatMap(({ path, lastModified }) => {
+    const alt = langAlternates(path, "lv").languages;
+    const languages = Object.fromEntries(Object.entries(alt).filter(([k]) => k !== "x-default").map(([k, u]) => [k, `${b}${u}`]));
+    return LOCALES.map((l) => ({ url: `${b}${langAlternates(path, l).canonical}`, lastModified, changeFrequency: "daily" as const, alternates: { languages } }));
+  });
   if (urls.length > 11) memo = { at: Date.now(), v };
   return v;
 }

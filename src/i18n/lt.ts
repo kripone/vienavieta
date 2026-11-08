@@ -2,6 +2,11 @@
 import type { Dict } from "./core";
 
 export const lt: Dict = {
+  "{name} pārdošanā": "{name} – pardavimas",
+  "{name} motocikli pārdošanā": "{name} motociklai – pardavimas",
+  "{name} sludinājumi no visiem portāliem vienā vietā.": "{name}: skelbimai iš visų portalų vienoje vietoje.",
+  "{what} pārdošanā": "{what} pardavimui",
+  "{what} īrei": "{what} nuomai",
   "Auto, moto, dzīvokļi, mājas un zeme no ss.com, autoplius.lt un citiem portāliem vienā meklētājā. Cenu vēsture, cenu kritumi un reālās darījumu cenas.": "Automobiliai, motociklai, butai, namai ir žemė iš ss.com, autoplius.lt ir kitų portalų vienoje paieškoje. Kainų istorija, kainų kritimai ir realios sandorių kainos.",
   "Ceļš": "Kelias",
   "Kategorijas": "Kategorijos",

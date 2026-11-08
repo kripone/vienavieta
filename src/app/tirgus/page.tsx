@@ -1,5 +1,6 @@
 import { getT } from "@/i18n/server";
 import type { Metadata } from "next";
+import { langAlternates } from "@/lib/seo";
 import { BarList, ColumnChart, ScatterChart, TrendChart } from "@/components/charts";
 import { MarketSelect } from "@/components/market-form";
 import { DEAL_LABEL } from "@/lib/constants";
@@ -8,9 +9,10 @@ import {
   makesWithListings, marketTotals, modelsWithListings, priceByYear, priceVsMileage, propertyByPlace, propertyByRegion, segmentTrend, topMakes,
 } from "@/lib/market";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getT();
-  return { title: t("Tirgus tendences"), description: t("Auto un nekustamā īpašuma cenas Latvijā: mediānas pa modeļiem, gadiem un reģioniem.") };
+export async function generateMetadata(props: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
+  const { t, locale } = await getT();
+  const filtered = Object.keys(await props.searchParams).length > 0;
+  return { alternates: langAlternates("/tirgus", locale), robots: filtered ? { index: false, follow: true } : undefined, title: t("Tirgus tendences"), description: t("Auto un nekustamā īpašuma cenas Latvijā: mediānas pa modeļiem, gadiem un reģioniem.") };
 }
 export const dynamic = "force-dynamic";
 

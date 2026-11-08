@@ -1,5 +1,6 @@
 import { getT } from "@/i18n/server";
 import type { Metadata } from "next";
+import { langAlternates } from "@/lib/seo";
 import { ListingCard } from "@/components/listing-card";
 import { recentDrops } from "@/lib/history";
 import { alsoAt } from "@/lib/dedupe";
@@ -7,9 +8,10 @@ import { priceEvals } from "@/lib/price-eval";
 import { vzdBadges } from "@/lib/vzd";
 import { formatPrice, timeAgo } from "@/lib/format";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getT();
-  return { title: t("Cenu kritumi"), description: t("Sludinājumi, kuriem pēdējās dienās samazināta cena: auto un nekustamais īpašums.") };
+export async function generateMetadata(props: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
+  const { t, locale } = await getT();
+  const filtered = Object.keys(await props.searchParams).length > 0;
+  return { alternates: langAlternates("/cenu-kritumi", locale), robots: filtered ? { index: false, follow: true } : undefined, title: t("Cenu kritumi"), description: t("Sludinājumi, kuriem pēdējās dienās samazināta cena: auto un nekustamais īpašums.") };
 }
 export const dynamic = "force-dynamic";
 

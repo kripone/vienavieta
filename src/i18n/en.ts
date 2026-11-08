@@ -2,6 +2,11 @@
 import type { Dict } from "./core";
 
 export const en: Dict = {
+  "{name} pārdošanā": "{name} for sale",
+  "{name} motocikli pārdošanā": "{name} motorcycles for sale",
+  "{name} sludinājumi no visiem portāliem vienā vietā.": "{name}: listings from all sites in one place.",
+  "{what} pārdošanā": "{what} for sale",
+  "{what} īrei": "{what} for rent",
   "Auto, moto, dzīvokļi, mājas un zeme no ss.com, autoplius.lt un citiem portāliem vienā meklētājā. Cenu vēsture, cenu kritumi un reālās darījumu cenas.": "Cars, motorcycles, apartments, houses and land from ss.com, autoplius.lt and other sites in one search. Price history, price drops and real transaction prices.",
   "Ceļš": "Breadcrumb",
   "Kategorijas": "Categories",

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SearchView, type SP } from "@/components/search-view";
 import { JsonLd } from "@/components/json-ld";
-import { appBase } from "@/lib/seo";
+import { appBase, langAlternates } from "@/lib/seo";
 import { getT } from "@/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -11,11 +11,11 @@ export async function generateMetadata(props: { searchParams: Promise<SP> }): Pr
   const sp = await props.searchParams;
   const filtered = Object.values(sp).some((v) => v != null && v !== "");
   if (filtered) return { robots: { index: false, follow: true } };
-  const { t } = await getT();
+  const { t, locale } = await getT();
   return {
     title: { absolute: `VienāVietā – ${t("Visi Latvijas sludinājumi vienā meklētājā")}` },
     description: t("Auto, moto, dzīvokļi, mājas un zeme no ss.com, autoplius.lt un citiem portāliem vienā meklētājā. Cenu vēsture, cenu kritumi un reālās darījumu cenas."),
-    alternates: { canonical: "/" },
+    alternates: langAlternates("/", locale),
   };
 }
 

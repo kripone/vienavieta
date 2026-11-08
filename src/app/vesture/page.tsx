@@ -1,11 +1,13 @@
 import { getT } from "@/i18n/server";
 import type { Metadata } from "next";
+import { langAlternates } from "@/lib/seo";
 import { redirect } from "next/navigation";
 import { findByUrl } from "@/lib/history";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getT();
-  return { title: t("Sludinājuma vēsture"), description: t("Ielīmē ss.com sludinājuma saiti un redzi, cik ilgi tas ir tirgū un kā mainījusies cena.") };
+export async function generateMetadata(props: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
+  const { t, locale } = await getT();
+  const filtered = Object.keys(await props.searchParams).length > 0;
+  return { alternates: langAlternates("/vesture", locale), robots: filtered ? { index: false, follow: true } : undefined, title: t("Sludinājuma vēsture"), description: t("Ielīmē ss.com sludinājuma saiti un redzi, cik ilgi tas ir tirgū un kā mainījusies cena.") };
 }
 export const dynamic = "force-dynamic";
 
