@@ -89,7 +89,7 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 ## Palaišana produkcijā
 - [x] Render Blueprint (render.yaml) un instrukcija docs/DEPLOY.md
 - [x] Testa versija internetā: Render + Cloudflare R2 + Brevo + Google karte
-- [ ] Domēns, hostings, pārvaldīta PostgreSQL
+- [x] Domēns, hostings, pārvaldīta PostgreSQL (vienavieta.lv: Cloudflare DNS → Render; vecā onrender adrese pāradresē)
 - [x] E-pasta sūtīšana (Brevo API)
 - [ ] Kļūdu uzraudzība, rezerves kopijas
 - [ ] Lietošanas noteikumi, privātuma politika, sīkdatnes

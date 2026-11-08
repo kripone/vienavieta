@@ -9,7 +9,7 @@ import { GOOGLE_KEY, googleCopyright, googleSession, googleTileUrl, type GoogleM
 type Point = [string, number, number, 1 | 2, number, string];
 
 const STREETS = process.env.NEXT_PUBLIC_MAP_TILES_URL || "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-const STREETS_ATTR = process.env.NEXT_PUBLIC_MAP_TILES_ATTRIBUTION || '&copy; <a href="https://www.openstreetmap.org/copyright">{t("OpenStreetMap")}</a>';
+const STREETS_ATTR = process.env.NEXT_PUBLIC_MAP_TILES_ATTRIBUTION || '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 const SATELLITE = process.env.NEXT_PUBLIC_MAP_SATELLITE_URL || "";
 const SATELLITE_ATTR = process.env.NEXT_PUBLIC_MAP_SATELLITE_ATTRIBUTION || "";
 
@@ -28,7 +28,7 @@ function simplify(pts: L.Point[], min = 8) {
  * Atsauce "Google Maps" + autortiesības no viewport atbildes tiek atjaunotas pēc katras kustības.
  */
 function addGoogleLayers(m: L.Map) {
-  m.attributionControl.setPrefix('<span aria-label={t("Google Maps")} style="font-weight:700">{t("Google Maps")}</span>');
+  m.attributionControl.setPrefix('<span aria-label="Google Maps" style="font-weight:700">Google Maps</span>');
   const layers: Partial<Record<GoogleMapType, { layer: L.TileLayer; session: string }>> = {};
   let active: GoogleMapType = "roadmap";
   let lastCopyright = "";

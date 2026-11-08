@@ -15,7 +15,7 @@ Iestatīšana:
 2. **APIs & Services → Library → Map Tiles API → Enable**.
 3. **APIs & Services → Credentials → Create credentials → API key**.
 4. Atslēgas iestatījumos:
-   - **Application restrictions → Websites**: `https://vienavieta-omew.onrender.com/*` (vēlāk arī savs domēns, piem. `https://vienavieta.lv/*`);
+   - **Application restrictions → Websites**: `https://vienavieta.lv/*` (un pagaidām `https://vienavieta-omew.onrender.com/*`);
    - **API restrictions → Restrict key → Map Tiles API**.
 5. Render: `NEXT_PUBLIC_GOOGLE_MAPS_KEY=<atslēga>` un jauna būvēšana (mainīgais tiek iebūvēts lapā).
 6. Ieteicams **Billing → Budgets & alerts** uzlikt budžetu (piem. 5 €), lai saņemtu brīdinājumu.
