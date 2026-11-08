@@ -58,7 +58,7 @@ export async function defaultFetch(url: string) {
 type Ctx = { findPlace: ReturnType<typeof makePlaceFinder>; findCity: (t: string) => PlaceRow | null; makes: MakeRow[]; models: ModelRow[] };
 export async function loadCtx(): Promise<Ctx> {
   const [placeRows, makeRows, modelRows] = await Promise.all([
-    db.select({ id: places.id, name: places.name, lat: places.lat, lon: places.lon, region: regions.name })
+    db.select({ id: places.id, name: places.name, lat: places.lat, lon: places.lon, region: regions.name, kind: places.kind, parentId: places.parentId })
       .from(places).innerJoin(regions, eq(places.regionId, regions.id)).where(eq(regions.country, "LV")),
     db.select({ id: makes.id, name: makes.name, vehicleClass: makes.vehicleClass }).from(makes),
     db.select({ id: models.id, makeId: models.makeId, name: models.name }).from(models),
@@ -104,9 +104,11 @@ async function saveRows(section: Section, pageRows: PageRow[], ctx: Ctx, res: Cr
     // labāk atpazīta marka/modelis (piem. "Citi" → EV6, "Mercedes" → Mercedes-Benz): atjaunojam arī virsrakstu un virsbūvi
     const better = (row.makeId && !e.makeId) || (row.modelId && !e.modelId);
     const newPlace = row.kind === "vehicle" && row.placeId && !e.placeId;
+    // īpašumam vieta precizēta (pagasts/ciems pēc VZD kataloga, piem. Salas pag. nevis Salaspils): jauna vieta, virsraksts, adrese
+    const movedPlace = row.kind === "property" && row.placeId && row.placeId !== e.placeId;
     // īpašuma veids precizēts (piem. "Māja" → "Vasarnīca" pēc teksta): atjaunojam veidu un virsrakstu
     const newType = row.kind === "property" && row.propertyType && row.propertyType !== e.propertyType;
-    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl || newAddress || better || newPlace || newType) {
+    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl || newAddress || better || newPlace || newType || movedPlace) {
       await db
         .update(listings)
         .set({
@@ -115,6 +117,7 @@ async function saveRows(section: Section, pageRows: PageRow[], ctx: Ctx, res: Cr
           ...(newAddress ? { address: row.address, geoPrecision: "place" } : {}),
           ...(newType ? { propertyType: row.propertyType, title: row.title } : {}),
           ...(newPlace ? { placeId: row.placeId, lat: row.lat, lon: row.lon, geoPrecision: "place" } : {}),
+          ...(movedPlace ? { placeId: row.placeId, lat: row.lat, lon: row.lon, geoPrecision: "place", title: row.title, address: row.address } : {}),
           ...(better ? { makeId: row.makeId, modelId: row.modelId, makeText: row.makeText, modelText: row.modelText, title: row.title, ...(e.body ? {} : { body: row.body }) } : {}),
         })
         .where(eq(listings.id, e.id));

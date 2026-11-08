@@ -117,41 +117,107 @@ export function slug(s: string) {
 }
 
 // ---------- vietas ----------
-type PlaceRow = { id: number; name: string; lat: number; lon: number; region: string };
-const SEGMENT_SKIP = new Set(["riga-region", "other", "all", "today", "sell", "hand_over"]);
+// ss.com adresē vieta ir hierarhija: <rajons>/<pilsēta | X-pag | X-l-t | X-nov>/<ciems>, piem.
+// riga-region/salas-pag/spunciems, liepaja-and-reg/nicas-pag, riga/agenskalns. Mūsu katalogs (VZD adrešu reģistrs):
+// novads → pilsēta / pagasts → ciems. Pēc prefiksa nemin: labāk bez vietas nekā nepareiza vieta.
+type PlaceRow = { id: number; name: string; lat: number; lon: number; region: string; kind?: string | null; parentId?: number | null };
+const SEGMENT_SKIP = new Set(["other", "all", "today", "sell", "hand_over"]);
 const ALIASES: Record<string, string> = { centre: "centrs", "maskavas-priekspilseta": "maskavas-forstate", vecriga: "vecriga" };
+const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+/** "Salas pagasts" → "salas" (ss.com raksta "salas-pag") */
+const parishStem = (name: string) => norm(name.replace(/ pagasts$/, ""));
+
+/** ss.com rajons → mūsdienu novadi (pēc 2021./2025. gada reformas) un valstspilsēta. */
+const SS_AREA: Record<string, { regions: string[]; city?: string }> = {
+  riga: { regions: [], city: "Rīga" },
+  jurmala: { regions: [], city: "Jūrmala" },
+  "riga-region": { regions: ["Ādažu novads", "Ķekavas novads", "Mārupes novads", "Olaines novads", "Ropažu novads", "Salaspils novads", "Saulkrastu novads", "Siguldas novads"] },
+  "aizkraukle-and-reg": { regions: ["Aizkraukles novads"] },
+  "aluksne-and-reg": { regions: ["Alūksnes novads"] },
+  "balvi-and-reg": { regions: ["Balvu novads"] },
+  "bauska-and-reg": { regions: ["Bauskas novads"] },
+  "cesis-and-reg": { regions: ["Cēsu novads"] },
+  "daugavpils-and-reg": { regions: ["Augšdaugavas novads"], city: "Daugavpils" },
+  "dobele-and-reg": { regions: ["Dobeles novads"] },
+  "gulbene-and-reg": { regions: ["Gulbenes novads"] },
+  "jekabpils-and-reg": { regions: ["Jēkabpils novads"] },
+  "jelgava-and-reg": { regions: ["Jelgavas novads"], city: "Jelgava" },
+  "kraslava-and-reg": { regions: ["Krāslavas novads"] },
+  "kuldiga-and-reg": { regions: ["Kuldīgas novads"] },
+  "liepaja-and-reg": { regions: ["Dienvidkurzemes novads"], city: "Liepāja" },
+  "limbadzi-and-reg": { regions: ["Limbažu novads"] },
+  "limbazi-and-reg": { regions: ["Limbažu novads"] },
+  "ludza-and-reg": { regions: ["Ludzas novads"] },
+  "madona-and-reg": { regions: ["Madonas novads"] },
+  "ogre-and-reg": { regions: ["Ogres novads"] },
+  "preili-and-reg": { regions: ["Preiļu novads", "Līvānu novads"] },
+  "rezekne-and-reg": { regions: ["Rēzeknes novads"], city: "Rēzekne" },
+  "saldus-and-reg": { regions: ["Saldus novads"] },
+  "talsi-and-reg": { regions: ["Talsu novads"] },
+  "tukums-and-reg": { regions: ["Tukuma novads"] },
+  "valka-and-reg": { regions: ["Valkas novads", "Smiltenes novads"] },
+  "valmiera-and-reg": { regions: ["Valmieras novads"] },
+  "ventspils-and-reg": { regions: ["Ventspils novads"], city: "Ventspils" },
+};
 
 export function makePlaceFinder(rows: PlaceRow[]) {
-  const bySlug = new Map<string, PlaceRow[]>();
-  for (const p of rows) {
-    const k = slug(p.name);
-    bySlug.set(k, [...(bySlug.get(k) ?? []), p]);
+  const byRegion = new Map<string, PlaceRow[]>();
+  for (const p of rows) byRegion.set(p.region, [...(byRegion.get(p.region) ?? []), p]);
+  const prefer = (list: PlaceRow[], regions: string[]) => list.find((p) => regions.includes(p.region)) ?? (list.length === 1 ? list[0] : null);
+  const towns = rows.filter((p) => p.kind === "town");
+  const parishes = rows.filter((p) => p.kind === "parish");
+  const villages = rows.filter((p) => p.kind === "village");
+
+  /** valstspilsētas apkaime: precīzi, tad pēc prefiksa tikai šīs pilsētas robežās; citādi centrs */
+  function inCity(city: string, rest: string[]): PlaceRow | null {
+    const list = byRegion.get(city) ?? [];
+    const segs = rest.filter((s) => !SEGMENT_SKIP.has(s)).map((s) => ALIASES[norm(s)] ?? norm(s));
+    for (const s of [...segs].reverse()) {
+      if (s === norm(city)) continue;
+      const exact = list.find((p) => norm(p.name) === s);
+      if (exact) return exact;
+      if (s.length >= 5) {
+        const pre = list.find((p) => norm(p.name).startsWith(s.slice(0, Math.max(5, s.length - 2))));
+        if (pre) return pre;
+      }
+    }
+    return list.find((p) => norm(p.name) === "centrs") ?? (list.length === 1 ? list[0] : list.find((p) => norm(p.name) === norm(city)) ?? list[0] ?? null);
   }
-  const regionCity = new Map(rows.map((p) => [slug(p.region), p.region]));
+
   return (url: string, categoryDepth: number): PlaceRow | null => {
     // https://www.ss.com/msg/lv/real-estate/flats/riga/agenskalns/abcde.html → ["riga","agenskalns"]
     const segs = new URL(url).pathname.split("/").filter(Boolean).slice(2 + categoryDepth, -1);
-    const norm = segs
-      .filter((s) => !SEGMENT_SKIP.has(s))
-      .map((s) => slug(s.replace(/-and-reg$/, "").replace(/-(pag|nov)$/, "")))
-      .map((s) => ALIASES[s] ?? s);
-    const region = segs.map((s) => regionCity.get(slug(s.replace(/-and-reg$/, "")))).find(Boolean);
-    for (const s of [...norm].reverse()) {
-      const exact = bySlug.get(s);
-      if (exact?.length) return exact.find((p) => p.region === region) ?? exact[0];
-      if (s.length >= 5) {
-        const pre = rows.filter((p) => slug(p.name).startsWith(s.slice(0, Math.max(5, s.length - 2))));
-        if (pre.length) return pre.find((p) => p.region === region) ?? pre[0];
-      }
+    if (!segs.length) return null;
+    const area = SS_AREA[segs[0]];
+    if (!area) return null; // ārzemes, "other"
+    if (!area.regions.length) return inCity(area.city!, segs.slice(1));
+    const s1 = segs[1];
+    if (!s1 || SEGMENT_SKIP.has(s1)) return null;
+    // valstspilsēta savā rajonā (liepaja-and-reg/liepaja) vai Rīga/Jūrmala Rīgas rajonā
+    for (const city of [area.city, "Rīga", "Jūrmala"]) if (city && s1 === norm(city)) return inCity(city, segs.slice(2));
+    const m = s1.match(/^(.+)-(pag|l-t|nov)$/);
+    let base: PlaceRow | null = null;
+    if (m?.[2] === "l-t") {
+      // "lauku teritorija" (ikskiles-l-t, keguma-l-t): pilsēta ar apkārtni → pilsēta; ja tādas nav, pagasts
+      const stem = m[1];
+      base = prefer(towns.filter((t) => area.regions.includes(t.region) && stem.startsWith(norm(t.name).slice(0, -1))), area.regions)
+        ?? prefer(parishes.filter((p) => parishStem(p.name) === stem), area.regions);
+    } else if (m) base = prefer(parishes.filter((p) => parishStem(p.name) === m[1]), area.regions);
+    else {
+      base = prefer(towns.filter((p) => norm(p.name) === s1), area.regions)
+        ?? prefer(parishes.filter((p) => parishStem(p.name) === s1), area.regions)
+        ?? prefer(villages.filter((p) => norm(p.name) === s1 && area.regions.includes(p.region)), area.regions);
     }
-    // tikai pilsēta bez apkaimes (".../flats/riga/x.html" vai ".../jelgava-and-reg/jelgava/x.html") → pilsētas centrs;
-    // citādi vietu labāk neminēt nekā minēt nepareizi
-    const citySlug = region ? slug(region) : "";
-    if (region && norm.length && norm.every((s) => s === citySlug)) {
-      const inCity = rows.filter((p) => p.region === region);
-      return inCity.find((p) => slug(p.name) === "centrs") ?? (inCity.length === 1 ? inCity[0] : inCity.find((p) => slug(p.name) === citySlug) ?? inCity[0] ?? null);
+    const s2 = segs[2] && !SEGMENT_SKIP.has(segs[2]) ? norm(segs[2]).replace(/-\d+$/, "") : null;
+    if (s2) {
+      const inside = base ? villages.filter((v) => v.parentId === base!.id && norm(v.name).replace(/-\d+$/, "") === s2) : [];
+      const v = inside[0]
+        ?? prefer(towns.filter((t) => norm(t.name) === s2 && area.regions.includes(t.region)), area.regions) // adazu-nov/adazi → Ādaži
+        ?? prefer(parishes.filter((p) => parishStem(p.name) === s2.replace(/-(pag|l-t)$/, "") && area.regions.includes(p.region)), area.regions)
+        ?? prefer(villages.filter((v) => norm(v.name) === s2 && area.regions.includes(v.region)), area.regions);
+      if (v) return v;
     }
-    return null;
+    return base;
   };
 }
 
@@ -374,7 +440,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export async function importSsRss(fetchXml: (url: string) => Promise<string> = defaultFetch): Promise<ImportResult> {
   const res: ImportResult = { feeds: 0, items: 0, created: 0, updated: 0, skipped: 0, hidden: 0, duplicates: 0, errors: [] };
   const [placeRows, makeRows, modelRows] = await Promise.all([
-    db.select({ id: places.id, name: places.name, lat: places.lat, lon: places.lon, region: regions.name })
+    db.select({ id: places.id, name: places.name, lat: places.lat, lon: places.lon, region: regions.name, kind: places.kind, parentId: places.parentId })
       .from(places).innerJoin(regions, eq(places.regionId, regions.id)).where(eq(regions.country, "LV")),
     db.select({ id: makes.id, name: makes.name, vehicleClass: makes.vehicleClass }).from(makes),
     db.select({ id: models.id, makeId: models.makeId, name: models.name }).from(models),

@@ -4,6 +4,8 @@ import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import catalog from "../../data/vehicle-catalog.json";
 import locations from "../../data/locations.json";
+import placesLv from "../../data/places-lv.json";
+import { eq, inArray, sql } from "drizzle-orm";
 import * as schema from "./schema";
 import type { VehicleClass } from "../lib/constants";
 
@@ -31,6 +33,8 @@ export async function seedReference(db: Db) {
       .onConflictDoNothing();
   }
 
+  await seedPlacesLv(db);
+
   for (const [vc, makes] of Object.entries(catalog as Record<VehicleClass, Record<string, string[]>>)) {
     const cls = vc as VehicleClass;
     for (const [makeName, modelNames] of Object.entries(makes)) {
@@ -48,6 +52,69 @@ export async function seedReference(db: Db) {
         .onConflictDoNothing();
     }
   }
+}
+
+type Pt = { code: string; name: string; lat: number; lon: number };
+type NovadsData = { region: string; towns: Pt[]; parishes: (Pt & { villages: Pt[] })[] };
+/** Datu versija (VZD adrešu reģistra atvērtie dati); mainot data/places-lv.json, palielini. */
+const PLACES_LV_VERSION = "seed:places-lv:2026-11-07";
+
+/**
+ * Latvijas pilsētas, pagasti un ciemi no VZD adrešu reģistra (data/places-lv.json, scripts/build-places.py).
+ * Esošās vietas ar tādu pašu nosaukumu novadā tiek papildinātas (veids, kods, koordinātas), nevis dublētas.
+ */
+export async function seedPlacesLv(db: Db) {
+  const done = await db.query.crawlState.findFirst({ where: eq(schema.crawlState.name, PLACES_LV_VERSION) });
+  if (done) return;
+  const t0 = Date.now();
+  for (const n of placesLv as NovadsData[]) {
+    const [region] = await db
+      .insert(schema.regions)
+      .values({ name: n.region, kind: "municipality", country: "LV" })
+      .onConflictDoUpdate({ target: schema.regions.name, set: { kind: "municipality" } })
+      .returning({ id: schema.regions.id });
+    const used = new Set<string>();
+    const upsert = async (rows: { name: string; lat: number; lon: number; kind: string; code: string; parentId?: number | null }[]) => {
+      if (!rows.length) return [] as { id: number; code: string | null }[];
+      return db
+        .insert(schema.places)
+        .values(rows.map((r) => ({ regionId: region.id, ...r })))
+        .onConflictDoUpdate({
+          target: [schema.places.regionId, schema.places.name],
+          set: { kind: sql`excluded.kind`, code: sql`excluded.code`, parentId: sql`excluded.parent_id`, lat: sql`excluded.lat`, lon: sql`excluded.lon` },
+        })
+        .returning({ id: schema.places.id, code: schema.places.code });
+    };
+    const unique = (name: string, suffix: string) => {
+      const n2 = used.has(name) ? `${name} (${suffix})` : name;
+      used.add(n2);
+      return n2;
+    };
+    await upsert(n.towns.map((t) => ({ name: unique(t.name, "pilsēta"), lat: t.lat, lon: t.lon, kind: "town", code: t.code })));
+    const parishRows = await upsert(n.parishes.map((p) => ({ name: unique(p.name, "pagasts"), lat: p.lat, lon: p.lon, kind: "parish", code: p.code })));
+    const parishId = new Map(parishRows.map((r) => [r.code, r.id]));
+    const villages = n.parishes.flatMap((p) =>
+      p.villages.map((v) => ({ name: unique(v.name, p.name.replace(/ pagasts$/, " pag.")), lat: v.lat, lon: v.lon, kind: "village", code: v.code, parentId: parishId.get(p.code) ?? null })),
+    );
+    for (let i = 0; i < villages.length; i += 500) await upsert(villages.slice(i, i + 500));
+  }
+  // Varakļānu novads 2025. gadā pievienots Madonas novadam: sludinājumus pārceļam uz jaunajām vietām
+  const [old] = await db.select({ id: schema.regions.id }).from(schema.regions).where(eq(schema.regions.name, "Varakļānu novads"));
+  if (old) {
+    const [madona] = await db.select({ id: schema.regions.id }).from(schema.regions).where(eq(schema.regions.name, "Madonas novads"));
+    const oldPlaces = await db.select({ id: schema.places.id, name: schema.places.name }).from(schema.places).where(eq(schema.places.regionId, old.id));
+    for (const p of oldPlaces) {
+      const [target] = await db.select({ id: schema.places.id }).from(schema.places).where(sql`${schema.places.regionId} = ${madona.id} and ${schema.places.name} = ${p.name}`);
+      if (target) await db.update(schema.listings).set({ placeId: target.id }).where(eq(schema.listings.placeId, p.id));
+    }
+    const ids = oldPlaces.map((p) => p.id);
+    const still = ids.length ? await db.select({ id: schema.listings.id }).from(schema.listings).where(inArray(schema.listings.placeId, ids)).limit(1) : [];
+    if (!still.length) {
+      if (ids.length) await db.delete(schema.places).where(inArray(schema.places.id, ids));
+      await db.delete(schema.regions).where(eq(schema.regions.id, old.id));
+    }
+  }
+  await db.insert(schema.crawlState).values({ name: PLACES_LV_VERSION, lastFullAt: new Date(), lastResult: { ms: Date.now() - t0 } }).onConflictDoNothing();
 }
 
 /** Daži parauga sludinājumi izstrādei. Neizmantot produkcijā. */

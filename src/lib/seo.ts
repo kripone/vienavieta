@@ -24,6 +24,7 @@ export function seoSlug(s: string) {
 /** Vietas forma latviski: Rīga → Rīgā, Daugavpils → Daugavpilī, Rēzekne → Rēzeknē, Ādažu novads → Ādažu novadā. */
 export function locative(name: string): string | null {
   if (/ novads$/.test(name)) return name.replace(/ novads$/, " novadā");
+  if (/ rajons$/.test(name)) return name.replace(/ rajons$/, " rajonā");
   if (/pils$/.test(name)) return name.replace(/pils$/, "pilī");
   if (/a$/.test(name)) return name.replace(/a$/, "ā");
   if (/e$/.test(name)) return name.replace(/e$/, "ē");
@@ -32,6 +33,7 @@ export function locative(name: string): string | null {
 
 /** Lielāko pilsētu nosaukumi un "kur" forma citās valodās; pārējiem rādām latvisko nosaukumu. */
 const REGION_I18N: Record<string, Partial<Record<Exclude<Locale, "lv">, [string, string]>>> = {
+  "Rīgas rajons": { en: ["Riga district", "in Riga district"], ru: ["Рижский район", "в Рижском районе"], lt: ["Rygos rajonas", "Rygos rajone"] },
   "Rīga": { en: ["Riga", "in Riga"], ru: ["Рига", "в Риге"], lt: ["Ryga", "Rygoje"] },
   "Jūrmala": { en: ["Jurmala", "in Jurmala"], ru: ["Юрмала", "в Юрмале"], lt: ["Jūrmala", "Jūrmaloje"] },
   "Daugavpils": { en: ["Daugavpils", "in Daugavpils"], ru: ["Даугавпилс", "в Даугавпилсе"], lt: ["Daugpilis", "Daugpilyje"] },
@@ -112,6 +114,7 @@ export type Landing = {
 };
 
 type Tr = { t: T; locale: Locale };
+export const RIGA_DISTRICT = { slug: "rigas-rajons", name: "Rīgas rajons" };
 
 /** /auto, /auto/bmw, /auto/bmw/3-serija (un /moto/...) */
 export async function resolveVehicle(vc: VehicleClass, parts: string[], { t, locale }: Tr): Promise<Landing | null> {
@@ -165,13 +168,14 @@ export async function resolveProperty(parts: string[], { t, locale }: Tr): Promi
     return { raw: { cat: "property", ptype: type, deal }, path: typePath, h1: what, title: what, about: about(what), crumbs, facet: "region", dealSwitch: { href: propertyHref(type, rent ? "sell" : "rent"), label: whatOf(!rent) } };
   }
   const cat = await getCatalog();
-  const region = cat.regions.find((r) => r.slug === parts[1]);
+  // "Rīgas rajons" (Pierīgas novadi) kā ss.com
+  const region = parts[1] === RIGA_DISTRICT.slug ? { id: 0, name: RIGA_DISTRICT.name, slug: RIGA_DISTRICT.slug } : cat.regions.find((r) => r.slug === parts[1]);
   if (!region) return null;
   const h1 = withPlace(what, region.name, locale);
   const path = `${typePath}/${region.slug}`;
   crumbs.push({ name: regionName(region.name, locale), href: path });
   return {
-    raw: { cat: "property", ptype: type, deal, loc: `r:${region.id}` },
+    raw: { cat: "property", ptype: type, deal, loc: region.id ? `r:${region.id}` : "g:pieriga" },
     path, h1, title: h1, about: about(h1), crumbs, facet: null,
     dealSwitch: { href: `${propertyHref(type, rent ? "sell" : "rent")}/${region.slug}`, label: withPlace(whatOf(!rent), region.name, locale) },
   };

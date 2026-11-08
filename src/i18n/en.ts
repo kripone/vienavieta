@@ -2,6 +2,7 @@
 import type { Dict } from "./core";
 
 export const en: Dict = {
+  "Rīgas rajons (Pierīga)": "Riga district (Pierīga)",
   "{name} pārdošanā": "{name} for sale",
   "{name} motocikli pārdošanā": "{name} motorcycles for sale",
   "{name} sludinājumi no visiem portāliem vienā vietā.": "{name}: listings from all sites in one place.",

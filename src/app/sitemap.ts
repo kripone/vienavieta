@@ -2,7 +2,8 @@ import type { MetadataRoute } from "next";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import type { PropertyType, VehicleClass } from "@/lib/constants";
-import { appBase, langAlternates, propertyHref, vehicleHref } from "@/lib/seo";
+import { appBase, langAlternates, propertyHref, RIGA_DISTRICT, vehicleHref } from "@/lib/seo";
+import { REGION_GROUPS_LOC } from "@/lib/constants";
 import { LOCALES } from "@/i18n/core";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +39,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const r of prop.rows) typeTotals.set(`${r.ptype}|${r.deal}`, (typeTotals.get(`${r.ptype}|${r.deal}`) ?? 0) + Number(r.n));
     for (const [k, n] of typeTotals) if (n >= MIN) { const [pt, deal] = k.split("|"); add(propertyHref(pt as PropertyType, deal)); }
     for (const r of prop.rows) if (r.region && Number(r.n) >= MIN) add(propertyHref(r.ptype as PropertyType, r.deal, r.region));
+    // Rīgas rajons (Pierīgas novadi kopā)
+    const district = new Map<string, number>();
+    for (const r of prop.rows) if (r.region && REGION_GROUPS_LOC["g:pieriga"].includes(r.region)) district.set(`${r.ptype}|${r.deal}`, (district.get(`${r.ptype}|${r.deal}`) ?? 0) + Number(r.n));
+    for (const [k, n] of district) if (n >= MIN) { const [pt, deal] = k.split("|"); add(`${propertyHref(pt as PropertyType, deal)}/${RIGA_DISTRICT.slug}`); }
   } catch (err) {
     console.error("Sitemap SEO lapas neizdevās:", err);
   }

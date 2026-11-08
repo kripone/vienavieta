@@ -125,6 +125,7 @@ export function SearchFilters({ initial, regions }: { initial: FilterValues; reg
         {t("Vieta")}
         <select value={v.loc ?? ""} onChange={(e) => update({ loc: e.target.value })}>
           <option value="">{t(v.cat !== "vehicle" || v.country === "LV" ? "Visa Latvija" : v.country === "LT" ? "Visa Lietuva" : "Visas vietas")}</option>
+          {(v.cat !== "vehicle" || v.country !== "LT") && <option value="g:pieriga">{t("Rīgas rajons (Pierīga)")}</option>}
           {regions.filter((r) => (v.cat === "vehicle" ? !v.country || r.country === v.country : r.country === "LV")).map((r) => (
             <optgroup key={r.region} label={v.cat === "vehicle" && !v.country && r.country === "LT" ? `${t("Lietuva")} · ${r.region}` : r.region}>
               <option value={`r:${r.regionId}`}>{r.kind === "city" || r.country === "LT" ? t("Visa {r}", { r: r.region }) : t("Viss {r}", { r: r.region })}</option>

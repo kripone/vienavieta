@@ -4,6 +4,8 @@ import { groupPrimaryOnly } from "./dedupe";
 import {
   AMENITIES, BODY_TYPES, COLORS, CONDITIONS, DEALS, DRIVES, FUELS, GEARBOXES, HEATING, MATERIALS, PROPERTY_GROUPS, PROPERTY_TYPES,
   PURPOSES, SERIES, VEHICLE_CLASSES, VEHICLE_CLASS_LABEL, DEAL_LABEL, type VehicleClass,
+  REGION_GROUPS_LOC,
+  REGION_GROUP_LABEL,
 } from "./constants";
 
 const { listings, places, regions, makes, models, users, listingPhotos } = schema;
@@ -48,7 +50,7 @@ export function parseSearch(raw: Raw) {
   const ptypeRaw = one(raw.ptype);
   const ptype = ptypeRaw?.startsWith("g:") ? (ptypeRaw.slice(2) in PROPERTY_GROUPS ? ptypeRaw : undefined) : pick(raw.ptype, PROPERTY_TYPES);
   const locRaw = one(raw.loc);
-  const loc = locRaw && /^[rp]:\d{1,6}$/.test(locRaw) ? locRaw : undefined;
+  const loc = locRaw && (/^[rp]:\d{1,6}$/.test(locRaw) || locRaw in REGION_GROUPS_LOC) ? locRaw : undefined;
   return {
     cat,
     vc,
@@ -112,8 +114,14 @@ function conditions(s: SearchParams): SQL[] {
   if (s.pmin != null) add(gte(listings.price, s.pmin));
   if (s.pmax != null) add(lte(listings.price, s.pmax));
   if (s.loc) {
+    const group = REGION_GROUPS_LOC[s.loc];
     const id = Number(s.loc.slice(2));
-    add(s.loc[0] === "p" ? eq(listings.placeId, id) : eq(places.regionId, id));
+    add(
+      group ? inArray(regions.name, group)
+      // pagasts vai pilsēta: ieskaitot tās ciemus
+      : s.loc[0] === "p" ? or(eq(listings.placeId, id), sql`${listings.placeId} in (select id from places where parent_id = ${id})`)!
+      : eq(places.regionId, id),
+    );
   }
   // Ārējiem sludinājumiem vieta var nebūt zināma (piem. ss.com auto RSS); valsti tad nosaka avots.
   const inCountry = (c: "LV" | "LT") =>
@@ -353,7 +361,8 @@ export async function describeSearch(s: SearchParams) {
   else if (s.pmin != null) parts.push(`no ${nf.format(s.pmin)} €`);
   if (s.ymin) parts.push(`no ${s.ymin}. g.`);
   if (s.rmin) parts.push(`${s.rmin}+ ist.`);
-  if (s.loc) {
+  if (s.loc && REGION_GROUPS_LOC[s.loc]) parts.push(REGION_GROUP_LABEL[s.loc]);
+  else if (s.loc) {
     const id = Number(s.loc.slice(2));
     const row = s.loc[0] === "p"
       ? await db.query.places.findFirst({ where: eq(places.id, id), columns: { name: true } })

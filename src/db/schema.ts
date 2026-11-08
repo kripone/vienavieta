@@ -132,8 +132,14 @@ export const places = pgTable(
     name: text("name").notNull(),
     lat: doublePrecision("lat").notNull(),
     lon: doublePrecision("lon").notNull(),
+    /** "area" (apkaime), "town" (pilsēta), "parish" (pagasts), "village" (ciems); null = vecs ieraksts */
+    kind: text("kind"),
+    /** ciemam: pagasts, kurā tas atrodas */
+    parentId: integer("parent_id"),
+    /** VZD adrešu reģistra kods (pilsētām, pagastiem, ciemiem) */
+    code: text("code").unique(),
   },
-  (t) => [uniqueIndex("places_region_name_uq").on(t.regionId, t.name)],
+  (t) => [uniqueIndex("places_region_name_uq").on(t.regionId, t.name), index("places_parent_idx").on(t.parentId)],
 );
 
 // ---------- transporta katalogs ----------

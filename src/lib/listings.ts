@@ -102,13 +102,15 @@ export async function getListing(id: string) {
   };
 }
 
-/** Vietas grupētas pa novadiem formām. */
+/** Vietas grupētas pa novadiem formām (bez ciemiem). */
 export async function regionOptions() {
   const rows = await db
     .select({ id: places.id, name: places.name, regionId: regions.id, region: regions.name, kind: regions.kind, country: regions.country })
     .from(places)
     .innerJoin(regions, eq(places.regionId, regions.id))
-    .orderBy(asc(regions.country), asc(regions.id), asc(places.id));
+    // ciemus sarakstā nerādām (tie ietilpst pagastā); novadā vispirms pilsētas, tad pagasti
+    .where(sql`coalesce(${places.kind}, '') <> 'village'`)
+    .orderBy(asc(regions.country), asc(regions.id), sql`case ${places.kind} when 'town' then 0 when 'parish' then 2 else 1 end`, sql`case when ${places.kind} is null then ${places.id} else 0 end`, asc(places.name));
   const map = new Map<string, { regionId: number; region: string; kind: "city" | "municipality"; country: "LV" | "LT"; places: { id: number; name: string }[] }>();
   for (const r of rows) (map.get(r.region) ?? map.set(r.region, { regionId: r.regionId, region: r.region, kind: r.kind, country: r.country, places: [] }).get(r.region)!).places.push({ id: r.id, name: r.name });
   return [...map.values()];

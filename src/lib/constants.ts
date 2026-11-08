@@ -222,3 +222,9 @@ export const OPERATOR: { name: string | null; regNo: string | null; address: str
   email: "info@vienavieta.lv",
   since: "2026-11-08",
 };
+
+/** Reģionu grupas meklēšanā (loc=g:…): "Rīgas rajons" kā ss.com – Pierīgas novadi. */
+export const REGION_GROUPS_LOC: Record<string, string[]> = {
+  "g:pieriga": ["Ādažu novads", "Ķekavas novads", "Mārupes novads", "Olaines novads", "Ropažu novads", "Salaspils novads", "Saulkrastu novads", "Siguldas novads"],
+};
+export const REGION_GROUP_LABEL: Record<string, string> = { "g:pieriga": "Rīgas rajons (Pierīga)" };

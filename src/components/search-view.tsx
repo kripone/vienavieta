@@ -19,7 +19,7 @@ import { getCurrentUser } from "@/lib/session";
 
 import { formatPrice } from "@/lib/format";
 import { facetCounts, priceSummary } from "@/lib/search";
-import { appBase, propertyHref, regionName, vehicleHref, seoSlug, type Landing } from "@/lib/seo";
+import { appBase, propertyHref, regionName, RIGA_DISTRICT, vehicleHref, seoSlug, type Landing } from "@/lib/seo";
 import { trTitle } from "@/i18n/content";
 import { PROPERTY_PLURAL, PROPERTY_TYPES, type PropertyType } from "@/lib/constants";
 
@@ -165,6 +165,7 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
             )}
             {facets.length > 0 && (
               <ul className="seo-links">
+                {facetBy === "region" && <li><a href={lp(`${landing!.path}/${RIGA_DISTRICT.slug}`)}>{regionName(RIGA_DISTRICT.name, locale)}</a></li>}
                 {facets.slice(0, 80).map((f) => {
                   const href = facetHref(f);
                   const label = facetBy === "region" ? regionName(f.name, locale) : facetBy === "model" ? trTitle(f.name, t) : f.name;
