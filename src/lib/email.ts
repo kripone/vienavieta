@@ -14,7 +14,7 @@ const transport = smtpConfigured
     })
   : null;
 
-const fromHeader = () => process.env.EMAIL_FROM ?? "VienāVietā <noreply@vienavieta.lv>";
+const fromHeader = () => process.env.EMAIL_FROM ?? "VienāVietā <info@vienavieta.lv>";
 
 /** "Vārds <adrese>" → { name, email } */
 function parseFrom(from: string) {
