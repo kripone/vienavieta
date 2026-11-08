@@ -10,6 +10,7 @@ const { listings, models, makes, crawlState } = schema;
 const BODY_KEY = "backfill:body:v3";
 const MODEL_KEY = "backfill:makemodel:v2"; // v2: modeļu aizstājvārdi (Allroad, Mazda6, T5, "21" → 21 Volga)
 const RECRAWL_KEY = "recrawl:models:v1";
+const PLACES_RECRAWL_KEY = "recrawl:places:v1";
 
 /**
  * Marka/modelis ss.com transportam, kas ievākts pirms aizstājvārdiem ("Mercedes" → Mercedes-Benz, BMW "320" → 3. sērija,
@@ -143,4 +144,13 @@ export async function backfillHouseTail(limit = 3000) {
   const vals = rows.rows.map((r) => sql`(${r.deal_id}::int, ${houseTail(r.address) ?? ""})`);
   await db.execute(sql`update vzd_deals d set house_tail = v.t from (values ${sql.join(vals, sql`, `)}) as v(id, t) where d.deal_id = v.id`);
   return rows.rows.length;
+}
+
+/** Pēc VZD vietu kataloga ielādes: īpašumu sadaļām pilnā kārta tūlīt (lai ss.com sludinājumi pārceļas uz precīzāku vietu). */
+export async function forcePlacesRecrawl() {
+  const done = await db.query.crawlState.findFirst({ where: eq(crawlState.name, PLACES_RECRAWL_KEY) });
+  if (done) return false;
+  await db.update(crawlState).set({ lastFullAt: null }).where(sql`${crawlState.name} like 'ss2:%' and ${crawlState.name} not in ('ss2:cars', 'ss2:moto')`);
+  await db.insert(crawlState).values({ name: PLACES_RECRAWL_KEY, lastFullAt: new Date() }).onConflictDoUpdate({ target: crawlState.name, set: { lastFullAt: new Date() } });
+  return true;
 }
