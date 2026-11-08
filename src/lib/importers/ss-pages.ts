@@ -12,7 +12,7 @@ const { listings, places, regions, makes, models, priceHistory, crawlState } = s
 export type Section = (typeof SS_SECTIONS)[number];
 export type PageRow = { link: string; fields: Record<string, string[]>; thumb?: string; snippet?: string; region?: string };
 
-const USER_AGENT = "VienaVietaBot/1.0 (+https://vienavieta-omew.onrender.com)";
+const USER_AGENT = "VienaVietaBot/1.0 (+https://vienavieta.lv)";
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const decode = (s: string) =>
   s.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, " ");

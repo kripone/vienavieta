@@ -11,7 +11,7 @@ import { houseKey, houseTail } from "../vzd-key";
 const { vzdDeals, crawlState } = schema;
 const API = "https://data.gov.lv/dati/api/3/action/package_show?id=darijumi-ar-telpu-grupam";
 const STATE = "vzd:tg";
-const UA = "VienaVietaBot/1.0 (+https://vienavieta-omew.onrender.com)";
+const UA = "VienaVietaBot/1.0 (+https://vienavieta.lv)";
 
 /** Viena CSV rinda ar pēdiņām ("a","b ""c""",""). Datu kopā rindās nav pārnesumu. */
 export function parseCsvLine(line: string): string[] {

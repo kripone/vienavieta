@@ -15,7 +15,7 @@ type Feed = { kind: "vehicle"; vehicleClass: "car" | "moto" } | { kind: "propert
 export type RssItem = { link: string; pubDate: Date; fields: Record<string, string[]>; /** sludinājuma teksta sākums, tikai modeļa atpazīšanai */ snippet?: string };
 
 // tikai ASCII: HTTP galvenēs nedrīkst būt garumzīmes
-const USER_AGENT = "VienaVietaBot/1.0 (+https://vienavieta-omew.onrender.com; RSS reader)";
+const USER_AGENT = "VienaVietaBot/1.0 (+https://vienavieta.lv; RSS reader)";
 
 // ---------- RSS parsēšana ----------
 const decode = (s: string) =>

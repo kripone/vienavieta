@@ -27,6 +27,9 @@ services:
         sync: false
       - key: BETTER_AUTH_URL
         sync: false
+      # Galvenais domēns (bez https://), piem. vienavieta.lv. Ja iestatīts, *.onrender.com un www pāradresē uz to (src/proxy.ts).
+      - key: CANONICAL_HOST
+        sync: false
       # E-pasts: Render bezmaksas plānā SMTP porti bloķēti, tāpēc lieto Brevo API (HTTPS).
       - key: BREVO_API_KEY
         sync: false
