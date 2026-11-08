@@ -60,6 +60,8 @@ export const users = pgTable("users", {
   locale: text("locale").notNull().default("lv"),
   /** E-pasts, ja favorītos saglabātam sludinājumam samazinās cena. */
   notifyPriceDrops: boolean("notify_price_drops").notNull().default(true),
+  /** Paziņojums telefonā/pārlūkā (push), ja favorītos saglabātam sludinājumam samazinās cena. */
+  pushPriceDrops: boolean("push_price_drops").notNull().default(true),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -470,4 +472,25 @@ export const dealerFeeds = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index("dealer_feeds_user_idx").on(t.userId)],
+);
+
+/**
+ * Push paziņojumu abonementi (Web Push, VAPID). Viens lietotājs var būt vairākās ierīcēs.
+ * Sūtīšana: src/lib/push.ts; abonēšana: /api/push; servisa darbinieks public/sw.js.
+ */
+export const pushSubscriptions = pgTable(
+  "push_subscriptions",
+  {
+    id: id(),
+    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    endpoint: text("endpoint").notNull().unique(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    /** Ierīces valoda paziņojumu tekstiem */
+    locale: text("locale").notNull().default("lv"),
+    userAgent: text("user_agent"),
+    createdAt: createdAt(),
+    lastSentAt: timestamp("last_sent_at", { withTimezone: true }),
+  },
+  (t) => [index("push_subscriptions_user_idx").on(t.userId)],
 );

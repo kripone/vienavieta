@@ -2,20 +2,21 @@
 import { useT } from "@/i18n/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { deleteSearch, setPriceDrops, updateSearch } from "@/app/pazinojumi/actions";
+import { deleteSearch, setPriceDrops, setPricePush, updateSearch } from "@/app/pazinojumi/actions";
 import { NOTIFY_FREQUENCIES, NOTIFY_FREQUENCY_LABEL, type NotifyFrequency } from "@/lib/constants";
 
-type Props = { id: string; name: string; href: string; frequency: string; notifyEmail: boolean; checked: string | null };
+type Props = { id: string; name: string; href: string; frequency: string; notifyEmail: boolean; notifyPush: boolean; hasPush: boolean; checked: string | null };
 
 export function SavedSearchRow(p: Props) {
   const { t } = useT();
   const router = useRouter();
   const [freq, setFreq] = useState(p.frequency);
   const [on, setOn] = useState(p.notifyEmail);
+  const [push, setPush] = useState(p.notifyPush);
   const [busy, setBusy] = useState(false);
   const [confirm, setConfirm] = useState(false);
 
-  async function save(patch: { frequency?: string; notifyEmail?: boolean }) {
+  async function save(patch: { frequency?: string; notifyEmail?: boolean; notifyPush?: boolean }) {
     setBusy(true);
     await updateSearch(p.id, patch);
     setBusy(false);
@@ -32,7 +33,13 @@ export function SavedSearchRow(p: Props) {
           <input type="checkbox" checked={on} disabled={busy} onChange={(e) => { setOn(e.target.checked); save({ notifyEmail: e.target.checked }); }} />
           {t("E-pasts")}
         </label>
-        <select aria-label={t("Biežums")} value={freq} disabled={busy || !on} onChange={(e) => { setFreq(e.target.value); save({ frequency: e.target.value }); }}>
+        {p.hasPush && (
+          <label className="check">
+            <input type="checkbox" checked={push} disabled={busy} onChange={(e) => { setPush(e.target.checked); save({ notifyPush: e.target.checked }); }} />
+            {t("Telefonā")}
+          </label>
+        )}
+        <select aria-label={t("Biežums")} value={freq} disabled={busy || (!on && !push)} onChange={(e) => { setFreq(e.target.value); save({ frequency: e.target.value }); }}>
           {NOTIFY_FREQUENCIES.map((f) => <option key={f} value={f}>{NOTIFY_FREQUENCY_LABEL[f as NotifyFrequency]}</option>)}
         </select>
         {!confirm ? (
@@ -56,6 +63,18 @@ export function PriceDropToggle({ on }: { on: boolean }) {
     <label className="check">
       <input type="checkbox" checked={v} disabled={busy} onChange={async (e) => { const n = e.target.checked; setV(n); setBusy(true); await setPriceDrops(n); setBusy(false); }} />
       {t("Sūtīt e-pastu, ja favorītos saglabātam sludinājumam samazinās cena")}
+    </label>
+  );
+}
+
+export function PricePushToggle({ on }: { on: boolean }) {
+  const { t } = useT();
+  const [v, setV] = useState(on);
+  const [busy, setBusy] = useState(false);
+  return (
+    <label className="check">
+      <input type="checkbox" checked={v} disabled={busy} onChange={async (e) => { const n = e.target.checked; setV(n); setBusy(true); await setPricePush(n); setBusy(false); }} />
+      {t("Paziņot telefonā, ja favorītos saglabātam sludinājumam samazinās cena")}
     </label>
   );
 }

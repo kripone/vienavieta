@@ -206,5 +206,5 @@ export const OPERATOR: { name: string | null; regNo: string | null; address: str
   regNo: null,
   address: null,
   email: "info@vienavieta.lv",
-  since: "2026-11-07",
+  since: "2026-11-08",
 };

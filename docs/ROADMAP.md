@@ -93,3 +93,5 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] E-pasta sūtīšana (Brevo API)
 - [ ] Kļūdu uzraudzība, rezerves kopijas
 - [ ] Lietošanas noteikumi, privātuma politika, sīkdatnes
+- [x] PWA: instalējama aplikācija (manifest, ikonas, servisa darbinieks) un push paziņojumi par saglabātajām meklēšanām un cenu kritumiem favorītos
+- [ ] Veikalu aplikācijas (Capacitor) – kad būs lietotāji

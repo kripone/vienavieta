@@ -127,6 +127,13 @@
       "when": 1794087065904,
       "tag": "0017_lyrical_yellowjacket",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794126460914,
+      "tag": "0018_robust_starhawk",
+      "breakpoints": true
     }
   ]
 }

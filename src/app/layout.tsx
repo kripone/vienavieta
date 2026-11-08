@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 // Burti ir iekļauti projektā (nav atkarīgi no Google Fonts servera)
 import "@fontsource/bricolage-grotesque/600.css";
 import "@fontsource/bricolage-grotesque/800.css";
@@ -12,6 +12,7 @@ import { CompareBar } from "@/components/compare";
 import { ThemeToggle, themeScript } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 import { LangSwitch } from "@/components/lang-switch";
+import { InstallBanner, PwaRegister } from "@/components/pwa";
 import { I18nProvider } from "@/i18n/client";
 import { getLocale, getT } from "@/i18n/server";
 import { DICTS } from "@/i18n/dicts";
@@ -23,8 +24,18 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { default: "VienāVietā", template: "%s · VienāVietā" },
     description: t("Visi Latvijas sludinājumi vienā meklētājā: transports un nekustamais īpašums."),
+    applicationName: "VienāVietā",
+    appleWebApp: { capable: true, title: "VienāVietā", statusBarStyle: "default" },
+    formatDetection: { telephone: false },
   };
 }
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#9e3039" },
+    { media: "(prefers-color-scheme: dark)", color: "#12141a" },
+  ],
+};
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
@@ -66,6 +77,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </footer>
         <CompareBar />
+        <PwaRegister />
+        <InstallBanner />
         </I18nProvider>
       </body>
     </html>

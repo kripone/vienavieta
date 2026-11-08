@@ -30,6 +30,13 @@ services:
       # Galvenais domēns (bez https://), piem. vienavieta.lv. Ja iestatīts, *.onrender.com un www pāradresē uz to (src/proxy.ts).
       - key: CANONICAL_HOST
         sync: false
+      # Push paziņojumi (npx web-push generate-vapid-keys)
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        value: mailto:info@vienavieta.lv
       # E-pasts: Render bezmaksas plānā SMTP porti bloķēti, tāpēc lieto Brevo API (HTTPS).
       - key: BREVO_API_KEY
         sync: false
