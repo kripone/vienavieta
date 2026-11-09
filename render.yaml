@@ -61,6 +61,9 @@ services:
       # Google karte (Map Tiles API), sk. docs/MAPS.md
       - key: NEXT_PUBLIC_GOOGLE_MAPS_KEY
         sync: false
+      # Apmeklējumu statistika (Cloudflare Web Analytics, bez sīkdatnēm): vietnes JS fragmenta "token"
+      - key: CF_ANALYTICS_TOKEN
+        sync: false
       # Ielu skats sludinājuma kartē lapā (Cloud konsolē jāieslēdz "Maps Embed API"); bez tā rāda saiti uz Google Maps
       - key: NEXT_PUBLIC_STREETVIEW_EMBED
         value: "on"

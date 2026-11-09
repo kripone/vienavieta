@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 // Burti ir iekļauti projektā (nav atkarīgi no Google Fonts servera)
 import "@fontsource/bricolage-grotesque/600.css";
 import "@fontsource/bricolage-grotesque/800.css";
@@ -95,6 +96,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <PwaRegister />
         <InstallBanner />
         </I18nProvider>
+        {/* Apmeklējumu statistika bez sīkdatnēm (Cloudflare Web Analytics); ieslēdz ar CF_ANALYTICS_TOKEN */}
+        {process.env.CF_ANALYTICS_TOKEN && (
+          <Script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={JSON.stringify({ token: process.env.CF_ANALYTICS_TOKEN, spa: true })} strategy="afterInteractive" />
+        )}
       </body>
     </html>
   );
