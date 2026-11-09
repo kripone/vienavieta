@@ -2,6 +2,11 @@
 import type { Dict } from "./core";
 
 export const ru: Dict = {
+  "Ielādē visus savus sludinājumus uzreiz: failā (XML, CSV, JSON) vai ar plūsmas saiti, ko atjaunojam automātiski.": "Загрузите все объявления сразу: файлом (XML, CSV, JSON) или ссылкой на фид, который мы обновляем автоматически.",
+  "Atvērt importu": "Открыть импорт",
+  "Esi auto salons vai nekustamo īpašumu aģentūra? Augstāk norādi to un saglabā, tad varēsi ielādēt visus sludinājumus uzreiz no faila (XML, CSV) vai plūsmas saites.": "Вы автосалон или агентство недвижимости? Укажите это выше и сохраните — тогда сможете загрузить все объявления сразу из файла (XML, CSV) или по ссылке на фид.",
+  "Daudz sludinājumu? Ielādē tos visus uzreiz no faila vai plūsmas saites.": "Много объявлений? Загрузите их все сразу из файла или по ссылке на фид.",
+  "Auto salons vai aģentūra? Ielādē visus sludinājumus uzreiz no faila vai plūsmas saites. Vispirms profilā norādi, ka esi uzņēmums.": "Автосалон или агентство? Загрузите все объявления сразу из файла или по ссылке на фид. Сначала укажите в профиле, что вы компания.",
   "st.": "эт.",
   "Rādīt visus {n} darījumus": "Показать все сделки ({n})",
   "Atvērt": "Открыть",

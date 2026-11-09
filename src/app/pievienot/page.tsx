@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { ListingForm } from "@/components/listing-form";
 import { regionOptions } from "@/lib/listings";
 import { requireUser } from "@/lib/session";
+import { isBusiness } from "@/lib/constants";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
@@ -25,6 +26,10 @@ export default async function AddPage() {
   return (
     <main className="wrap mid">
       <h1>{t("Pievienot sludinājumu")}</h1>
+      <div className="import-banner">
+        <span>📥 {isBusiness(user.sellerType) ? t("Daudz sludinājumu? Ielādē tos visus uzreiz no faila vai plūsmas saites.") : t("Auto salons vai aģentūra? Ielādē visus sludinājumus uzreiz no faila vai plūsmas saites. Vispirms profilā norādi, ka esi uzņēmums.")}</span>
+        <a className="btn small primary" href={isBusiness(user.sellerType) ? "/importi" : "/profils"}>{isBusiness(user.sellerType) ? t("Sludinājumu imports") : t("Mans profils")} →</a>
+      </div>
       <p className="lead">{t("Lauki ar * ir obligāti. Pārējie palīdz pircējiem tevi atrast filtros.")}</p>
       <ListingForm regions={await regionOptions()} defaultPhone={user.phone ?? ""} />
     </main>
