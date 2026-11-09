@@ -46,6 +46,7 @@ export async function seedReference(db: Db) {
           set: { popular: POPULAR[cls].includes(makeName) },
         })
         .returning({ id: schema.makes.id });
+      if (!modelNames.length) continue;
       await db
         .insert(schema.models)
         .values(modelNames.map((name) => ({ makeId: make.id, name })))

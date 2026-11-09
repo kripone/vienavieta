@@ -173,6 +173,8 @@ export const SS_FEEDS = [
 export const SS_SECTIONS = [
   { key: "ss2:cars", url: "https://www.ss.com/lv/transport/cars/", kind: "vehicle", vehicleClass: "car" },
   { key: "ss2:moto", url: "https://www.ss.com/lv/transport/moto-transport/motorcycles/", kind: "vehicle", vehicleClass: "moto" },
+  // kemperi un dzīvojamās piekabes (ss.com tie ir sadaļā "Kravas automašīnas → Kempingi"; piederumus izlaižam, sk. mapItem)
+  { key: "ss2:campers", url: "https://www.ss.com/lv/transport/cargo-cars/campings/", kind: "vehicle", vehicleClass: "camper" },
   { key: "ss2:flats", url: "https://www.ss.com/lv/real-estate/flats/", kind: "property", propertyType: "Dzīvoklis" },
   { key: "ss2:homes", url: "https://www.ss.com/lv/real-estate/homes-summer-residences/", kind: "property", propertyType: "Māja" },
   { key: "ss2:land", url: "https://www.ss.com/lv/real-estate/plots-and-lands/", kind: "property", propertyType: "Zeme" },

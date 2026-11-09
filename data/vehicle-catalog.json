@@ -2009,6 +2009,9 @@
       "Sonic",
       "Twin"
     ],
+    "Bailey": [],
+    "Benimar": [],
+    "Burow": [],
     "Bürstner": [
       "Campeo",
       "Delfin",
@@ -2016,16 +2019,24 @@
       "Lyseo",
       "Travel Van"
     ],
+    "Cabby": [],
+    "Capron": [],
     "Carado": [
       "A 464",
       "T 448",
       "V 600"
     ],
+    "Caravelair": [],
+    "Carthago": [],
+    "Challenger": [],
     "Chausson": [
       "First Line",
       "Flash",
       "Titanium",
       "Welcome"
+    ],
+    "Citroën": [
+      "Jumper"
     ],
     "Dethleffs": [
       "Advantage",
@@ -2035,15 +2046,28 @@
       "Pulse",
       "Trend"
     ],
+    "Elddis": [],
+    "Elnagh": [],
+    "Eriba": [
+      "Touring",
+      "Nova"
+    ],
+    "Eura Mobil": [],
     "Fendt": [
       "Bianco",
       "Saphir",
       "Tendenza"
     ],
+    "Fiat": [
+      "Ducato"
+    ],
     "Ford": [
+      "Transit",
       "Nugget",
       "Transit Custom Nugget"
     ],
+    "Frankia": [],
+    "Globecar": [],
     "Hobby": [
       "De Luxe",
       "Excellent",
@@ -2060,6 +2084,10 @@
       "ML-T",
       "Venture S"
     ],
+    "Iveco": [
+      "Daily"
+    ],
+    "Kabe": [],
     "Knaus": [
       "BoxLife",
       "BoxStar",
@@ -2073,18 +2101,27 @@
       "Ecovip",
       "Kosmo"
     ],
+    "Le Voyageur": [],
     "LMC": [
       "Cruiser",
       "Style",
       "Tourer"
     ],
+    "Malibu": [],
     "McLouis": [
       "Fusion",
       "Glamys"
     ],
     "Mercedes-Benz": [
       "Marco Polo",
-      "Sprinter kemperis"
+      "Sprinter kemperis",
+      "Sprinter"
+    ],
+    "Mobilvetta": [],
+    "Niesmann+Bischoff": [],
+    "Nomad": [],
+    "Peugeot": [
+      "Boxer"
     ],
     "Pilote": [
       "Foxy Van",
@@ -2102,27 +2139,38 @@
       "Série M",
       "V-Series"
     ],
+    "Renault": [
+      "Master",
+      "Trafic"
+    ],
+    "Rimor": [],
     "Roller Team": [
       "Kronos",
       "Livingstone",
       "Zefiro"
     ],
+    "Solifer": [],
+    "Sterckeman": [],
     "Sunlight": [
       "Cliff",
       "I 69 L",
       "T 69 L",
       "V 66"
     ],
+    "Swift": [],
     "Tabbert": [
       "Da Vinci",
       "Puccini",
       "Rossini"
     ],
+    "Trigano": [],
     "Volkswagen": [
       "California Beach",
       "California Coast",
       "California Ocean",
-      "Grand California"
+      "Grand California",
+      "Transporter",
+      "Crafter"
     ],
     "Weinsberg": [
       "CaraBus",
@@ -2134,7 +2182,8 @@
       "Club Joker",
       "Columbus",
       "Kepler"
-    ]
+    ],
+    "Wilk": []
   },
   "van": {
     "Citroën": [

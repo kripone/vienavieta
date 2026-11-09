@@ -67,6 +67,7 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 ## 8. Citu portālu sludinājumi
 - [x] ss.com oficiālās RSS plūsmas (auto, moto, dzīvokļi, mājas, zeme): fakti + saite, bez bildēm un teksta; reizi stundā; avota filtrs
 - [x] ss.com sarakstu lapas (pēc jurista atzinuma): visas lapas reizi diennaktī, jaunie ik 15 min, ss.com izdzēstie tiek noņemti
+- [x] ss.com kemperi un dzīvojamās piekabes (sadaļa "Kravas automašīnas → Kempingi") sadaļā "Kemperi"; piederumi izlaisti, veids (piekabe, alkova, integrētais…) pēc teksta sākuma vai markas
 - [ ] Citu portālu RSS/partneru plūsmas (reklama.lv, city24.lv, autoplius.lt …)
 - [x] ss.com sīktēli tieši no ss.com servera (neglabājam), ja nenāk: ilustrācija
 - [x] Tirgus tendences /tirgus: populārākās markas, modeļi, cena pa gadiem, cena pret nobraukumu, €/m² pa reģioniem un vietām

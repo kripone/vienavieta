@@ -11,7 +11,7 @@ import { landLabel } from "../listing-input";
 const { listings, places, regions, makes, models, priceHistory } = schema;
 
 /** Plūsmas vai sadaļas apraksts: kas tajā ir (transports ar klasi vai īpašums ar veidu). */
-type Feed = { kind: "vehicle"; vehicleClass: "car" | "moto" } | { kind: "property"; propertyType: PropertyType; url?: string };
+type Feed = { kind: "vehicle"; vehicleClass: "car" | "moto" | "camper" } | { kind: "property"; propertyType: PropertyType; url?: string };
 export type RssItem = { link: string; pubDate: Date; fields: Record<string, string[]>; /** sludinājuma teksta sākums, tikai modeļa atpazīšanai */ snippet?: string };
 
 // tikai ASCII: HTTP galvenēs nedrīkst būt garumzīmes
@@ -238,6 +238,7 @@ type ModelRow = { id: number; makeId: number; name: string };
 
 /** ss.com markas nosaukumi, kas atšķiras no mūsu kataloga. */
 const MAKE_ALIASES: Record<string, string> = {
+  buerstner: "burstner", buestner: "burstner", bursner: "burstner", "eura-mobil": "eura-mobil", euramobil: "eura-mobil",
   mercedes: "mercedes-benz", "mercedes-benz": "mercedes-benz", vw: "volkswagen", "land-rover": "land-rover", landrover: "land-rover",
   "alfa-romeo": "alfa-romeo", alfa: "alfa-romeo", citroen: "citroen", skoda: "skoda", "rolls-royce": "rolls-royce", vaz: "lada", "gaz": "gaz",
 };
@@ -336,6 +337,18 @@ export function isSummerHouse(snippet?: string) {
   return /vasarn[iī]c|d[aā]rza\s*m[aā]j|d[aā]rzkop[iī]bas|d[aā]rzi[nņ][aā]\s*m[aā]j|br[iī]vdienu\s*m[aā]j|vasaras\s*m[aā]j|(^|[^а-яё])дач|садов\S*\s*(дом|участ)|дачн/.test(s);
 }
 
+/** Kempera veids pēc saraksta teksta sākuma (neglabājam) vai markas, kas ražo tikai dzīvojamās piekabes. */
+const CARAVAN_ONLY = new Set(["Hobby", "Tabbert", "Fendt", "LMC", "Wilk", "Eriba", "Kabe", "Solifer", "Caravelair", "Sterckeman", "Cabby", "Nomad", "Swift", "Bailey", "Elddis"].map((m) => slug(m)));
+export function camperBody(snippet: string | undefined, make: string): string | null {
+  const s = (snippet ?? "").toLowerCase();
+  if (/treiler|piekab|karavan|caravan|прицеп|караван|дача на колес/.test(s)) return "Treileris";
+  if (/alkov|альков/.test(s)) return "Alkova";
+  if (/daļēji integr|dalēji integr|teilintegr|semi.?integr|полуинтегр/.test(s)) return "Daļēji integrētais";
+  if (/integr|интегр/.test(s)) return "Integrētais";
+  if (/kemperfurg|campervan|camper van|кемпервэн|автодом на базе микроавтобус/.test(s)) return "Kemperfurgons";
+  return CARAVAN_ONLY.has(slug(make)) ? "Treileris" : null;
+}
+
 export function mapItem(
   feed: Feed,
   item: RssItem,
@@ -362,10 +375,14 @@ export function mapItem(
     if (feed.vehicleClass === "moto" && !path.includes("/motorcycles/")) return null; // rezerves daļas, skuteri u.c.
     // marka: no "Marka" lauka (auto) vai adreses ceļa (moto: …/motorcycles/kawasaki/…)
     const makeRaw = first(f, "Marka") ?? path.split("/").filter(Boolean).at(-2) ?? "";
-    const modelRaw0 = feed.vehicleClass === "car" ? (f["Modelis"]?.[0] ?? f["Marka"]?.[1] ?? "") : (first(f, "Modelis") ?? "");
+    const modelRaw0 = feed.vehicleClass !== "moto" ? (f["Modelis"]?.[0] ?? f["Marka"]?.[1] ?? "") : (first(f, "Modelis") ?? "");
     const isOther = /^(citi|cits|cita|other|another)$/i.test(modelRaw0.trim()); // ss.com "Citi" = modelis nav viņu sarakstā
-    const modelRaw = isOther ? "" : modelRaw0;
+    // "Hobby Hobby", "Cabby Cabby 532": modeļa laukā atkārtota marka
+    const makeHead = (first(f, "Marka") ?? "").trim();
+    const modelRaw = isOther ? "" : feed.vehicleClass === "camper" && makeHead && slug(modelRaw0).startsWith(slug(makeHead)) ? modelRaw0.trim().slice(makeHead.length).trim() : modelRaw0;
     const make = findMake(ctx.makes, feed.vehicleClass, makeRaw);
+    // ss.com "Kempingi" sadaļā ir arī piederumi (akumulatori, ledusskapji, invertori): ņemam tikai zināmas kemperu/bāzes markas vai dārgus
+    if (feed.vehicleClass === "camper" && priced.price < (make ? 300 : 1000)) return null;
     // neatpazīts vai "Citi": mēģinām atrast modeli sludinājuma teksta sākumā (piem. "Tourneo" → "Tourneo Custom")
     const model = make ? (matchModel(ctx.models, make.id, modelRaw, make.name) ?? modelFromText(ctx.models, make.id, item.snippet)) : null;
     const year = int(first(f, "Gads"));
@@ -387,7 +404,7 @@ export function mapItem(
       engineL,
       fuel,
       // virsbūve RSS nav norādīta: nosakām pēc modeļa (RAV4 → apvidus, Passat Variant → universāls), citādi nezināma
-      body: feed.vehicleClass === "car" ? inferBody(modelName) ?? inferBody(modelRaw) : null,
+      body: feed.vehicleClass === "car" ? inferBody(modelName) ?? inferBody(modelRaw) : feed.vehicleClass === "camper" ? camperBody(item.snippet, makeName) : null,
     };
   }
 
