@@ -95,8 +95,8 @@ export default async function ValuationPage(props: { searchParams: Promise<SP> }
               <h2>{modelName ? `${modelName.mk} ${t(modelName.m)}, ${y}` : t("Rezultāts")}</h2>
               <div className="val-hero">
                 <span className="fine">{t("Tipiskā cena")}</span>
-                <b>{formatPrice(car.median)}</b>
-                <span>{t("Lielākā daļa līdzīgu auto: {a} – {b}", { a: formatPrice(car.p25), b: formatPrice(car.p75) })}</span>
+                <b>{formatPrice(Math.round(car.median / 100) * 100)}</b>
+                <span>{t("Lielākā daļa līdzīgu auto: {a} – {b}", { a: formatPrice(Math.round(car.p25 / 100) * 100), b: formatPrice(Math.round(car.p75 / 100) * 100) })}</span>
               </div>
               <p className="fine">
                 {t("Pēc {n} sludinājumiem: {y1}–{y2}. g.", { n: car.n, y1: car.yearFrom, y2: car.yearTo })}
