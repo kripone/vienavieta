@@ -490,3 +490,9 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .val-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px; }
 .val-hero { display: grid; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
 .val-hero b { font-family: var(--f-display); font-size: 32px; font-variant-numeric: tabular-nums; }
+
+/* Mēneša pārskats (/parskati) */
+.report-nav { display: flex; justify-content: space-between; gap: 8px; margin: 0 0 14px; }
+.report section { margin-top: 22px; }
+.report-drops { list-style: none; padding: 0; display: grid; gap: 6px; margin: 0 0 10px; }
+.report-drops .down { color: #2f8a64; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }

@@ -98,6 +98,7 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] Kļūdu uzraudzība: servera un pārlūka kļūdas žurnālā, apskate moderācijā (cilne "Kļūdas")
 - [x] Sludinājuma lapā "Līdzīgi sludinājumi"
 - [x] Rīks „Cik vērts?” (/novertejums): auto pēc modeļa/gada/nobraukuma, dzīvoklis pēc vietas/platības un VZD darījumiem mājā
+- [x] Mēneša tirgus pārskats (/parskati/<gads-mēnesis>): dzīvokļu €/m² Rīgā un pilsētās, populārākie auto, cenu kritumi
 - [x] PWA: instalējama aplikācija (manifest, ikonas, servisa darbinieks) un push paziņojumi par saglabātajām meklēšanām un cenu kritumiem favorītos
 - [ ] Veikalu aplikācijas (Capacitor) – kad būs lietotāji
 - [x] SEO: Search Console, SEO lapas (/auto/<marka>/<modelis>, /moto, /ipasumi/<veids>[-ire]/<reģions>), sitemap ar tām, noindex filtru lapām un citu portālu sludinājumiem, JSON-LD (Car/Product, BreadcrumbList, WebSite), OG attēls

@@ -31,6 +31,7 @@ export default async function MarketPage(props: { searchParams: Promise<SP> }) {
     <main className="wrap">
       <h1>{t("Tirgus tendences")}</h1>
       <p className="lead">{t("Aprēķināts no visiem aktīvajiem sludinājumiem (VienāVietā un ss.com); viens objekts vairākos portālos skaitās vienreiz.")}</p>
+      <p><a className="btn small" href="/parskati">📰 {t("Mēneša tirgus pārskats")} →</a></p>
       <div className="stat-row">
         <div className="stat"><b>{formatNumber(tot("vehicle"))}</b><span>{t("transporta sludinājumi")}</span></div>
         <div className="stat"><b>{formatNumber(tot("property"))}</b><span>{t("īpašumu sludinājumi")}</span></div>

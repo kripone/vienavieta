@@ -19,6 +19,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const add = (path: string) => urls.push({ path });
 
   try {
+    const { reportMonths } = await import("@/lib/report");
+    for (const m of await reportMonths()) if (m.n >= 500) add(`/parskati/${m.ym}`);
+  } catch {}
+  try {
     // vienā vaicājumā: skaiti pa markām/modeļiem un īpašumu veidiem/reģioniem
     const veh = await db.execute<{ vc: string; make: string; model: string | null; n: number }>(sql`
       select l.vehicle_class as vc, mk.name as make, md.name as model, count(*)::int as n
