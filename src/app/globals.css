@@ -445,6 +445,12 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .pwa-x { flex: none; background: none; border: 0; color: var(--muted); font-size: 22px; line-height: 1; padding: 4px; cursor: pointer; }
 
 /* sludinājuma karte */
+.lmap-head { display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; }
+.lmap-switch { display: inline-flex; background: var(--surface-2); border-radius: 10px; padding: 3px; gap: 3px; }
+.lmap-switch > button, .lmap-switch > a { border: 0; background: none; font: inherit; font-size: 14px; font-weight: 600; color: var(--muted); padding: 7px 12px; border-radius: 8px; cursor: pointer; text-decoration: none; }
+.lmap-switch > .on { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.lmap-switch > a { color: var(--accent); }
+.listing-map iframe.lmap { display: block; width: 100%; height: 320px; border: 1px solid var(--line); border-radius: 10px; }
 .listing-map .lmap { height: 320px; border-radius: 10px; overflow: hidden; z-index: 0; border: 1px solid var(--line); background: var(--surface-2); }
 .lmap.loading { height: 320px; border-radius: 10px; background: var(--surface-2); }
 @media (max-width: 560px) { .listing-map .lmap, .lmap.loading { height: 240px; } }

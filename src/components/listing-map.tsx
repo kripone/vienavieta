@@ -1,15 +1,20 @@
 "use client";
 // Sludinājuma atrašanās vieta kartē. Precīza adrese (ģeokodēta) → atzīme; aptuvena (tikai apkaime/pagasts) → aplis.
+// Ielu skats (tikai precīzai adresei): Google Maps Embed API lapā, ja NEXT_PUBLIC_STREETVIEW_EMBED=on
+// (Cloud konsolē jābūt ieslēgtam "Maps Embed API"), citādi saite uz Google Maps ielu skatu.
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useT } from "@/i18n/client";
 import { GOOGLE_KEY } from "@/lib/google-tiles";
 import { addGoogleLayers, STREETS_ATTR } from "./map-layers";
 
+const SV_EMBED = process.env.NEXT_PUBLIC_STREETVIEW_EMBED === "on" && Boolean(GOOGLE_KEY);
+
 export function ListingMap({ lat, lon, exact }: { lat: number; lon: number; exact: boolean }) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const box = useRef<HTMLDivElement>(null);
+  const [street, setStreet] = useState(false);
 
   useEffect(() => {
     if (!box.current) return;
@@ -26,11 +31,35 @@ export function ListingMap({ lat, lon, exact }: { lat: number; lon: number; exac
     return () => { m.remove(); };
   }, [lat, lon, exact]);
 
-  const gmaps = `https://www.google.com/maps/search/?api=1&query=${lat.toFixed(5)},${lon.toFixed(5)}`;
+  const ll = `${lat.toFixed(5)},${lon.toFixed(5)}`;
+  const gmaps = `https://www.google.com/maps/search/?api=1&query=${ll}`;
+  const pano = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${ll}`;
   return (
     <section className="listing-map" id="karte">
-      <h2>{t("Atrašanās vieta")}</h2>
-      <div ref={box} className="map lmap" role="img" aria-label={t("Atrašanās vieta")} />
+      <div className="lmap-head">
+        <h2>{t("Atrašanās vieta")}</h2>
+        {exact && (
+          <div className="lmap-switch" role="tablist">
+            <button type="button" role="tab" aria-selected={!street} className={street ? "" : "on"} onClick={() => setStreet(false)}>🗺️ {t("Karte")}</button>
+            {SV_EMBED ? (
+              <button type="button" role="tab" aria-selected={street} className={street ? "on" : ""} onClick={() => setStreet(true)}>🚶 {t("Ielu skats")}</button>
+            ) : (
+              <a href={pano} rel="noopener noreferrer">🚶 {t("Ielu skats")} ↗</a>
+            )}
+          </div>
+        )}
+      </div>
+      <div ref={box} className="map lmap" role="img" aria-label={t("Atrašanās vieta")} hidden={street} />
+      {street && (
+        <iframe
+          className="lmap sv"
+          title={t("Ielu skats")}
+          loading="lazy"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allowFullScreen
+          src={`https://www.google.com/maps/embed/v1/streetview?key=${GOOGLE_KEY}&location=${ll}&fov=90&language=${locale}`}
+        />
+      )}
       <p className="fine">
         {exact ? t("Atzīme pēc sludinājumā norādītās adreses.") : t("Aptuvena vieta: sludinājumā nav precīzas adreses, rādām apkaimi vai pagastu.")}{" "}
         <a href={gmaps} rel="noopener noreferrer">{t("Atvērt Google Maps")} ↗</a>
