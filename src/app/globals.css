@@ -391,7 +391,7 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .vzd-all[open] { display: none; }
 .hist-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .hist-stats .stat { min-width: 0; padding: 10px 8px; text-align: center; }
-@media (max-width: 560px) { .hist-stats .stat b { font-size: 17px; } .hist-stats .stat span { font-size: 11px; } }
+@media (max-width: 560px) { .hist-stats { gap: 6px; } .hist-stats .stat { padding: 10px 4px; } .hist-stats .stat b { font-size: 15px; white-space: nowrap; } .hist-stats .stat span { font-size: 11px; line-height: 1.3; display: block; } }
 .vzd-badge { display: inline-block; margin-top: 6px; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: inherit; text-decoration: none; font-variant-numeric: tabular-nums; }
 .vzd-badge:hover { border-color: currentColor; }
 .house { margin: 20px 0; }
