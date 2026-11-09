@@ -132,3 +132,54 @@ export function locationLabel(place: string | null, region: string | null, regio
   return regionKind === "city" ? `${region}, ${place}` : `${place}, ${region.replace(" novads", " nov.").replace(" apskritis", " apskr.")}`;
 }
 
+
+type SimilarSource = {
+  id: string; kind: string; price: number; groupKey: string | null; vehicleClass: string | null; makeId: number | null; modelId: number | null; year: number | null;
+  propertyType: string | null; deal: string | null; placeId: number | null; areaM2: string | number | null;
+};
+
+/** Līdzīgi aktīvie sludinājumi: transportam tas pats modelis (vai marka), ±3 gadi; īpašumam tas pats veids un darījums
+ *  tajā pašā vietā (vai reģionā), līdzīga platība. Abiem cena 0,6–1,5× un vistuvākā cena vispirms. */
+export async function similarListings(l: SimilarSource, limit = 6) {
+  const base = [
+    eq(listings.status, "active"),
+    ne(listings.id, l.id),
+    eq(listings.kind, l.kind as "vehicle" | "property"),
+    sql`${listings.price} between ${Math.floor(l.price * 0.6)} and ${Math.ceil(l.price * 1.5)}`,
+    ...(l.groupKey ? [sql`${listings.groupKey} is distinct from ${l.groupKey}`] : []),
+  ];
+  const run = (extra: ReturnType<typeof sql>[]) =>
+    db
+      .select(cardFields)
+      .from(listings)
+      .leftJoin(places, eq(listings.placeId, places.id))
+      .leftJoin(regions, eq(places.regionId, regions.id))
+      .where(and(...base, ...extra))
+      .orderBy(sql`abs(${listings.price} - ${l.price})`, desc(listings.createdAt))
+      .limit(limit);
+  const tries: ReturnType<typeof sql>[][] = [];
+  if (l.kind === "vehicle") {
+    const cls = l.vehicleClass ? [sql`${listings.vehicleClass} = ${l.vehicleClass}`] : [];
+    const yr = l.year ? [sql`${listings.year} between ${l.year - 3} and ${l.year + 3}`] : [];
+    if (l.modelId) tries.push([...cls, sql`${listings.modelId} = ${l.modelId}`, ...yr]);
+    if (l.makeId) tries.push([...cls, sql`${listings.makeId} = ${l.makeId}`, ...yr]);
+  } else {
+    const area = Number(l.areaM2) || 0;
+    const common = [
+      ...(l.propertyType ? [sql`${listings.propertyType} = ${l.propertyType}`] : []),
+      ...(l.deal ? [sql`${listings.deal} = ${l.deal}`] : []),
+      ...(area ? [sql`${listings.areaM2} between ${Math.floor(area * 0.7)} and ${Math.ceil(area * 1.3)}`] : []),
+    ];
+    if (l.placeId) {
+      tries.push([...common, sql`${listings.placeId} = ${l.placeId}`]);
+      tries.push([...common, sql`${places.regionId} = (select region_id from places where id = ${l.placeId})`]);
+    }
+  }
+  const seen = new Set<string>();
+  const out: Awaited<ReturnType<typeof run>> = [];
+  for (const extra of tries) {
+    if (out.length >= limit) break;
+    for (const r of await run(extra)) if (!seen.has(r.id) && out.length < limit) { seen.add(r.id); out.push(r); }
+  }
+  return out;
+}

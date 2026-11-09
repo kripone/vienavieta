@@ -2,6 +2,7 @@
 import type { Dict } from "./core";
 
 export const en: Dict = {
+  "Līdzīgi sludinājumi": "Similar listings",
   "Karte": "Map",
   "Ielu skats": "Street view",
   "Ielādē visus savus sludinājumus uzreiz: failā (XML, CSV, JSON) vai ar plūsmas saiti, ko atjaunojam automātiski.": "Upload all your listings at once: as a file (XML, CSV, JSON) or a feed link that we refresh automatically.",

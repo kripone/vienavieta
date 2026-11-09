@@ -2,6 +2,7 @@
 import type { Dict } from "./core";
 
 export const lt: Dict = {
+  "Līdzīgi sludinājumi": "Panašūs skelbimai",
   "Karte": "Žemėlapis",
   "Ielu skats": "Gatvės vaizdas",
   "Ielādē visus savus sludinājumus uzreiz: failā (XML, CSV, JSON) vai ar plūsmas saiti, ko atjaunojam automātiski.": "Įkelkite visus skelbimus iš karto: failu (XML, CSV, JSON) arba srauto nuoroda, kurią atnaujiname automatiškai.",

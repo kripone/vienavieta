@@ -475,3 +475,5 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .import-hint { margin-top: 16px; }
 .import-hint h2 { margin-top: 0; }
 .import-hint-small { margin-top: 12px; }
+.similar { margin-top: 28px; }
+.similar h2 { margin-bottom: 10px; }

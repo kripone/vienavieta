@@ -26,7 +26,8 @@ import { dealsForListing } from "@/lib/vzd";
 import { VzdDeals } from "@/components/vzd-deals";
 import { priceEvals } from "@/lib/price-eval";
 import { favoriteIds } from "@/lib/favorites";
-import { fullLocation, getListing, locationLabel } from "@/lib/listings";
+import { fullLocation, getListing, locationLabel, similarListings } from "@/lib/listings";
+import { ListingCard } from "@/components/listing-card";
 import { getCurrentUser, isModerator } from "@/lib/session";
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ saglabats?: string }> };
@@ -96,6 +97,8 @@ export default async function ListingPage(props: Props) {
   const history = await listingHistory({ id: l.id, price: l.price, createdAt: l.createdAt }).catch(() => null);
   const vzd = l.kind === "property" && l.propertyType === "Dzīvoklis" && l.deal === "sell" ? await dealsForListing(l).catch(() => null) : null;
   const isFav = user && !isOwner ? (await favoriteIds(user.id, [l.id])).has(l.id) : false;
+  const similar = l.status === "active" ? await similarListings(l).catch(() => []) : [];
+  const simEvals = similar.length ? await priceEvals(similar.map((x) => x.id)).catch(() => new Map()) : new Map();
   const seller = (d.sellerType === "dealer" || d.sellerType === "agency") && d.companyName ? d.companyName : d.sellerName || t("Privātpersona");
   const unit = priceUnit(l.deal, t);
   const ext = l.source !== "own" && l.externalUrl ? l.externalUrl : null;
@@ -261,6 +264,14 @@ export default async function ListingPage(props: Props) {
           </section>
         )}
       </div>
+      {similar.length > 0 && (
+        <section className="similar">
+          <h2>{t("Līdzīgi sludinājumi")}</h2>
+          <div className="list">
+            {similar.map((x) => <ListingCard key={x.id} l={x} evaluation={simEvals.get(x.id)} />)}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

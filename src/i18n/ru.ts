@@ -2,6 +2,7 @@
 import type { Dict } from "./core";
 
 export const ru: Dict = {
+  "Līdzīgi sludinājumi": "Похожие объявления",
   "Karte": "Карта",
   "Ielu skats": "Просмотр улиц",
   "Ielādē visus savus sludinājumus uzreiz: failā (XML, CSV, JSON) vai ar plūsmas saiti, ko atjaunojam automātiski.": "Загрузите все объявления сразу: файлом (XML, CSV, JSON) или ссылкой на фид, который мы обновляем автоматически.",
