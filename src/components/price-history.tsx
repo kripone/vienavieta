@@ -14,7 +14,7 @@ export async function PriceHistory({ h, external }: { h: { points: HistoryPoint[
   return (
     <section className="hist" id="vesture">
       <h2>{t("Vēsture")}</h2>
-      <div className="stat-row">
+      <div className="stat-row hist-stats">
         <div className="stat"><b>{tp(h.days, "diena", "dienas")}</b><span>{t("tirgū")}{external ? "*" : ""}</span></div>
         <div className="stat"><b>{formatPrice(h.first)}</b><span>{t("sākuma cena")}</span></div>
         <div className="stat"><b>{h.changes}</b><span>{t("cenas izmaiņas")}</span></div>
