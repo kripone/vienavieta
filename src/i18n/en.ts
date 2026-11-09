@@ -2,6 +2,8 @@
 import type { Dict } from "./core";
 
 export const en: Dict = {
+  "pēc modeļa, gada un nobraukuma": "by model, year and mileage",
+  "pēc vietas, platības un darījumiem": "by location, area and sales",
   "Tirgus pārskats": "Market report",
   "Mēneša tirgus pārskats": "Monthly market report",
   "Automātisks kopsavilkums no visiem tajā mēnesī pieejamajiem sludinājumiem (VienāVietā un ss.com); viens objekts vairākos portālos skaitās vienreiz.": "An automatic summary of all listings available that month (VienāVietā and ss.com); one property listed on several portals counts once.",

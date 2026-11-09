@@ -52,9 +52,15 @@ export default async function ValuationPage(props: { searchParams: Promise<SP> }
     <main className="wrap mid valuation">
       <h1>{t("Cik vērts mans auto vai dzīvoklis?")}</h1>
       <p className="lead">{t("Aptuvenā cena pēc līdzīgiem sludinājumiem visos portālos un dzīvokļiem arī pēc reālajiem darījumiem tajā pašā mājā.")}</p>
-      <nav className="seg" aria-label={t("Ko novērtēt")}>
-        <a href={lp("/novertejums")} aria-current={kind === "car" ? "page" : undefined}>🚗 {t("Auto")}</a>
-        <a href={lp("/novertejums?veids=dzivoklis")} aria-current={kind === "flat" ? "page" : undefined}>🏠 {t("Dzīvoklis")}</a>
+      <nav className="val-tabs" aria-label={t("Ko novērtēt")}>
+        <a href={lp("/novertejums")} aria-current={kind === "car" ? "page" : undefined}>
+          <span className="vt-ico" aria-hidden="true">🚗</span>
+          <span><b>{t("Auto")}</b><small>{t("pēc modeļa, gada un nobraukuma")}</small></span>
+        </a>
+        <a href={lp("/novertejums?veids=dzivoklis")} aria-current={kind === "flat" ? "page" : undefined}>
+          <span className="vt-ico" aria-hidden="true">🏠</span>
+          <span><b>{t("Dzīvoklis")}</b><small>{t("pēc vietas, platības un darījumiem")}</small></span>
+        </a>
       </nav>
 
       {kind === "car" ? (

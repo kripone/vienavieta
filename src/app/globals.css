@@ -483,7 +483,14 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .err-stack { font-size: 11px; overflow-x: auto; background: var(--surface-2); padding: 8px; border-radius: 8px; max-height: 300px; }
 
 /* Novērtējums (/novertejums) */
-.valuation .seg { margin: 4px 0 14px; }
+.val-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 6px 0 16px; }
+.val-tabs a { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 2px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--fg); text-decoration: none; min-height: 64px; transition: border-color .15s, background .15s; }
+.val-tabs a:hover { border-color: var(--accent); }
+.val-tabs a[aria-current="page"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.val-tabs .vt-ico { font-size: 28px; line-height: 1; flex: none; }
+.val-tabs b { display: block; font-family: var(--f-display); font-size: 18px; }
+.val-tabs small { display: block; color: var(--muted); font-size: 12px; line-height: 1.3; margin-top: 2px; }
+@media (max-width: 420px) { .val-tabs a { padding: 12px; gap: 8px; } .val-tabs .vt-ico { font-size: 24px; } .val-tabs b { font-size: 16px; } }
 .val-form { display: grid; gap: 12px; }
 .val-form .btn { justify-self: start; }
 .val-result { margin-top: 20px; }

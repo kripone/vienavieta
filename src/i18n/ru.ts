@@ -2,6 +2,8 @@
 import type { Dict } from "./core";
 
 export const ru: Dict = {
+  "pēc modeļa, gada un nobraukuma": "по модели, году и пробегу",
+  "pēc vietas, platības un darījumiem": "по месту, площади и сделкам",
   "Tirgus pārskats": "Обзор рынка",
   "Mēneša tirgus pārskats": "Ежемесячный обзор рынка",
   "Automātisks kopsavilkums no visiem tajā mēnesī pieejamajiem sludinājumiem (VienāVietā un ss.com); viens objekts vairākos portālos skaitās vienreiz.": "Автоматическая сводка по всем объявлениям, доступным в этом месяце (VienāVietā и ss.com); один объект на нескольких порталах считается один раз.",

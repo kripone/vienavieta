@@ -2,6 +2,8 @@
 import type { Dict } from "./core";
 
 export const lt: Dict = {
+  "pēc modeļa, gada un nobraukuma": "pagal modelį, metus ir ridą",
+  "pēc vietas, platības un darījumiem": "pagal vietą, plotą ir sandorius",
   "Tirgus pārskats": "Rinkos apžvalga",
   "Mēneša tirgus pārskats": "Mėnesio rinkos apžvalga",
   "Automātisks kopsavilkums no visiem tajā mēnesī pieejamajiem sludinājumiem (VienāVietā un ss.com); viens objekts vairākos portālos skaitās vienreiz.": "Automatinė visų tą mėnesį prieinamų skelbimų (VienāVietā ir ss.com) santrauka; vienas objektas keliuose portaluose skaičiuojamas kartą.",
