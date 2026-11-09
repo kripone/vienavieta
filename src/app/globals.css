@@ -161,9 +161,12 @@ main .fine { margin-top: 14px; }
 .side { position: sticky; top: 12px; max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 @media (max-width: 900px) { .side { position: static; max-height: none; } }
 .filters-box { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
-.filters-box > summary { font-family: var(--f-display); font-weight: 600; font-size: 16px; cursor: pointer; list-style: none; }
+.filters-box > summary { font-family: var(--f-display); font-weight: 600; font-size: 16px; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; }
 .filters-box > summary::-webkit-details-marker { display: none; }
-@media (min-width: 901px) { .filters-box > summary { pointer-events: none; } }
+.fb-ico { flex: none; color: var(--accent); }
+.fb-count { background: var(--accent); color: var(--accent-fg); font-size: 12px; font-weight: 700; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; }
+.fb-hint { display: none; margin-left: auto; font-family: var(--f-body); font-size: 13px; font-weight: 600; color: var(--accent); }
+@media (min-width: 901px) { .filters-box > summary { pointer-events: none; } .fb-ico { display: none; } }
 .filters { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
 .filters .grid2 { gap: 10px; }
 .filters .field { font-size: 12px; }
@@ -190,7 +193,15 @@ main .fine { margin-top: 14px; }
 .maptools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
 .drawhint { position: absolute; left: 20px; top: 56px; z-index: 500; background: var(--accent); color: var(--accent-fg); font-size: 12px; font-weight: 600; padding: 5px 9px; border-radius: 6px; pointer-events: none; }
 .leaflet-container { font-family: var(--f-body); }
-@media (max-width: 900px) { .filters-box > summary { font-size: 15px; } .filters-box > summary::after { content: " ▾"; color: var(--muted); } .filters-box[open] > summary::after { content: " ▴"; } }
+@media (max-width: 900px) {
+  /* telefonā filtru virsraksts ir skaidri redzama poga */
+  .filters-box { padding: 0; border-color: var(--accent); }
+  .filters-box > summary { font-size: 16px; padding: 13px 14px; min-height: 48px; border-radius: 11px; background: var(--accent-soft); -webkit-tap-highlight-color: transparent; }
+  .filters-box > summary:active { filter: brightness(0.96); }
+  .filters-box[open] > summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: 1px solid var(--line); }
+  .filters-box > .filters, .filters-box > form { padding: 0 14px 14px; }
+  .filters-box:not([open]) .fb-open, .filters-box[open] .fb-close { display: inline; }
+}
 @media (max-width: 560px) { .filters .grid2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .mapwrap .map { height: 260px; } }
 .seg-sm button { padding: 6px 10px; font-size: 13px; }
 
