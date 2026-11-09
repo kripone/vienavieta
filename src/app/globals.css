@@ -292,6 +292,8 @@ main .fine { margin-top: 14px; }
 .ext-row { display: flex; align-items: center; gap: 6px 12px; flex-wrap: wrap; margin-top: 6px; font-size: 13px; }
 .src-badge { background: var(--surface-2); color: var(--muted); border-radius: 6px; padding: 1px 8px; font-weight: 600; font-size: 12px; }
 .ext-link { font-weight: 700; }
+.more-btn { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 4px 12px; font-weight: 700; font-size: 13px; text-decoration: none; min-height: 30px; }
+.more-btn:hover { background: var(--accent); color: var(--accent-fg); }
 .ext-note { font-size: 13px; color: var(--muted); margin: 0; }
 .also a { font-weight: 600; }
 .also-panel ul { margin: 6px 0 0; padding-left: 18px; }

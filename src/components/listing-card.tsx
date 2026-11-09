@@ -85,7 +85,7 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
           <div className="ext-row">
             <span className="src-badge">{t("Avots: {src}", { src })}</span>
             <a className="ext-link" href={ext} {...extLink}>{t("Skatīt {src}", { src })} ↗</a>
-            <a className="fine" href={lp(`/sludinajumi/${l.id}`)}>{t("Sīkāk")}</a>
+            <a className="more-btn" href={lp(`/sludinajumi/${l.id}`)}>{t("Sīkāk")} →</a>
           </div>
         )}
         {also && also.length > 0 && (
