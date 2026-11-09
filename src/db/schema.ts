@@ -24,7 +24,8 @@ export const vehicleClass = pgEnum("vehicle_class", ["car", "moto", "camper", "v
 export const listingKind = pgEnum("listing_kind", ["vehicle", "property"]);
 export const listingStatus = pgEnum("listing_status", ["active", "pending", "hidden", "sold", "deleted"]);
 export const listingSource = pgEnum("listing_source", ["own", "ss.com", "reklama.lv", "mm.lv", "city24.lv", "auto24.lv", "autoplius.lt", "aruodas.lt"]);
-export const sellerType = pgEnum("seller_type", ["private", "dealer"]);
+/** "dealer" = auto salons, "agency" = nekustamo īpašumu aģentūra */
+export const sellerType = pgEnum("seller_type", ["private", "dealer", "agency"]);
 export const dealType = pgEnum("deal_type", ["sell", "rent", "day", "buy"]);
 export const regionKind = pgEnum("region_kind", ["city", "municipality"]);
 export const country = pgEnum("country", ["LV", "LT"]);
@@ -469,7 +470,10 @@ export const dealerFeeds = pgTable(
   {
     id: serial("id").primaryKey(),
     userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    /** plūsmas saite vai "file:<nosaukums>" augšupielādētam failam */
     url: text("url").notNull(),
+    /** augšupielādēta faila saturs (XML/CSV/JSON); saitei null */
+    content: text("content"),
     /** "vehicle" | "property" — ja plūsmā nav norādīts katrai vienībai */
     kind: listingKind("kind").notNull().default("vehicle"),
     active: boolean("active").notNull().default(true),

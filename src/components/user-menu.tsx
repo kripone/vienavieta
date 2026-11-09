@@ -14,7 +14,7 @@ export async function UserMenu() {
   }
   // Saloniem rāda uzņēmuma nosaukumu, privātpersonām vārdu
   const label =
-    user.sellerType === "dealer" && user.companyName ? user.companyName : (user.name || user.email).split(" ")[0];
+    (user.sellerType === "dealer" || user.sellerType === "agency") && user.companyName ? user.companyName : (user.name || user.email).split(" ")[0];
   const mod = isModerator(user) ? await moderationCounts().catch(() => null) : null;
   return (
     <>

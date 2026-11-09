@@ -4,7 +4,7 @@
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
 import { XMLParser } from "fast-xml-parser";
-import { and, eq, inArray, notInArray, sql } from "drizzle-orm";
+import { and, eq, inArray, notInArray, sql, isNull } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { BODY_TYPES, DEALER_FEED, type PropertyType } from "../constants";
 import { inferBody } from "../illustrations";
@@ -234,7 +234,13 @@ const BODY: [RegExp, string][] = [
   [/suv|crossover|4x4|apvid|внедор|джип/, "Apvidus"], [/coupe|kupe|купе/, "Kupeja"], [/convert|cabrio|kabri|кабри/, "Kabriolets"],
   [/minivan|mpv|vienat|минив/, "Minivens"], [/pick|пикап/, "Pikaps"], [/van|bus|furg|фург|микроав/, "Mikroautobuss"],
 ];
-const PTYPE: [RegExp, PropertyType][] = [[/apart|flat|dzīvok|dzivok|кварт/, "Dzīvoklis"], [/house|māja|maja|дом|villa|private/, "Māja"], [/land|zeme|участ|plot/, "Zeme"]];
+const PTYPE: [RegExp, PropertyType][] = [
+  [/summer|vasarn|dārza|darza|дач|cottage/, "Vasarnīca"], [/room|istaba|комнат/, "Istaba"], [/farm|lauku|хутор|countryside/, "Lauku īpašums"],
+  [/forest|mež|mez|лес/, "Mežs"], [/office|biroj|офис/, "Birojs"], [/shop|retail|tirdzn|магаз|торгов/, "Tirdzniecības telpas"],
+  [/warehouse|storage|noliktav|склад/, "Noliktava"], [/industr|ražoš|razos|производ/, "Ražošanas telpas"], [/garage|garāž|garaz|гараж/, "Garāža"],
+  [/parking|stāvviet|stavviet|парков/, "Stāvvieta"], [/commercial|komerc|коммерч/, "Komercēka"],
+  [/apart|flat|dzīvok|dzivok|кварт/, "Dzīvoklis"], [/house|māja|maja|дом|villa|private/, "Māja"], [/land|zeme|участ|plot/, "Zeme"],
+];
 
 // ---------- imports ----------
 export type FeedResult = { items: number; created: number; updated: number; removed: number; skipped: number; errors: string[]; ms: number };
@@ -247,7 +253,7 @@ export async function runFeed(feedId: number): Promise<FeedResult> {
   const [owner] = await db.select({ id: users.id, phone: users.phone, email: users.email, blockedAt: users.blockedAt }).from(users).where(eq(users.id, feed.userId));
   try {
     if (!owner || owner.blockedAt) throw new Error("Lietotājs bloķēts.");
-    const { text, type } = await fetchFeed(feed.url);
+    const { text, type } = feed.content != null ? { text: feed.content, type: "" } : await fetchFeed(feed.url);
     let rows: Flat[];
     try {
       rows = parseFeed(text, type);
@@ -332,12 +338,15 @@ export async function runFeed(feedId: number): Promise<FeedResult> {
         const area = num(get(f, "area"));
         const land = num(get(f, "land"));
         if (!area && !land) { res.skipped++; if (res.errors.length < 10) res.errors.push(`${itemId}: nav platības`); continue; }
-        const deal = /rent|īre|ire|nom|аренд/i.test(get(f, "deal") ?? "") ? "rent" : "sell";
+        const deal = /rent|īr|ir[eē]|nom|аренд/i.test(get(f, "deal") ?? "") ? "rent" : "sell";
         const where = place ? `, ${place.name === "Centrs" ? place.region : place.name}` : "";
         const title =
           ptype === "Dzīvoklis" ? `${rooms ?? 1}-istabu dzīvoklis${area ? `, ${area} m²` : ""}${where}`
           : ptype === "Māja" ? `Privātmāja${area ? ` ${area} m²` : ""}${land ? `, zeme ${landLabel(land)}` : ""}${where}`
-          : `Zemes gabals${land ? ` ${landLabel(land)}` : ""}${where}`;
+          : ptype === "Vasarnīca" ? `Vasarnīca${area ? ` ${area} m²` : ""}${land ? `, zeme ${landLabel(land)}` : ""}${where}`
+          : ptype === "Zeme" ? `Zemes gabals${land ? ` ${landLabel(land)}` : ""}${where}`
+          : ptype === "Mežs" ? `Meža īpašums${land ? ` ${landLabel(land)}` : ""}${where}`
+          : `${ptype}${area ? ` ${area} m²` : land ? ` ${landLabel(land)}` : ""}${where}`;
         const street = get(f, "street");
         row = {
           ...base,
@@ -396,7 +405,8 @@ export async function runDueFeed() {
   const [f] = await db
     .select({ id: dealerFeeds.id })
     .from(dealerFeeds)
-    .where(and(eq(dealerFeeds.active, true), sql`(${dealerFeeds.lastRunAt} is null or ${dealerFeeds.lastRunAt} < ${due})`))
+    // augšupielādētus failus atkārtoti nenolasām (tos atjauno, augšupielādējot no jauna)
+    .where(and(eq(dealerFeeds.active, true), isNull(dealerFeeds.content), sql`(${dealerFeeds.lastRunAt} is null or ${dealerFeeds.lastRunAt} < ${due})`))
     .orderBy(sql`${dealerFeeds.lastRunAt} nulls first`)
     .limit(1);
   return f ? { id: f.id, ...(await runFeed(f.id)) } : null;

@@ -35,6 +35,7 @@ export const cardFields = {
   areaM2: listings.areaM2,
   landM2: listings.landM2,
   place: places.name,
+  address: listings.address,
   region: regions.name,
   regionKind: regions.kind,
   thumbKey: coverThumb,
@@ -114,6 +115,16 @@ export async function regionOptions() {
   const map = new Map<string, { regionId: number; region: string; kind: "city" | "municipality"; country: "LV" | "LT"; places: { id: number; name: string }[] }>();
   for (const r of rows) (map.get(r.region) ?? map.set(r.region, { regionId: r.regionId, region: r.region, kind: r.kind, country: r.country, places: [] }).get(r.region)!).places.push({ id: r.id, name: r.name });
   return [...map.values()];
+}
+
+/** Iela ar numuru no adreses ("Gaigalas 17, Āgenskalns, Rīga" → "Gaigalas 17"). */
+export const streetOf = (address: string | null | undefined) => (address ? address.split(",")[0].trim() || null : null);
+
+/** Vieta ar ielu: "Gaigalas 17, Rīga, Āgenskalns" (ja iela zināma). */
+export function fullLocation(address: string | null | undefined, place: string | null, region: string | null, regionKind: string | null) {
+  const loc = locationLabel(place, region, regionKind);
+  const street = streetOf(address);
+  return street && loc ? `${street}, ${loc}` : street ?? loc;
 }
 
 export function locationLabel(place: string | null, region: string | null, regionKind: string | null) {

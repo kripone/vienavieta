@@ -14,7 +14,7 @@ const ProfileSchema = z
       .trim()
       .transform((v) => v.replace(/[\s-]/g, ""))
       .refine((v) => v === "" || isValidPhone(v), "Ievadi derīgu tālruni, piem. +371 20000000 vai +370 60000000."),
-    sellerType: z.enum(["private", "dealer"]),
+    sellerType: z.enum(["private", "dealer", "agency"]),
     companyName: z.string().trim().max(100, "Nosaukums ir pārāk garš."),
   })
   .refine((v) => v.sellerType === "private" || v.companyName.length >= 2, {
@@ -50,7 +50,7 @@ export async function updateProfile(_prev: ProfileState, form: FormData): Promis
       // mainot tālruni, apstiprinājums jāveic no jauna
       ...(phoneChanged && { phoneVerifiedAt: null }),
       sellerType: v.sellerType,
-      companyName: v.sellerType === "dealer" ? v.companyName : null,
+      companyName: v.sellerType !== "private" ? v.companyName : null,
     })
     .where(eq(schema.users.id, user.id));
 

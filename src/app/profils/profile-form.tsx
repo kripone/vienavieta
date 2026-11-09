@@ -3,7 +3,7 @@ import { useT } from "@/i18n/client";
 import { useActionState, useState } from "react";
 import { updateProfile, type ProfileState } from "./actions";
 
-type Props = { name: string; phone: string; sellerType: "private" | "dealer"; companyName: string };
+type Props = { name: string; phone: string; sellerType: "private" | "dealer" | "agency"; companyName: string };
 
 export function ProfileForm(initial: Props) {
   const { t } = useT();
@@ -35,11 +35,14 @@ export function ProfileForm(initial: Props) {
             <input type="radio" name="sellerType" value="private" checked={sellerType === "private"} onChange={() => setSellerType("private")} /> {t("Privātpersona")}
           </label>
           <label>
-            <input type="radio" name="sellerType" value="dealer" checked={sellerType === "dealer"} onChange={() => setSellerType("dealer")} /> {t("Auto salons vai nekustamo īpašumu aģentūra")}
+            <input type="radio" name="sellerType" value="dealer" checked={sellerType === "dealer"} onChange={() => setSellerType("dealer")} /> {t("Auto salons")}
+          </label>
+          <label>
+            <input type="radio" name="sellerType" value="agency" checked={sellerType === "agency"} onChange={() => setSellerType("agency")} /> {t("Nekustamo īpašumu aģentūra")}
           </label>
         </div>
       </fieldset>
-      {sellerType === "dealer" && (
+      {sellerType !== "private" && (
         <label className="field">
           {t("Uzņēmuma nosaukums")}
           <input name="companyName" value={companyName} onChange={(e) => setCompanyName(e.target.value)} autoComplete="organization" aria-invalid={Boolean(err.companyName)} />

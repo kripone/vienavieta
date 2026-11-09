@@ -8,7 +8,7 @@ import { DEAL_LABEL, SOURCE_LABEL } from "@/lib/constants";
 import { listingIll } from "@/lib/illustrations";
 import { formatNumber, formatPrice, timeAgo } from "@/lib/format";
 import { landLabel } from "@/lib/listing-input";
-import { locationLabel, type ListingCard as Card } from "@/lib/listings";
+import { fullLocation, locationLabel, type ListingCard as Card } from "@/lib/listings";
 import { mediaUrl } from "@/lib/storage";
 import { getT } from "@/i18n/server";
 import { trTitle } from "@/i18n/content";
@@ -48,7 +48,7 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
   const src = SOURCE_LABEL[l.source] ?? l.source;
   // Ārējie sludinājumi: virsraksts ved uz oriģinālu; mūsu lapā ir tikai fakti un saite.
   const extLink = { rel: "nofollow noopener noreferrer" } as const; // tajā pašā cilnē, lai darbojas poga "Atpakaļ"
-  const where = locationLabel(l.place, l.region, l.regionKind);
+  const where = l.kind === "property" ? fullLocation(l.address, l.place, l.region, l.regionKind) : locationLabel(l.place, l.region, l.regionKind);
   return (
     <article className="card lcard">
       <a href={lp(`/sludinajumi/${l.id}`)} className="thumb" aria-hidden="true" tabIndex={-1}>

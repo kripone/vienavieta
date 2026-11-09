@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   // pg ir Node.js bibliotēka, to nevajag iekļaut klienta kodā
   serverExternalPackages: ["pg"],
   poweredByHeader: false,
+  // importa faili līdz 15 MB (DEALER_FEED.MAX_BYTES)
+  experimental: { serverActions: { bodySizeLimit: "16mb" }, proxyClientMaxBodySize: "16mb" },
   async headers() {
     return [
       {

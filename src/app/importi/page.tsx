@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { desc, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { getT } from "@/i18n/server";
-import { DEALER_FEED } from "@/lib/constants";
+import { DEALER_FEED, isBusiness } from "@/lib/constants";
 import { timeAgo } from "@/lib/format";
 import { requireUser } from "@/lib/session";
 import type { FeedResult } from "@/lib/importers/dealer-feed";
-import { AddFeedForm, FeedButtons } from "./feed-form";
+import { AddFeedForm, FeedButtons, UploadForm } from "./feed-form";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
@@ -18,23 +18,29 @@ export default async function ImportPage() {
   const { t } = await getT();
   const user = await requireUser("/importi");
   const feeds = await db.select().from(schema.dealerFeeds).where(eq(schema.dealerFeeds.userId, user.id)).orderBy(desc(schema.dealerFeeds.createdAt));
-  const isDealer = user.sellerType === "dealer";
+  const isDealer = isBusiness(user.sellerType);
+  const defKind = user.sellerType === "agency" ? "property" : "vehicle";
   return (
     <main className="wrap narrow">
       <h1>{t("Sludinājumu imports")}</h1>
-      <p className="lead">{t("Saloni un aģentūras var pievienot savu sludinājumu plūsmu. Mēs to nolasām ik {h} stundas: jauni sludinājumi parādās, mainītās cenas atjaunojas, noņemtie pazūd.", { h: DEALER_FEED.EVERY_HOURS })}</p>
+      <p className="lead">{t("Saloni un aģentūras var ielādēt savus sludinājumus failā vai pievienot plūsmas saiti. Saiti nolasām ik {h} stundas: jauni sludinājumi parādās, mainītās cenas atjaunojas, noņemtie pazūd. Failu atjauno, augšupielādējot to no jauna.", { h: DEALER_FEED.EVERY_HOURS })}</p>
       {!isDealer ? (
         <div className="notice">
           {t("Imports pieejams tikai saloniem un aģentūrām. Profilā norādi, ka esi salons vai aģentūra.")} <a href="/profils">{t("Mans profils")}</a>
         </div>
       ) : (
         <>
-          {feeds.length < DEALER_FEED.MAX_FEEDS_PER_USER && <AddFeedForm />}
+          {feeds.length < DEALER_FEED.MAX_FEEDS_PER_USER && (
+            <div className="import-ways">
+              <UploadForm defKind={defKind} />
+              <AddFeedForm defKind={defKind} />
+            </div>
+          )}
           {feeds.map((f) => {
             const r = f.lastResult as FeedResult | null;
             return (
               <section key={f.id} className="panel stack">
-                <b className="break">{f.url}</b>
+                <b className="break">{f.url.startsWith("file:") ? `📄 ${f.url.slice(5)}` : f.url}</b>
                 <span className="fine">
                   {f.kind === "property" ? t("Nekustamais īpašums") : t("Transports")} ·{" "}
                   {f.lastRunAt ? t("Pēdējais imports {when}", { when: timeAgo(f.lastRunAt, t) }) : t("Imports notiek…")}
@@ -58,7 +64,8 @@ export default async function ImportPage() {
             <ul>
               <li>{t("Facebook vai Google auto katalogs (XML vai CSV): to pašu, ko salons jau sūta uz Facebook Marketplace.")}</li>
               <li>{t("Jebkurš XML vai JSON ar sludinājumiem (lauki make, model, year, price, mileage, image…).")}</li>
-              <li>{t("CSV vai Excel saglabāts kā CSV: kolonnas kā paraugā.")} <a href="/importi/paraugs.csv">{t("Lejupielādēt CSV paraugu")}</a></li>
+              <li>{t("Aģentūrām: XML eksports no jūsu NĪ sistēmas (lauki type, deal, price, area, rooms, floor, city, street, image…).")}</li>
+              <li>{t("CSV vai Excel saglabāts kā CSV: kolonnas kā paraugā.")} <a href="/importi/paraugs.csv">{t("CSV paraugs transportam")}</a> · <a href="/importi/paraugs.csv?kind=property">{t("CSV paraugs īpašumiem")}</a></li>
             </ul>
             <p className="fine">{t("Līdz {n} sludinājumiem plūsmā, līdz {p} bildēm katram. Bildes rādām no jūsu servera. Sludinājumi saņem jūsu profila tālruni un e-pastu.", { n: DEALER_FEED.MAX_ITEMS, p: DEALER_FEED.MAX_PHOTOS })}</p>
           </section>

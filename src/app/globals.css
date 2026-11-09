@@ -428,3 +428,5 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .seo-links a:hover { color: var(--accent); text-decoration: underline; }
 .foot-cats { display: flex; flex-wrap: wrap; gap: 6px 14px; }
 .foot .foot-cats { flex-basis: 100%; order: -1; padding-bottom: 6px; }
+
+.import-ways { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); align-items: start; }

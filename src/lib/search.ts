@@ -137,6 +137,7 @@ function conditions(s: SearchParams): SQL[] {
   if (s.src === "own") add(eq(listings.source, "own"));
   else if (s.src === "ext") add(ne(listings.source, "own"));
   if (s.seller === "verified") add(isNotNull(users.identityVerifiedAt));
+  else if (s.seller === "dealer") add(inArray(users.sellerType, ["dealer", "agency"]));
   else if (s.seller) add(eq(users.sellerType, s.seller));
   if (s.q) {
     const like = `%${s.q.replace(/[%_\\]/g, (m) => "\\" + m)}%`;
@@ -214,7 +215,7 @@ export async function searchListings(s: SearchParams) {
         id: listings.id, kind: listings.kind, status: listings.status, title: listings.title, price: listings.price, deal: listings.deal,
         createdAt: listings.createdAt, year: listings.year, mileageKm: listings.mileageKm, fuel: listings.fuel, gearbox: listings.gearbox,
         body: listings.body, vehicleClass: listings.vehicleClass, color: listings.color, groupKey: listings.groupKey, source: listings.source, externalUrl: listings.externalUrl, externalThumbUrl: listings.externalThumbUrl, makeId: listings.makeId, modelId: listings.modelId, placeId: listings.placeId, propertyType: listings.propertyType, rooms: listings.rooms, areaM2: listings.areaM2, landM2: listings.landM2,
-        place: places.name, region: regions.name, regionKind: regions.kind, thumbKey: coverThumb, photoCount, firstPrice: listings.firstPrice,
+        place: places.name, address: listings.address, region: regions.name, regionKind: regions.kind, thumbKey: coverThumb, photoCount, firstPrice: listings.firstPrice,
       })
       .from(listings)
       .leftJoin(places, eq(listings.placeId, places.id))
@@ -312,7 +313,7 @@ export async function newListingsSince(s: SearchParams, since: Date, until: Date
     db
       .select({
         id: listings.id, title: listings.title, price: listings.price, deal: listings.deal, kind: listings.kind,
-        place: places.name, region: regions.name, regionKind: regions.kind, thumbKey: coverThumb,
+        place: places.name, address: listings.address, region: regions.name, regionKind: regions.kind, thumbKey: coverThumb,
       })
       .from(listings)
       .leftJoin(places, eq(listings.placeId, places.id))

@@ -26,7 +26,7 @@ import { dealsForListing } from "@/lib/vzd";
 import { VzdDeals } from "@/components/vzd-deals";
 import { priceEvals } from "@/lib/price-eval";
 import { favoriteIds } from "@/lib/favorites";
-import { getListing, locationLabel } from "@/lib/listings";
+import { fullLocation, getListing, locationLabel } from "@/lib/listings";
 import { getCurrentUser, isModerator } from "@/lib/session";
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ saglabats?: string }> };
@@ -38,7 +38,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const external = d.l.source !== "own";
   return {
     title: trTitle(d.l.title, (await getT()).t),
-    description: `${formatPrice(d.l.price)} · ${locationLabel(d.place, d.region, d.regionKind)}`,
+    description: `${formatPrice(d.l.price)} · ${fullLocation(d.l.address, d.place, d.region, d.regionKind)}`,
     alternates: external ? { canonical: `/sludinajumi/${d.l.id}` } : langAlternates(`/sludinajumi/${d.l.id}`, (await getT()).locale),
     // citu portālu sludinājumi ir tikai fakti + saite: meklētājos tos nerādām (indeksējam SEO lapas un pašu sludinājumus)
     robots: external || d.l.status !== "active" ? { index: false, follow: true } : undefined,
@@ -96,7 +96,7 @@ export default async function ListingPage(props: Props) {
   const history = await listingHistory({ id: l.id, price: l.price, createdAt: l.createdAt }).catch(() => null);
   const vzd = l.kind === "property" && l.propertyType === "Dzīvoklis" && l.deal === "sell" ? await dealsForListing(l).catch(() => null) : null;
   const isFav = user && !isOwner ? (await favoriteIds(user.id, [l.id])).has(l.id) : false;
-  const seller = d.sellerType === "dealer" && d.companyName ? d.companyName : d.sellerName || t("Privātpersona");
+  const seller = (d.sellerType === "dealer" || d.sellerType === "agency") && d.companyName ? d.companyName : d.sellerName || t("Privātpersona");
   const unit = priceUnit(l.deal, t);
   const ext = l.source !== "own" && l.externalUrl ? l.externalUrl : null;
   const src = SOURCE_LABEL[l.source] ?? l.source;
@@ -175,7 +175,7 @@ export default async function ListingPage(props: Props) {
           </div>
           {evaluation && <EvalBadge e={evaluation} long />}
           <p className="meta">
-            {d.place && <span>📍 {locationLabel(d.place, d.region, d.regionKind)}</span>}
+            {(d.place || l.address) && <span>📍 {fullLocation(l.address, d.place, d.region, d.regionKind)}</span>}
             <span>{ext ? t("Pievienots {when}", { when: timeAgo(l.createdAt, t) }) : t("Ievietots {when}", { when: timeAgo(l.createdAt, t) })}</span>
           </p>
           {ext ? (
@@ -190,7 +190,7 @@ export default async function ListingPage(props: Props) {
             <div className="panel seller">
               <b>{seller}</b>
               <span className="fine">
-                {t(d.sellerType === "dealer" ? (l.kind === "vehicle" ? "Auto salons" : "Aģentūra") : "Privātpersona")}
+                {t(d.sellerType === "agency" ? "Aģentūra" : d.sellerType === "dealer" ? (l.kind === "vehicle" ? "Auto salons" : "Aģentūra") : "Privātpersona")}
                 {d.sellerVerified ? ` · ✔ ${t("identitāte apstiprināta")}` : ""}
               </span>
               {l.status === "active" && !isOwner && <ContactReveal id={l.id} />}

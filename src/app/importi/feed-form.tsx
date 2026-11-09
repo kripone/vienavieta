@@ -1,26 +1,54 @@
 "use client";
 import { useActionState, useState } from "react";
 import { useT } from "@/i18n/client";
-import { addFeed, deleteFeed, runNow, type FeedState } from "./actions";
+import { addFeed, deleteFeed, runNow, uploadFeed, type FeedState } from "./actions";
 
-export function AddFeedForm() {
+function KindSelect({ kind, setKind }: { kind: string; setKind: (k: string) => void }) {
+  const { t } = useT();
+  return (
+    <label className="field">
+      {t("Ko satur")}
+      <select name="kind" value={kind} onChange={(e) => setKind(e.target.value)}>
+        <option value="vehicle">{t("Transportu")}</option>
+        <option value="property">{t("Nekustamo īpašumu")}</option>
+      </select>
+    </label>
+  );
+}
+
+/** Faila augšupielāde (XML, CSV, JSON). */
+export function UploadForm({ defKind }: { defKind: string }) {
+  const { t } = useT();
+  const [state, action, pending] = useActionState<FeedState, FormData>(uploadFeed, {});
+  const [kind, setKind] = useState(defKind);
+  return (
+    <form action={action} className="panel stack">
+      <h2>{t("Ielādēt failu")}</h2>
+      <label className="field">
+        {t("Fails (XML, CSV vai JSON)")}
+        <input name="file" type="file" required accept=".xml,.csv,.json,.txt,text/xml,text/csv,application/json" />
+      </label>
+      <KindSelect kind={kind} setKind={setKind} />
+      <button className="btn primary" disabled={pending}>{pending ? t("Ielādē…") : t("Ielādēt sludinājumus")}</button>
+      {state.error && <p className="err">{t(state.error)}</p>}
+      {state.ok && <p className="ok">{t("Fails saņemts. Imports notiek fonā, pēc minūtes atjauno lapu.")}</p>}
+    </form>
+  );
+}
+
+export function AddFeedForm({ defKind }: { defKind: string }) {
   const { t } = useT();
   const [state, action, pending] = useActionState<FeedState, FormData>(addFeed, {});
   const [url, setUrl] = useState("");
-  const [kind, setKind] = useState("vehicle");
+  const [kind, setKind] = useState(defKind);
   return (
     <form action={action} className="panel stack">
+      <h2>{t("Vai pievienot plūsmas saiti")}</h2>
       <label className="field">
         {t("Plūsmas saite (XML, CSV vai JSON)")}
         <input name="url" type="url" required value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://www.tavssalons.lv/feed.xml" />
       </label>
-      <label className="field">
-        {t("Ko plūsma satur")}
-        <select name="kind" value={kind} onChange={(e) => setKind(e.target.value)}>
-          <option value="vehicle">{t("Transportu")}</option>
-          <option value="property">{t("Nekustamo īpašumu")}</option>
-        </select>
-      </label>
+      <KindSelect kind={kind} setKind={setKind} />
       <button className="btn primary" disabled={pending}>{pending ? t("Pievieno…") : t("Pievienot plūsmu")}</button>
       {state.error && <p className="err">{t(state.error)}</p>}
       {state.ok && <p className="ok">{t("Plūsma pievienota. Imports notiek fonā, pēc minūtes atjauno lapu.")}</p>}

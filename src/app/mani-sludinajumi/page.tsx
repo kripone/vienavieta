@@ -19,7 +19,7 @@ export default async function MyListingsPage() {
       <div className="row between">
         <h1>{t("Mani sludinājumi")}</h1>
         <div className="row">
-          {user.sellerType === "dealer" && <a className="btn" href="/importi">{t("Imports no salona sistēmas")}</a>}
+          {(user.sellerType === "dealer" || user.sellerType === "agency") && <a className="btn" href="/importi">{t("Sludinājumu imports (fails vai plūsma)")}</a>}
           <a className="btn primary" href="/pievienot">{t("+ Pievienot sludinājumu")}</a>
         </div>
       </div>
