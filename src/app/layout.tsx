@@ -64,6 +64,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <a href={lp("/tirgus")} className="btn" title={t("Tirgus tendences")}>📈 <span className="hide-sm">{t("Tirgus")}</span></a>
               <a href={lp("/cenu-kritumi")} className="btn" title={t("Cenu kritumi")}>▼ <span className="hide-sm">{t("Kritumi")}</span></a>
               <a href={lp("/darijumi")} className="btn" title={t("Reālās dzīvokļu darījumu cenas (VZD)")}>🏠 <span className="hide-sm">{t("Darījumi")}</span></a>
+              <a href={lp("/novertejums")} className="btn" title={t("Cik vērts mans auto vai dzīvoklis?")}>💶 <span className="hide-sm">{t("Cik vērts?")}</span></a>
               <LangSwitch />
               <ThemeToggle />
               <UserMenu />
@@ -84,6 +85,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <a href={lp("/ipasumi/vasarnicas")}>{t("Vasarnīcas")}</a>
               <a href={lp("/ipasumi/zeme")}>{t("Zeme")}</a>
               <a href={lp("/ipasumi")}>{t("Visi īpašumi")}</a>
+              <a href={lp("/novertejums")}>{t("Cik vērts?")}</a>
             </nav>
             <nav aria-label={LEGAL[locale].footer.about}>
               <a href={lp("/par-mums")}>{LEGAL[locale].footer.about}</a>

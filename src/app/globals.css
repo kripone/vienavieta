@@ -481,3 +481,12 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .err-item.resolved { opacity: .55; }
 .err-msg { font-family: var(--f-mono); font-size: 13px; margin-top: 4px; overflow-wrap: anywhere; }
 .err-stack { font-size: 11px; overflow-x: auto; background: var(--surface-2); padding: 8px; border-radius: 8px; max-height: 300px; }
+
+/* Novērtējums (/novertejums) */
+.valuation .seg { margin: 4px 0 14px; }
+.val-form { display: grid; gap: 12px; }
+.val-form .btn { justify-self: start; }
+.val-result { margin-top: 20px; }
+.val-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px; }
+.val-hero { display: grid; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+.val-hero b { font-family: var(--f-display); font-size: 32px; font-variant-numeric: tabular-nums; }
