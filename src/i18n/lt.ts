@@ -2,6 +2,10 @@
 import type { Dict } from "./core";
 
 export const lt: Dict = {
+  "Kaut kas nogāja greizi": "Kažkas nepavyko",
+  "Kļūda jau ir pierakstīta, un mēs to izlabosim. Pamēģini vēlreiz vai atgriezies sākumlapā.": "Klaida jau užfiksuota ir mes ją ištaisysime. Bandykite dar kartą arba grįžkite į pradžią.",
+  "Mēģināt vēlreiz": "Bandyti dar kartą",
+  "Uz sākumlapu": "Į pradžią",
   "Līdzīgi sludinājumi": "Panašūs skelbimai",
   "Karte": "Žemėlapis",
   "Ielu skats": "Gatvės vaizdas",

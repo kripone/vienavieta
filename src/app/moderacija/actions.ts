@@ -67,3 +67,10 @@ export async function unblockUser(userId: string): Promise<ModResult> {
   await db.update(users).set({ blockedAt: null }).where(eq(users.id, userId));
   return done();
 }
+
+/** Kļūdu žurnāls: atzīmē visas kļūdas kā izskatītas (atkārtojoties tās atkal kļūst neizskatītas). */
+export async function resolveErrors(): Promise<void> {
+  if (!(await moderator())) return;
+  await db.update(schema.errorEvents).set({ resolved: true }).where(eq(schema.errorEvents.resolved, false));
+  revalidatePath("/moderacija");
+}

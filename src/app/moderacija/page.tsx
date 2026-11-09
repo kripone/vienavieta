@@ -5,6 +5,8 @@ import { REPORT_REASONS } from "@/lib/constants";
 import { formatPrice, plural, timeAgo } from "@/lib/format";
 import { findUsers, hiddenListings, moderationCounts, reportedListings } from "@/lib/moderation";
 import { isModerator, requireModerator } from "@/lib/session";
+import { recentErrors } from "@/lib/errors";
+import { resolveErrors } from "./actions";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
@@ -16,6 +18,7 @@ const TABS = [
   ["sudzibas", "Sūdzības"],
   ["paslepti", "Paslēptie"],
   ["lietotaji", "Lietotāji"],
+  ["kludas", "Kļūdas"],
 ] as const;
 const STATUS: Record<string, string> = { active: "Aktīvs", pending: "Paslēpts pēc sūdzībām", hidden: "Paslēpis moderators", sold: "Pārdots" };
 const reasonLabel = (r: string) => REPORT_REASONS[r as keyof typeof REPORT_REASONS] ?? r;
@@ -26,7 +29,8 @@ export default async function ModerationPage(props: { searchParams: Promise<SP> 
   const tab = TABS.some(([t]) => t === sp.tab) ? sp.tab! : "sudzibas";
   await requireModerator(`/moderacija?tab=${tab}`);
   const counts = await moderationCounts();
-  const badge: Record<string, number> = { sudzibas: counts.open, paslepti: counts.hidden, lietotaji: counts.blocked };
+  const errors = await recentErrors().catch(() => []);
+  const badge: Record<string, number> = { sudzibas: counts.open, paslepti: counts.hidden, lietotaji: counts.blocked, kludas: errors.filter((e) => !e.resolved).length };
 
   return (
     <main className="wrap mod">
@@ -41,6 +45,7 @@ export default async function ModerationPage(props: { searchParams: Promise<SP> 
       {tab === "sudzibas" && <Reports />}
       {tab === "paslepti" && <Hidden />}
       {tab === "lietotaji" && <Users q={sp.q?.slice(0, 80)} />}
+      {tab === "kludas" && <Errors rows={errors} />}
     </main>
   );
 }
@@ -139,5 +144,29 @@ async function Users({ q }: { q?: string }) {
         </div>
       )}
     </>
+  );
+}
+
+function Errors({ rows }: { rows: Awaited<ReturnType<typeof recentErrors>> }) {
+  if (!rows.length) return <div className="notice">Kļūdu nav. 🎉</div>;
+  return (
+    <div className="stack">
+      {rows.some((r) => !r.resolved) && (
+        <form action={resolveErrors}><button className="btn small">Atzīmēt visas kā izskatītas</button></form>
+      )}
+      {rows.map((r) => (
+        <details key={r.id} className={`panel mod-item err-item${r.resolved ? " resolved" : ""}`}>
+          <summary>
+            <b>{r.source === "server" ? "Serveris" : "Pārlūks"}</b> · {r.count}× · pēdējo reizi {r.lastAt.toLocaleString("lv-LV", { timeZone: "Europe/Riga" })}
+            <div className="err-msg">{r.message}</div>
+          </summary>
+          {r.url && <p className="fine">Lapa: <a href={r.url}>{r.url}</a></p>}
+          {r.digest && <p className="fine">Digest: {r.digest}</p>}
+          {r.userAgent && <p className="fine">Pārlūks: {r.userAgent}</p>}
+          <p className="fine">Pirmo reizi: {r.firstAt.toLocaleString("lv-LV", { timeZone: "Europe/Riga" })}</p>
+          {r.stack && <pre className="err-stack">{r.stack}</pre>}
+        </details>
+      ))}
+    </div>
   );
 }

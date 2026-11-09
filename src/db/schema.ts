@@ -504,3 +504,26 @@ export const pushSubscriptions = pgTable(
   },
   (t) => [index("push_subscriptions_user_idx").on(t.userId)],
 );
+
+/**
+ * Kļūdu žurnāls (servera un pārlūka). Viena rinda katrai atšķirīgai kļūdai (fingerprint), count = cik reizes.
+ * Ieraksta src/lib/errors.ts; apskate /moderacija?tab=kludas. IP adreses neglabājam.
+ */
+export const errorEvents = pgTable(
+  "error_events",
+  {
+    id: id(),
+    fingerprint: text("fingerprint").notNull().unique(),
+    source: text("source").notNull(),
+    message: text("message").notNull(),
+    stack: text("stack"),
+    url: text("url"),
+    digest: text("digest"),
+    userAgent: text("user_agent"),
+    count: integer("count").notNull().default(1),
+    resolved: boolean("resolved").notNull().default(false),
+    firstAt: timestamp("first_at", { withTimezone: true }).notNull().defaultNow(),
+    lastAt: timestamp("last_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("error_events_last_idx").on(t.lastAt)],
+);

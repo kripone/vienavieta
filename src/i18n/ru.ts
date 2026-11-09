@@ -2,6 +2,10 @@
 import type { Dict } from "./core";
 
 export const ru: Dict = {
+  "Kaut kas nogāja greizi": "Что-то пошло не так",
+  "Kļūda jau ir pierakstīta, un mēs to izlabosim. Pamēģini vēlreiz vai atgriezies sākumlapā.": "Ошибка уже записана, и мы её исправим. Попробуйте ещё раз или вернитесь на главную.",
+  "Mēģināt vēlreiz": "Попробовать ещё раз",
+  "Uz sākumlapu": "На главную",
   "Līdzīgi sludinājumi": "Похожие объявления",
   "Karte": "Карта",
   "Ielu skats": "Просмотр улиц",

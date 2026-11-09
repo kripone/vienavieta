@@ -477,3 +477,7 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .import-hint-small { margin-top: 12px; }
 .similar { margin-top: 28px; }
 .similar h2 { margin-bottom: 10px; }
+.err-item summary { cursor: pointer; }
+.err-item.resolved { opacity: .55; }
+.err-msg { font-family: var(--f-mono); font-size: 13px; margin-top: 4px; overflow-wrap: anywhere; }
+.err-stack { font-size: 11px; overflow-x: auto; background: var(--surface-2); padding: 8px; border-radius: 8px; max-height: 300px; }
