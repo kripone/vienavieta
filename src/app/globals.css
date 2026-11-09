@@ -159,7 +159,8 @@ main .fine { margin-top: 14px; }
 .search { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 20px; align-items: start; }
 @media (max-width: 900px) { .search { grid-template-columns: minmax(0, 1fr); } }
 .side { position: sticky; top: 12px; max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-@media (max-width: 900px) { .side { position: static; max-height: none; } }
+/* telefonā .side nav ritināms bloks: citādi Android Chrome (overscroll-behavior: contain) neļauj ritināt lapu, pieskaroties filtriem */
+@media (max-width: 900px) { .side { position: static; max-height: none; overflow: visible; overscroll-behavior: auto; } }
 .filters-box { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
 .filters-box > summary { font-family: var(--f-display); font-weight: 600; font-size: 16px; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; }
 .filters-box > summary::-webkit-details-marker { display: none; }
