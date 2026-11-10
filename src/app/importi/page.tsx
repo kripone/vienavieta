@@ -4,7 +4,7 @@ import { db, schema } from "@/db";
 import { getT } from "@/i18n/server";
 import { DEALER_FEED, isBusiness } from "@/lib/constants";
 import { timeAgo } from "@/lib/format";
-import { requireUser } from "@/lib/session";
+import { isAdmin, requireUser } from "@/lib/session";
 import type { FeedResult } from "@/lib/importers/dealer-feed";
 import { AddFeedForm, FeedButtons, UploadForm } from "./feed-form";
 
@@ -18,7 +18,8 @@ export default async function ImportPage() {
   const { t } = await getT();
   const user = await requireUser("/importi");
   const feeds = await db.select().from(schema.dealerFeeds).where(eq(schema.dealerFeeds.userId, user.id)).orderBy(desc(schema.dealerFeeds.createdAt));
-  const isDealer = isBusiness(user.sellerType);
+  const admin = isAdmin(user);
+  const isDealer = isBusiness(user.sellerType) || admin;
   const defKind = user.sellerType === "agency" ? "property" : "vehicle";
   return (
     <main className="wrap narrow">
@@ -32,8 +33,8 @@ export default async function ImportPage() {
         <>
           {feeds.length < DEALER_FEED.MAX_FEEDS_PER_USER && (
             <div className="import-ways">
-              <UploadForm defKind={defKind} />
-              <AddFeedForm defKind={defKind} />
+              <UploadForm defKind={defKind} admin={admin} />
+              <AddFeedForm defKind={defKind} admin={admin} />
             </div>
           )}
           {feeds.map((f) => {
@@ -43,6 +44,7 @@ export default async function ImportPage() {
                 <b className="break">{f.url.startsWith("file:") ? `📄 ${f.url.slice(5)}` : f.url}</b>
                 <span className="fine">
                   {f.kind === "property" ? t("Nekustamais īpašums") : t("Transports")} ·{" "}
+                  {f.source ? `${t("{s} partneru plūsma", { s: f.source })} · ` : ""}
                   {f.lastRunAt ? t("Pēdējais imports {when}", { when: timeAgo(f.lastRunAt, t) }) : t("Imports notiek…")}
                 </span>
                 {r && (
@@ -65,6 +67,7 @@ export default async function ImportPage() {
               <li>{t("Facebook vai Google auto katalogs (XML vai CSV): to pašu, ko salons jau sūta uz Facebook Marketplace.")}</li>
               <li>{t("Jebkurš XML vai JSON ar sludinājumiem (lauki make, model, year, price, mileage, image…).")}</li>
               <li>{t("Aģentūrām: XML eksports no jūsu NĪ sistēmas (lauki type, deal, price, area, rooms, floor, city, street, image…).")}</li>
+              <li>{t("Aģentūrām: City24 formāta JSON eksports (tas pats, ko sūtāt uz city24.lv). Ņemam tikai objekta datus un galveno bildi, brokeru kontaktus neņemam.")}</li>
               <li>{t("CSV vai Excel saglabāts kā CSV: kolonnas kā paraugā.")} <a href="/importi/paraugs.csv">{t("CSV paraugs transportam")}</a> · <a href="/importi/paraugs.csv?kind=property">{t("CSV paraugs īpašumiem")}</a></li>
             </ul>
             <p className="fine">{t("Līdz {n} sludinājumiem plūsmā, līdz {p} bildēm katram. Bildes rādām no jūsu servera. Sludinājumi saņem jūsu profila tālruni un e-pastu.", { n: DEALER_FEED.MAX_ITEMS, p: DEALER_FEED.MAX_PHOTOS })}</p>

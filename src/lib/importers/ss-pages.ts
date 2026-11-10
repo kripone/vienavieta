@@ -5,7 +5,7 @@ import { and, eq, inArray, lt, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { SS_QUICK_PAGES, SS_REQUEST_DELAY_MS, SS_SECTIONS } from "../constants";
 import { linkDuplicate } from "../dedupe";
-import { makeCityFinder, makePlaceFinder, mapItem, type MakeRow, type ModelRow, type PlaceRow, type RssItem } from "./ss-rss";
+import { makeCityFinder, makePlaceFinder, mapItem, slug, type MakeRow, type ModelRow, type PlaceRow, type RssItem } from "./ss-rss";
 
 const { listings, places, regions, makes, models, priceHistory, crawlState } = schema;
 
@@ -55,7 +55,7 @@ export async function defaultFetch(url: string) {
   return r.text();
 }
 
-type Ctx = { findPlace: ReturnType<typeof makePlaceFinder>; findCity: (t: string) => PlaceRow | null; makes: MakeRow[]; models: ModelRow[] };
+type Ctx = { findPlace: ReturnType<typeof makePlaceFinder>; findCity: (t: string) => PlaceRow | null; findIn: (region: string, name: string) => PlaceRow | null; makes: MakeRow[]; models: ModelRow[] };
 export async function loadCtx(): Promise<Ctx> {
   const [placeRows, makeRows, modelRows] = await Promise.all([
     db.select({ id: places.id, name: places.name, lat: places.lat, lon: places.lon, region: regions.name, kind: places.kind, parentId: places.parentId })
@@ -63,7 +63,13 @@ export async function loadCtx(): Promise<Ctx> {
     db.select({ id: makes.id, name: makes.name, vehicleClass: makes.vehicleClass }).from(makes),
     db.select({ id: models.id, makeId: models.makeId, name: models.name }).from(models),
   ]);
-  return { findPlace: makePlaceFinder(placeRows as PlaceRow[]), findCity: makeCityFinder(placeRows as PlaceRow[]), makes: makeRows as MakeRow[], models: modelRows };
+  const rows = placeRows as PlaceRow[];
+  /** Vieta pēc nosaukuma konkrētā reģionā (piem. "Rīga" + "Āgenskalns"); citādi null. */
+  const findIn = (region: string, name: string) => {
+    const r = slug(region), n = slug(name);
+    return rows.find((p) => slug(p.region) === r && slug(p.name) === n) ?? null;
+  };
+  return { findPlace: makePlaceFinder(rows), findCity: makeCityFinder(rows), findIn, makes: makeRows as MakeRow[], models: modelRows };
 }
 
 export type CrawlResult = { section: string; mode: "quick" | "full"; pages: number; rows: number; created: number; updated: number; priceChanged: number; duplicates: number; removed: number; errors: string[]; ms: number };

@@ -155,6 +155,13 @@
       "when": 1794260826576,
       "tag": "0021_rainy_wraith",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794350378890,
+      "tag": "0022_absurd_apocalypse",
+      "breakpoints": true
     }
   ]
 }

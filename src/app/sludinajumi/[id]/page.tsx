@@ -198,7 +198,7 @@ export default async function ListingPage(props: Props) {
               </span>
               {l.status === "active" && !isOwner && <ContactReveal id={l.id} />}
               {l.feedId && l.externalUrl && /^https?:\/\//.test(l.externalUrl) && (
-                <a className="fine" href={l.externalUrl} rel="nofollow noopener noreferrer">{t("Sludinājums salona mājaslapā")} ↗</a>
+                <a className="fine" href={l.externalUrl} rel="nofollow noopener noreferrer">{/(^|\.)city24\.lv$/.test(new URL(l.externalUrl).hostname) ? t("Sludinājums city24.lv") : t("Sludinājums salona mājaslapā")} ↗</a>
               )}
             </div>
           )}

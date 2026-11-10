@@ -2,10 +2,10 @@
 import { and, count, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db, schema } from "@/db";
-import { DEALER_FEED } from "@/lib/constants";
+import { DEALER_FEED, PARTNER_SOURCES, type PartnerSource } from "@/lib/constants";
 import { checkFeedUrl, parseFeed, removeFeedListings, runFeed } from "@/lib/importers/dealer-feed";
 import { isBusiness } from "@/lib/constants";
-import { getCurrentUser } from "@/lib/session";
+import { getCurrentUser, isAdmin } from "@/lib/session";
 
 const { dealerFeeds } = schema;
 const g = globalThis as unknown as { feedRuns?: Set<number> };
@@ -16,8 +16,14 @@ export type FeedState = { ok?: boolean; error?: string };
 async function dealer() {
   const user = await getCurrentUser();
   if (!user) return { error: "Sesija beigusies. Ielogojies vēlreiz." } as const;
-  if (!isBusiness(user.sellerType)) return { error: "Imports pieejams tikai saloniem un aģentūrām. Profilā norādi, ka esi salons vai aģentūra." } as const;
+  if (!isBusiness(user.sellerType) && !isAdmin(user)) return { error: "Imports pieejams tikai saloniem un aģentūrām. Profilā norādi, ka esi salons vai aģentūra." } as const;
   return { user } as const;
+}
+
+/** Portāla partneru plūsmu (City24 u.c.) drīkst pievienot tikai administrators; citiem vienmēr null (= "own"). */
+function partnerSource(user: { role: string; email: string }, form: FormData): PartnerSource | null {
+  const v = String(form.get("source") ?? "");
+  return isAdmin(user) && (PARTNER_SOURCES as readonly string[]).includes(v) ? (v as PartnerSource) : null;
 }
 
 /** Palaiž importu fonā (lai lapa negaida); rezultāts parādās pēc lapas atjaunošanas. */
@@ -37,6 +43,7 @@ export async function addFeed(_prev: FeedState, form: FormData): Promise<FeedSta
   if ("error" in d) return { error: d.error };
   const url = String(form.get("url") ?? "").trim().slice(0, 1000);
   const kind = form.get("kind") === "property" ? "property" : "vehicle";
+  const source = partnerSource(d.user, form);
   try {
     await checkFeedUrl(url);
   } catch (e) {
@@ -44,7 +51,7 @@ export async function addFeed(_prev: FeedState, form: FormData): Promise<FeedSta
   }
   const [{ n }] = await db.select({ n: count() }).from(dealerFeeds).where(eq(dealerFeeds.userId, d.user.id));
   if (n >= DEALER_FEED.MAX_FEEDS_PER_USER) return { error: `Var pievienot līdz ${DEALER_FEED.MAX_FEEDS_PER_USER} plūsmām.` };
-  const [f] = await db.insert(dealerFeeds).values({ userId: d.user.id, url, kind }).returning({ id: dealerFeeds.id });
+  const [f] = await db.insert(dealerFeeds).values({ userId: d.user.id, url, kind, source }).returning({ id: dealerFeeds.id });
   startRun(f.id);
   revalidatePath("/importi");
   return { ok: true };
@@ -66,15 +73,16 @@ export async function uploadFeed(_prev: FeedState, form: FormData): Promise<Feed
     return { error: "Failu neizdevās nolasīt. Pārbaudi formātu (skat. paraugu)." };
   }
   const kind = form.get("kind") === "property" ? "property" : "vehicle";
+  const source = partnerSource(d.user, form);
   const url = `file:${name}`;
   // tāds pats faila nosaukums = tā pati plūsma (atjauno sludinājumus, noņem trūkstošos)
   const [same] = await db.select({ id: dealerFeeds.id }).from(dealerFeeds).where(and(eq(dealerFeeds.userId, d.user.id), eq(dealerFeeds.url, url)));
   let id = same?.id;
-  if (id) await db.update(dealerFeeds).set({ content, kind }).where(eq(dealerFeeds.id, id));
+  if (id) await db.update(dealerFeeds).set({ content, kind, source }).where(eq(dealerFeeds.id, id));
   else {
     const [{ n }] = await db.select({ n: count() }).from(dealerFeeds).where(eq(dealerFeeds.userId, d.user.id));
     if (n >= DEALER_FEED.MAX_FEEDS_PER_USER) return { error: `Var pievienot līdz ${DEALER_FEED.MAX_FEEDS_PER_USER} plūsmām vai failiem.` };
-    [{ id }] = await db.insert(dealerFeeds).values({ userId: d.user.id, url, content, kind }).returning({ id: dealerFeeds.id });
+    [{ id }] = await db.insert(dealerFeeds).values({ userId: d.user.id, url, content, kind, source }).returning({ id: dealerFeeds.id });
   }
   startRun(id!);
   revalidatePath("/importi");

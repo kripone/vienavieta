@@ -1,6 +1,7 @@
 "use client";
 import { useActionState, useState } from "react";
 import { useT } from "@/i18n/client";
+import { PARTNER_SOURCES } from "@/lib/constants";
 import { addFeed, deleteFeed, runNow, uploadFeed, type FeedState } from "./actions";
 
 function KindSelect({ kind, setKind }: { kind: string; setKind: (k: string) => void }) {
@@ -16,8 +17,24 @@ function KindSelect({ kind, setKind }: { kind: string; setKind: (k: string) => v
   );
 }
 
+/** Tikai administratoram: portāla partneru plūsma (sludinājumi ar portāla avotu, tikai fakti + sīktēls + saite). */
+function SourceSelect() {
+  const { t } = useT();
+  return (
+    <label className="field">
+      {t("Avots")}
+      <select name="source" defaultValue="">
+        <option value="">{t("Mana salona vai aģentūras sludinājumi")}</option>
+        {PARTNER_SOURCES.map((s) => (
+          <option key={s} value={s}>{t("{s} partneru plūsma", { s })}</option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 /** Faila augšupielāde (XML, CSV, JSON). */
-export function UploadForm({ defKind }: { defKind: string }) {
+export function UploadForm({ defKind, admin }: { defKind: string; admin?: boolean }) {
   const { t } = useT();
   const [state, action, pending] = useActionState<FeedState, FormData>(uploadFeed, {});
   const [kind, setKind] = useState(defKind);
@@ -29,6 +46,7 @@ export function UploadForm({ defKind }: { defKind: string }) {
         <input name="file" type="file" required accept=".xml,.csv,.json,.txt,text/xml,text/csv,application/json" />
       </label>
       <KindSelect kind={kind} setKind={setKind} />
+      {admin && <SourceSelect />}
       <button className="btn primary" disabled={pending}>{pending ? t("Ielādē…") : t("Ielādēt sludinājumus")}</button>
       {state.error && <p className="err">{t(state.error)}</p>}
       {state.ok && <p className="ok">{t("Fails saņemts. Imports notiek fonā, pēc minūtes atjauno lapu.")}</p>}
@@ -36,7 +54,7 @@ export function UploadForm({ defKind }: { defKind: string }) {
   );
 }
 
-export function AddFeedForm({ defKind }: { defKind: string }) {
+export function AddFeedForm({ defKind, admin }: { defKind: string; admin?: boolean }) {
   const { t } = useT();
   const [state, action, pending] = useActionState<FeedState, FormData>(addFeed, {});
   const [url, setUrl] = useState("");
@@ -49,6 +67,7 @@ export function AddFeedForm({ defKind }: { defKind: string }) {
         <input name="url" type="url" required value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://www.tavssalons.lv/feed.xml" />
       </label>
       <KindSelect kind={kind} setKind={setKind} />
+      {admin && <SourceSelect />}
       <button className="btn primary" disabled={pending}>{pending ? t("Pievieno…") : t("Pievienot plūsmu")}</button>
       {state.error && <p className="err">{t(state.error)}</p>}
       {state.ok && <p className="ok">{t("Plūsma pievienota. Imports notiek fonā, pēc minūtes atjauno lapu.")}</p>}
