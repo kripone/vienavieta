@@ -214,6 +214,21 @@ export const SS_DETAILS_V2_AT = new Date("2026-11-07T21:45:00Z");
 export const DEALER_FEED = { MAX_FEEDS_PER_USER: 3, MAX_ITEMS: 1000, MAX_BYTES: 15_000_000, MAX_PHOTOS: 20, EVERY_HOURS: 6 } as const;
 
 /**
+ * Portāli, kuru partneru plūsmu administrators var pievienot /importi (dealer_feeds.source).
+ * Tādiem sludinājumiem rādām tikai faktus, vienu sīktēlu ar avota norādi un saiti uz oriģinālu ar UTM.
+ */
+export const PARTNER_SOURCES = ["city24.lv", "auto24.lv", "autoplius.lt"] as const;
+export type PartnerSource = (typeof PARTNER_SOURCES)[number];
+export const PARTNER_UTM = "utm_source=vienavieta.lv&utm_medium=referral&utm_campaign=partner_feed";
+
+/**
+ * City24 formāta JSON (src/lib/importers/city24-format.ts).
+ * IMG_FMT aizstāj "{fmt:em}" bildes adresē (14 ≈ sīktēls, ~20 KB). LISTING_URL lieto, ja plūsmā nav "url"
+ * (formāts jāpārbauda ar City24: {id} = friendly_id).
+ */
+export const CITY24 = { IMG_FMT: "14", LISTING_URL: "https://www.city24.lv/real-estate/{id}" } as const;
+
+/**
  * Portāla uzturētājs (juridiskās lapas un kājene). null = vēl nav izlemts, lapās rāda "tiks norādīts".
  * Aizpildīt pirms publiskas palaišanas.
  */

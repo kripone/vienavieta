@@ -1,0 +1,1 @@
+ALTER TABLE "dealer_feeds" ADD COLUMN "source" "listing_source";

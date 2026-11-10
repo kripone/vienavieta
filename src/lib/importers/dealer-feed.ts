@@ -1,12 +1,16 @@
 // Salonu un aģentūru sludinājumu plūsmas: XML (arī Facebook/Google auto katalogs), CSV vai JSON pēc saites.
 // Plūsmu pievieno pats salons (/importi); sludinājumi kļūst par salona sludinājumiem mūsu portālā.
 // Bildes rādām no salona servera (remote_photos), neglabājam. Aprakstu ņemam: tas ir salona paša teksts.
+// City24 formāta JSON (aģentūru eksports vai City24 partneru plūsma): city24-format.ts, bez brokeru datiem, viena bilde.
+// dealer_feeds.source = portāls (tikai administrators): sludinājumi ar portāla avotu, bez apraksta un kontaktiem,
+// viens sīktēls un saite uz oriģinālu ar UTM.
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
 import { XMLParser } from "fast-xml-parser";
 import { and, eq, inArray, notInArray, sql, isNull } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { BODY_TYPES, DEALER_FEED, type PropertyType } from "../constants";
+import { BODY_TYPES, DEALER_FEED, PARTNER_UTM, type PropertyType } from "../constants";
+import { city24ToFlat, isCity24Item } from "./city24-format";
 import { inferBody } from "../illustrations";
 import { landLabel } from "../listing-input";
 import { findMake, matchModel, vehicleTitle } from "./ss-rss";
@@ -172,6 +176,8 @@ export function parseFeed(text: string, type = ""): Flat[] {
   if (t.startsWith("[") || t.startsWith("{") || /json/.test(type)) {
     const j = JSON.parse(t);
     const arr = Array.isArray(j) ? j : findItems(j);
+    // City24 formāts: tikai objekta fakti, bez brokeru datiem (city24-format.ts)
+    if (arr.some(isCity24Item)) return arr.filter(isCity24Item).map((x) => city24ToFlat(x as Record<string, unknown>));
     return arr.map((x) => flatten(x));
   }
   return parseCsv(text);
@@ -207,6 +213,10 @@ const ALIASES: Record<string, string[]> = {
   land: ["land", "landarea", "lotsize", "landm2", "zeme"],
   floor: ["floor", "stavs"],
   floors: ["floors", "numfloors", "stavuskaits"],
+  lat: ["lat", "latitude", "address.latitude", "platums"],
+  lon: ["lon", "lng", "longitude", "address.longitude", "garums"],
+  cityFallback: ["cityfallback"],
+  format: ["format"],
 };
 const IMAGE_KEYS = /^(image|images|imagelink|imageurl|additionalimagelink|photo|photos|picture|bilde|bildes|foto)(\.|$)/;
 
@@ -242,6 +252,17 @@ const PTYPE: [RegExp, PropertyType][] = [
   [/apart|flat|dzīvok|dzivok|кварт/, "Dzīvoklis"], [/house|māja|maja|дом|villa|private/, "Māja"], [/land|zeme|участ|plot/, "Zeme"],
 ];
 
+/** Portāla saitei pieliek UTM atzīmes (lai partneris redz, ka apmeklētājs nāk no mums). */
+function withUtm(url: string) {
+  try {
+    const u = new URL(url);
+    for (const [k, v] of new URLSearchParams(PARTNER_UTM)) if (!u.searchParams.has(k)) u.searchParams.set(k, v);
+    return u.toString().slice(0, 500);
+  } catch {
+    return url;
+  }
+}
+
 // ---------- imports ----------
 export type FeedResult = { items: number; created: number; updated: number; removed: number; skipped: number; errors: string[]; ms: number };
 
@@ -264,6 +285,8 @@ export async function runFeed(feedId: number): Promise<FeedResult> {
     res.items = rows.length;
     if (!rows.length) throw new Error("Plūsmā nav atrasts neviens sludinājums.");
     const ctx = await loadCtx();
+    const source = feed.source ?? "own";
+    const partner = source !== "own";
     const seen: string[] = [];
     for (const [i, f] of rows.entries()) {
       const itemId = (get(f, "id") ?? get(f, "url") ?? `${i}`).slice(0, 120);
@@ -275,26 +298,33 @@ export async function runFeed(feedId: number): Promise<FeedResult> {
       const kind: "vehicle" | "property" =
         kindRaw ? (/prop|nekust|ipas|īpaš|real|home|недв/i.test(kindRaw) ? "property" : "vehicle") : get(f, "make") ? "vehicle" : ptypeRaw && pick(ptypeRaw, PTYPE) ? "property" : feed.kind;
       const city = get(f, "city");
-      const place = city ? ctx.findCity(city) : null;
-      const photos = images(f);
+      const fallback = get(f, "cityFallback");
+      // "Āgenskalns" + "Rīga" → apkaime Rīgā; ja tādas nav, pilsēta (nevis cita "Centrs" citā pilsētā)
+      const place = city && fallback ? ctx.findIn(fallback, city) ?? ctx.findCity(fallback) : city ? ctx.findCity(city) : null;
+      const lat = num(get(f, "lat")), lon = num(get(f, "lon"));
+      const exact = lat != null && lon != null && lat > 55.5 && lat < 58.2 && lon > 20.8 && lon < 28.3;
+      // portāla partneru plūsma: tikai fakti, viens sīktēls un saite uz oriģinālu (ar UTM); bez apraksta un kontaktiem
+      const url = get(f, "url")?.slice(0, 500) ?? null;
+      if (partner && !url) { res.skipped++; if (res.errors.length < 10) res.errors.push(`${itemId}: nav saites uz oriģinālu`); continue; }
+      const photos = partner || get(f, "format") === "city24" ? images(f).slice(0, 1) : images(f);
       const base = {
         kind,
         status: "active" as const,
-        source: "own" as const,
+        source,
         externalId,
-        externalUrl: get(f, "url")?.slice(0, 500) ?? null,
+        externalUrl: partner && url ? withUtm(url) : url,
         externalThumbUrl: photos[0] ?? null,
-        remotePhotos: photos,
+        remotePhotos: partner ? [] : photos,
         feedId: feed.id,
-        userId: feed.userId,
+        userId: partner ? null : feed.userId,
         price,
-        description: get(f, "description")?.slice(0, 5000) ?? null,
+        description: partner ? null : get(f, "description")?.slice(0, 5000) ?? null,
         placeId: place?.id ?? null,
-        lat: place ? place.lat + (Math.random() - 0.5) * 0.01 : null,
-        lon: place ? place.lon + (Math.random() - 0.5) * 0.02 : null,
-        geoPrecision: place ? "place" : null,
-        contactPhone: owner.phone ?? null,
-        contactEmail: owner.email,
+        lat: exact ? lat : place ? place.lat + (Math.random() - 0.5) * 0.01 : null,
+        lon: exact ? lon : place ? place.lon + (Math.random() - 0.5) * 0.02 : null,
+        geoPrecision: exact ? "street" : place ? "place" : null,
+        contactPhone: partner ? null : owner.phone ?? null,
+        contactEmail: partner ? null : owner.email,
         updatedAt: new Date(),
       };
       let row: typeof listings.$inferInsert;
@@ -330,7 +360,7 @@ export async function runFeed(feedId: number): Promise<FeedResult> {
           powerKw: num(get(f, "power")) ? Math.round(num(get(f, "power"))!) : null,
           color: get(f, "color")?.slice(0, 30) ?? null,
           vin: get(f, "vin")?.slice(0, 17) ?? null,
-          title: (get(f, "title") ?? vehicleTitle(makeName, modelName, engineL ? String(engineL) : null, fuel, year)).slice(0, 120),
+          title: ((partner ? undefined : get(f, "title")) ?? vehicleTitle(makeName, modelName, engineL ? String(engineL) : null, fuel, year)).slice(0, 120),
         };
       } else {
         const ptype = pick(ptypeRaw, PTYPE) ?? "Dzīvoklis";
@@ -358,11 +388,11 @@ export async function runFeed(feedId: number): Promise<FeedResult> {
           floor: Math.round(num(get(f, "floor")) ?? NaN) || null,
           floors: Math.round(num(get(f, "floors")) ?? NaN) || null,
           address: street && place ? `${street}, ${place.name}, ${place.region}` : null,
-          title: (get(f, "title") ?? title).slice(0, 120),
+          title: ((partner ? undefined : get(f, "title")) ?? title).slice(0, 120),
         };
       }
       seen.push(externalId);
-      const [existing] = await db.select({ id: listings.id, price: listings.price, status: listings.status }).from(listings).where(and(eq(listings.source, "own"), eq(listings.externalId, externalId)));
+      const [existing] = await db.select({ id: listings.id, price: listings.price, status: listings.status }).from(listings).where(and(eq(listings.source, source), eq(listings.externalId, externalId)));
       if (existing) {
         if (existing.status === "hidden" || existing.status === "pending") continue; // moderators paslēpis
         const { kind: _k, source: _s, externalId: _e, userId: _u, ...upd } = row;

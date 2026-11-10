@@ -476,6 +476,12 @@ export const dealerFeeds = pgTable(
     content: text("content"),
     /** "vehicle" | "property" — ja plūsmā nav norādīts katrai vienībai */
     kind: listingKind("kind").notNull().default("vehicle"),
+    /**
+     * null = salona/aģentūras plūsma (sludinājumi source "own", lietotāja vārdā).
+     * Portāls (PARTNER_SOURCES, piem. "city24.lv") = portāla partneru plūsma, ko pievieno administrators:
+     * sludinājumi ar šo avotu, tikai fakti + viens sīktēls + saite uz oriģinālu.
+     */
+    source: listingSource("source"),
     active: boolean("active").notNull().default(true),
     lastRunAt: timestamp("last_run_at", { withTimezone: true }),
     lastResult: jsonb("last_result"),

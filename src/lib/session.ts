@@ -43,6 +43,12 @@ const adminEmails = () =>
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
 
+/** Administrators: loma "admin" vai e-pasts ADMIN_EMAILS (piem., portālu partneru plūsmām /importi). */
+export function isAdmin(user: Who | null | undefined): boolean {
+  if (!user) return false;
+  return user.role === "admin" || adminEmails().includes(user.email.toLowerCase());
+}
+
 export function isModerator(user: Who | null | undefined): boolean {
   if (!user) return false;
   return user.role === "moderator" || user.role === "admin" || adminEmails().includes(user.email.toLowerCase());
