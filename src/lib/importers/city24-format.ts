@@ -22,10 +22,13 @@ export function city24Image(url: string): string | null {
   return /^https:\/\/static\.img-city24\.lv\/object\/\d+\/[\w/.-]+\.(jpe?g|png|webp)$/i.test(u) ? u : null;
 }
 
-/** Saite uz oriģinālu: plūsmas "url", ja ir; citādi pēc friendly_id. */
+/**
+ * Saite uz oriģinālu: plūsmas "url" (vai "link") vienmēr pirmā, ņemam tieši; citādi CITY24.LISTING_URL pēc friendly_id.
+ * Saites pareizību pret City24 serveri nepārbaudām (tur Cloudflare), tikai sagatavojam no plūsmas datiem.
+ */
 export function city24Url(o: Obj): string | null {
   const own = str(o.url) || str(o.link);
-  if (/^https:\/\/(www\.)?city24\.lv\//i.test(own)) return own;
+  if (/^https?:\/\/\S+$/i.test(own)) return own;
   const id = str(o.friendly_id) || str(o.id);
   return /^\d+$/.test(id) ? CITY24.LISTING_URL.replace("{id}", id) : null;
 }
