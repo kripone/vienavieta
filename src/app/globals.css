@@ -503,3 +503,14 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .report section { margin-top: 22px; }
 .report-drops { list-style: none; padding: 0; display: grid; gap: 6px; margin: 0 0 10px; }
 .report-drops .down { color: #2f8a64; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* Līzinga / hipotēkas kalkulators sludinājuma lapā */
+.fin-box { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.fin-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 12px; align-content: start; }
+.fin-result { display: flex; flex-direction: column; gap: 4px; background: var(--bg); border-radius: 10px; padding: 14px; }
+.fin-result > b { font-family: var(--f-display); font-size: 28px; line-height: 1.1; }
+.fin-result dl { margin: 8px 0 0; display: grid; gap: 4px; font-size: 14px; }
+.fin-result dl div { display: flex; justify-content: space-between; gap: 8px; }
+.fin-result dt { color: var(--muted); }
+.fin-result dd { margin: 0; font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) { .fin-box { grid-template-columns: 1fr; } }

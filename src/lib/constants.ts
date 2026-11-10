@@ -214,6 +214,16 @@ export const SS_DETAILS_V2_AT = new Date("2026-11-07T21:45:00Z");
 export const DEALER_FEED = { MAX_FEEDS_PER_USER: 3, MAX_ITEMS: 1000, MAX_BYTES: 15_000_000, MAX_PHOTOS: 20, EVERY_HOURS: 6 } as const;
 
 /**
+ * Līzinga un hipotēkas kalkulators sludinājuma lapā (src/components/finance-calc.tsx). Tikai aptuvens piemērs.
+ * Likmes ir noklusējums, ko lietotājs var mainīt. EURIBOR_6M atjauno ik pa laikam (2026-11-09: 3,001%).
+ */
+export const FINANCE = {
+  EURIBOR_6M: 3.0,
+  lease: { downPct: 20, months: 60, ratePct: 6.9, balloonPct: 0, minPrice: 1500, termOptions: [12, 24, 36, 48, 60, 72, 84] },
+  mortgage: { downPct: 15, years: 30, marginPct: 2.5, minPrice: 10000, termOptions: [5, 10, 15, 20, 25, 30] },
+} as const;
+
+/**
  * Portāli, kuru partneru plūsmu administrators var pievienot /importi (dealer_feeds.source).
  * Tādiem sludinājumiem rādām tikai faktus, vienu sīktēlu ar avota norādi un saiti uz oriģinālu ar UTM.
  */

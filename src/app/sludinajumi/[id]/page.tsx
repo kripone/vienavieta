@@ -3,13 +3,14 @@ import { getT } from "@/i18n/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ContactReveal } from "@/components/contact-reveal";
+import { FinanceCalc } from "@/components/finance-calc";
 import { FavButton } from "@/components/fav-button";
 import { ReportButton } from "@/components/report-button";
 import { Gallery } from "@/components/gallery";
 import { ExtThumb } from "@/components/ext-thumb";
 import { priceUnit } from "@/components/listing-card";
 import { OwnerActions } from "@/components/owner-actions";
-import { DEAL_LABEL, PROPERTY_PLURAL, SOURCE_LABEL, VEHICLE_CLASS_LABEL, type VehicleClass } from "@/lib/constants";
+import { DEAL_LABEL, FINANCE, PROPERTY_PLURAL, SOURCE_LABEL, VEHICLE_CLASS_LABEL, type VehicleClass } from "@/lib/constants";
 import { formatNumber, formatPrice, timeAgo } from "@/lib/format";
 import { listingIll } from "@/lib/illustrations";
 import { landLabel } from "@/lib/listing-input";
@@ -257,6 +258,8 @@ export default async function ListingPage(props: Props) {
         {l.kind === "property" && l.lat != null && l.lon != null && <ListingMapLazy lat={l.lat} lon={l.lon} exact={l.geoPrecision === "street"} />}
         {vzd && <VzdDeals data={vzd} perM2={l.areaM2 ? Math.round(l.price / Number(l.areaM2)) : null} />}
         {history && <PriceHistory h={history} external={l.source !== "own"} />}
+        {l.status === "active" && l.kind === "vehicle" && !l.deal?.match(/^(rent|day|buy)$/) && l.price >= FINANCE.lease.minPrice && <FinanceCalc price={l.price} kind="lease" />}
+        {l.status === "active" && l.kind === "property" && l.deal === "sell" && l.price >= FINANCE.mortgage.minPrice && <FinanceCalc price={l.price} kind="mortgage" />}
         {l.description && (
           <section>
             <h2>{t("Apraksts")}</h2>

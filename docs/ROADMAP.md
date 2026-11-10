@@ -19,7 +19,7 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] Pievienošanas un rediģēšanas forma (transports un īpašumi, lauki pēc veida)
 - [x] Bilžu augšupielāde: samazināšana līdz 1600 px, sīktēli, EXIF/GPS dzēšana; lokāla mape vai S3/R2
 - [x] Sludinājuma lapa ar galeriju, parametriem, aprakstu un kontaktiem pēc pieprasījuma
-- [ ] Līzinga un hipotēkas kalkulators sludinājuma lapā
+- [x] Līzinga un hipotēkas kalkulators sludinājuma lapā (transportam līzings, pārdodamiem īpašumiem hipotēka; noklusējumi `FINANCE`)
 - [x] Mani sludinājumi: rediģēt, atzīmēt kā pārdotu, dzēst; cenu vēsture saglabājas
 - [x] Antispam: limits diennaktī, saišu un surogātvārdu pārbaude, lielie burti, dublikāti, slēptais lauks, aizpildīšanas laiks
 
