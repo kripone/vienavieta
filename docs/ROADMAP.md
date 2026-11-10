@@ -69,6 +69,9 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] ss.com sarakstu lapas (pēc jurista atzinuma): visas lapas reizi diennaktī, jaunie ik 15 min, ss.com izdzēstie tiek noņemti
 - [x] ss.com kemperi un dzīvojamās piekabes (sadaļa "Kravas automašīnas → Kempingi") sadaļā "Kemperi"; piederumi izlaisti, veids (piekabe, alkova, integrētais…) pēc teksta sākuma vai markas
 - [ ] Citu portālu RSS/partneru plūsmas (reklama.lv, city24.lv, autoplius.lt …)
+  - [x] Tehniski gatavs: partneru plūsma /importi (tikai administrators, `dealer_feeds.source`): fakti, viens sīktēls, saite ar UTM
+  - [x] City24 formāta JSON (aģentūru eksports vai City24 plūsma), bez brokeru datiem
+  - [ ] Gaidām partneru atbildes un plūsmu specifikācijas (autoplius.lt: lauku nosaukumi → `ALIASES`)
 - [x] ss.com sīktēli tieši no ss.com servera (neglabājam), ja nenāk: ilustrācija
 - [x] Tirgus tendences /tirgus: populārākās markas, modeļi, cena pa gadiem, cena pret nobraukumu, €/m² pa reģioniem un vietām
 - [x] Dienas tirgus momentuzņēmumi (market_stats) cenu dinamikai laikā
