@@ -286,7 +286,8 @@ async function getBrowser() {
   if (!browserPromise) {
     browserPromise = (async () => {
       const { chromium } = await import("playwright");
-      return chromium.launch({ headless: true });
+      // channel "chromium" = pilnais pārlūks ar jauno headless režīmu (nevis headless shell), sk. autoplius-pages.ts
+      return chromium.launch({ channel: "chromium", headless: true, args: ["--disable-blink-features=AutomationControlled"] });
     })().catch((e) => {
       browserPromise = null;
       throw e;
@@ -298,18 +299,42 @@ async function getBrowser() {
 /** Atver lapu chromium pārlūkā (apiet Cloudflare pārbaudi) un atgriež HTML. Tikai city24.lv adreses. */
 export async function browserFetch(url: string): Promise<string> {
   if (!/(^|\.)city24\.lv$/.test(new URL(url).host)) throw new Error(`Nav city24.lv adrese: ${url}`);
-  const browser = await getBrowser();
-  const context = await browser.newContext({
-    locale: "lv-LV",
-    userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-  });
+  // viena kopīga konteksta "sesija": kad Cloudflare pārbaude reiz izieta, cf_clearance sīkdatne
+  // darbojas arī nākamajām lapām (citādi katra lapa no jauna dabūtu pārbaudi)
+  const context = await getContext();
+  const page = await context.newPage();
   try {
-    const page = await context.newPage();
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45_000 });
-    // Cloudflare pārbaudes gadījumā kartītes parādās ar aizkavi: gaidām, līdz tās ir
-    await page.waitForSelector("a.object__image", { timeout: 30_000 });
-    return await page.content();
+    // Cloudflare pārbaudei ("Mazliet uzgaidiet…") ļaujam pabeigties: gaidām kartītes, vajadzības gadījumā pārlādējam
+    for (let attempt = 1; ; attempt++) {
+      try {
+        await page.waitForSelector("a.object__image", { timeout: 40_000 });
+        return await page.content();
+      } catch (e) {
+        const title = await page.title().catch(() => "");
+        if (attempt >= 3 || !/uzgaidiet|just a moment|cloudflare|city24/i.test(title)) throw e;
+        await page.reload({ waitUntil: "domcontentloaded", timeout: 45_000 });
+      }
+    }
   } finally {
-    await context.close();
+    await page.close();
   }
+}
+
+let contextPromise: Promise<import("playwright").BrowserContext> | null = null;
+
+async function getContext() {
+  if (!contextPromise) {
+    contextPromise = (async () => {
+      const browser = await getBrowser();
+      return browser.newContext({
+        locale: "lv-LV",
+        userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+      });
+    })().catch((e) => {
+      contextPromise = null;
+      throw e;
+    });
+  }
+  return contextPromise;
 }
