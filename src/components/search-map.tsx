@@ -34,10 +34,13 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
   const [count, setCount] = useState<number | null>(null);
   const [full, setFull] = useState(false);
 
+  // punktu rādiuss pēc tālummaiņas: tālu mazi (lai karte redzama), tuvu lielāki
+  const radiusFor = (z: number) => (z >= 15 ? 7 : z >= 12 ? 5.5 : z >= 9 ? 4 : 3);
+
   // kartes izveide
   useEffect(() => {
     if (!box.current || map.current) return;
-    const m = L.map(box.current, { center: [56.0, 24.0], zoom: 6, minZoom: 6, maxZoom: 18, zoomControl: true, worldCopyJump: false });
+    const m = L.map(box.current, { center: [56.0, 24.0], zoom: 6, minZoom: 6, maxZoom: 18, zoomControl: true, worldCopyJump: false, renderer: L.canvas() });
     if (GOOGLE_KEY) addGoogleLayers(m);
     else {
       const streets = L.tileLayer(STREETS, { attribution: STREETS_ATTR, maxZoom: 19 }).addTo(m);
@@ -48,8 +51,13 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
     }
     m.setMaxBounds([[53.3, 19.5], [58.8, 29.5]]); // Latvija un Lietuva
     markers.current = L.layerGroup().addTo(m);
+    m.on("zoomend", () => {
+      const r = radiusFor(m.getZoom());
+      markers.current?.eachLayer((l) => (l as L.CircleMarker).setRadius?.(r));
+    });
     map.current = m;
     return () => { m.remove(); map.current = null; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // punkti
@@ -62,7 +70,7 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
       markers.current.clearLayers();
       setCount(pts.length);
       for (const [id, lat, lon, kind, price, title] of pts) {
-        L.circleMarker([lat, lon], { radius: 7, weight: 2, color: "#fff", fillColor: kind === 1 ? "#2f5fa8" : "#2f8a64", fillOpacity: 0.9 })
+        L.circleMarker([lat, lon], { radius: radiusFor(m.getZoom()), weight: 1, color: "#fff", fillColor: kind === 1 ? "#2f5fa8" : "#2f8a64", fillOpacity: 0.9 })
           .bindPopup(`<a href="/sludinajumi/${id}" style="font-weight:700">${esc(title)}</a><br>${fmt.format(price)} €`)
           .addTo(markers.current);
       }
