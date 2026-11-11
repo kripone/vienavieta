@@ -255,7 +255,7 @@ export default async function ListingPage(props: Props) {
             {l.source !== "own" && <p className="fine">{t("Aprīkojums pēc pārdevēja norādītā {src}.", { src: SOURCE_LABEL[l.source] ?? l.source })}</p>}
           </details>
         )}
-        {l.lat != null && l.lon != null && <ListingMapLazy lat={l.lat} lon={l.lon} exact={l.geoPrecision === "street"} />}
+        {l.kind === "property" && l.lat != null && l.lon != null && <ListingMapLazy lat={l.lat} lon={l.lon} exact={l.geoPrecision === "street"} />}
         {vzd && <VzdDeals data={vzd} perM2={l.areaM2 ? Math.round(l.price / Number(l.areaM2)) : null} />}
         {history && <PriceHistory h={history} external={l.source !== "own"} />}
         {l.status === "active" && l.kind === "vehicle" && !l.deal?.match(/^(rent|day|buy)$/) && l.price >= FINANCE.lease.minPrice && <FinanceCalc price={l.price} kind="lease" />}

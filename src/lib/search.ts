@@ -128,9 +128,12 @@ function conditions(s: SearchParams): SQL[] {
     or(eq(regions.country, c), and(isNull(listings.placeId), inArray(listings.source, c === "LV" ? [...LV_SOURCES] : [...LT_SOURCES])));
   if (s.cat === "vehicle") {
     if (s.country) add(inCountry(s.country));
-  } else {
-    // "Visi" un nekustamais īpašums: tikai Latvija; Lietuvas sludinājumi redzami auto sadaļā.
+  } else if (s.cat === "property") {
+    // Nekustamais īpašums: tikai Latvija (LT īpašumu avotu pagaidām nav).
     add(inCountry("LV"));
+  } else {
+    // "Visi": Latvijas sludinājumi + Lietuvas auto (autoplius.lt), lai galvenajā lapā un kartē redzami arī tie.
+    add(or(inCountry("LV"), and(eq(listings.kind, "vehicle"), inCountry("LT")))!);
   }
   // dublikāti starp portāliem: viena kartīte grupai (sk. src/lib/dedupe.ts); ar avota filtru rāda visus no tā avota
   if (!s.src) add(groupPrimaryOnly);
