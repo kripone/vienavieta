@@ -59,7 +59,7 @@ type Ctx = { findPlace: ReturnType<typeof makePlaceFinder>; findCity: (t: string
 export async function loadCtx(): Promise<Ctx> {
   const [placeRows, makeRows, modelRows] = await Promise.all([
     db.select({ id: places.id, name: places.name, lat: places.lat, lon: places.lon, region: regions.name, kind: places.kind, parentId: places.parentId })
-      .from(places).innerJoin(regions, eq(places.regionId, regions.id)).where(eq(regions.country, "LV")),
+      .from(places).innerJoin(regions, eq(places.regionId, regions.id)).where(inArray(regions.country, ["LV", "LT"])),
     db.select({ id: makes.id, name: makes.name, vehicleClass: makes.vehicleClass }).from(makes),
     db.select({ id: models.id, makeId: models.makeId, name: models.name }).from(models),
   ]);
