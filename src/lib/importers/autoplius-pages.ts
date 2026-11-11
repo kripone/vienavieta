@@ -10,6 +10,7 @@ import { AUTOPLIUS, EXTERNAL_TTL_DAYS } from "../constants";
 import { linkDuplicate } from "../dedupe";
 import { inferBody } from "../illustrations";
 import { findMake, matchModel, slug, vehicleTitle, type ImportRow, type MakeRow, type ModelRow, type PlaceRow } from "./ss-rss";
+import { withCrawlLock } from "./crawl-lock";
 import { loadCtx } from "./ss-pages";
 
 const { listings, priceHistory, crawlState } = schema;
@@ -295,7 +296,14 @@ export async function tickAutoplius(): Promise<CrawlResult | null> {
   const fullDue = !st?.lastFullAt || now - st.lastFullAt.getTime() > AUTOPLIUS.fullEveryHours * 3600_000;
   const quickDue = !st?.lastQuickAt || now - st.lastQuickAt.getTime() > AUTOPLIUS.quickEveryMin * 60_000;
   if (!fullDue && !quickDue) return null;
-  return crawlAutoplius(fullDue ? "full" : "quick");
+  // pa vienam pārlūkam visiem crawleriem (512 MB instances) un pēc kārtas pārlūku aizveram
+  return withCrawlLock(async () => {
+    try {
+      return await crawlAutoplius(fullDue ? "full" : "quick");
+    } finally {
+      await closeBrowser().catch(() => {});
+    }
+  });
 }
 
 // ---------- lapu ielāde ar reālu pārlūku (Playwright) ----------
@@ -306,15 +314,25 @@ async function getBrowser() {
   if (!browserPromise) {
     browserPromise = (async () => {
       const { chromium } = await import("playwright");
-      // channel "chromium" = pilnais pārlūks ar jauno headless režīmu (nevis headless shell):
-      // Cloudflare no datu centra IP (Render) headless shell neatlaiž, pilno — atlaiž
-      return chromium.launch({ channel: "chromium", headless: true, args: ["--disable-blink-features=AutomationControlled"] });
+      // headless shell (vieglāks par pilno chromium: Render starter ir tikai 512 MB, pilnais deva OOM).
+      // --disable-dev-shm-usage: konteineru /dev/shm ir mazs, citādi pārlūks krīt ar atmiņas kļūdām.
+      return chromium.launch({ headless: true, args: ["--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"] });
     })().catch((e) => {
       browserPromise = null;
       throw e;
     });
   }
   return browserPromise;
+}
+
+/** Aizver pārlūku un sesiju pēc kārtas — atmiņa (512 MB instances) netiek turēta starp kārtām. */
+export async function closeBrowser() {
+  const ctx = contextPromise;
+  contextPromise = null;
+  if (ctx) await ctx.then((c) => c.close()).catch(() => {});
+  const br = browserPromise;
+  browserPromise = null;
+  if (br) await br.then((b) => b.close()).catch(() => {});
 }
 
 /** Atver lapu chromium pārlūkā (apiet Cloudflare pārbaudi) un atgriež HTML. Tikai autoplius.lt adreses. */
