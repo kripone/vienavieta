@@ -253,6 +253,21 @@ export const PARTNER_UTM = "utm_source=vienavieta.lv&utm_medium=referral&utm_cam
 export const CITY24 = { IMG_FMT: "14", LISTING_URL: "https://www.city24.lv/real-estate/{id}" } as const;
 
 /**
+ * city24.lv sarakstu sadaļas (lietotājs 2026-11-11, sk. CLAUDE.md; imports src/lib/importers/city24-pages.ts).
+ * Lapas atver ar reālu pārlūku (Playwright), jo parasto HTTP bloķē Cloudflare. typeSlug ir sludinājuma
+ * adreses tips, pēc kura atšķiram sadaļas kartītes no karuseļiem citām sadaļām tajā pašā lapā.
+ */
+export const CITY24_SECTIONS = [
+  { key: "city24:flats-sale", url: "https://www.city24.lv/real-estate-search/apartments-for-sale", typeSlug: "apartments-for-sale", propertyType: "Dzīvoklis", deal: "sell" },
+  { key: "city24:flats-rent", url: "https://www.city24.lv/real-estate-search/apartments-for-rent", typeSlug: "apartments-for-rent", propertyType: "Dzīvoklis", deal: "rent" },
+  { key: "city24:houses-sale", url: "https://www.city24.lv/real-estate-search/houses-for-sale", typeSlug: "houses-for-sale", propertyType: "Māja", deal: "sell" },
+  { key: "city24:houses-rent", url: "https://www.city24.lv/real-estate-search/houses-for-rent", typeSlug: "houses-for-rent", propertyType: "Māja", deal: "rent" },
+  { key: "city24:land-sale", url: "https://www.city24.lv/real-estate-search/land-lots-for-sale", typeSlug: "land-lots-for-sale", propertyType: "Zeme", deal: "sell" },
+] as const;
+/** Pauze starp lapām, ātrās kārtas lapu skaits, pilnās kārtas maksimums un biežums (sk. AUTOPLIUS). */
+export const CITY24_CRAWL = { delayMs: 3000, quickPages: 2, maxPages: 30, quickEveryMin: 30, fullEveryHours: 24 } as const;
+
+/**
  * Portāla uzturētājs (juridiskās lapas un kājene). null = vēl nav izlemts, lapās rāda "tiks norādīts".
  * Aizpildīt pirms publiskas palaišanas.
  */
