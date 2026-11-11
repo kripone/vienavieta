@@ -8,8 +8,8 @@ services:
     runtime: node
     region: frankfurt
     plan: starter # 7 $/mēn., neaizmieg
-    # npm install (nevis ci), kamēr package-lock.json nav atjaunots ar playwright; chromium vajadzīgs autoplius.lt ievākšanai
-    buildCommand: npm install && npx playwright install --with-deps chromium && npm run build
+    # npm ci (precīzi no package-lock.json); chromium vajadzīgs autoplius.lt ievākšanai
+    buildCommand: npm ci && npx playwright install --with-deps chromium && npm run build
     # Pirms palaišanas: datubāzes migrācijas un vietu/kataloga dati (drīkst atkārtot)
     startCommand: npm run db:migrate && npm run db:seed && npm start
     healthCheckPath: /api/health
