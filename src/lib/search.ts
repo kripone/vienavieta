@@ -278,19 +278,36 @@ export async function searchListings(s: SearchParams) {
   return { rows, total, pages: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
 }
 
-/** Punkti kartei visiem atbilstošajiem sludinājumiem (bez zonas filtra, lai redzētu arī apkārtni). */
+/**
+ * Punkti kartei visiem atbilstošajiem sludinājumiem (bez zonas filtra, lai redzētu arī apkārtni).
+ * Retināšana pa ģeogrāfiskajām šūnām (~5 km): no katras šūnas ne vairāk kā PER_CELL jaunākie,
+ * lai limits netiktu apēsts viena avota blīvajiem punktiem un karte rādītu visu reģionu.
+ */
 export async function searchPoints(s: SearchParams, limit = 3000) {
-  const where = and(...conditions({ ...s, zone: undefined }), isNotNull(listings.lat));
-  return db
-    .select({ id: listings.id, lat: listings.lat, lon: listings.lon, kind: listings.kind, price: listings.price, title: listings.title })
-    .from(listings)
-    .leftJoin(places, eq(listings.placeId, places.id))
-    .leftJoin(regions, eq(places.regionId, regions.id))
-    .leftJoin(makes, eq(listings.makeId, makes.id))
-    .leftJoin(models, eq(listings.modelId, models.id))
-    .leftJoin(users, eq(listings.userId, users.id))
-    .where(where)
-    .limit(limit);
+  const PER_CELL = 4;
+  const where = and(...conditions({ ...s, zone: undefined }), isNotNull(listings.lat)) ?? sql`true`;
+  const q = sql`
+    select id, lat, lon, kind, price, title from (
+      select ${listings.id} as id, ${listings.lat} as lat, ${listings.lon} as lon,
+        ${listings.kind} as kind, ${listings.price} as price, ${listings.title} as title,
+        row_number() over (
+          partition by floor(${listings.lat} * 20), floor(${listings.lon} * 20)
+          order by ${listings.updatedAt} desc
+        ) as rn
+      from ${listings}
+      left join ${places} on ${eq(listings.placeId, places.id)}
+      left join ${regions} on ${eq(places.regionId, regions.id)}
+      left join ${makes} on ${eq(listings.makeId, makes.id)}
+      left join ${models} on ${eq(listings.modelId, models.id)}
+      left join ${users} on ${eq(listings.userId, users.id)}
+      where ${where}
+    ) t
+    where rn <= ${PER_CELL}
+    limit ${limit}`;
+  const r = await db.execute(q);
+  return (r.rows as { id: string; lat: number | null; lon: number | null; kind: string; price: number; title: string }[]).map((p) => ({
+    id: p.id, lat: p.lat, lon: p.lon, kind: p.kind as "vehicle" | "property", price: p.price, title: p.title,
+  }));
 }
 
 /** Pārvērš parametrus atpakaļ URL (izlaižot tukšos un noklusētos). */
