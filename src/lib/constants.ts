@@ -103,7 +103,7 @@ export const PROPERTY_FIELDS: Record<PropertyType, readonly string[]> = {
   "Zeme": ["landM2", "purpose"],
   "Mežs": ["landM2"],
   "Birojs": ["areaM2", "floor", "floors", "heating", "condition", "amenities"],
-  "Tirdzniecības telpas": ["areaM2", "floor", "heating", "condition", "amenities"],
+  "Tirdzniecības telpas": ["areaM2", "floor", "heating", "condition"],
   "Noliktava": ["areaM2", "landM2", "heating", "condition"],
   "Ražošanas telpas": ["areaM2", "landM2", "heating", "condition"],
   "Komercēka": ["areaM2", "landM2", "floors", "material", "heating", "condition", "builtYear"],
@@ -193,6 +193,20 @@ export const SS_QUICK_EVERY_MIN = 15;
 export const SS_FULL_EVERY_HOURS = 24;
 /** Ārējie sludinājumi tiek paslēpti, ja nav redzēti tik dienas (drošībai, ja pilnā kārta ilgi neizdodas). */
 export const EXTERNAL_TTL_DAYS = 21;
+/**
+ * autoplius.lt vieglie auto (lietotājs 2026-11-11, sk. CLAUDE.md; imports src/lib/importers/autoplius-pages.ts).
+ * Lapas atver ar reālu pārlūku (Playwright), jo parasto HTTP bloķē Cloudflare. maxPages ierobežo pilno kārtu
+ * (portālā desmitiem tūkstošu sludinājumu; jaunākie ir pirmajās lapās), izdzēstos paslēpj pēc EXTERNAL_TTL_DAYS.
+ */
+export const AUTOPLIUS = {
+  key: "autoplius:cars",
+  url: "https://lv.autoplius.lt/sludinajumi/lietotas-automasinas",
+  delayMs: 3000,
+  quickPages: 2,
+  maxPages: 40,
+  quickEveryMin: 30,
+  fullEveryHours: 24,
+} as const;
 /** Avotu nosaukumi kartītēs. */
 export const SOURCE_LABEL: Record<string, string> = {
   own: "VienāVietā", "ss.com": "ss.com", "reklama.lv": "reklama.lv", "mm.lv": "mm.lv", "city24.lv": "city24.lv",
