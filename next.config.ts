@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // pg ir Node.js bibliotēka, to nevajag iekļaut klienta kodā
-  serverExternalPackages: ["pg"],
+  // pg un playwright ir Node.js bibliotēkas, tās nevajag iekļaut klienta kodā (playwright — autoplius.lt ievākšanai)
+  serverExternalPackages: ["pg", "playwright", "playwright-core"],
   poweredByHeader: false,
   // importa faili līdz 15 MB (DEALER_FEED.MAX_BYTES)
   experimental: { serverActions: { bodySizeLimit: "16mb" }, proxyClientMaxBodySize: "16mb" },
