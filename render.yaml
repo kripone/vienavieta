@@ -8,8 +8,9 @@ services:
     runtime: node
     region: frankfurt
     plan: starter # 7 $/mēn., neaizmieg
-    # npm ci (precīzi no package-lock.json); chromium vajadzīgs autoplius.lt ievākšanai
-    buildCommand: npm ci && npx playwright install --with-deps chromium && npm run build
+    # npm ci (precīzi no package-lock.json); chromium vajadzīgs autoplius.lt/city24.lv ievākšanai.
+    # BEZ --with-deps: Render build nav root tiesību (su neizdodas → exit 1); sistēmas bibliotēkas Render vidē jau ir.
+    buildCommand: npm ci && npx playwright install chromium && npm run build
     # Pirms palaišanas: datubāzes migrācijas un vietu/kataloga dati (drīkst atkārtot)
     startCommand: npm run db:migrate && npm run db:seed && npm start
     healthCheckPath: /api/health
