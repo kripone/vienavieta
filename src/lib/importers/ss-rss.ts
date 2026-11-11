@@ -1,7 +1,7 @@
 // ss.com RSS imports. Lieto tikai ss.com publicētās RSS plūsmas (sk. SS_FEEDS) un no tām ņem tikai faktus:
 // marka/modelis, gads, nobraukums, tilpums, cena, istabas, platība, stāvs, sērija, zeme un vieta (no adreses ceļa).
 // Pārdevēja teksts un bildes netiek kopētas; virsrakstu veidojam paši; kartītē ir saite uz oriģinālu.
-import { and, eq, lt, sql } from "drizzle-orm";
+import { and, eq, inArray, lt, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { EXTERNAL_TTL_DAYS, SERIES, SS_FEEDS, type PropertyType } from "../constants";
 import { linkDuplicate } from "../dedupe";
@@ -227,7 +227,7 @@ export function makeCityFinder(rows: PlaceRow[]) {
     const s = slug(t.replace(/\s+un\s+raj\.?$/i, ""));
     if (!s || /rajons$/.test(s)) return null;
     const city = rows.filter((p) => slug(p.region) === s);
-    if (city.length) return city.find((p) => slug(p.name) === "centrs") ?? city[0];
+    if (city.length) return city.find((p) => slug(p.name) === "centrs" || slug(p.name) === "centras") ?? city[0];
     return rows.find((p) => slug(p.name) === s) ?? null;
   };
 }
@@ -458,7 +458,7 @@ export async function importSsRss(fetchXml: (url: string) => Promise<string> = d
   const res: ImportResult = { feeds: 0, items: 0, created: 0, updated: 0, skipped: 0, hidden: 0, duplicates: 0, errors: [] };
   const [placeRows, makeRows, modelRows] = await Promise.all([
     db.select({ id: places.id, name: places.name, lat: places.lat, lon: places.lon, region: regions.name, kind: places.kind, parentId: places.parentId })
-      .from(places).innerJoin(regions, eq(places.regionId, regions.id)).where(eq(regions.country, "LV")),
+      .from(places).innerJoin(regions, eq(places.regionId, regions.id)).where(inArray(regions.country, ["LV", "LT"])),
     db.select({ id: makes.id, name: makes.name, vehicleClass: makes.vehicleClass }).from(makes),
     db.select({ id: models.id, makeId: models.makeId, name: models.name }).from(models),
   ]);
