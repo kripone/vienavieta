@@ -86,7 +86,7 @@ export function parseListPage(html: string): { rows: ApRow[]; lastPage: number }
   const rows: ApRow[] = [];
   for (let i = 0; i < opens.length; i++) {
     const tag = opens[i][0];
-    const href = tag.match(/href="([^"]+)")?.[1] ?? "";
+    const href = tag.match(/href="([^"]+)"/)?.[1] ?? "";
     if (!/autoplius\.lt\/sludinajumi\//.test(href)) continue;
     const externalId = href.match(/-(\d+)\.html/)?.[1];
     if (!externalId) continue;
