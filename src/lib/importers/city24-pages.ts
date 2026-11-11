@@ -12,6 +12,7 @@ import { CITY24_CRAWL, CITY24_SECTIONS, EXTERNAL_TTL_DAYS, type PropertyType } f
 import { linkDuplicate } from "../dedupe";
 import { landLabel } from "../listing-input";
 import { city24Image } from "./city24-format";
+import { withCrawlLock } from "./crawl-lock";
 import { parseLand, slug, type ImportRow, type PlaceRow } from "./ss-rss";
 import { loadCtx } from "./ss-pages";
 
@@ -272,7 +273,14 @@ export async function tickCity24(): Promise<(CrawlResult & { section: string }) 
     const fullDue = !st?.lastFullAt || now - st.lastFullAt.getTime() > CITY24_CRAWL.fullEveryHours * 3600_000;
     const quickDue = !st?.lastQuickAt || now - st.lastQuickAt.getTime() > CITY24_CRAWL.quickEveryMin * 60_000;
     if (!fullDue && !quickDue) continue;
-    const r = await crawlCity24Section(section, fullDue ? "full" : "quick");
+    // pa vienam pārlūkam visiem crawleriem (512 MB instances) un pēc kārtas pārlūku aizveram
+    const r = await withCrawlLock(async () => {
+      try {
+        return await crawlCity24Section(section, fullDue ? "full" : "quick");
+      } finally {
+        await closeBrowser().catch(() => {});
+      }
+    });
     return { ...r, section: section.key };
   }
   return null;
@@ -286,14 +294,25 @@ async function getBrowser() {
   if (!browserPromise) {
     browserPromise = (async () => {
       const { chromium } = await import("playwright");
-      // channel "chromium" = pilnais pārlūks ar jauno headless režīmu (nevis headless shell), sk. autoplius-pages.ts
-      return chromium.launch({ channel: "chromium", headless: true, args: ["--disable-blink-features=AutomationControlled"] });
+      // headless shell (vieglāks par pilno chromium: Render starter ir tikai 512 MB, pilnais deva OOM).
+      // --disable-dev-shm-usage: konteineru /dev/shm ir mazs, citādi pārlūks krīt ar atmiņas kļūdām.
+      return chromium.launch({ headless: true, args: ["--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"] });
     })().catch((e) => {
       browserPromise = null;
       throw e;
     });
   }
   return browserPromise;
+}
+
+/** Aizver pārlūku un sesiju pēc kārtas — atmiņa (512 MB instances) netiek turēta starp kārtām. */
+export async function closeBrowser() {
+  const ctx = contextPromise;
+  contextPromise = null;
+  if (ctx) await ctx.then((c) => c.close()).catch(() => {});
+  const br = browserPromise;
+  browserPromise = null;
+  if (br) await br.then((b) => b.close()).catch(() => {});
 }
 
 /** Atver lapu chromium pārlūkā (apiet Cloudflare pārbaudi) un atgriež HTML. Tikai city24.lv adreses. */
