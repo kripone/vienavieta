@@ -69,6 +69,7 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] ss.com sarakstu lapas (pēc jurista atzinuma): visas lapas reizi diennaktī, jaunie ik 15 min, ss.com izdzēstie tiek noņemti
 - [x] ss.com kemperi un dzīvojamās piekabes (sadaļa "Kravas automašīnas → Kempingi") sadaļā "Kemperi"; piederumi izlaisti, veids (piekabe, alkova, integrētais…) pēc teksta sākuma vai markas
 - [x] autoplius.lt vieglie auto saraksta kartītes ar reālu pārlūku (Playwright, lietotājs 2026-11-11): fakti + saite + sīktēls, nomas sludinājumi izlaisti; ātrā kārta ik 30 min, pilnā (40 lapas) reizi diennaktī; izslēdz ar AUTOPLIUS_CRAWL=off
+- [x] city24.lv īpašumu saraksta kartītes ar reālu pārlūku (Playwright, lietotājs 2026-11-11): dzīvokļi un mājas pārdošanā/īrē, zeme pārdošanā; fakti + saite + sīktēls, karuseļi un jaunie projekti izlaisti; ātrā kārta ik 30 min pa vienai sadaļai, pilnā (30 lapas) reizi diennaktī; izslēdz ar CITY24_CRAWL=off
 - [ ] Citu portālu RSS/partneru plūsmas (reklama.lv, city24.lv, autoplius.lt …)
   - [x] Tehniski gatavs: partneru plūsma /importi (tikai administrators, `dealer_feeds.source`): fakti, viens sīktēls, saite ar UTM
   - [x] City24 formāta JSON (aģentūru eksports vai City24 plūsma), bez brokeru datiem

@@ -6,6 +6,7 @@ import { SS_FULL_EVERY_HOURS, SS_QUICK_EVERY_MIN, SS_SECTIONS } from "../constan
 import { geocodePending, geocodingEnabled } from "../geocode";
 import { ensureDailySnapshot } from "../market";
 import { autopliusEnabled, tickAutoplius } from "./autoplius-pages";
+import { city24Enabled, tickCity24 } from "./city24-pages";
 import { backfillBodies, backfillHouseTail, backfillMakeModel, ensureMotoModels, forceModelRecrawl, forcePlacesRecrawl } from "./backfill";
 import { crawlSection } from "./ss-pages";
 import { detailsEnabled, fillVehicleCities } from "./ss-details";
@@ -111,6 +112,17 @@ export function startSsCrawler() {
       for (;;) {
         const r = await tickAutoplius().catch((e) => (console.error("autoplius.lt ievākšana:", e instanceof Error ? e.message : e), null));
         if (r) console.log(`autoplius.lt ${r.mode}:`, JSON.stringify({ ...r, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
+        await new Promise((res) => setTimeout(res, 60_000));
+      }
+    })();
+  }
+  // city24.lv īpašumi: pa vienai sadaļai kārtā, ātrā ik CITY24_CRAWL.quickEveryMin, pilnā reizi diennaktī (Playwright pārlūks)
+  if (city24Enabled()) {
+    (async () => {
+      await new Promise((r) => setTimeout(r, 210_000));
+      for (;;) {
+        const r = await tickCity24().catch((e) => (console.error("city24.lv ievākšana:", e instanceof Error ? e.message : e), null));
+        if (r) console.log(`city24.lv ${r.mode} ${r.section}:`, JSON.stringify({ ...r, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
         await new Promise((res) => setTimeout(res, 60_000));
       }
     })();
