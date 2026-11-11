@@ -5,6 +5,7 @@ import { db, schema } from "@/db";
 import { SS_FULL_EVERY_HOURS, SS_QUICK_EVERY_MIN, SS_SECTIONS } from "../constants";
 import { geocodePending, geocodingEnabled } from "../geocode";
 import { ensureDailySnapshot } from "../market";
+import { autopliusEnabled, tickAutoplius } from "./autoplius-pages";
 import { backfillBodies, backfillHouseTail, backfillMakeModel, ensureMotoModels, forceModelRecrawl, forcePlacesRecrawl } from "./backfill";
 import { crawlSection } from "./ss-pages";
 import { detailsEnabled, fillVehicleCities } from "./ss-details";
@@ -100,6 +101,17 @@ export function startSsCrawler() {
         const r = await fillVehicleCities().catch((e) => (console.error("ss.com pilsētas:", e instanceof Error ? e.message : e), null));
         if (r && (r.found || r.errors)) console.log("ss.com pilsētas:", JSON.stringify(r));
         await new Promise((res) => setTimeout(res, r ? 15_000 : 600_000));
+      }
+    })();
+  }
+  // autoplius.lt vieglie auto: ātrā kārta ik AUTOPLIUS.quickEveryMin, pilnā reizi diennaktī (Playwright pārlūks)
+  if (autopliusEnabled()) {
+    (async () => {
+      await new Promise((r) => setTimeout(r, 150_000));
+      for (;;) {
+        const r = await tickAutoplius().catch((e) => (console.error("autoplius.lt ievākšana:", e instanceof Error ? e.message : e), null));
+        if (r) console.log(`autoplius.lt ${r.mode}:`, JSON.stringify({ ...r, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
+        await new Promise((res) => setTimeout(res, 60_000));
       }
     })();
   }
