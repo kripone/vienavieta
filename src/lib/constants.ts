@@ -103,7 +103,7 @@ export const PROPERTY_FIELDS: Record<PropertyType, readonly string[]> = {
   "Zeme": ["landM2", "purpose"],
   "Mežs": ["landM2"],
   "Birojs": ["areaM2", "floor", "floors", "heating", "condition", "amenities"],
-  "Tirdzniecības telpas": ["areaM2", "floor", "heating", "condition"],
+  "Tirdzniecības telpas": ["areaM2", "floor", "heating", "condition", "amenities"],
   "Noliktava": ["areaM2", "landM2", "heating", "condition"],
   "Ražošanas telpas": ["areaM2", "landM2", "heating", "condition"],
   "Komercēka": ["areaM2", "landM2", "floors", "material", "heating", "condition", "builtYear"],
