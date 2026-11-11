@@ -34,13 +34,15 @@ export function parseListPage(html: string): { rows: PageRow[]; lastPage: number
     labels.forEach((label, i) => {
       if (label && cells[i]?.length) fields[label] = cells[i];
     });
-    // sīktēla adrese (rādām no ss.com servera, neglabājam un nelejupielādējam)
-    const thumb = body.match(/<img[^>]*src="(https:\/\/i\.ss\.com\/[^"]+\.th2\.jpg)"/)?.[1];
+    // sīktēla adrese (rādām no ss.com servera, neglabājam un nelejupielādējam).
+    // ss.com sarakstos dod 90px (.th2.jpg); lietojam 174px variantu (.t.jpg) — vienīgais lielākais, kas pieejams bez detaļu lapas.
+    const thumb = body.match(/<img[^>]*src="(https:\/\/i\.ss\.com\/[^"]+)\.th2\.jpg"/)?.[1];
+    const thumbUrl = thumb ? `${thumb}.t.jpg` : undefined;
     // sludinājuma teksta sākums: tikai modeļa atpazīšanai, ja ss.com modelis ir "Citi" (neglabājam, nerādām)
     const snippet = text(body.match(/<a[^>]*class="am"[^>]*>([\s\S]*?)<\/a>/)?.[1] ?? "");
     // pilsēta/rajons zem sludinājuma (motocikliem ir; vieglajiem auto ss.com sarakstā nav)
     const region = text(body.match(/<div class="ads_region">([\s\S]*?)<\/div>/)?.[1] ?? "") || undefined;
-    rows.push({ link: `https://www.ss.com${href}`, fields, thumb, snippet, region });
+    rows.push({ link: `https://www.ss.com${href}`, fields, thumb: thumbUrl, snippet, region });
   }
   const pages = [...html.matchAll(/class="navi"[^>]*href="[^"]*?page(\d+)\.html"/g), ...html.matchAll(/href="[^"]*?page(\d+)\.html"[^>]*class="navi"/g)].map((x) => Number(x[1]));
   return { rows, lastPage: Math.max(1, ...pages) };
