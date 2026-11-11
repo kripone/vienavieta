@@ -218,7 +218,9 @@ const pageUrl = (section: City24Section, n: number) => (n <= 1 ? section.url : `
  * Vienas sadaļas kārta. "quick": pirmās CITY24_CRAWL.quickPages lapas (jaunie un cenu maiņas).
  * "full": līdz CITY24_CRAWL.maxPages lapām; izdzēstos paslēpj pēc EXTERNAL_TTL_DAYS (sk. autoplius-pages.ts).
  */
-export async function crawlCity24Section(section: City24Section, mode: "quick" | "full", fetchHtml: (url: string) => Promise<string> = browserFetch, delayMs = CITY24_CRAWL.delayMs): Promise<CrawlResult> {
+export async function crawlCity24Section(section: City24Section, mode: "quick" | "full", fetchHtml?: (url: string) => Promise<string>, delayMs = CITY24_CRAWL.delayMs): Promise<CrawlResult> {
+  // Lapas sākumkarte var būt no citas sadaļas (SSR saturs), tāpēc gaidām tieši šīs sadaļas kartītes
+  fetchHtml ??= (url) => browserFetch(url, `a.object__image[href*="/real-estate/${section.typeSlug}/"]`);
   const started = new Date();
   const res: CrawlResult = { mode, pages: 0, rows: 0, created: 0, updated: 0, priceChanged: 0, duplicates: 0, removed: 0, errors: [], ms: 0 };
   const fullCtx = await loadCtx();
@@ -316,7 +318,7 @@ export async function closeBrowser() {
 }
 
 /** Atver lapu chromium pārlūkā (apiet Cloudflare pārbaudi) un atgriež HTML. Tikai city24.lv adreses. */
-export async function browserFetch(url: string): Promise<string> {
+export async function browserFetch(url: string, waitSelector = "a.object__image"): Promise<string> {
   if (!/(^|\.)city24\.lv$/.test(new URL(url).host)) throw new Error(`Nav city24.lv adrese: ${url}`);
   // viena kopīga konteksta "sesija": kad Cloudflare pārbaude reiz izieta, cf_clearance sīkdatne
   // darbojas arī nākamajām lapām (citādi katra lapa no jauna dabūtu pārbaudi)
@@ -327,7 +329,7 @@ export async function browserFetch(url: string): Promise<string> {
     // Cloudflare pārbaudei ("Mazliet uzgaidiet…") ļaujam pabeigties: gaidām kartītes, vajadzības gadījumā pārlādējam
     for (let attempt = 1; ; attempt++) {
       try {
-        await page.waitForSelector("a.object__image", { timeout: 40_000 });
+        await page.waitForSelector(waitSelector, { timeout: 40_000 });
         return await page.content();
       } catch (e) {
         const title = await page.title().catch(() => "");
