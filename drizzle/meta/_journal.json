@@ -176,6 +176,13 @@
       "when": 1794515118470,
       "tag": "0024_military_human_robot",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1794518943549,
+      "tag": "0025_strange_agent_brand",
+      "breakpoints": true
     }
   ]
 }

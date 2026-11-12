@@ -344,3 +344,16 @@ export const REGION_GROUPS_LOC: Record<string, string[]> = {
   "g:pieriga": ["Ādažu novads", "Ķekavas novads", "Mārupes novads", "Olaines novads", "Ropažu novads", "Salaspils novads", "Saulkrastu novads", "Siguldas novads"],
 };
 export const REGION_GROUP_LABEL: Record<string, string> = { "g:pieriga": "Rīgas rajons (Pierīga)" };
+
+/** Favorīta statuss lietotāja piezīmēs (favorites.stage). */
+export const FAVORITE_STAGES = ["new", "called", "viewing", "seen", "deal", "rejected"] as const;
+export const FAVORITE_STAGE_LABEL: Record<(typeof FAVORITE_STAGES)[number], string> = {
+  new: "Vēl neesmu sazinājies",
+  called: "Sazinājos",
+  viewing: "Sarunāta apskate",
+  seen: "Apskatīju",
+  deal: "Vienojamies par cenu",
+  rejected: "Atmetu",
+};
+export const FAVORITE_NOTE_MAX = 1000;
+export const SHARE_COMMENT_MAX = 500;

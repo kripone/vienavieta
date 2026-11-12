@@ -313,9 +313,38 @@ export const favorites = pgTable(
     priceAtSave: integer("price_at_save"),
     /** Cena, par kuru pēdējo reizi sūtīts cenu krituma paziņojums. */
     notifiedPrice: integer("notified_price"),
+    /** Privāta piezīme (redz tikai pats lietotājs) un statuss (FAVORITE_STAGES). */
+    note: text("note"),
+    stage: text("stage"),
     createdAt: createdAt(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.listingId] })],
+);
+
+/** Favorītu saraksta kopīgošana ar saiti (/saraksts/<token>); atsauc ar revokedAt. Privātās piezīmes kopīgotajā skatā nerāda. */
+export const favoriteShares = pgTable("favorite_shares", {
+  id: id(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  createdAt: createdAt(),
+});
+
+/** Kopīgotā saraksta skatītāju vērtējumi un komentāri (bez reģistrācijas; visitorKey = nejauša atslēga pārlūkā). */
+export const shareReactions = pgTable(
+  "share_reactions",
+  {
+    id: id(),
+    shareId: text("share_id").notNull().references(() => favoriteShares.id, { onDelete: "cascade" }),
+    listingId: text("listing_id").notNull().references(() => listings.id, { onDelete: "cascade" }),
+    visitorKey: text("visitor_key").notNull(),
+    name: text("name").notNull(),
+    vote: text("vote"),
+    comment: text("comment"),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("share_reactions_one_idx").on(t.shareId, t.listingId, t.visitorKey)],
 );
 
 export const savedSearches = pgTable(
