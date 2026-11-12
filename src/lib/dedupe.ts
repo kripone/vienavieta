@@ -24,6 +24,9 @@ export async function findDuplicate(l: Row): Promise<Row | null> {
   let extra;
   if (l.kind === "vehicle") {
     if (!l.year || !(l.makeId || l.makeText)) return null; // par maz datu
+    const engineNum = l.engineL && /^\d+(\.\d+)?$/.test(l.engineL) ? Number(l.engineL) : null;
+    // "Benzīns" un "Benzīns/gāze" uzskatāmi par saderīgiem (viens portāls gāzi norāda, otrs nē)
+    const fuelGroup = l.fuel === "Benzīns" || l.fuel === "Benzīns/gāze" ? ["Benzīns", "Benzīns/gāze"] : l.fuel ? [l.fuel] : null;
     extra = [
       eq(listings.vehicleClass, l.vehicleClass!),
       // gads: līdzīgs (±1), jo pārdevēji portālos mēdz norādīt gadu ar nobīdi
@@ -38,6 +41,10 @@ export async function findDuplicate(l: Row): Promise<Row | null> {
       l.placeId ? or(isNull(listings.placeId), eq(listings.placeId, l.placeId)) : undefined,
       // krāsa: ja zināma abiem (autoplius saraksta kartītēs krāsas nav, ss.com detaļās ir), tai jāsakrīt
       l.color ? or(isNull(listings.color), eq(listings.color, l.color)) : undefined,
+      // dzinēja tilpums: ja zināms abiem, jāsakrīt ±0.1 l (2.0 pret 3.0 nav tas pats auto)
+      engineNum != null ? or(isNull(listings.engineL), sql`abs((${listings.engineL})::numeric - ${engineNum}) <= 0.1`) : undefined,
+      // degviela: ja zināma abiem, jāsakrīt (dīzelis pret benzīnu nav tas pats auto)
+      fuelGroup ? or(isNull(listings.fuel), inArray(listings.fuel, fuelGroup)) : undefined,
     ];
   } else {
     if (!l.placeId || !(l.rooms || l.areaM2 || l.landM2)) return null;
