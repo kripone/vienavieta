@@ -69,6 +69,9 @@ services:
       # Apmeklējumu statistika (Cloudflare Web Analytics, bez sīkdatnēm): vietnes JS fragmenta "token"
       - key: CF_ANALYTICS_TOKEN
         sync: false
+      # Brauciena laika zona meklēšanā (openrouteservice.org bezmaksas atslēga); bez tās minūtes rēķina aptuveni pēc attāluma
+      - key: ORS_API_KEY
+        sync: false
       # Ielu skats sludinājuma kartē lapā (Cloud konsolē jāieslēdz "Maps Embed API"); bez tā rāda saiti uz Google Maps
       - key: NEXT_PUBLIC_STREETVIEW_EMBED
         value: "on"

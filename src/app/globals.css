@@ -515,3 +515,17 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .fin-result dt { color: var(--muted); }
 .fin-result dd { margin: 0; font-variant-numeric: tabular-nums; }
 @media (max-width: 640px) { .fin-box { grid-template-columns: 1fr; } }
+
+/* Brīvā teksta meklēšana un attāluma zona (src/components/smart-search.tsx) */
+.smart { display: grid; gap: 8px; margin-bottom: 12px; }
+.smart-text { display: flex; gap: 8px; }
+.smart-text input { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 12px 14px; border: 2px solid var(--accent); border-radius: 12px; background: var(--surface); color: var(--fg); }
+.smart-text .btn { flex: none; border-radius: 12px; }
+.smart-near > summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--accent); list-style: none; width: fit-content; }
+.smart-near > summary::-webkit-details-marker { display: none; }
+.smart-near-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.smart-near-row input { flex: 1 1 220px; min-width: 0; font: inherit; font-size: 16px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--fg); }
+.smart-near-row select { font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--fg); }
+.tq-note { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; }
+.tq-note p { margin: 0 0 4px; } .tq-note p:last-child { margin: 0; }
+@media (max-width: 560px) { .smart-text .btn span { display: none; } .smart-text input { font-size: 15px; padding: 11px 12px; } }

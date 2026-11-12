@@ -7,6 +7,7 @@ import { SaveSearchButton } from "./save-search-button";
 import { SearchFilters } from "./search-filters";
 import { SearchMapLazy } from "./search-map-lazy";
 import { SortSelect } from "./sort-select";
+import { SmartSearch } from "./smart-search";
 import { TypeStrip } from "./type-strip";
 import { VEHICLE_CLASS_LABEL, VEHICLE_CLASSES, type VehicleClass } from "@/lib/constants";
 import { alsoAt } from "@/lib/dedupe";
@@ -14,7 +15,7 @@ import { priceEvals } from "@/lib/price-eval";
 import { vzdBadges } from "@/lib/vzd";
 import { favoriteIds } from "@/lib/favorites";
 import { regionOptions } from "@/lib/listings";
-import { parseSearch, searchListings, typeCounts, sourceCounts } from "@/lib/search";
+import { describeSearch, parseSearch, searchListings, typeCounts, sourceCounts } from "@/lib/search";
 import { getCurrentUser } from "@/lib/session";
 
 import { formatPrice } from "@/lib/format";
@@ -108,6 +109,19 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
             }} />
           </>
         )}
+        <SmartSearch flat={flat} action={lp("/mekle")} />
+        {flat.tq && !landing && (
+          <div className="tq-note">
+            <p>🔎 <b>„{flat.tq}”</b></p>
+            <p>{t("Sapratu")}: <b>{await describeSearch(s).catch(() => "")}</b>. <span className="fine">{t("Filtri ir iestatīti pēc tava teksta; vari tos labot sadaļā „Filtri”.")}</span></p>
+            {(flat.tn ?? "").split(",").filter(Boolean).map((n) => (
+              <p key={n} className="fine">
+                {n === "economy" ? t("„Ekonomisks” saprasts kā dzinējs līdz 2,0 l.") : t("„{x}”: citu portālu sludinājumos to nevar pārbaudīt, tāpēc pēc tā nav filtrēts.", { x: t(n.replace("unchecked:", "")) })}
+              </p>
+            ))}
+            {flat.tu && <p className="fine">{t("Nesaprasti vārdi:")} {flat.tu}</p>}
+          </div>
+        )}
         {stripMode && <TypeStrip mode={stripMode} flat={flat} counts={counts} />}
         <SearchMapLazy query={pointsQuery} zone={flat.zone} />
         <div className="results-head">
@@ -121,7 +135,16 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
         <Suspense>
           <SaveSearchButton loggedIn={Boolean(user)} filters={flat} />
         </Suspense>
-        {s.zone && <p className="zone-note">{t("Rāda tikai sludinājumus iezīmētajā zonā.")}</p>}
+        {s.zone && (() => {
+          const [unit, value, approx, label] = (flat.zl ?? "").split("|");
+          if (!label) return <p className="zone-note">{t("Rāda tikai sludinājumus iezīmētajā zonā.")}</p>;
+          return (
+            <p className="zone-note">
+              📍 {unit === "min" ? t("Rāda sludinājumus līdz {n} min braucienā ar auto no: {a}", { n: value, a: label }) : t("Rāda sludinājumus līdz {n} km no: {a}", { n: value, a: label })}
+              {approx === "1" ? ` (${t("aptuveni, pēc attāluma")})` : ""}. {t("Transportam vieta ir zināma tikai pilsētas vai pagasta līmenī.")}
+            </p>
+          );
+        })()}
         {!result ? (
           <div className="notice">
             Neizdevās pieslēgties datubāzei. Pārbaudi, vai tā darbojas (<code>docker compose up -d</code>).
