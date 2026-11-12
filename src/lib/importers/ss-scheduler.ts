@@ -6,6 +6,7 @@ import { SS_FULL_EVERY_HOURS, SS_QUICK_EVERY_MIN, SS_SECTIONS } from "../constan
 import { geocodePending, geocodingEnabled } from "../geocode";
 import { ensureDailySnapshot } from "../market";
 import { autopliusEnabled, tickAutoplius } from "./autoplius-pages";
+import { tickZip, zipEnabled } from "./zip-pages";
 import { city24Enabled, tickCity24 } from "./city24-pages";
 import { backfillBodies, backfillHouseTail, backfillMakeModel, ensureMotoModels, forceModelRecrawl, forcePlacesRecrawl } from "./backfill";
 import { crawlSection } from "./ss-pages";
@@ -112,6 +113,17 @@ export function startSsCrawler() {
       for (;;) {
         const rs = await tickAutoplius().catch((e) => (console.error("autoplius.lt ievākšana:", e instanceof Error ? e.message : e), null));
         for (const r of rs ?? []) console.log(`autoplius.lt ${r.key} ${r.mode}:`, JSON.stringify({ ...r, key: undefined, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
+        await new Promise((res) => setTimeout(res, 60_000));
+      }
+    })();
+  }
+  // zip.lv: publiskais JSON API bez Cloudflare — droši var darboties arī serverī (bez pārlūka)
+  if (zipEnabled()) {
+    (async () => {
+      await new Promise((r) => setTimeout(r, 240_000));
+      for (;;) {
+        const r = await tickZip().catch((e) => (console.error("zip.lv ievākšana:", e instanceof Error ? e.message : e), null));
+        if (r) console.log(`zip.lv ${r.section} ${r.mode}:`, JSON.stringify({ ...r, section: undefined, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
         await new Promise((res) => setTimeout(res, 60_000));
       }
     })();

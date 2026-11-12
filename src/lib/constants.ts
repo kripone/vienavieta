@@ -222,7 +222,7 @@ export const AUTOPLIUS_LT = {
 /** Avotu nosaukumi kartītēs. */
 export const SOURCE_LABEL: Record<string, string> = {
   own: "VienāVietā", "ss.com": "ss.com", "reklama.lv": "reklama.lv", "mm.lv": "mm.lv", "city24.lv": "city24.lv",
-  "auto24.lv": "auto24.lv", "autoplius.lt": "autoplius.lt", "aruodas.lt": "aruodas.lt",
+  "auto24.lv": "auto24.lv", "autoplius.lt": "autoplius.lt", "aruodas.lt": "aruodas.lt", "zip.lv": "zip.lv", "pp.lv": "pp.lv",
 };
 
 /** Cenas novērtējums pret līdzīgiem: zem GOOD — "Laba cena", virs HIGH — "Virs tirgus"; vajag vismaz MIN līdzīgus. */
@@ -278,6 +278,28 @@ export const CITY24_SECTIONS = [
 ] as const;
 /** Pauze starp lapām, ātrās kārtas lapu skaits, pilnās kārtas maksimums un biežums (sk. AUTOPLIUS). */
 export const CITY24_CRAWL = { delayMs: 3000, quickPages: 2, maxPages: 30, quickEveryMin: 30, fullEveryHours: 24 } as const;
+
+/**
+ * zip.lv kategorijas (imports src/lib/importers/zip-pages.ts caur portāla publisko JSON API — Cloudflare nav,
+ * tāpēc var darboties arī serverī). catId no kategorijas lapas _listingData. Avota enum: "zip.lv".
+ */
+export const ZIP_SECTIONS: readonly {
+  key: string;
+  catId: number;
+  kind: "vehicle" | "property";
+  vehicleClass?: VehicleClass;
+  propertyType?: PropertyType;
+  deal?: "sell" | "rent";
+}[] = [
+  { key: "zip:cars", catId: 69, kind: "vehicle", vehicleClass: "car" },
+  { key: "zip:trucks", catId: 131, kind: "vehicle", vehicleClass: "truck" },
+  { key: "zip:flats-sale", catId: 63, kind: "property", propertyType: "Dzīvoklis", deal: "sell" },
+  { key: "zip:flats-rent", catId: 138, kind: "property", propertyType: "Dzīvoklis", deal: "rent" },
+  { key: "zip:houses-sale", catId: 65, kind: "property", propertyType: "Māja", deal: "sell" },
+  { key: "zip:land-sale", catId: 68, kind: "property", propertyType: "Zeme", deal: "sell" },
+];
+/** Pauze starp API pieprasījumiem, ātrās kārtas lapu skaits, pilnās kārtas maksimums un biežums. */
+export const ZIP_CRAWL = { delayMs: 1000, quickPages: 1, maxPages: 40, quickEveryMin: 30, fullEveryHours: 24 } as const;
 
 /**
  * Portāla uzturētājs (juridiskās lapas un kājene). null = vēl nav izlemts, lapās rāda "tiks norādīts".
