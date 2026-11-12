@@ -6,7 +6,7 @@
 // Nomas sludinājumi (cena "Parai/Mēnesī") tiek izlaisti — ņemam tikai pārdošanas sludinājumus.
 import { and, eq, inArray, lt, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { AUTOPLIUS, EXTERNAL_TTL_DAYS } from "../constants";
+import { AUTOPLIUS, AUTOPLIUS_LT, EXTERNAL_TTL_DAYS } from "../constants";
 import { linkDuplicate } from "../dedupe";
 import { inferBody } from "../illustrations";
 import { findMake, matchModel, slug, vehicleTitle, type ImportRow, type MakeRow, type ModelRow, type PlaceRow } from "./ss-rss";
@@ -36,27 +36,28 @@ const decode = (s: string) =>
 const text = (html: string) => decode(html.replace(/<[^>]+>/g, "")).replace(/\s+/g, " ").trim();
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/** "Mehāniskā"/"Automātiskā" → mūsu katalogs. */
+/** "Mehāniskā"/"Automātiskā" (lv) vai "Mechaninė"/"Automatinė" (lt) → mūsu katalogs. */
 export function mapGearbox(v?: string | null) {
   const s = (v ?? "").toLowerCase();
-  if (s.startsWith("meh")) return "Manuāla";
+  if (s.startsWith("meh") || s.startsWith("mec")) return "Manuāla";
   if (s.startsWith("aut")) return "Automāts";
   return null;
 }
 
-/** autoplius degvielas pieraksts (var būt vairākas ar " / ") → mūsu katalogs. */
+/** autoplius degvielas pieraksts (var būt vairākas ar " / "; lv un lt valodās) → mūsu katalogs. */
 export function mapFuel(v?: string | null) {
   const s = (v ?? "").toLowerCase();
   if (!s) return null;
   if (s.includes("benz") && s.includes("elektr")) return "Hibrīds";
   if (s.startsWith("elektr")) return "Elektro";
-  if (s.includes("dīzel") || s.includes("dzel")) return "Dīzelis";
-  if (s.includes("gāze") || s.includes("gaze")) return "Benzīns/gāze";
+  if (s.includes("dīzel") || s.includes("dzel") || s.includes("dyzel")) return "Dīzelis";
+  if (s.includes("gāze") || s.includes("gaze") || s.includes("duj")) return "Benzīns/gāze";
   if (s.includes("benz")) return "Benzīns";
   return null;
 }
 
 const BODY_MAP: Record<string, string> = {
+  // latviski
   sedans: "Sedans",
   limuzins: "Sedans",
   universalas: "Universāls",
@@ -70,6 +71,18 @@ const BODY_MAP: Record<string, string> = {
   kabriolets: "Kabriolets",
   pikaps: "Pikaps",
   mikroautobuss: "Mikroautobuss",
+  // lietuviski (lt.autoplius.lt)
+  sedanas: "Sedans",
+  limuzinas: "Sedans",
+  hecbekas: "Hečbeks",
+  visureigis: "Apvidus",
+  "visureigis-krosoveris": "Apvidus",
+  krosoveris: "Apvidus",
+  minivenas: "Minivens",
+  kabrioletas: "Kabriolets",
+  "kabrioletas-roadsteris": "Kabriolets",
+  pikapas: "Pikaps",
+  mikroautobusas: "Mikroautobuss",
 };
 
 /** autoplius virsbūves nosaukums (saraksta kartītē zem virsraksta) → mūsu katalogs. */
@@ -88,7 +101,7 @@ export function parseListPage(html: string): { rows: ApRow[]; lastPage: number }
   for (let i = 0; i < opens.length; i++) {
     const tag = opens[i][0];
     const href = tag.match(/href="([^"]+)"/)?.[1] ?? "";
-    if (!/autoplius\.lt\/sludinajumi\//.test(href)) continue;
+    if (!/autoplius\.lt\/(sludinajumi|skelbimai)\//.test(href)) continue;
     const externalId = href.match(/-(\d+)\.html/)?.[1];
     if (!externalId) continue;
     const body = html.slice(opens[i].index! + tag.length, opens[i + 1]?.index ?? html.length);
@@ -114,8 +127,8 @@ export function parseListPage(html: string): { rows: ApRow[]; lastPage: number }
     const spans = [...paramsBlock.matchAll(/<span[^>]*>([\s\S]*?)<\/span>/g)].map((m) => text(m[1])).filter(Boolean);
     const engineRaw = spans.find((s) => /kW/i.test(s)) ?? null;
     const mileageRaw = spans.find((s) => /km$/i.test(s)) ?? null;
-    const gearboxRaw = spans.find((s) => /^(mehāniskā|automātiskā)/i.test(s)) ?? null;
-    const fuelRaw = spans.find((s) => s !== engineRaw && s !== mileageRaw && s !== gearboxRaw && /(benz|dīzel|dzel|elektr|gāze|gaze)/i.test(s)) ?? null;
+    const gearboxRaw = spans.find((s) => /^(mehāniskā|automātiskā|mechaninė|automatinė)/i.test(s)) ?? null;
+    const fuelRaw = spans.find((s) => s !== engineRaw && s !== mileageRaw && s !== gearboxRaw && /(benz|dīzel|dzel|dyzel|elektr|gāze|gaze|duj)/i.test(s)) ?? null;
     const used = new Set([engineRaw, mileageRaw, gearboxRaw, fuelRaw]);
     const city = [...spans].reverse().find((s) => !used.has(s))?.replace(/,\s*(Latvija|Lietuva|Igaunija)\s*$/i, "") ?? null;
 
@@ -236,22 +249,28 @@ async function saveRows(apRows: ApRow[], ctx: Ctx, res: CrawlResult, mode: "quic
   }
 }
 
-const pageUrl = (n: number) => (n <= 1 ? AUTOPLIUS.url : `${AUTOPLIUS.url}?page_nr=${n}`);
+/** Ievākšanas mērķis: viena valoda/plūsma ar savu crawl_state atslēgu un lapas adresi. */
+export type ApTarget = { key: string; url: string; quickPages: number; maxPages: number; quickEveryMin: number; fullEveryHours: number };
+
+/** Plūsmas, kuras ievācam: latviešu (lv.autoplius.lt) un lietuviešu (autoplius.lt). Sludinājumu ID ir kopīgi. */
+export const AP_TARGETS: ApTarget[] = [AUTOPLIUS, AUTOPLIUS_LT];
+
+const pageUrl = (t: ApTarget, n: number) => (n <= 1 ? t.url : `${t.url}?page_nr=${n}`);
 
 /**
- * Viena kārta. "quick": pirmās AUTOPLIUS.quickPages lapas (jaunie un cenu maiņas).
- * "full": līdz AUTOPLIUS.maxPages lapām; beigās neredzētie tiek atzīmēti kā izdzēsti avotā.
+ * Viena kārta vienai plūsmai. "quick": pirmās target.quickPages lapas (jaunie un cenu maiņas).
+ * "full": līdz target.maxPages lapām; beigās ilgi neredzētie tiek paslēpti (sk. EXTERNAL_TTL_DAYS).
  */
-export async function crawlAutoplius(mode: "quick" | "full", fetchHtml: (url: string) => Promise<string> = browserFetch, delayMs = AUTOPLIUS.delayMs): Promise<CrawlResult> {
+export async function crawlAutoplius(mode: "quick" | "full", target: ApTarget = AUTOPLIUS, fetchHtml: (url: string) => Promise<string> = browserFetch, delayMs = AUTOPLIUS.delayMs): Promise<CrawlResult> {
   const started = new Date();
   const res: CrawlResult = { mode, pages: 0, rows: 0, created: 0, updated: 0, priceChanged: 0, duplicates: 0, removed: 0, errors: [], ms: 0 };
   const fullCtx = await loadCtx();
   const ctx: Ctx = { makes: fullCtx.makes, models: fullCtx.models, findCity: fullCtx.findCity };
-  let last: number = mode === "quick" ? AUTOPLIUS.quickPages : AUTOPLIUS.maxPages;
+  let last: number = mode === "quick" ? target.quickPages : target.maxPages;
   let failsInRow = 0;
   for (let n = 1; n <= last; n++) {
     try {
-      const { rows, lastPage } = parseListPage(await fetchHtml(pageUrl(n)));
+      const { rows, lastPage } = parseListPage(await fetchHtml(pageUrl(target, n)));
       if (n === 1) last = Math.min(last, lastPage);
       res.pages++;
       res.rows += rows.length;
@@ -280,7 +299,7 @@ export async function crawlAutoplius(mode: "quick" | "full", fetchHtml: (url: st
   res.ms = Date.now() - started.getTime();
 
   const set = mode === "full" ? { lastFullAt: started, lastResult: res as unknown as Record<string, unknown> } : { lastQuickAt: started };
-  await db.insert(crawlState).values({ name: AUTOPLIUS.key, ...set }).onConflictDoUpdate({ target: crawlState.name, set });
+  await db.insert(crawlState).values({ name: target.key, ...set }).onConflictDoUpdate({ target: crawlState.name, set });
   return res;
 }
 
@@ -289,21 +308,28 @@ export function autopliusEnabled() {
   return v === "on" || (process.env.NODE_ENV === "production" && v !== "off");
 }
 
-/** Plānotāja solis: izpilda ātro vai pilno kārtu, ja pienācis laiks; citādi null. */
-export async function tickAutoplius(): Promise<CrawlResult | null> {
-  const st = await db.query.crawlState.findFirst({ where: eq(crawlState.name, AUTOPLIUS.key) });
-  const now = Date.now();
-  const fullDue = !st?.lastFullAt || now - st.lastFullAt.getTime() > AUTOPLIUS.fullEveryHours * 3600_000;
-  const quickDue = !st?.lastQuickAt || now - st.lastQuickAt.getTime() > AUTOPLIUS.quickEveryMin * 60_000;
-  if (!fullDue && !quickDue) return null;
+/**
+ * Plānotāja solis: katrai plūsmai (LV un LT) izpilda ātro vai pilno kārtu, ja pienācis laiks.
+ * Atgriež izpildīto kārtu rezultātus (ar plūsmas atslēgu) vai null, ja neviena kārta nav pienākusies.
+ */
+export async function tickAutoplius(): Promise<(CrawlResult & { key: string })[] | null> {
+  const out: (CrawlResult & { key: string })[] = [];
   // pa vienam pārlūkam visiem crawleriem (512 MB instances) un pēc kārtas pārlūku aizveram
-  return withCrawlLock(async () => {
-    try {
-      return await crawlAutoplius(fullDue ? "full" : "quick");
-    } finally {
-      await closeBrowser().catch(() => {});
+  await withCrawlLock(async () => {
+    for (const target of AP_TARGETS) {
+      const st = await db.query.crawlState.findFirst({ where: eq(crawlState.name, target.key) });
+      const now = Date.now();
+      const fullDue = !st?.lastFullAt || now - st.lastFullAt.getTime() > target.fullEveryHours * 3600_000;
+      const quickDue = !st?.lastQuickAt || now - st.lastQuickAt.getTime() > target.quickEveryMin * 60_000;
+      if (!fullDue && !quickDue) continue;
+      try {
+        out.push({ ...(await crawlAutoplius(fullDue ? "full" : "quick", target)), key: target.key });
+      } finally {
+        await closeBrowser().catch(() => {});
+      }
     }
   });
+  return out.length ? out : null;
 }
 
 // ---------- lapu ielāde ar reālu pārlūku (Playwright) ----------
