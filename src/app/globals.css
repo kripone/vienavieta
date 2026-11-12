@@ -529,3 +529,19 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .tq-note { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; }
 .tq-note p { margin: 0 0 4px; } .tq-note p:last-child { margin: 0; }
 @media (max-width: 560px) { .smart-text .btn span { display: none; } .smart-text input { font-size: 15px; padding: 11px 12px; } }
+
+/* Meklēšanas lauka krāsainā, rotējošā mala ("AI" stilā) */
+@property --smart-a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes smart-spin { to { --smart-a: 360deg; } }
+.smart-text input {
+  border: 2.5px solid transparent;
+  background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    conic-gradient(from var(--smart-a), #ff5f6d, #ffc371, #47e5a0, #3fa9f5, #a56bff, #ff5fa2, #ff5f6d) border-box;
+  animation: smart-spin 4s linear infinite;
+  box-shadow: 0 0 14px rgba(165, 107, 255, .22), 0 0 4px rgba(63, 169, 245, .25);
+  outline: none;
+  transition: box-shadow .2s;
+}
+.smart-text input:focus { animation-duration: 1.8s; box-shadow: 0 0 22px rgba(165, 107, 255, .4), 0 0 8px rgba(63, 169, 245, .4); }
+@media (prefers-reduced-motion: reduce) { .smart-text input { animation: none; } }
