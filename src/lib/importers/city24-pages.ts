@@ -45,7 +45,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
  * tips sakrīt ar sadaļu (lapā ir arī citu sadaļu karuseļi); dublikātus (slick kloni) izlaižam.
  */
 export function parseListPage(html: string, section: City24Section): { rows: C24Row[]; lastPage: number } {
-  const opens = [...html.matchAll(/<div class="object object--list object--result[^"]*">/g)];
+  const opens = [...html.matchAll(/<div class="object object--list object--result[^"]*"[^>]*>/g)];
   const rows: C24Row[] = [];
   const seen = new Set<string>();
   for (let i = 0; i < opens.length; i++) {
@@ -219,8 +219,11 @@ const pageUrl = (section: City24Section, n: number) => (n <= 1 ? section.url : `
  * "full": līdz CITY24_CRAWL.maxPages lapām; izdzēstos paslēpj pēc EXTERNAL_TTL_DAYS (sk. autoplius-pages.ts).
  */
 export async function crawlCity24Section(section: City24Section, mode: "quick" | "full", fetchHtml?: (url: string) => Promise<string>, delayMs = CITY24_CRAWL.delayMs): Promise<CrawlResult> {
-  // Lapas sākumkarte var būt no citas sadaļas (SSR saturs), tāpēc gaidām tieši šīs sadaļas kartītes
-  fetchHtml ??= (url) => browserFetch(url, `a.object__image[href*="/real-estate/${section.typeSlug}/"]`);
+  // Lapas sākumkarte var būt no citas sadaļas (SSR saturs), tāpēc gaidām tieši šīs sadaļas kartītes.
+  // Galvenais saraksts ielādējas ar JS: līdz tam redzami skeleta aizpildītāji (object--loading) un
+  // karuseļu kartītes (object--grid) ar šīs pašas sadaļas saitēm — gaidām ielādētu saraksta kartīti
+  // (bez object--loading klases), citādi dabūtu skeleta HTML un 0 rindu (2026-11-12 city24 izmaiņas).
+  fetchHtml ??= (url) => browserFetch(url, `div.object--result:not(.object--loading) a.object__image[href*="/real-estate/${section.typeSlug}/"]`);
   const started = new Date();
   const res: CrawlResult = { mode, pages: 0, rows: 0, created: 0, updated: 0, priceChanged: 0, duplicates: 0, removed: 0, errors: [], ms: 0 };
   const fullCtx = await loadCtx();
