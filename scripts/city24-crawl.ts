@@ -12,9 +12,15 @@ async function main() {
   if (/-a(:\d+)?\//.test(url) || /-a\.[a-z0-9-]*\//.test(url) || url.includes("-a/")) {
     console.warn("UZMANĪBU: DATABASE_URL izskatās pēc iekšējās Render adreses — ārpus Render tā nestrādās. Lieto ārējo (External) virkni.");
   }
-  const r = await tickCity24();
-  if (r) console.log(`city24.lv ${r.section} ${r.mode}:`, JSON.stringify({ ...r, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
-  else console.log("city24.lv: kārta vēl nav pienākusies (sk. crawl_state)");
+  // izpildām vairākas kārtas pēc kārtas (katrs tick apstrādā vienu sadaļu), līdz visas sadaļas apdarītas
+  for (let i = 0; i < 6; i++) {
+    const r = await tickCity24();
+    if (!r) {
+      if (i === 0) console.log("city24.lv: kārta vēl nav pienākusies (sk. crawl_state)");
+      break;
+    }
+    console.log(`city24.lv ${r.section} ${r.mode}:`, JSON.stringify({ ...r, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
+  }
   await closeBrowser().catch(() => {});
 }
 main().then(() => process.exit(0), (e) => (console.error(e), process.exit(1)));
