@@ -271,12 +271,14 @@ export async function crawlAutoplius(mode: "quick" | "full", target: ApTarget = 
   for (let n = 1; n <= last; n++) {
     try {
       const { rows, lastPage } = parseListPage(await fetchHtml(pageUrl(target, n)));
-      if (n === 1) last = Math.min(last, lastPage);
       res.pages++;
       res.rows += rows.length;
       await saveRows(rows, ctx, res, mode);
       failsInRow = 0;
       if (!rows.length) break;
+      // lapošana ir slidošs logs (lapā redzami tikai ~5 numuri ap pašreizējo): pilnajā kārtā
+      // ejam līdz maxPages, bet apstājamies, kad saitēs vairs nav nākamā lapas numura
+      if (mode === "full" && lastPage <= n) break;
     } catch (err) {
       res.errors.push(`lapa ${n}: ${err instanceof Error ? err.message : err}`);
       if (++failsInRow >= 3) break;
