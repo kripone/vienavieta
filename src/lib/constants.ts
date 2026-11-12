@@ -302,6 +302,28 @@ export const ZIP_SECTIONS: readonly {
 export const ZIP_CRAWL = { delayMs: 1000, quickPages: 1, maxPages: 40, quickEveryMin: 30, fullEveryHours: 24 } as const;
 
 /**
+ * pp.lv kategorijas (imports src/lib/importers/pp-pages.ts caur publisko JSON API apipub.pp.lv — Cloudflare nav).
+ * catId no /categories/tree. API neatbalsta lapošanu: lasām 20 jaunākos pa kategorijai, vecākus
+ * paslēpj EXTERNAL_TTL_DAYS noteikums. Darījuma veids (pārdod/īrē) nāk no katra sludinājuma action.
+ * Avota enum: "pp.lv".
+ */
+export const PP_SECTIONS: readonly {
+  key: string;
+  catId: number;
+  kind: "vehicle" | "property";
+  vehicleClass?: VehicleClass;
+  propertyType?: PropertyType;
+}[] = [
+  { key: "pp:cars", catId: 2, kind: "vehicle", vehicleClass: "car" },
+  { key: "pp:moto", catId: 2114, kind: "vehicle", vehicleClass: "moto" },
+  { key: "pp:flats", catId: 3811, kind: "property", propertyType: "Dzīvoklis" },
+  { key: "pp:houses", catId: 3813, kind: "property", propertyType: "Māja" },
+  { key: "pp:land", catId: 3817, kind: "property", propertyType: "Zeme" },
+];
+/** Ātrās un pilnās kārtas biežums (API lapu nav — abas kārtas lasa 20 jaunākos). */
+export const PP_CRAWL = { delayMs: 1000, quickEveryMin: 30, fullEveryHours: 24 } as const;
+
+/**
  * Portāla uzturētājs (juridiskās lapas un kājene). null = vēl nav izlemts, lapās rāda "tiks norādīts".
  * Aizpildīt pirms publiskas palaišanas.
  */

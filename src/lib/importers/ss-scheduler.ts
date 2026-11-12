@@ -7,6 +7,7 @@ import { geocodePending, geocodingEnabled } from "../geocode";
 import { ensureDailySnapshot } from "../market";
 import { autopliusEnabled, tickAutoplius } from "./autoplius-pages";
 import { tickZip, zipEnabled } from "./zip-pages";
+import { ppEnabled, tickPp } from "./pp-pages";
 import { city24Enabled, tickCity24 } from "./city24-pages";
 import { backfillBodies, backfillHouseTail, backfillMakeModel, ensureMotoModels, forceModelRecrawl, forcePlacesRecrawl } from "./backfill";
 import { crawlSection } from "./ss-pages";
@@ -124,6 +125,17 @@ export function startSsCrawler() {
       for (;;) {
         const r = await tickZip().catch((e) => (console.error("zip.lv ievākšana:", e instanceof Error ? e.message : e), null));
         if (r) console.log(`zip.lv ${r.section} ${r.mode}:`, JSON.stringify({ ...r, section: undefined, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
+        await new Promise((res) => setTimeout(res, 60_000));
+      }
+    })();
+  }
+  // pp.lv: publiskais JSON API bez Cloudflare — droši var darboties arī serverī (bez pārlūka)
+  if (ppEnabled()) {
+    (async () => {
+      await new Promise((r) => setTimeout(r, 300_000));
+      for (;;) {
+        const r = await tickPp().catch((e) => (console.error("pp.lv ievākšana:", e instanceof Error ? e.message : e), null));
+        if (r) console.log(`pp.lv ${r.section} ${r.mode}:`, JSON.stringify({ ...r, section: undefined, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
         await new Promise((res) => setTimeout(res, 60_000));
       }
     })();
