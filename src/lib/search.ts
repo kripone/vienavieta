@@ -11,7 +11,7 @@ import {
 
 const { listings, places, regions, makes, models, users, listingPhotos } = schema;
 
-const LV_SOURCES = ["own", "ss.com", "mm.lv", "city24.lv", "zip.lv", "pp.lv", "finder.porsche.com"] as const;
+const LV_SOURCES = ["own", "ss.com", "mm.lv", "city24.lv", "zip.lv", "pp.lv", "finder.porsche.com", "bravo-auto.lv"] as const;
 const LT_SOURCES = ["autoplius.lt", "aruodas.lt"] as const;
 
 export const PAGE_SIZE = 24;
