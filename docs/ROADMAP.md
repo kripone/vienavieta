@@ -108,7 +108,8 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] Mini analītika virs meklēšanas rezultātiem: tipiskā cena, cenu sadalījuma grafiks, cenu samazinājumi
 - [x] Privātas piezīmes un statuss pie favorītiem; favorītu saraksta kopīgošana ar saiti, skatītāju „patīk/nepatīk” un komentāri
 - [x] Dzīvokļu cenu karte pa apkaimēm un pilsētām (/cenu-karte; pārdošana un īre)
-- [ ] Atgādinājums pie favorīta (piem. „skate sestdien”); nedēļas kopsavilkums saglabātajām meklēšanām
+- [x] Favorīta piezīmē atpazīst dienu un laiku („jātiekas sestdien 2”) un piedāvā pievienot kalendāram (Google saite vai .ics)
+- [ ] Nedēļas kopsavilkums saglabātajām meklēšanām
 - [x] PWA: instalējama aplikācija (manifest, ikonas, servisa darbinieks) un push paziņojumi par saglabātajām meklēšanām un cenu kritumiem favorītos
 - [ ] Veikalu aplikācijas (Capacitor) – kad būs lietotāji
 - [x] SEO: Search Console, SEO lapas (/auto/<marka>/<modelis>, /moto, /ipasumi/<veids>[-ire]/<reģions>), sitemap ar tām, noindex filtru lapām un citu portālu sludinājumiem, JSON-LD (Car/Product, BreadcrumbList, WebSite), OG attēls

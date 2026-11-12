@@ -2,6 +2,10 @@
 import type { Dict } from "./core";
 
 export const lt: Dict = {
+  "Apskate": "Apžiūra",
+  "Pievienot Google kalendāram": "Pridėti į Google kalendorių",
+  "Apple / Outlook (.ics)": "Apple / Outlook (.ics)",
+  "Piem.: jātiekas sestdien 14:00, var nedaudz kaulēties": "Pvz.: susitikimas šeštadienį 14:00, galima šiek tiek derėtis",
   "Dzīvokļu cenu karte": "Butų kainų žemėlapis",
   "Dzīvokļu īres cenu karte": "Butų nuomos kainų žemėlapis",
   "Dzīvokļu cenas par kvadrātmetru Rīgas apkaimēs un Latvijas pilsētās: mediāna no aktīvajiem sludinājumiem.": "Butų kainos už kvadratinį metrą Rygos mikrorajonuose ir Latvijos miestuose: aktyvių skelbimų mediana.",

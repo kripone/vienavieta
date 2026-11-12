@@ -2,6 +2,10 @@
 import type { Dict } from "./core";
 
 export const ru: Dict = {
+  "Apskate": "Просмотр",
+  "Pievienot Google kalendāram": "Добавить в Google Календарь",
+  "Apple / Outlook (.ics)": "Apple / Outlook (.ics)",
+  "Piem.: jātiekas sestdien 14:00, var nedaudz kaulēties": "Напр.: встреча в субботу 14:00, можно немного поторговаться",
   "Dzīvokļu cenu karte": "Карта цен на квартиры",
   "Dzīvokļu īres cenu karte": "Карта цен аренды квартир",
   "Dzīvokļu cenas par kvadrātmetru Rīgas apkaimēs un Latvijas pilsētās: mediāna no aktīvajiem sludinājumiem.": "Цены на квартиры за квадратный метр в районах Риги и городах Латвии: медиана активных объявлений.",

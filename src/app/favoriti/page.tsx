@@ -68,7 +68,7 @@ export default async function FavoritesPage() {
                       ))}
                     </ul>
                   )}
-                  <FavNote listingId={l.id} note={l.note} stage={l.stage} />
+                  <FavNote listingId={l.id} title={l.title} note={l.note} stage={l.stage} />
                 </div>
               );
             })}

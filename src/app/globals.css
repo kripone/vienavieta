@@ -607,3 +607,5 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .pm-table th:first-child, .pm-table td:first-child { text-align: left; }
 .pm-table td small { color: var(--muted); }
 @media (max-width: 560px) { .mapwrap .map.pmap { height: 420px; } }
+.fav-cal { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; background: var(--accent-soft); border-radius: 8px; padding: 8px 10px; font-size: 14px; }
+.fav-cal-btns { display: flex; flex-wrap: wrap; gap: 6px; }
