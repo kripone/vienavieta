@@ -82,7 +82,10 @@ export function parseLand(v?: string) {
   if (!v) return null;
   const n = Number(v.replace(/[^\d.,]/g, "").replace(",", "."));
   if (!Number.isFinite(n) || n <= 0) return null;
-  return /ha/.test(v) ? Math.round(n * 10_000) : Math.round(n);
+  const m2 = /ha/.test(v) ? Math.round(n * 10_000) : Math.round(n);
+  // virs 10 000 ha (100M m²) ir acīmredzama mērvienības/parse kļūda; land_m2 kolonna ir
+  // integer (max ~2.15 mljrd m²), lielāka vērtija nogāž insert (city24 "677000 ha" gadījums)
+  return m2 > 100_000_000 ? null : m2;
 }
 
 /** "1.8H" → { engineL: 1.8, fuel: Hibrīds } */
