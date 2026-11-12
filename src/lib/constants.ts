@@ -207,6 +207,18 @@ export const AUTOPLIUS = {
   quickEveryMin: 30,
   fullEveryHours: 24,
 } as const;
+/**
+ * Lietuvas autoplius.lt plūsma (lietuviešu valoda; tie paši sludinājumu ID, tāpēc latviešu auto,
+ * kas parādās abās plūsmās, vienkārši atjauno to pašu rindu). Atsevišķa crawl_state atslēga.
+ */
+export const AUTOPLIUS_LT = {
+  key: "autoplius:cars-lt",
+  url: "https://autoplius.lt/skelbimai/naudoti-automobiliai",
+  quickPages: 2,
+  maxPages: 40,
+  quickEveryMin: 30,
+  fullEveryHours: 24,
+} as const;
 /** Avotu nosaukumi kartītēs. */
 export const SOURCE_LABEL: Record<string, string> = {
   own: "VienāVietā", "ss.com": "ss.com", "reklama.lv": "reklama.lv", "mm.lv": "mm.lv", "city24.lv": "city24.lv",

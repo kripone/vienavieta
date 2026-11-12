@@ -110,8 +110,8 @@ export function startSsCrawler() {
     (async () => {
       await new Promise((r) => setTimeout(r, 150_000));
       for (;;) {
-        const r = await tickAutoplius().catch((e) => (console.error("autoplius.lt ievākšana:", e instanceof Error ? e.message : e), null));
-        if (r) console.log(`autoplius.lt ${r.mode}:`, JSON.stringify({ ...r, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
+        const rs = await tickAutoplius().catch((e) => (console.error("autoplius.lt ievākšana:", e instanceof Error ? e.message : e), null));
+        for (const r of rs ?? []) console.log(`autoplius.lt ${r.key} ${r.mode}:`, JSON.stringify({ ...r, key: undefined, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
         await new Promise((res) => setTimeout(res, 60_000));
       }
     })();

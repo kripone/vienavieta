@@ -12,9 +12,9 @@ async function main() {
   if (/-a(:\d+)?\//.test(url) || /-a\.[a-z0-9-]*\//.test(url) || url.includes("-a/")) {
     console.warn("UZMANĪBU: DATABASE_URL izskatās pēc iekšējās Render adreses — ārpus Render tā nestrādās. Lieto ārējo (External) virkni.");
   }
-  const r = await tickAutoplius();
-  if (r) console.log(`autoplius.lt ${r.mode}:`, JSON.stringify({ ...r, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
-  else console.log("autoplius.lt: kārta vēl nav pienākusies (sk. crawl_state)");
+  const rs = await tickAutoplius();
+  for (const r of rs ?? []) console.log(`autoplius.lt ${r.key} ${r.mode}:`, JSON.stringify({ ...r, key: undefined, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
+  if (!rs) console.log("autoplius.lt: kārta vēl nav pienākusies (sk. crawl_state)");
   await closeBrowser().catch(() => {});
 }
 main().then(() => process.exit(0), (e) => (console.error(e), process.exit(1)));
