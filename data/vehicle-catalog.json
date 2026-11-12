@@ -441,6 +441,10 @@
       "Tacuma",
       "Tico"
     ],
+    "DAF": [
+      "LF",
+      "XF"
+    ],
     "Daihatsu": [
       "Applause",
       "Charade",
@@ -456,9 +460,10 @@
       "Trevis",
       "YRV"
     ],
-    "DAF": [
-      "LF",
-      "XF"
+    "DFSK": [
+      "EC35",
+      "Glory 580",
+      "Seres 3"
     ],
     "Dodge": [
       "Avenger",
@@ -646,6 +651,11 @@
       "Transit Custom",
       "Windstar"
     ],
+    "Forthing": [
+      "Friday",
+      "T5 EVO",
+      "U-Tour"
+    ],
     "GAZ": [
       "21 Volga",
       "24 Volga",
@@ -685,6 +695,14 @@
       "Hover",
       "Poer",
       "Steed",
+      "Wingle"
+    ],
+    "GWM": [
+      "Haval H6",
+      "Haval Jolion",
+      "Ora 03",
+      "Tank 300",
+      "Tank 500",
       "Wingle"
     ],
     "Honda": [
@@ -1411,6 +1429,10 @@
       "Wind",
       "Zoe"
     ],
+    "Rivian": [
+      "R1S",
+      "R1T"
+    ],
     "Rolls-Royce": [
       "Corniche",
       "Cullinan",
@@ -1465,30 +1487,8 @@
       "3",
       "5"
     ],
-    "Škoda": [
-      "100",
-      "105",
-      "120",
-      "130",
-      "Citigo",
-      "Elroq",
-      "Enyaq",
-      "Enyaq Coupe",
-      "Fabia",
-      "Favorit",
-      "Felicia",
-      "Forman",
-      "Kamiq",
-      "Karoq",
-      "Kodiaq",
-      "Octavia",
-      "Octavia Scout",
-      "Rapid",
-      "Rapid Spaceback",
-      "Roomster",
-      "Scala",
-      "Superb",
-      "Yeti"
+    "Skywell": [
+      "ET5"
     ],
     "Smart": [
       "#1",
@@ -1733,6 +1733,31 @@
       "001",
       "7X",
       "X"
+    ],
+    "Škoda": [
+      "100",
+      "105",
+      "120",
+      "130",
+      "Citigo",
+      "Elroq",
+      "Enyaq",
+      "Enyaq Coupe",
+      "Fabia",
+      "Favorit",
+      "Felicia",
+      "Forman",
+      "Kamiq",
+      "Karoq",
+      "Kodiaq",
+      "Octavia",
+      "Octavia Scout",
+      "Rapid",
+      "Rapid Spaceback",
+      "Roomster",
+      "Scala",
+      "Superb",
+      "Yeti"
     ]
   },
   "moto": {
@@ -1798,6 +1823,16 @@
       "Streetfighter V4",
       "SuperSport",
       "XDiavel"
+    ],
+    "Dņepr": [
+      "K-750",
+      "MT"
+    ],
+    "Gas Gas": [
+      "EC",
+      "EX",
+      "MC",
+      "TXT GP"
     ],
     "Harley-Davidson": [
       "Breakout",
@@ -1885,6 +1920,10 @@
       "Z900",
       "Z900RS"
     ],
+    "Kove": [
+      "450 Rally",
+      "800X"
+    ],
     "KTM": [
       "125 Duke",
       "390 Adventure",
@@ -1899,9 +1938,21 @@
       "EXC 300",
       "SX-F 450"
     ],
+    "Malaguti": [
+      "Madison",
+      "Monte Pro"
+    ],
+    "Mash": [
+      "Dirt Track",
+      "Five Hundred"
+    ],
     "Minsk": [
       "125",
       "D4"
+    ],
+    "Mondial": [
+      "HPS",
+      "SMX"
     ],
     "Moto Guzzi": [
       "California",
@@ -1909,6 +1960,10 @@
       "V100 Mandello",
       "V7",
       "V85 TT"
+    ],
+    "Moto Morini": [
+      "Seiemmezzo",
+      "X-Cape"
     ],
     "MV Agusta": [
       "Brutale",
@@ -1947,6 +2002,11 @@
       "V-Strom 1050",
       "V-Strom 800DE"
     ],
+    "SWM": [
+      "Gran Milano",
+      "Superdual",
+      "Varez"
+    ],
     "Triumph": [
       "Bonneville T120",
       "Rocket 3",
@@ -1959,6 +2019,9 @@
       "Tiger 900",
       "Trident 660"
     ],
+    "Tula": [
+      "T200"
+    ],
     "Ural": [
       "Gear Up",
       "Ranger",
@@ -1969,6 +2032,19 @@
       "GTS 300",
       "Primavera",
       "Sprint"
+    ],
+    "Victory": [
+      "Cross Country",
+      "Hammer",
+      "Vegas"
+    ],
+    "Voge": [
+      "300R",
+      "500R",
+      "DS900X"
+    ],
+    "Voshod": [
+      "3M"
     ],
     "Yamaha": [
       "FJR1300",
@@ -1996,9 +2072,11 @@
       "FX",
       "S",
       "SR"
-    ]
+    ],
+    "ČZ": []
   },
   "camper": {
+    "Abbey": [],
     "Adria": [
       "Altea",
       "Adora",
@@ -2009,8 +2087,10 @@
       "Sonic",
       "Twin"
     ],
+    "Avondale": [],
     "Bailey": [],
     "Benimar": [],
+    "Beyerland": [],
     "Burow": [],
     "Bürstner": [
       "Campeo",
@@ -2029,6 +2109,7 @@
     "Caravelair": [],
     "Carthago": [],
     "Challenger": [],
+    "Chateau": [],
     "Chausson": [
       "First Line",
       "Flash",
@@ -2038,6 +2119,7 @@
     "Citroën": [
       "Jumper"
     ],
+    "Compass": [],
     "Dethleffs": [
       "Advantage",
       "Esprit",
@@ -2046,6 +2128,7 @@
       "Pulse",
       "Trend"
     ],
+    "Eifelland": [],
     "Elddis": [],
     "Elnagh": [],
     "Eriba": [
@@ -2067,7 +2150,9 @@
       "Transit Custom Nugget"
     ],
     "Frankia": [],
+    "GAZ": [],
     "Globecar": [],
+    "Gruau": [],
     "Hobby": [
       "De Luxe",
       "Excellent",
@@ -2084,10 +2169,12 @@
       "ML-T",
       "Venture S"
     ],
+    "Hyundai": [],
     "Iveco": [
       "Daily"
     ],
     "Kabe": [],
+    "Kip": [],
     "Knaus": [
       "BoxLife",
       "BoxStar",
@@ -2107,7 +2194,9 @@
       "Style",
       "Tourer"
     ],
+    "Lunar": [],
     "Malibu": [],
+    "MAN": [],
     "McLouis": [
       "Fusion",
       "Glamys"
@@ -2120,6 +2209,7 @@
     "Mobilvetta": [],
     "Niesmann+Bischoff": [],
     "Nomad": [],
+    "Opel": [],
     "Peugeot": [
       "Boxer"
     ],
@@ -2128,6 +2218,7 @@
       "Galaxy",
       "Pacific"
     ],
+    "Polar": [],
     "Pössl": [
       "2Win",
       "D-Line",
@@ -2150,7 +2241,9 @@
       "Zefiro"
     ],
     "Solifer": [],
+    "Sprite": [],
     "Sterckeman": [],
+    "Sterling": [],
     "Sunlight": [
       "Cliff",
       "I 69 L",
@@ -2163,7 +2256,9 @@
       "Puccini",
       "Rossini"
     ],
+    "Tec": [],
     "Trigano": [],
+    "Turatello": [],
     "Volkswagen": [
       "California Beach",
       "California Coast",

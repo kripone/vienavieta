@@ -245,6 +245,9 @@ const MAKE_ALIASES: Record<string, string> = {
   mercedes: "mercedes-benz", "mercedes-benz": "mercedes-benz", vw: "volkswagen", "land-rover": "land-rover", landrover: "land-rover",
   "alfa-romeo": "alfa-romeo", alfa: "alfa-romeo", citroen: "citroen", skoda: "skoda", "rolls-royce": "rolls-royce", vaz: "lada", "gaz": "gaz",
   infinit: "infiniti", // slug("Infinity") → "infinit" (y tiek nogriezts transliterācijā)
+  gas: "gas-gas", mitibisi: "mitsubisi", "motto-guzzi": "moto-guzzi", polstar: "polestar",
+  // drukas kļūdas; uzmanību: slug pārvērš sh→s, ch→c, y→"" ("Mash"→"mas", "Chateau"→"cateau")
+  caetau: "cateau", eiffeland: "eifelland", gw: "gwm",
 
 };
 
