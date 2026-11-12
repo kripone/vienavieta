@@ -1,0 +1,1 @@
+ALTER TYPE "public"."listing_source" ADD VALUE 'finder.porsche.com';

@@ -223,7 +223,13 @@ export const AUTOPLIUS_LT = {
 export const SOURCE_LABEL: Record<string, string> = {
   own: "VienāVietā", "ss.com": "ss.com", "mm.lv": "mm.lv", "city24.lv": "city24.lv",
   "auto24.lv": "auto24.lv", "autoplius.lt": "autoplius.lt", "aruodas.lt": "aruodas.lt", "zip.lv": "zip.lv", "pp.lv": "pp.lv",
+  "finder.porsche.com": "Porsche Finder",
 };
+
+/** Porsche Finder (Porsche Center Riga Airport lietotie auto): oficiālā dīlera meklētājs, aiz Vercel
+ * bot aizsardzības — lapas atver ar reālu pārlūku (Playwright), tāpēc crawleris skrien lokāli
+ * (stundu uzdevums), nevis serverī. Dati nāk no JSON-LD (schema.org Car) — pilni un strukturēti. */
+export const PORSCHE = { key: "porsche:used", url: "https://finder.porsche.com/lv/lv-LV/search?condition=used&dealership=15000002587", delayMs: 2500, quickPages: 2, maxPages: 10, quickEveryMin: 30, fullEveryHours: 24 } as const;
 
 /** Cenas novērtējums pret līdzīgiem: zem GOOD — "Laba cena", virs HIGH — "Virs tirgus"; vajag vismaz MIN līdzīgus. */
 export const PRICE_EVAL = { GOOD: 0.88, HIGH: 1.15, MIN: 3, YEARS: 2 } as const;

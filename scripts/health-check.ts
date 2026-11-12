@@ -16,6 +16,7 @@ const { crawlState } = schema;
 const FLOWS: [string, string | null][] = [
   ["autoplius:", "scripts/autoplius-crawl.ts"],
   ["city24:", "scripts/city24-crawl.ts"],
+  ["porsche:", "scripts/porsche-crawl.ts"],
   ["ss2:", null],
   ["zip:", null],
   ["pp:", null],
