@@ -244,15 +244,20 @@ const MAKE_ALIASES: Record<string, string> = {
   buerstner: "burstner", buestner: "burstner", bursner: "burstner", "eura-mobil": "eura-mobil", euramobil: "eura-mobil",
   mercedes: "mercedes-benz", "mercedes-benz": "mercedes-benz", vw: "volkswagen", "land-rover": "land-rover", landrover: "land-rover",
   "alfa-romeo": "alfa-romeo", alfa: "alfa-romeo", citroen: "citroen", skoda: "skoda", "rolls-royce": "rolls-royce", vaz: "lada", "gaz": "gaz",
+  infinit: "infiniti", // slug("Infinity") → "infinit" (y tiek nogriezts transliterācijā)
+
 };
+
+/** Kataloga nosaukumi, ar kuriem salīdzināt: pilnais un bez iekavas daļas ("Lada (VAZ)" → "lada-vaz", "lada"). */
+const makeKeys = (name: string) => [slug(name), slug(name.replace(/\(.*?\)/g, "").trim())];
 
 export function findMake(makes: MakeRow[], vehicleClass: string, raw: string) {
   const k = slug(raw);
   const want = MAKE_ALIASES[k] ?? k;
   return (
-    makes.find((m) => m.vehicleClass === vehicleClass && slug(m.name) === want) ??
+    makes.find((m) => m.vehicleClass === vehicleClass && makeKeys(m.name).includes(want)) ??
     // atstarpju/defišu variācijas: "Dong feng" → "Dongfeng", "Mercedes Benz" → "Mercedes-Benz"
-    makes.find((m) => m.vehicleClass === vehicleClass && slug(m.name).replace(/-/g, "") === want.replace(/-/g, "")) ??
+    makes.find((m) => m.vehicleClass === vehicleClass && makeKeys(m.name).some((mk) => mk.replace(/-/g, "") === want.replace(/-/g, ""))) ??
     null
   );
 }
