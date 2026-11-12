@@ -249,7 +249,12 @@ const MAKE_ALIASES: Record<string, string> = {
 export function findMake(makes: MakeRow[], vehicleClass: string, raw: string) {
   const k = slug(raw);
   const want = MAKE_ALIASES[k] ?? k;
-  return makes.find((m) => m.vehicleClass === vehicleClass && slug(m.name) === want) ?? null;
+  return (
+    makes.find((m) => m.vehicleClass === vehicleClass && slug(m.name) === want) ??
+    // atstarpju/defišu variācijas: "Dong feng" → "Dongfeng", "Mercedes Benz" → "Mercedes-Benz"
+    makes.find((m) => m.vehicleClass === vehicleClass && slug(m.name).replace(/-/g, "") === want.replace(/-/g, "")) ??
+    null
+  );
 }
 
 /** ss.com modeļu pieraksts → mūsu katalogs: BMW "320d" → "3. sērija", Mercedes "E220" → "E klase", "ML350" → "M klase". */
