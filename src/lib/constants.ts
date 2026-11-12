@@ -221,7 +221,7 @@ export const AUTOPLIUS_LT = {
 } as const;
 /** Avotu nosaukumi kartītēs. */
 export const SOURCE_LABEL: Record<string, string> = {
-  own: "VienāVietā", "ss.com": "ss.com", "reklama.lv": "reklama.lv", "mm.lv": "mm.lv", "city24.lv": "city24.lv",
+  own: "VienāVietā", "ss.com": "ss.com", "mm.lv": "mm.lv", "city24.lv": "city24.lv",
   "auto24.lv": "auto24.lv", "autoplius.lt": "autoplius.lt", "aruodas.lt": "aruodas.lt", "zip.lv": "zip.lv", "pp.lv": "pp.lv",
 };
 
