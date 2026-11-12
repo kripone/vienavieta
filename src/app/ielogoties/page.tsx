@@ -15,6 +15,8 @@ const ERRORS: Record<string, string> = {
   EXPIRED_TOKEN: "Pieteikšanās saite ir novecojusi. Pieprasi jaunu.",
   ATTEMPTS_EXCEEDED: "Šī saite jau ir izmantota. Pieprasi jaunu.",
   new_user_signup_disabled: "Reģistrācija pašlaik nav pieejama.",
+  blocked: "Šis konts ir bloķēts.",
+  telegram_disabled: "Pieteikšanās ar Telegram pašlaik nav pieejama.",
 };
 
 export default async function LoginPage(props: { searchParams: Promise<{ next?: string; error?: string }> }) {
@@ -28,7 +30,7 @@ export default async function LoginPage(props: { searchParams: Promise<{ next?: 
       <h1>{t("Ielogoties vai reģistrēties")}</h1>
       <p className="lead">{t("Konts vajadzīgs, lai ievietotu sludinājumus, saglabātu favorītus un rakstītu pārdevējiem.")}</p>
       {error && <p className="alert">{t(ERRORS[error] ?? "Pieteikties neizdevās. Mēģini vēlreiz.")}</p>}
-      <LoginForm next={target} social={enabledSocial} />
+      <LoginForm next={target} social={enabledSocial} telegramBot={process.env.TELEGRAM_BOT_USERNAME ?? ""} />
       <p className="fine">
         Turpinot tu piekrīti portāla lietošanas noteikumiem un privātuma politikai. Mēs nekad nerādām tavu e-pastu
         citiem lietotājiem.
