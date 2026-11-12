@@ -90,7 +90,7 @@ export function parseListPage(html: string): BravoRow[] {
 }
 
 /** Bravo virsbūve (angļu/lv jauktis) → mūsu katalogs. */
-function mapBody(v?: string | null) {
+export function mapBody(v?: string | null) {
   const s = slug(v ?? "");
   if (!s) return null;
   if (s === "sedan" || s === "sedans") return "Sedans";
@@ -105,7 +105,7 @@ function mapBody(v?: string | null) {
 }
 
 /** Bravo krāsa ("Light gray", "Blue Metāliska", "KALAHARI GOLD") → mūsu COLORS. */
-function mapColor(v?: string | null) {
+export function mapColor(v?: string | null) {
   const s = slug(v ?? "");
   if (!s) return null;
   if (/balt|white/.test(s)) return "Balta";
