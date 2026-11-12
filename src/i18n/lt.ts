@@ -2,6 +2,18 @@
 import type { Dict } from "./core";
 
 export const lt: Dict = {
+  "Dzīvokļu cenu karte": "Butų kainų žemėlapis",
+  "Dzīvokļu īres cenu karte": "Butų nuomos kainų žemėlapis",
+  "Dzīvokļu cenas par kvadrātmetru Rīgas apkaimēs un Latvijas pilsētās: mediāna no aktīvajiem sludinājumiem.": "Butų kainos už kvadratinį metrą Rygos mikrorajonuose ir Latvijos miestuose: aktyvių skelbimų mediana.",
+  "€/m² mēnesī": "€/m² per mėnesį",
+  "Cik maksā kvadrātmetrs katrā apkaimē un pilsētā: mediāna no {n} aktīvajiem sludinājumiem. Uzspied uz apļa, lai redzētu sludinājumus.": "Kiek kainuoja kvadratinis metras kiekviename mikrorajone ir mieste: {n} aktyvių skelbimų mediana. Paspauskite apskritimą, kad pamatytumėte skelbimus.",
+  "Pārdošana": "Pardavimas",
+  "Pagaidām nav pietiekami daudz datu.": "Kol kas nepakanka duomenų.",
+  "Apļa lielums rāda sludinājumu skaitu. Vietas ar mazāk nekā {n} sludinājumiem nav parādītas. Tās ir piedāvājuma cenas, nevis darījumu cenas.": "Apskritimo dydis rodo skelbimų skaičių. Vietos, kuriose mažiau nei {n} skelbimų, nerodomos. Tai siūlomos, o ne sandorių kainos.",
+  "{n} sludinājumi": "{n} skelbimų",
+  "Skatīt sludinājumus": "Žiūrėti skelbimus",
+  "Visa Latvija": "Visa Latvija",
+  "Rīga": "Ryga",
   "Apskati sludinājumus un pasaki savu viedokli: ieraksti vārdu, spied „patīk” vai „nepatīk” un, ja gribi, pieliec komentāru. Reģistrēties nevajag.": "Peržiūrėkite skelbimus ir pasakykite nuomonę: įrašykite vardą, spauskite „patinka“ arba „nepatinka“ ir, jei norite, pridėkite komentarą. Registruotis nereikia.",
   "Apskatīju": "Apžiūrėjau",
   "Atmetu": "Atmečiau",

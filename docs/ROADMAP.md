@@ -107,7 +107,8 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] Brīvā teksta meklēšana („dīzeļa universālis līdz 6000 € ar automātu”) un attālums / brauciena laiks no adreses
 - [x] Mini analītika virs meklēšanas rezultātiem: tipiskā cena, cenu sadalījuma grafiks, cenu samazinājumi
 - [x] Privātas piezīmes un statuss pie favorītiem; favorītu saraksta kopīgošana ar saiti, skatītāju „patīk/nepatīk” un komentāri
-- [ ] Atgādinājums pie favorīta (piem. „skate sestdien”); dzīvokļu cenu karte pa apkaimēm; nedēļas kopsavilkums saglabātajām meklēšanām
+- [x] Dzīvokļu cenu karte pa apkaimēm un pilsētām (/cenu-karte; pārdošana un īre)
+- [ ] Atgādinājums pie favorīta (piem. „skate sestdien”); nedēļas kopsavilkums saglabātajām meklēšanām
 - [x] PWA: instalējama aplikācija (manifest, ikonas, servisa darbinieks) un push paziņojumi par saglabātajām meklēšanām un cenu kritumiem favorītos
 - [ ] Veikalu aplikācijas (Capacitor) – kad būs lietotāji
 - [x] SEO: Search Console, SEO lapas (/auto/<marka>/<modelis>, /moto, /ipasumi/<veids>[-ire]/<reģions>), sitemap ar tām, noindex filtru lapām un citu portālu sludinājumiem, JSON-LD (Car/Product, BreadcrumbList, WebSite), OG attēls

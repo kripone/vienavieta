@@ -357,3 +357,6 @@ export const FAVORITE_STAGE_LABEL: Record<(typeof FAVORITE_STAGES)[number], stri
 };
 export const FAVORITE_NOTE_MAX = 1000;
 export const SHARE_COMMENT_MAX = 500;
+
+/** Cenu kartes krāsu skala (/cenu-karte): viens tonis, gaišs = lēti, tumšs = dārgi. */
+export const PRICE_RAMP = ["#cfe1f2", "#93c0e0", "#4e97cc", "#1f6bb0", "#0b3a75"] as const;

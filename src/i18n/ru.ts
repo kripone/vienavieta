@@ -2,6 +2,18 @@
 import type { Dict } from "./core";
 
 export const ru: Dict = {
+  "Dzīvokļu cenu karte": "Карта цен на квартиры",
+  "Dzīvokļu īres cenu karte": "Карта цен аренды квартир",
+  "Dzīvokļu cenas par kvadrātmetru Rīgas apkaimēs un Latvijas pilsētās: mediāna no aktīvajiem sludinājumiem.": "Цены на квартиры за квадратный метр в районах Риги и городах Латвии: медиана активных объявлений.",
+  "€/m² mēnesī": "€/м² в месяц",
+  "Cik maksā kvadrātmetrs katrā apkaimē un pilsētā: mediāna no {n} aktīvajiem sludinājumiem. Uzspied uz apļa, lai redzētu sludinājumus.": "Сколько стоит квадратный метр в каждом районе и городе: медиана по {n} активным объявлениям. Нажмите на круг, чтобы увидеть объявления.",
+  "Pārdošana": "Продажа",
+  "Pagaidām nav pietiekami daudz datu.": "Пока недостаточно данных.",
+  "Apļa lielums rāda sludinājumu skaitu. Vietas ar mazāk nekā {n} sludinājumiem nav parādītas. Tās ir piedāvājuma cenas, nevis darījumu cenas.": "Размер круга показывает число объявлений. Места, где меньше {n} объявлений, не показаны. Это цены предложения, а не цены сделок.",
+  "{n} sludinājumi": "{n} объявлений",
+  "Skatīt sludinājumus": "Смотреть объявления",
+  "Visa Latvija": "Вся Латвия",
+  "Rīga": "Рига",
   "Apskati sludinājumus un pasaki savu viedokli: ieraksti vārdu, spied „patīk” vai „nepatīk” un, ja gribi, pieliec komentāru. Reģistrēties nevajag.": "Посмотрите объявления и выскажите мнение: введите имя, нажмите «нравится» или «не нравится» и при желании добавьте комментарий. Регистрация не нужна.",
   "Apskatīju": "Посмотрел",
   "Atmetu": "Отказался",

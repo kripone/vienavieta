@@ -587,3 +587,23 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .share-form input { font: inherit; font-size: 15px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); min-width: 0; }
 .share-form .share-name { flex: 0 1 130px; } .share-form .share-comment { flex: 1 1 200px; }
 .share-form .btn.on { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+/* Dzīvokļu cenu karte */
+.pricemap .pm-seg { display: inline-flex; margin-bottom: 14px; }
+.pricemap .pm-seg a { text-decoration: none; padding: 8px 18px; border-radius: 7px; font-weight: 600; color: var(--muted); }
+.pricemap .pm-seg a[aria-current="page"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.pm-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin-bottom: 10px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.pm-legend .pm-unit { color: var(--muted); font-weight: 600; }
+.pm-key { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.pm-key i, .pm-dot { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,.25); flex: none; }
+.pm-dot { width: 11px; height: 11px; margin-right: 8px; vertical-align: -1px; }
+.mapwrap .map.pmap { height: 520px; }
+.pmap-views { display: flex; gap: 6px; margin-bottom: 8px; }
+.pmap-label span { position: absolute; transform: translate(-50%, 14px); background: #fff; color: #181b24; font: 700 11px/1 var(--font-body, system-ui), sans-serif; padding: 3px 5px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,.35); white-space: nowrap; }
+.table-scroll { overflow-x: auto; }
+.pm-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.pm-table th { text-align: right; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 8px 6px; border-bottom: 1px solid var(--line); }
+.pm-table td { text-align: right; padding: 9px 6px; border-bottom: 1px solid var(--surface-2); }
+.pm-table th:first-child, .pm-table td:first-child { text-align: left; }
+.pm-table td small { color: var(--muted); }
+@media (max-width: 560px) { .mapwrap .map.pmap { height: 420px; } }
