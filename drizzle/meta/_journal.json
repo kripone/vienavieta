@@ -190,6 +190,13 @@
       "when": 1794525939477,
       "tag": "0026_ambitious_payback",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1794526949516,
+      "tag": "0027_hard_hitman",
+      "breakpoints": true
     }
   ]
 }

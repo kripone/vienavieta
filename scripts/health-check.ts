@@ -20,6 +20,7 @@ const FLOWS: [string, string | null][] = [
   ["ss2:", null],
   ["zip:", null],
   ["pp:", null],
+  ["bravo:", null],
 ];
 
 const QUICK_MAX_H = 3;

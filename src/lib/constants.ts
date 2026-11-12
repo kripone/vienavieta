@@ -224,7 +224,12 @@ export const SOURCE_LABEL: Record<string, string> = {
   own: "VienāVietā", "ss.com": "ss.com", "mm.lv": "mm.lv", "city24.lv": "city24.lv",
   "auto24.lv": "auto24.lv", "autoplius.lt": "autoplius.lt", "aruodas.lt": "aruodas.lt", "zip.lv": "zip.lv", "pp.lv": "pp.lv",
   "finder.porsche.com": "Porsche Finder",
+  "bravo-auto.lv": "Bravo Auto",
 };
+
+/** bravo-auto.lv (Inchcape mazlietoto auto zīmols): servera renderētas kartītes ar data-* atributiem,
+ * bez bot aizsardzības — var ievākt serverī (bez pārlūka), tāpat kā zip.lv/pp.lv. */
+export const BRAVO = { key: "bravo:cars", url: "https://bravo-auto.lv/auto", quickEveryMin: 30, fullEveryHours: 24 } as const;
 
 /** Porsche Finder (Porsche Center Riga Airport lietotie auto): oficiālā dīlera meklētājs, aiz Vercel
  * bot aizsardzības — lapas atver ar reālu pārlūku (Playwright), tāpēc crawleris skrien lokāli
