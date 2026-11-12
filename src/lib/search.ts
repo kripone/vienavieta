@@ -535,7 +535,10 @@ export function priceInsights(s: SearchParams): Promise<PriceInsights | null> {
     if (n < 8 || st.median == null) return null;
     const median = Math.round(Number(st.median));
     const lo = Math.floor(Number(st.p5)), hi = Math.max(lo + 12, Math.ceil(Number(st.p95)));
-    const cheapMax = Math.round(median * 0.8), dearMin = Math.round(median * 1.2);
+    // sliekšņus noapaļo (100 € vai 10 € īrei un lētām lietām), lai skaitļi būtu viegli lasāmi
+    const unit = median >= 2000 ? 100 : 10;
+    const rnd = (v: number) => Math.round(v / unit) * unit;
+    const cheapMax = rnd(median * 0.8), dearMin = rnd(median * 1.2);
     const N = 14;
     const [rows, [seg]] = await Promise.all([
       from({ b: sql<number>`least(${N}::int, greatest(1, width_bucket(${listings.price}::numeric, ${lo}::numeric, ${hi}::numeric, ${N}::int)))`, c: count() }).where(where).groupBy(sql`1`) as unknown as Promise<{ b: number; c: number }[]>,
@@ -545,7 +548,7 @@ export function priceInsights(s: SearchParams): Promise<PriceInsights | null> {
     const bins = Array.from({ length: N }, (_, i) => [Math.round(lo + i * step), Math.round(lo + (i + 1) * step), Number(rows.find((r) => Number(r.b) === i + 1)?.c ?? 0)] as [number, number, number]);
     const cheap = Number(seg?.cheap ?? 0), dear = Number(seg?.dear ?? 0);
     return {
-      n, median, p25: Math.round(Number(st.p25)), p75: Math.round(Number(st.p75)), lo, hi, bins,
+      n, median: rnd(median), p25: rnd(Number(st.p25)), p75: rnd(Number(st.p75)), lo, hi, bins,
       cheap, dear, mid: n - cheap - dear, cheapMax, dearMin,
       drops: Number(st.drops ?? 0), dropPct: st.dropPct != null ? Math.round(Number(st.dropPct) * 10) / 10 : null,
     };

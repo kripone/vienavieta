@@ -18,7 +18,7 @@ export async function PriceInsights({ d, flat, rent }: { d: Data; flat: Record<s
   return (
     <section className="insights" aria-label={t("Cenu kopsavilkums")}>
       <p className="ins-lead">
-        {t("Atrasti")} <b>{tp(d.n, "sludinājums", "sludinājumi")}</b>. {t("Tipiskā cena šiem parametriem (mediāna):")} <b className="ins-price">{money(d.median)}</b>
+        <b>{tp(d.n, "sludinājums", "sludinājumi")}</b>. {t("Tipiskā cena šiem parametriem (mediāna):")} <b className="ins-price">{money(d.median)}</b>
         <span className="fine"> · {t("lielākā daļa: {a} – {b}", { a: money(d.p25), b: money(d.p75) })}</span>
       </p>
       {d.drops > 0 && (
@@ -29,7 +29,7 @@ export async function PriceInsights({ d, flat, rent }: { d: Data; flat: Record<s
           <span key={i} className={`ins-bar ${cls(from, to)}`} style={{ height: `${Math.max(c ? 6 : 2, (c / max) * 100)}%` }} title={`${formatNumber(from)}–${formatNumber(to)}${unit}: ${c}`} />
         ))}
       </div>
-      <div className="ins-axis"><span>{money(d.lo)}</span><span>{t("mediāna")} {money(d.median)}</span><span>{money(d.hi)}</span></div>
+      <div className="ins-axis"><span>{money(Math.round(d.lo / 100) * 100 || d.lo)}</span><span>{t("mediāna")} {money(d.median)}</span><span>{money(Math.round(d.hi / 100) * 100 || d.hi)}</span></div>
       <div className="ins-legend">
         <a className="cheap" href={href({ pmax: String(d.cheapMax), pmin: null })}><b>{formatNumber(d.cheap)}</b> {t("lēti")}<small>{t("zem {p}", { p: money(d.cheapMax) })}</small></a>
         <a className="mid" href={href({ pmin: String(d.cheapMax), pmax: String(d.dearMin) })}><b>{formatNumber(d.mid)}</b> {t("vidēji")}<small>{money(d.cheapMax)} – {money(d.dearMin)}</small></a>
