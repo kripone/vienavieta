@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AMENITIES, BODY_TYPES, COLORS, CONDITIONS, DEAL_LABEL, DEALS, DRIVES, FUELS, GEARBOXES, HEATING, MATERIALS, PROPERTY_FIELDS,
-  PROPERTY_GROUPS, PURPOSES, SERIES, VEHICLE_CLASS_LABEL, VEHICLE_CLASSES, type PropertyType, type VehicleClass,
+  PROPERTY_GROUPS, PURPOSES, SERIES, SOURCE_LABEL, VEHICLE_CLASS_LABEL, VEHICLE_CLASSES, type PropertyType, type VehicleClass,
 } from "@/lib/constants";
 import type { RegionOption } from "./listing-form";
 
@@ -26,7 +26,7 @@ function propertyKeys(ptype: string): readonly string[] {
   return PROPERTY_FIELDS[ptype as PropertyType] ?? [];
 }
 
-export function SearchFilters({ initial, regions }: { initial: FilterValues; regions: RegionOption[] }) {
+export function SearchFilters({ initial, regions, sources = [] }: { initial: FilterValues; regions: RegionOption[]; sources?: { source: string; n: number }[] }) {
   const { t } = useT();
   const router = useRouter();
   const [v, setV] = useState<FilterValues>(initial);
@@ -235,20 +235,45 @@ export function SearchFilters({ initial, regions }: { initial: FilterValues; reg
           <option value="verified">{t("Tikai ar apstiprinātu identitāti")}</option>
         </select>
       </label>
-      <label className="field">
-        {t("Avots")}
-        <select value={v.src ?? ""} onChange={(e) => update({ src: e.target.value })}>
-          <option value="">{t("Visi sludinājumi")}</option>
-          <option value="own">{t("Tikai VienāVietā")}</option>
-          <option value="ext">{t("No citiem portāliem (ss.com)")}</option>
-        </select>
-      </label>
+      <div className="field">
+        {t("Avoti")}
+        <SourceChips value={v.sources ?? ""} sources={sources} onChange={(sources) => update({ sources, src: "" })} />
+      </div>
 
       {active > 0 && (
         <button type="button" className="btn small" onClick={() => update({ ...Object.fromEntries(Object.keys(v).map((k) => [k, ""])), cat: v.cat ?? "", vc: v.vc ?? "", sort: v.sort ?? "" })}>
           Notīrīt filtrus ({active})
         </button>
       )}
+    </div>
+  );
+}
+
+/**
+ * Avotu ieslēgšanas/izslēgšanas čipi ar sludinājumu skaitiem.
+ * Bez parametra (viss atzīmēts) = visi avoti; atzīmju kombinācija iet URL kā ?sources=a,b.
+ */
+function SourceChips({ value, sources, onChange }: { value: string; sources: { source: string; n: number }[]; onChange: (v: string) => void }) {
+  const selected = value ? value.split(",").filter(Boolean) : [];
+  // atlasītos rādām arī tad, ja tekošajos filtros tiem skaits ir 0
+  const items = [...sources];
+  for (const key of selected) if (!items.some((i) => i.source === key)) items.push({ source: key, n: 0 });
+  if (!items.length) return null;
+  const allOn = !selected.length;
+  const isOn = (key: string) => allOn || selected.includes(key);
+  const toggle = (key: string) => {
+    const cur = allOn ? items.map((i) => i.source) : selected;
+    const next = cur.includes(key) ? cur.filter((x) => x !== key) : [...cur, key];
+    // visi ieslēgti vai visi izslēgti = bez filtra (visi avoti)
+    onChange(next.length === 0 || next.length === items.length ? "" : next.join(","));
+  };
+  return (
+    <div className="checks src-chips" role="group">
+      {items.map((i) => (
+        <label key={i.source} className={isOn(i.source) ? "on" : "off"}>
+          <input type="checkbox" checked={isOn(i.source)} onChange={() => toggle(i.source)} /> {SOURCE_LABEL[i.source] ?? i.source} <span className="fine">{i.n}</span>
+        </label>
+      ))}
     </div>
   );
 }

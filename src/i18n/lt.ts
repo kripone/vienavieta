@@ -198,6 +198,7 @@ export const lt: Dict = {
   "Auto un nekustamā īpašuma cenas Latvijā: mediānas pa modeļiem, gadiem un reģioniem.": "Automobilių ir nekilnojamojo turto kainos Latvijoje: medianos pagal modelius, metus ir regionus.",
   "Automāts": "Automatinė",
   "Avots": "Šaltinis",
+  "Avoti": "Šaltiniai",
   "Avots: {src}": "Šaltinis: {src}",
   "Balkons": "Balkonas",
   "Balta": "Balta",

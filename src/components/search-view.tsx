@@ -14,7 +14,7 @@ import { priceEvals } from "@/lib/price-eval";
 import { vzdBadges } from "@/lib/vzd";
 import { favoriteIds } from "@/lib/favorites";
 import { regionOptions } from "@/lib/listings";
-import { parseSearch, searchListings, typeCounts } from "@/lib/search";
+import { parseSearch, searchListings, typeCounts, sourceCounts } from "@/lib/search";
 import { getCurrentUser } from "@/lib/session";
 
 import { formatPrice } from "@/lib/format";
@@ -45,6 +45,7 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
   }
   const stripMode = s.cat === "vehicle" && (s.vc ?? "car") === "car" ? "car" : s.cat === "property" && !s.ptype?.startsWith("g:") ? "home" : null;
   const counts = stripMode && result ? await typeCounts(s).catch(() => ({})) : {};
+  const srcCounts = result ? await sourceCounts(s).catch(() => []) : [];
   const [also, evals, vzd] = result
     ? await Promise.all([
         alsoAt(result.rows).catch(() => new Map()),
@@ -91,7 +92,7 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
           )}
         </nav>
         <FiltersBox active={Object.keys(flat).filter((k) => !["cat", "vc", "sort", "page"].includes(k)).length}>
-          <SearchFilters initial={flat} regions={regions} />
+          <SearchFilters initial={flat} regions={regions} sources={srcCounts} />
         </FiltersBox>
       </aside>
       <section className="results">

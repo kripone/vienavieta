@@ -6,6 +6,7 @@ import {
   PURPOSES, SERIES, VEHICLE_CLASSES, VEHICLE_CLASS_LABEL, DEAL_LABEL, type VehicleClass,
   REGION_GROUPS_LOC,
   REGION_GROUP_LABEL,
+  SOURCE_LABEL,
 } from "./constants";
 
 const { listings, places, regions, makes, models, users, listingPhotos } = schema;
@@ -63,6 +64,8 @@ export function parseSearch(raw: Raw) {
     seller: pick(raw.seller, ["private", "dealer", "verified"] as const),
     /** own = tikai VienāVietā, ext = no citiem portāliem */
     src: pick(raw.src, ["own", "ext"] as const),
+    /** konkrētu avotu saraksts (piem. "ss.com,autoplius.lt"); tukšs = visi avoti */
+    sources: many(raw.sources).filter((x) => x in SOURCE_LABEL),
     sort: pick(raw.sort, SORTS) ?? "new",
     page: int(raw.page, 1, 1000) ?? 1,
     zone: parseZone(raw.zone),
@@ -136,9 +139,10 @@ function conditions(s: SearchParams): SQL[] {
     add(or(inCountry("LV"), and(eq(listings.kind, "vehicle"), inCountry("LT")))!);
   }
   // dublikāti starp portāliem: viena kartīte grupai (sk. src/lib/dedupe.ts); ar avota filtru rāda visus no tā avota
-  if (!s.src) add(groupPrimaryOnly);
+  if (!s.src && !s.sources.length) add(groupPrimaryOnly);
   if (s.src === "own") add(eq(listings.source, "own"));
   else if (s.src === "ext") add(ne(listings.source, "own"));
+  if (s.sources.length) add(inArray(listings.source, s.sources as (typeof listings.$inferSelect.source)[]));
   if (s.seller === "verified") add(isNotNull(users.identityVerifiedAt));
   else if (s.seller === "dealer") add(inArray(users.sellerType, ["dealer", "agency"]));
   else if (s.seller) add(eq(users.sellerType, s.seller));
@@ -444,6 +448,25 @@ export function facetCounts(s: SearchParams, by: "make" | "model" | "region"): P
       .groupBy(idCol, nameCol)
       .orderBy(desc(count()));
     return rows.filter((r) => r.id != null && r.name).map((r) => ({ id: Number(r.id), name: String(r.name), n: Number(r.n) }));
+  });
+}
+
+/** Sludināmumu skaits pa avotiem pie dotajiem filtriem (pašu avota filtru neskaitot) — "Avoti" čipiem. */
+export function sourceCounts(s: SearchParams): Promise<{ source: string; n: number }[]> {
+  const base = { ...s, page: 1, sort: "new" as const, src: undefined, sources: [] as string[] };
+  return cached(`src:${JSON.stringify(base)}`, async () => {
+    const rows = await db
+      .select({ source: listings.source, n: count() })
+      .from(listings)
+      .leftJoin(places, eq(listings.placeId, places.id))
+      .leftJoin(regions, eq(places.regionId, regions.id))
+      .leftJoin(makes, eq(listings.makeId, makes.id))
+      .leftJoin(models, eq(listings.modelId, models.id))
+      .leftJoin(users, eq(listings.userId, users.id))
+      .where(and(...conditions(base)))
+      .groupBy(listings.source)
+      .orderBy(desc(count()));
+    return rows.map((r) => ({ source: String(r.source), n: Number(r.n) }));
   });
 }
 
