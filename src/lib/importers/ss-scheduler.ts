@@ -9,6 +9,7 @@ import { autopliusEnabled, tickAutoplius } from "./autoplius-pages";
 import { tickZip, zipEnabled } from "./zip-pages";
 import { ppEnabled, tickPp } from "./pp-pages";
 import { bravoEnabled, tickBravo } from "./bravo-pages";
+import { vehoEnabled, tickVeho } from "./veho-pages";
 import { city24Enabled, tickCity24 } from "./city24-pages";
 import { backfillBodies, backfillHouseTail, backfillMakeModel, ensureMotoModels, forceModelRecrawl, forcePlacesRecrawl } from "./backfill";
 import { crawlSection } from "./ss-pages";
@@ -148,6 +149,17 @@ export function startSsCrawler() {
       for (;;) {
         const r = await tickBravo().catch((e) => (console.error("bravo-auto.lv ievākšana:", e instanceof Error ? e.message : e), null));
         if (r) console.log(`bravo-auto.lv ${r.mode}:`, JSON.stringify({ ...r, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
+        await new Promise((res) => setTimeout(res, 60_000));
+      }
+    })();
+  }
+  // veho.lv (Mercedes-Benz dīleris): atklāts JSON API bez bot aizsardzības — darbojas serverī (bez pārlūka)
+  if (vehoEnabled()) {
+    (async () => {
+      await new Promise((r) => setTimeout(r, 360_000));
+      for (;;) {
+        const r = await tickVeho().catch((e) => (console.error("veho.lv ievākšana:", e instanceof Error ? e.message : e), null));
+        if (r) console.log(`veho.lv ${r.mode}:`, JSON.stringify({ ...r, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
         await new Promise((res) => setTimeout(res, 60_000));
       }
     })();
