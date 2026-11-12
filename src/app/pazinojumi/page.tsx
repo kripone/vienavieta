@@ -3,6 +3,7 @@ import { desc, eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import { db, schema } from "@/db";
 import { SavedSearchRow, PriceDropToggle, PricePushToggle } from "@/components/saved-search-row";
+import { TelegramConnect } from "@/components/telegram-connect";
 import { InstallApp, PushDevice } from "@/components/pwa";
 import { pushPublicKey, userHasPush } from "@/lib/push";
 import { MAX_SAVED_SEARCHES } from "@/lib/constants";
@@ -32,6 +33,12 @@ export default async function NotificationsPage() {
         <PushDevice publicKey={pushPublicKey()} />
       </section>
 
+      <section className="panel stack" id="telegram">
+        <h2>Telegram</h2>
+        <p className="fine">{t("Pieslēdz mūsu botu un saņem jaunos sludinājumus un cenu kritumus Telegram čatā uzreiz.")}</p>
+        <TelegramConnect chatId={user.telegramChatId} username={user.telegramUsername} priceDrops={user.telegramPriceDrops} />
+      </section>
+
       <section className="panel stack">
         <h2>{t("Saglabātās meklēšanas")}</h2>
         {rows.length === 0 ? (
@@ -49,7 +56,9 @@ export default async function NotificationsPage() {
                 frequency={r.frequency}
                 notifyEmail={r.notifyEmail}
                 notifyPush={r.notifyPush}
+                notifyTelegram={r.notifyTelegram}
                 hasPush={hasPush}
+                hasTelegram={Boolean(user.telegramChatId)}
                 checked={r.lastNotifiedAt ? timeAgo(r.lastNotifiedAt, t) : null}
               />
             ))}

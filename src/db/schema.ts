@@ -63,6 +63,15 @@ export const users = pgTable("users", {
   notifyPriceDrops: boolean("notify_price_drops").notNull().default(true),
   /** Paziņojums telefonā/pārlūkā (push), ja favorītos saglabātam sludinājumam samazinās cena. */
   pushPriceDrops: boolean("push_price_drops").notNull().default(true),
+  /** Telegram čats, uz kuru sūtīt paziņojumus (piesaista caur bota /start saiti). */
+  telegramChatId: text("telegram_chat_id"),
+  /** Telegram lietotājvārds (rādām iestatījumos; var būt bez @). */
+  telegramUsername: text("telegram_username"),
+  /** Telegram ziņa, ja favorītos saglabātam sludinājumam samazinās cena. */
+  telegramPriceDrops: boolean("telegram_price_drops").notNull().default(true),
+  /** Vienreizējs piesaistes kods (t.me/<bots>?start=<kods>); derīgs līdz telegram_link_expires. */
+  telegramLinkToken: text("telegram_link_token"),
+  telegramLinkExpires: timestamp("telegram_link_expires", { withTimezone: true }),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -321,6 +330,8 @@ export const savedSearches = pgTable(
     /** "hourly" | "daily", sk. NOTIFY_FREQUENCIES */
     frequency: text("frequency").notNull().default("daily"),
     notifyPush: boolean("notify_push").notNull().default(false),
+    /** Telegram ziņa par jauniem sludinājumiem (lietotājam jābūt piesaistītam čatam). */
+    notifyTelegram: boolean("notify_telegram").notNull().default(false),
     lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
     lastNotifiedAt: timestamp("last_notified_at", { withTimezone: true }),
     createdAt: createdAt(),

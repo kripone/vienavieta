@@ -887,5 +887,11 @@ export const en: Dict = {
   "saglabāts sludinājums": {
     "one": "saved listing",
     "other": "saved listings"
-  }
+  },
+  "Pieslēgt Telegram": "Connect Telegram",
+  "Gatavojam saiti…": "Preparing link…",
+  "Atvienot Telegram": "Disconnect Telegram",
+  "Pieslēgts čats:": "Connected chat:",
+  "Sūtīt Telegram ziņu, ja favorītos saglabātam sludinājumam samazinās cena": "Send a Telegram message when a favorited listing's price drops",
+  "Pieslēdz mūsu botu un saņem jaunos sludinājumus un cenu kritumus Telegram čatā uzreiz.": "Connect our bot to get new listings and price drops in Telegram instantly.",
 };

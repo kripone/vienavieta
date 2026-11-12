@@ -895,5 +895,11 @@ export const ru: Dict = {
     "few": "сохранённых объявления",
     "many": "сохранённых объявлений",
     "other": "сохранённых объявления"
-  }
+  },
+  "Pieslēgt Telegram": "Подключить Telegram",
+  "Gatavojam saiti…": "Готовим ссылку…",
+  "Atvienot Telegram": "Отключить Telegram",
+  "Pieslēgts čats:": "Подключён чат:",
+  "Sūtīt Telegram ziņu, ja favorītos saglabātam sludinājumam samazinās cena": "Присылать сообщение в Telegram, когда цена избранного объявления снижается",
+  "Pieslēdz mūsu botu un saņem jaunos sludinājumus un cenu kritumus Telegram čatā uzreiz.": "Подключите нашего бота и мгновенно получайте новые объявления и снижения цен в Telegram.",
 };

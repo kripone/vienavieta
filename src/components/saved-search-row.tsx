@@ -5,7 +5,7 @@ import { useState } from "react";
 import { deleteSearch, setPriceDrops, setPricePush, updateSearch } from "@/app/pazinojumi/actions";
 import { NOTIFY_FREQUENCIES, NOTIFY_FREQUENCY_LABEL, type NotifyFrequency } from "@/lib/constants";
 
-type Props = { id: string; name: string; href: string; frequency: string; notifyEmail: boolean; notifyPush: boolean; hasPush: boolean; checked: string | null };
+type Props = { id: string; name: string; href: string; frequency: string; notifyEmail: boolean; notifyPush: boolean; notifyTelegram: boolean; hasPush: boolean; hasTelegram: boolean; checked: string | null };
 
 export function SavedSearchRow(p: Props) {
   const { t } = useT();
@@ -13,10 +13,11 @@ export function SavedSearchRow(p: Props) {
   const [freq, setFreq] = useState(p.frequency);
   const [on, setOn] = useState(p.notifyEmail);
   const [push, setPush] = useState(p.notifyPush);
+  const [tg, setTg] = useState(p.notifyTelegram);
   const [busy, setBusy] = useState(false);
   const [confirm, setConfirm] = useState(false);
 
-  async function save(patch: { frequency?: string; notifyEmail?: boolean; notifyPush?: boolean }) {
+  async function save(patch: { frequency?: string; notifyEmail?: boolean; notifyPush?: boolean; notifyTelegram?: boolean }) {
     setBusy(true);
     await updateSearch(p.id, patch);
     setBusy(false);
@@ -39,7 +40,13 @@ export function SavedSearchRow(p: Props) {
             {t("Telefonā")}
           </label>
         )}
-        <select aria-label={t("Biežums")} value={freq} disabled={busy || (!on && !push)} onChange={(e) => { setFreq(e.target.value); save({ frequency: e.target.value }); }}>
+        {p.hasTelegram && (
+          <label className="check">
+            <input type="checkbox" checked={tg} disabled={busy} onChange={(e) => { setTg(e.target.checked); save({ notifyTelegram: e.target.checked }); }} />
+            Telegram
+          </label>
+        )}
+        <select aria-label={t("Biežums")} value={freq} disabled={busy || (!on && !push && !tg)} onChange={(e) => { setFreq(e.target.value); save({ frequency: e.target.value }); }}>
           {NOTIFY_FREQUENCIES.map((f) => <option key={f} value={f}>{NOTIFY_FREQUENCY_LABEL[f as NotifyFrequency]}</option>)}
         </select>
         {!confirm ? (
