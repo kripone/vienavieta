@@ -23,7 +23,7 @@ export const userRole = pgEnum("user_role", ["user", "moderator", "admin"]);
 export const vehicleClass = pgEnum("vehicle_class", ["car", "moto", "camper", "van", "truck"]);
 export const listingKind = pgEnum("listing_kind", ["vehicle", "property"]);
 export const listingStatus = pgEnum("listing_status", ["active", "pending", "hidden", "sold", "deleted"]);
-export const listingSource = pgEnum("listing_source", ["own", "ss.com", "reklama.lv", "mm.lv", "city24.lv", "auto24.lv", "autoplius.lt", "aruodas.lt", "zip.lv", "pp.lv", "finder.porsche.com", "bravo-auto.lv"]);
+export const listingSource = pgEnum("listing_source", ["own", "ss.com", "reklama.lv", "mm.lv", "city24.lv", "auto24.lv", "autoplius.lt", "aruodas.lt", "zip.lv", "pp.lv", "finder.porsche.com", "bravo-auto.lv", "veho.lv"]);
 /** "dealer" = auto salons, "agency" = nekustamo īpašumu aģentūra */
 export const sellerType = pgEnum("seller_type", ["private", "dealer", "agency"]);
 export const dealType = pgEnum("deal_type", ["sell", "rent", "day", "buy"]);
