@@ -1,6 +1,6 @@
 // Dublikāti starp portāliem: tas pats auto vai īpašums VienāVietā un ss.com (vēlāk arī citos avotos).
 // Grupas atslēga glabājas listings.group_key; meklēšanā rāda vienu kartīti (savējo pirmo) ar saitēm uz pārējām.
-import { and, eq, gte, inArray, isNotNull, lte, ne, or, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, isNotNull, isNull, lte, ne, or, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 
 const { listings } = schema;
@@ -26,12 +26,18 @@ export async function findDuplicate(l: Row): Promise<Row | null> {
     if (!l.year || !(l.makeId || l.makeText)) return null; // par maz datu
     extra = [
       eq(listings.vehicleClass, l.vehicleClass!),
-      eq(listings.year, l.year),
+      // gads: līdzīgs (±1), jo pārdevēji portālos mēdz norādīt gadu ar nobīdi
+      gte(listings.year, l.year - 1),
+      lte(listings.year, l.year + 1),
       l.makeId ? eq(listings.makeId, l.makeId) : sql`lower(${listings.makeText}) = lower(${l.makeText})`,
       l.modelId ? or(eq(listings.modelId, l.modelId), sql`${listings.modelId} is null`) : undefined,
       l.mileageKm != null
         ? or(sql`${listings.mileageKm} is null`, and(gte(listings.mileageKm, Math.floor(l.mileageKm * 0.97) - 1000), lte(listings.mileageKm, Math.ceil(l.mileageKm * 1.03) + 1000)))
         : undefined,
+      // atrašanās vieta: ja zināma abiem, tai jāsakrīt — cita pilsēta nozīmē, ka tā drīzāk nav tas pats auto
+      l.placeId ? or(isNull(listings.placeId), eq(listings.placeId, l.placeId)) : undefined,
+      // krāsa: ja zināma abiem (autoplius saraksta kartītēs krāsas nav, ss.com detaļās ir), tai jāsakrīt
+      l.color ? or(isNull(listings.color), eq(listings.color, l.color)) : undefined,
     ];
   } else {
     if (!l.placeId || !(l.rooms || l.areaM2 || l.landM2)) return null;
