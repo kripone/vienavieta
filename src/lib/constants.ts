@@ -226,6 +226,7 @@ export const SOURCE_LABEL: Record<string, string> = {
   "finder.porsche.com": "Porsche Finder",
   "bravo-auto.lv": "Bravo Auto",
   "veho.lv": "Veho",
+  "mollerauto.lv": "Moller Auto",
 };
 
 /** bravo-auto.lv (Inchcape mazlietoto auto zīmols): servera renderētas kartītes ar data-* atributiem,
@@ -234,6 +235,9 @@ export const BRAVO = { key: "bravo:cars", url: "https://bravo-auto.lv/auto", qui
 
 /** veho.lv (Mercedes-Benz oficiālais dīleris): atklāts JSON API bez bot aizsardzības — servera plūsma. */
 export const VEHO = { key: "veho:cars", url: "https://veho.lv/api/vehicle-search/", quickEveryMin: 30, fullEveryHours: 24 } as const;
+
+/** mollerauto.lv (Audi/VW/Škoda dīleris): Magento servera renderētas kartītes, bez bot aizsardzības — servera plūsma. */
+export const MOLLER = { key: "moller:cars", url: "https://mollerauto.lv/lv/used-cars.html", quickEveryMin: 30, fullEveryHours: 24 } as const;
 
 /** Porsche Finder (Porsche Center Riga Airport lietotie auto): oficiālā dīlera meklētājs, aiz Vercel
  * bot aizsardzības — lapas atver ar reālu pārlūku (Playwright), tāpēc crawleris skrien lokāli

@@ -10,6 +10,7 @@ import { tickZip, zipEnabled } from "./zip-pages";
 import { ppEnabled, tickPp } from "./pp-pages";
 import { bravoEnabled, tickBravo } from "./bravo-pages";
 import { vehoEnabled, tickVeho } from "./veho-pages";
+import { mollerEnabled, tickMoller } from "./moller-pages";
 import { city24Enabled, tickCity24 } from "./city24-pages";
 import { backfillBodies, backfillHouseTail, backfillMakeModel, ensureMotoModels, forceModelRecrawl, forcePlacesRecrawl } from "./backfill";
 import { crawlSection } from "./ss-pages";
@@ -160,6 +161,17 @@ export function startSsCrawler() {
       for (;;) {
         const r = await tickVeho().catch((e) => (console.error("veho.lv ievākšana:", e instanceof Error ? e.message : e), null));
         if (r) console.log(`veho.lv ${r.mode}:`, JSON.stringify({ ...r, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
+        await new Promise((res) => setTimeout(res, 60_000));
+      }
+    })();
+  }
+  // mollerauto.lv (Audi/VW/Škoda dīleris): Magento servera HTML bez bot aizsardzības — darbojas serverī (bez pārlūka)
+  if (mollerEnabled()) {
+    (async () => {
+      await new Promise((r) => setTimeout(r, 390_000));
+      for (;;) {
+        const r = await tickMoller().catch((e) => (console.error("mollerauto.lv ievākšana:", e instanceof Error ? e.message : e), null));
+        if (r) console.log(`mollerauto.lv ${r.mode}:`, JSON.stringify({ ...r, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
         await new Promise((res) => setTimeout(res, 60_000));
       }
     })();
