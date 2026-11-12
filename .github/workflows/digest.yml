@@ -1,0 +1,26 @@
+# Rīta kopsavilkums administratoram Telegramā (sk. scripts/morning-digest.ts).
+# Skrien katru dienu 06:17 UTC = 08:17 pēc Rīgas laika (ziemā; vasarā 09:17).
+name: Rīta kopsavilkums
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Nosūtīt kopsavilkumu
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          ADMIN_TG_CHAT: ${{ secrets.ADMIN_TG_CHAT }}
+        run: npx tsx scripts/morning-digest.ts
