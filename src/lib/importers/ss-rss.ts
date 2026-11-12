@@ -254,6 +254,12 @@ const MAKE_ALIASES: Record<string, string> = {
 /** Kataloga nosaukumi, ar kuriem salīdzināt: pilnais un bez iekavas daļas ("Lada (VAZ)" → "lada-vaz", "lada"). */
 const makeKeys = (name: string) => [slug(name), slug(name.replace(/\(.*?\)/g, "").trim())];
 
+/** ss.com "markas", kas patiesībā ir uzlādes iekārtas (slug formā, sk. slug() transformācijas). */
+const CHARGER_MAKES = new Set([
+  "ev-carge", "feree", "pni", "podpoint", "reac", "soh", "soh-tests",
+  "uzlades", "v2c", "webasto-analog", "3-f-rozete", "elektroauto",
+]);
+
 export function findMake(makes: MakeRow[], vehicleClass: string, raw: string) {
   const k = slug(raw);
   const want = MAKE_ALIASES[k] ?? k;
@@ -389,6 +395,9 @@ export function mapItem(
   if (feed.kind === "vehicle") {
     const path = new URL(item.link).pathname;
     if (feed.vehicleClass === "moto" && !path.includes("/motorcycles/")) return null; // rezerves daļas, skuteri u.c.
+    // ss.com "Elektroauto" sadaļā pārdod arī uzlādes iekārtas (lādētāji, rosetes) — tās nav auto, izlaižam.
+    // NB: atslēgas ir slug() vērtības (sh→s, ch→c, y→""), tāpēc "ev-carge", "reac", "feree".
+    if (feed.vehicleClass === "car" && CHARGER_MAKES.has(slug(first(f, "Marka") ?? ""))) return null;
     // marka: no "Marka" lauka (auto) vai adreses ceļa (moto: …/motorcycles/kawasaki/…)
     const makeRaw = first(f, "Marka") ?? path.split("/").filter(Boolean).at(-2) ?? "";
     const modelRaw0 = feed.vehicleClass !== "moto" ? (f["Modelis"]?.[0] ?? f["Marka"]?.[1] ?? "") : (first(f, "Modelis") ?? "");
