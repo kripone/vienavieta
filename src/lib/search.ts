@@ -384,8 +384,25 @@ export async function describeSearch(s: SearchParams) {
   if (s.pmin != null && s.pmax != null) parts.push(`${nf.format(s.pmin)}–${nf.format(s.pmax)} €`);
   else if (s.pmax != null) parts.push(`līdz ${nf.format(s.pmax)} €`);
   else if (s.pmin != null) parts.push(`no ${nf.format(s.pmin)} €`);
-  if (s.ymin) parts.push(`no ${s.ymin}. g.`);
-  if (s.rmin) parts.push(`${s.rmin}+ ist.`);
+  if (s.ymin && s.ymin === s.ymax) parts.push(`${s.ymin}. g.`);
+  else {
+    if (s.ymin) parts.push(`no ${s.ymin}. g.`);
+    if (s.ymax) parts.push(`līdz ${s.ymax}. g.`);
+  }
+  if (s.cat === "vehicle") {
+    for (const x of [s.el ? "Elektro" : s.fuel, s.gear, s.body, s.drive, s.color]) if (x) parts.push(x);
+    if (s.ccmax != null) parts.push(`dzinējs līdz ${String(s.ccmax).replace(".", ",")} l`);
+    if (s.kmmax != null) parts.push(`līdz ${nf.format(s.kmmax)} km`);
+  }
+  if (s.rmin && s.rmin === s.rmax) parts.push(`${s.rmin} ist.`);
+  else if (s.rmin) parts.push(`${s.rmin}+ ist.`);
+  if (s.cat === "property") {
+    if (s.amin != null && s.amax != null) parts.push(`${s.amin}–${s.amax} m²`);
+    else if (s.amin != null) parts.push(`no ${s.amin} m²`);
+    else if (s.amax != null) parts.push(`līdz ${s.amax} m²`);
+    if (s.fmin != null && s.fmin === s.fmax) parts.push(`${s.fmin}. stāvs`);
+    if (s.series) parts.push(s.series);
+  }
   if (s.loc && REGION_GROUPS_LOC[s.loc]) parts.push(REGION_GROUP_LABEL[s.loc]);
   else if (s.loc) {
     const id = Number(s.loc.slice(2));
@@ -397,7 +414,7 @@ export async function describeSearch(s: SearchParams) {
   if (s.zone) parts.push("zona kartē");
   if (s.src === "own") parts.push("tikai VienāVietā");
   else if (s.src === "ext") parts.push("no citiem portāliem");
-  return parts.join(" · ").slice(0, 120);
+  return parts.join(" · ").slice(0, 160);
 }
 
 /** Joslai: sludinājumu skaits pa virsbūvēm (auto) vai īpašuma veidiem, ievērojot pārējos filtrus. */
