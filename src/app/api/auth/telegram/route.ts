@@ -34,7 +34,9 @@ export async function GET(req: Request) {
   const q = Object.fromEntries(url.searchParams.entries());
   const next = q.next?.startsWith("/") ? q.next : "/";
   delete q.next; // mūsu parametrs, nevis Telegram — neietilpst parakstā
-  const fail = (code: string) => Response.redirect(new URL(`/ielogoties?error=${encodeURIComponent(code)}`, url.origin), 302);
+  // aiz starpniekservera req.url origin ir iekšējā adrese (localhost:10000) — lietojam publisko
+  const origin = (process.env.APP_URL || process.env.BETTER_AUTH_URL || url.origin).replace(/\/$/, "");
+  const fail = (code: string) => Response.redirect(new URL(`/ielogoties?error=${encodeURIComponent(code)}`, origin), 302);
 
   if (!telegramEnabled()) return fail("telegram_disabled");
   if (!validAuth(q, process.env.TELEGRAM_BOT_TOKEN!)) return fail("INVALID_TOKEN");
@@ -54,7 +56,7 @@ export async function GET(req: Request) {
     expiresAt: new Date(Date.now() + 15 * 60_000),
   });
 
-  const verify = new URL("/api/auth/magic-link/verify", url.origin);
+  const verify = new URL("/api/auth/magic-link/verify", origin);
   verify.searchParams.set("token", token);
   verify.searchParams.set("callbackURL", next);
   verify.searchParams.set("newUserCallbackURL", "/profils?jauns=1");
