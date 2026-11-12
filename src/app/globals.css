@@ -76,6 +76,7 @@ h1 { font-family: var(--f-display); font-weight: 800; font-size: 28px; letter-sp
 .fine { font-size: 13px; color: var(--muted); font-weight: 400; margin: 0; }
 main .fine { margin-top: 14px; }
 .sso { display: flex; flex-direction: column; gap: 8px; }
+.sso .tg-login iframe { width: 100%; }
 .or { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; margin: 14px 0; }
 .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 .user-btn span { max-width: 18ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

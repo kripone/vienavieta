@@ -1,12 +1,32 @@
 "use client";
 import { useT } from "@/i18n/client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
-type Social = { google: boolean; facebook: boolean; apple: boolean };
+type Social = { google: boolean; facebook: boolean; apple: boolean; telegram: boolean };
 const SOCIAL_LABEL = { google: "Google", facebook: "Facebook", apple: "Apple" } as const;
 
-export function LoginForm({ next, social }: { next: string; social: Social }) {
+/** Oficiālais Telegram Login Widget (poga nāk no telegram.org skripta). */
+function TelegramLogin({ bot, next }: { bot: string; next: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    const s = document.createElement("script");
+    s.src = "https://telegram.org/js/telegram-widget.js?22";
+    s.async = true;
+    s.setAttribute("data-telegram-login", bot);
+    s.setAttribute("data-size", "large");
+    s.setAttribute("data-radius", "8");
+    s.setAttribute("data-userpic", "false");
+    s.setAttribute("data-request-access", "write");
+    s.setAttribute("data-auth-url", `${window.location.origin}/api/auth/telegram?next=${encodeURIComponent(next)}`);
+    ref.current.innerHTML = "";
+    ref.current.appendChild(s);
+  }, [bot, next]);
+  return <div ref={ref} className="tg-login" />;
+}
+
+export function LoginForm({ next, social, telegramBot }: { next: string; social: Social; telegramBot?: string }) {
   const { t } = useT();
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -35,7 +55,7 @@ export function LoginForm({ next, social }: { next: string; social: Social }) {
     setState("sent");
   }
 
-  const providers = (Object.keys(social) as (keyof Social)[]).filter((p) => social[p]);
+  const providers = (Object.keys(SOCIAL_LABEL) as (keyof typeof SOCIAL_LABEL)[]).filter((p) => social[p]);
 
   if (state === "sent") {
     return (
@@ -53,7 +73,7 @@ export function LoginForm({ next, social }: { next: string; social: Social }) {
 
   return (
     <div className="panel">
-      {providers.length > 0 && (
+      {(providers.length > 0 || (social.telegram && telegramBot)) && (
         <>
           <div className="sso">
             {providers.map((p) => (
@@ -61,6 +81,7 @@ export function LoginForm({ next, social }: { next: string; social: Social }) {
                 Turpināt ar {SOCIAL_LABEL[p]}
               </button>
             ))}
+            {social.telegram && telegramBot && <TelegramLogin bot={telegramBot} next={next} />}
           </div>
           <div className="or">
             <span>{t("vai ar e-pastu")}</span>
