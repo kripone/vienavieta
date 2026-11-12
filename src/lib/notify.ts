@@ -10,6 +10,7 @@ import { formatPrice, plural } from "./format";
 import { locationLabel } from "./listings";
 import { newListingsSince, parseSearch, toQuery } from "./search";
 import { pushToUser, type PushMessage } from "./push";
+import { sendTelegram } from "./telegram";
 import { makeT, type Locale } from "@/i18n/core";
 import { DICTS } from "@/i18n/dicts";
 import { trTitle } from "@/i18n/content";
@@ -60,6 +61,15 @@ function itemsHtml(items: Item[]) {
 const itemsText = (items: Item[]) =>
   items.map((l) => `- ${l.title} — ${l.oldPrice != null ? `${formatPrice(l.oldPrice)} → ` : ""}${formatPrice(l.price)}${unit(l.deal)}\n  ${appUrl()}/sludinajumi/${l.id}`).join("\n");
 
+/** Telegram ziņu rindas (HTML režīms). */
+const itemsTg = (items: Item[]) =>
+  items
+    .map(
+      (l) =>
+        `• <a href="${appUrl()}/sludinajumi/${l.id}">${escapeHtml(l.title)}</a> — ${l.oldPrice != null ? `<s>${formatPrice(l.oldPrice)}</s> ` : ""}<b>${formatPrice(l.price)}${unit(l.deal)}</b> · ${escapeHtml(locationLabel(l.place, l.region, l.regionKind))}`,
+    )
+    .join("\n");
+
 function layout(intro: string, body: string, footer: string) {
   return `<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#181b24;max-width:600px">
     <p style="font-size:18px;font-weight:700;margin:0 0 12px">Vienā<span style="color:#9e3039">Vietā</span></p>
@@ -94,22 +104,22 @@ function dropPush(locale: Locale, items: Item[]): PushMessage {
 }
 
 // ---------- darbs ----------
-export type RunResult = { searchesChecked: number; searchEmails: number; priceEmails: number; pushes: number; errors: number };
+export type RunResult = { searchesChecked: number; searchEmails: number; priceEmails: number; pushes: number; telegrams: number; errors: number };
 
 export async function runNotifications(now = new Date()): Promise<RunResult> {
-  const res: RunResult = { searchesChecked: 0, searchEmails: 0, priceEmails: 0, pushes: 0, errors: 0 };
+  const res: RunResult = { searchesChecked: 0, searchEmails: 0, priceEmails: 0, pushes: 0, telegrams: 0, errors: 0 };
   let budget = MAX_EMAILS_PER_RUN;
 
-  // 1) saglabātās meklēšanas, kurām pienācis laiks (e-pasts vai push)
+  // 1) saglabātās meklēšanas, kurām pienācis laiks (e-pasts, push vai Telegram)
   const hourAgo = new Date(now.getTime() - 50 * 60_000);
   const dayAgo = new Date(now.getTime() - 23 * 3600_000);
   const due = await db
-    .select({ s: savedSearches, email: users.email })
+    .select({ s: savedSearches, email: users.email, tgChat: users.telegramChatId })
     .from(savedSearches)
     .innerJoin(users, eq(savedSearches.userId, users.id))
     .where(
       and(
-        or(eq(savedSearches.notifyEmail, true), eq(savedSearches.notifyPush, true)),
+        or(eq(savedSearches.notifyEmail, true), eq(savedSearches.notifyPush, true), eq(savedSearches.notifyTelegram, true)),
         isNull(users.blockedAt),
         or(
           isNull(savedSearches.lastNotifiedAt),
@@ -122,11 +132,11 @@ export async function runNotifications(now = new Date()): Promise<RunResult> {
     .limit(1000);
 
   type Found = { s: typeof savedSearches.$inferSelect; rows: Item[]; total: number };
-  const byUser = new Map<string, { email: string; found: Found[]; checked: string[] }>();
-  for (const { s, email } of due) {
+  const byUser = new Map<string, { email: string; tgChat: string | null; found: Found[]; checked: string[] }>();
+  for (const { s, email, tgChat } of due) {
     res.searchesChecked++;
     const { rows, total } = await newListingsSince(parseSearch(s.filters), s.lastSeenAt, now, 10);
-    const u = byUser.get(s.userId) ?? { email, found: [], checked: [] };
+    const u = byUser.get(s.userId) ?? { email, tgChat, found: [], checked: [] };
     if (total > 0) u.found.push({ s, rows, total });
     else u.checked.push(s.id);
     byUser.set(s.userId, u);
@@ -173,6 +183,22 @@ export async function runNotifications(now = new Date()): Promise<RunResult> {
         console.error("Push neizdevās:", err instanceof Error ? err.message : err);
       }
     }
+    const byTelegram = u.tgChat ? u.found.filter((f) => f.s.notifyTelegram) : [];
+    if (byTelegram.length) {
+      try {
+        const msg = byTelegram
+          .map((f) => {
+            const more = f.total > f.rows.length ? `\n<a href="${appUrl()}/?${toQuery(f.s.filters)}">Visi jaunie (${f.total}) →</a>` : "";
+            return `🔎 <b>${escapeHtml(f.s.name)}</b>\n${itemsTg(f.rows)}${more}`;
+          })
+          .join("\n\n");
+        await sendTelegram(u.tgChat!, msg.slice(0, 4000));
+        res.telegrams++;
+      } catch (err) {
+        res.errors++;
+        console.error("Telegram neizdevās:", err instanceof Error ? err.message : err);
+      }
+    }
     await db.update(savedSearches).set({ lastSeenAt: now, lastNotifiedAt: now }).where(inArray(savedSearches.id, u.found.map((f) => f.s.id)));
   }
 
@@ -180,6 +206,7 @@ export async function runNotifications(now = new Date()): Promise<RunResult> {
   const drops = await db
     .select({
       userId: users.id, email: users.email, wantEmail: users.notifyPriceDrops, wantPush: users.pushPriceDrops,
+      wantTg: users.telegramPriceDrops, tgChat: users.telegramChatId,
       id: listings.id, title: listings.title, price: listings.price, deal: listings.deal,
       place: places.name, region: regions.name, regionKind: regions.kind,
       oldPrice: sql<number>`coalesce(${favorites.notifiedPrice}, ${favorites.priceAtSave})`,
@@ -192,7 +219,7 @@ export async function runNotifications(now = new Date()): Promise<RunResult> {
     .where(
       and(
         eq(listings.status, "active"),
-        or(eq(users.notifyPriceDrops, true), eq(users.pushPriceDrops, true)),
+        or(eq(users.notifyPriceDrops, true), eq(users.pushPriceDrops, true), eq(users.telegramPriceDrops, true)),
         isNull(users.blockedAt),
         isNotNull(favorites.priceAtSave),
         sql`${listings.price} < coalesce(${favorites.notifiedPrice}, ${favorites.priceAtSave})`,
@@ -200,9 +227,9 @@ export async function runNotifications(now = new Date()): Promise<RunResult> {
     )
     .limit(2000);
 
-  const perUser = new Map<string, { email: string; wantEmail: boolean; wantPush: boolean; items: Item[] }>();
+  const perUser = new Map<string, { email: string; wantEmail: boolean; wantPush: boolean; wantTg: boolean; tgChat: string | null; items: Item[] }>();
   for (const d of drops) {
-    const u = perUser.get(d.userId) ?? { email: d.email, wantEmail: d.wantEmail, wantPush: d.wantPush, items: [] };
+    const u = perUser.get(d.userId) ?? { email: d.email, wantEmail: d.wantEmail, wantPush: d.wantPush, wantTg: d.wantTg, tgChat: d.tgChat, items: [] };
     u.items.push(d);
     perUser.set(d.userId, u);
   }
@@ -238,6 +265,16 @@ export async function runNotifications(now = new Date()): Promise<RunResult> {
       } catch (err) {
         res.errors++;
         console.error("Push neizdevās:", err instanceof Error ? err.message : err);
+      }
+    }
+    if (u.wantTg && u.tgChat) {
+      try {
+        await sendTelegram(u.tgChat, `📉 <b>Cena samazināta</b>\n${itemsTg(u.items)}`.slice(0, 4000));
+        res.telegrams++;
+        delivered = true;
+      } catch (err) {
+        res.errors++;
+        console.error("Telegram neizdevās:", err instanceof Error ? err.message : err);
       }
     }
     // atzīmējam arī tad, ja lietotājam nav neviena kanāla (lai nepārbaudītu katru reizi no jauna)

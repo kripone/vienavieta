@@ -896,5 +896,11 @@ export const lt: Dict = {
     "few": "išsaugoti skelbimai",
     "many": "išsaugotų skelbimų",
     "other": "išsaugotų skelbimų"
-  }
+  },
+  "Pieslēgt Telegram": "Prijungti Telegram",
+  "Gatavojam saiti…": "Ruošiama nuoroda…",
+  "Atvienot Telegram": "Atjungti Telegram",
+  "Pieslēgts čats:": "Prijungtas pokalbis:",
+  "Sūtīt Telegram ziņu, ja favorītos saglabātam sludinājumam samazinās cena": "Siųsti Telegram žinutę, kai išsaugoto skelbimo kaina sumažėja",
+  "Pieslēdz mūsu botu un saņem jaunos sludinājumus un cenu kritumus Telegram čatā uzreiz.": "Prijunkite mūsų botą ir gaukite naujus skelbimus bei kainų kritimus Telegram iškart.",
 };

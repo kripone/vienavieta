@@ -7,6 +7,7 @@ import { verifyUnsubscribe } from "@/lib/notify";
 import { describeSearch, normalizeFilters, parseSearch } from "@/lib/search";
 import { getCurrentUser } from "@/lib/session";
 import { userHasPush } from "@/lib/push";
+import { createLinkToken, telegramEnabled } from "@/lib/telegram";
 
 const { savedSearches, users } = schema;
 
@@ -30,13 +31,14 @@ export async function saveSearch(raw: Record<string, string>): Promise<SaveSearc
   return { ok: true, id: row.id, name };
 }
 
-export async function updateSearch(id: string, patch: { frequency?: string; notifyEmail?: boolean; notifyPush?: boolean; name?: string }) {
+export async function updateSearch(id: string, patch: { frequency?: string; notifyEmail?: boolean; notifyPush?: boolean; notifyTelegram?: boolean; name?: string }) {
   const user = await getCurrentUser();
   if (!user) return { ok: false as const };
   const set: Partial<typeof savedSearches.$inferInsert> = {};
   if (patch.frequency && (NOTIFY_FREQUENCIES as readonly string[]).includes(patch.frequency)) set.frequency = patch.frequency as NotifyFrequency;
   if (typeof patch.notifyEmail === "boolean") set.notifyEmail = patch.notifyEmail;
   if (typeof patch.notifyPush === "boolean") set.notifyPush = patch.notifyPush;
+  if (typeof patch.notifyTelegram === "boolean") set.notifyTelegram = patch.notifyTelegram;
   if (typeof patch.name === "string" && patch.name.trim()) set.name = patch.name.trim().slice(0, 120);
   if (!Object.keys(set).length) return { ok: false as const };
   await db.update(savedSearches).set(set).where(and(eq(savedSearches.id, id), eq(savedSearches.userId, user.id)));
@@ -64,6 +66,31 @@ export async function setPricePush(on: boolean) {
   const user = await getCurrentUser();
   if (!user) return { ok: false as const };
   await db.update(users).set({ pushPriceDrops: Boolean(on) }).where(eq(users.id, user.id));
+  revalidatePath("/pazinojumi");
+  return { ok: true as const };
+}
+
+/** Izveido vienreizēju Telegram piesaistes saiti (derīga 10 min). Atgriež t.me URL. */
+export async function linkTelegram(): Promise<{ ok: true; url: string } | { ok: false }> {
+  const user = await getCurrentUser();
+  if (!user || !telegramEnabled()) return { ok: false as const };
+  const url = await createLinkToken(user.id);
+  return { ok: true as const, url };
+}
+
+/** Atvieno Telegram čatu no konta. */
+export async function unlinkTelegram() {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false as const };
+  await db.update(users).set({ telegramChatId: null, telegramUsername: null }).where(eq(users.id, user.id));
+  revalidatePath("/pazinojumi");
+  return { ok: true as const };
+}
+
+export async function setTelegramPriceDrops(on: boolean) {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false as const };
+  await db.update(users).set({ telegramPriceDrops: Boolean(on) }).where(eq(users.id, user.id));
   revalidatePath("/pazinojumi");
   return { ok: true as const };
 }

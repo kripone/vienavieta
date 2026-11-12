@@ -56,6 +56,13 @@ services:
         sync: false
       - key: EMAIL_FROM
         sync: false
+      # Telegram paziņojumu bots (token no @BotFather; username bez @; secret — jebkāda garlaicīga virkne)
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_BOT_USERNAME
+        sync: false
+      - key: TELEGRAM_WEBHOOK_SECRET
+        sync: false
       # Bildes: Cloudflare R2 ("s3"); bez R2 atslēgām var izmantot "db" (sk. docs/DEPLOY.md)
       # Administratoru e-pasti (komats starp tiem): piekļuve /moderacija
       - key: ADMIN_EMAILS

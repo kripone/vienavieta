@@ -169,6 +169,13 @@
       "when": 1794477829841,
       "tag": "0023_ancient_sabra",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1794515118470,
+      "tag": "0024_military_human_robot",
+      "breakpoints": true
     }
   ]
 }
