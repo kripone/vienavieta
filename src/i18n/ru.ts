@@ -2,6 +2,19 @@
 import type { Dict } from "./core";
 
 export const ru: Dict = {
+  "Cenu kopsavilkums": "Сводка цен",
+  "Atrasti": "Найдено",
+  "Tipiskā cena šiem parametriem (mediāna):": "Типичная цена для этих параметров (медиана):",
+  "lielākā daļa: {a} – {b}": "большинство: {a} – {b}",
+  "Pēdējās 30 dienās cena samazināta {n} sludinājumiem": "За последние 30 дней цена снижена в {n} объявлениях",
+  "Rādīt tos": "Показать",
+  "Cenu sadalījums": "Распределение цен",
+  "lēti": "дешёвые",
+  "vidēji": "средние",
+  "dārgi": "дорогие",
+  "zem {p}": "ниже {p}",
+  "virs {p}": "выше {p}",
+  "€/mēn.": "€/мес.",
   "Ieraksti adresi.": "Введите адрес.",
   "Adresi neatradām. Pamēģini ar ielu un pilsētu, piem. „Brīvības iela 100, Rīga”.": "Адрес не найден. Попробуйте улицу и город, напр. «Brīvības iela 100, Rīga».",
   "Neizdevās aprēķināt zonu. Mēģini vēlreiz.": "Не удалось рассчитать зону. Попробуйте ещё раз.",

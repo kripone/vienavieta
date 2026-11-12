@@ -8,6 +8,7 @@ import { SearchFilters } from "./search-filters";
 import { SearchMapLazy } from "./search-map-lazy";
 import { SortSelect } from "./sort-select";
 import { SmartSearch } from "./smart-search";
+import { PriceInsights } from "./price-insights";
 import { TypeStrip } from "./type-strip";
 import { VEHICLE_CLASS_LABEL, VEHICLE_CLASSES, type VehicleClass } from "@/lib/constants";
 import { alsoAt } from "@/lib/dedupe";
@@ -15,7 +16,7 @@ import { priceEvals } from "@/lib/price-eval";
 import { vzdBadges } from "@/lib/vzd";
 import { favoriteIds } from "@/lib/favorites";
 import { regionOptions } from "@/lib/listings";
-import { describeSearch, parseSearch, searchListings, typeCounts, sourceCounts } from "@/lib/search";
+import { describeSearch, priceInsights, parseSearch, searchListings, typeCounts, sourceCounts } from "@/lib/search";
 import { getCurrentUser } from "@/lib/session";
 
 import { formatPrice } from "@/lib/format";
@@ -66,6 +67,8 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
     return p.toString() ? `/?${p}` : "/";
   };
   // SEO lapām: kopsavilkums un iekšējās saites
+  // mini analītika: tikai salīdzināmām cenām (transports vai īpašums ar zināmu darījumu), pirmajā lapā
+  const insights = result && s.page === 1 && (s.cat === "vehicle" || (s.cat === "property" && (s.deal === "sell" || s.deal === "rent"))) ? await priceInsights(s).catch(() => null) : null;
   const summary = landing ? await priceSummary(s).catch(() => null) : null;
   const facetBy = landing?.facet === "make" || landing?.facet === "model" || landing?.facet === "region" ? landing.facet : null;
   const facets = facetBy ? await facetCounts(s, facetBy).catch(() => []) : [];
@@ -124,6 +127,7 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
         )}
         {stripMode && <TypeStrip mode={stripMode} flat={flat} counts={counts} />}
         <SearchMapLazy query={pointsQuery} zone={flat.zone} />
+        {insights && <PriceInsights d={insights} flat={flat} rent={s.deal === "rent"} />}
         <div className="results-head">
           {landing ? <h1>{landing.h1}</h1> : <h1>{heading}</h1>}
           {result && <span className="count">{tp(result.total, "sludinājums", "sludinājumi")}</span>}

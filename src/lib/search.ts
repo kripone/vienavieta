@@ -503,3 +503,51 @@ export function priceSummary(s: SearchParams): Promise<{ n: number; median: numb
     return { n: Number(r?.n ?? 0), median: r?.median != null ? Math.round(Number(r.median)) : null };
   });
 }
+
+export type PriceInsights = {
+  n: number; median: number; p25: number; p75: number; lo: number; hi: number;
+  /** stabiņi no lo līdz hi: [cena no, cena līdz, skaits] */
+  bins: [number, number, number][];
+  cheap: number; mid: number; dear: number; cheapMax: number; dearMin: number;
+  drops: number; dropPct: number | null;
+};
+
+/** Mini analītika meklēšanas rezultātiem: mediāna, cenu sadalījums (lēti < 80% mediānas, dārgi > 120%) un cenu samazinājumi 30 dienās. */
+export function priceInsights(s: SearchParams): Promise<PriceInsights | null> {
+  const base = { ...s, page: 1, sort: "new" as const };
+  return cached(`ins:${JSON.stringify(base)}`, async () => {
+    const from = <T extends Record<string, unknown>>(sel: T) =>
+      db.select(sel as never).from(listings)
+        .leftJoin(places, eq(listings.placeId, places.id))
+        .leftJoin(regions, eq(places.regionId, regions.id))
+        .leftJoin(makes, eq(listings.makeId, makes.id))
+        .leftJoin(models, eq(listings.modelId, models.id))
+        .leftJoin(users, eq(listings.userId, users.id));
+    const where = and(...conditions(base), sql`${listings.price} > 0`);
+    const pc = (f: number) => sql<number>`percentile_cont(${f}::float8) within group (order by ${listings.price})`;
+    const dropped = sql`${listings.firstPrice} > ${listings.price} and exists (select 1 from price_history h where h.listing_id = ${listings.id} and h.changed_at > now() - interval '30 days')`;
+    const [st] = (await from({
+      n: count(), p5: pc(0.05), p25: pc(0.25), median: pc(0.5), p75: pc(0.75), p95: pc(0.95),
+      drops: sql<number>`count(*) filter (where ${dropped})`,
+      dropPct: sql<number | null>`avg((${listings.firstPrice} - ${listings.price})::numeric / nullif(${listings.firstPrice}, 0) * 100) filter (where ${dropped})`,
+    }).where(where)) as unknown as { n: number; p5: number; p25: number; median: number; p75: number; p95: number; drops: number; dropPct: number | null }[];
+    const n = Number(st?.n ?? 0);
+    if (n < 8 || st.median == null) return null;
+    const median = Math.round(Number(st.median));
+    const lo = Math.floor(Number(st.p5)), hi = Math.max(lo + 12, Math.ceil(Number(st.p95)));
+    const cheapMax = Math.round(median * 0.8), dearMin = Math.round(median * 1.2);
+    const N = 14;
+    const [rows, [seg]] = await Promise.all([
+      from({ b: sql<number>`least(${N}::int, greatest(1, width_bucket(${listings.price}::numeric, ${lo}::numeric, ${hi}::numeric, ${N}::int)))`, c: count() }).where(where).groupBy(sql`1`) as unknown as Promise<{ b: number; c: number }[]>,
+      from({ cheap: sql<number>`count(*) filter (where ${listings.price} < ${cheapMax}::int)`, dear: sql<number>`count(*) filter (where ${listings.price} > ${dearMin}::int)` }).where(where) as unknown as Promise<{ cheap: number; dear: number }[]>,
+    ]);
+    const step = (hi - lo) / N;
+    const bins = Array.from({ length: N }, (_, i) => [Math.round(lo + i * step), Math.round(lo + (i + 1) * step), Number(rows.find((r) => Number(r.b) === i + 1)?.c ?? 0)] as [number, number, number]);
+    const cheap = Number(seg?.cheap ?? 0), dear = Number(seg?.dear ?? 0);
+    return {
+      n, median, p25: Math.round(Number(st.p25)), p75: Math.round(Number(st.p75)), lo, hi, bins,
+      cheap, dear, mid: n - cheap - dear, cheapMax, dearMin,
+      drops: Number(st.drops ?? 0), dropPct: st.dropPct != null ? Math.round(Number(st.dropPct) * 10) / 10 : null,
+    };
+  });
+}

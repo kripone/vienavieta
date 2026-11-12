@@ -2,6 +2,19 @@
 import type { Dict } from "./core";
 
 export const lt: Dict = {
+  "Cenu kopsavilkums": "Kainų suvestinė",
+  "Atrasti": "Rasta",
+  "Tipiskā cena šiem parametriem (mediāna):": "Įprasta kaina pagal šiuos kriterijus (mediana):",
+  "lielākā daļa: {a} – {b}": "dauguma: {a} – {b}",
+  "Pēdējās 30 dienās cena samazināta {n} sludinājumiem": "Per 30 dienų kaina sumažinta {n} skelbimų",
+  "Rādīt tos": "Rodyti",
+  "Cenu sadalījums": "Kainų pasiskirstymas",
+  "lēti": "pigūs",
+  "vidēji": "vidutiniai",
+  "dārgi": "brangūs",
+  "zem {p}": "iki {p}",
+  "virs {p}": "virš {p}",
+  "€/mēn.": "€/mėn.",
   "Ieraksti adresi.": "Įveskite adresą.",
   "Adresi neatradām. Pamēģini ar ielu un pilsētu, piem. „Brīvības iela 100, Rīga”.": "Adreso neradome. Pabandykite gatvę ir miestą, pvz. „Brīvības iela 100, Rīga“.",
   "Neizdevās aprēķināt zonu. Mēģini vēlreiz.": "Nepavyko apskaičiuoti zonos. Bandykite dar kartą.",

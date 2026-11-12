@@ -106,10 +106,6 @@ export function SearchFilters({ initial, regions, sources = [] }: { initial: Fil
         </div>
       )}
 
-      <label className="field">
-        {t("Meklēt")}
-        <input type="search" value={v.q ?? ""} placeholder={t("piem. Golf, 2 istabas, Teika")} onChange={(e) => update({ q: e.target.value }, 500)} />
-      </label>
       <div className="grid2">
         {numIn("pmin", "Cena no, €")}
         {numIn("pmax", "Cena līdz, €")}
