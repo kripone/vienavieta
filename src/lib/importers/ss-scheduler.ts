@@ -12,6 +12,7 @@ import { bravoEnabled, tickBravo } from "./bravo-pages";
 import { vehoEnabled, tickVeho } from "./veho-pages";
 import { mollerEnabled, tickMoller } from "./moller-pages";
 import { toyotaEnabled, tickToyota } from "./toyota-pages";
+import { wessEnabled, tickWess } from "./wess-pages";
 import { city24Enabled, tickCity24 } from "./city24-pages";
 import { backfillBodies, backfillHouseTail, backfillMakeModel, ensureMotoModels, forceModelRecrawl, forcePlacesRecrawl } from "./backfill";
 import { crawlSection } from "./ss-pages";
@@ -184,6 +185,17 @@ export function startSsCrawler() {
       for (;;) {
         const r = await tickToyota().catch((e) => (console.error("toyota.lv/lexus.lv ievākšana:", e instanceof Error ? e.message : e), null));
         if (r) console.log(`toyota+lexus ${r.mode}:`, JSON.stringify({ ...r, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
+        await new Promise((res) => setTimeout(res, 60_000));
+      }
+    })();
+  }
+  // cars.bmwwess.lv (Wess Select): WooCommerce servera HTML — darbojas serverī (bez pārlūka)
+  if (wessEnabled()) {
+    (async () => {
+      await new Promise((r) => setTimeout(r, 450_000));
+      for (;;) {
+        const r = await tickWess().catch((e) => (console.error("cars.bmwwess.lv ievākšana:", e instanceof Error ? e.message : e), null));
+        if (r) console.log(`wess ${r.mode}:`, JSON.stringify({ ...r, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
         await new Promise((res) => setTimeout(res, 60_000));
       }
     })();
