@@ -23,6 +23,8 @@ const FLOWS: [string, string | null][] = [
   ["bravo:", null],
   ["veho:", null],
   ["moller:", null],
+  ["toyota:", null],
+  ["lexus:", null],
 ];
 
 const QUICK_MAX_H = 3;
