@@ -2,6 +2,7 @@
 import { useT } from "@/i18n/client";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import Supercluster from "supercluster";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { GOOGLE_KEY } from "@/lib/google-tiles";
@@ -15,6 +16,10 @@ const SATELLITE_ATTR = process.env.NEXT_PUBLIC_MAP_SATELLITE_ATTRIBUTION || "";
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 const fmt = new Intl.NumberFormat("lv-LV");
+type Props = { id: string; kind: 1 | 2; price: number; title: string };
+/** Skaits burbulī: 150, 2,5k, 12k. */
+const short = (n: number) => (n < 1000 ? String(n) : n < 10000 ? `${(Math.floor(n / 100) / 10).toString().replace(".", ",")}k` : `${Math.floor(n / 1000)}k`);
+const popupHtml = (p: Props) => `<a href="/sludinajumi/${p.id}" style="font-weight:700">${esc(p.title)}</a><br>${fmt.format(p.price)} €`;
 
 /** Vienkāršo zīmēto līniju: atstāj punktus, kas ir vismaz `min` pikseļu attālumā. */
 function simplify(pts: L.Point[], min = 8) {
@@ -51,31 +56,53 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
     }
     m.setMaxBounds([[53.3, 19.5], [58.8, 29.5]]); // Latvija un Lietuva
     markers.current = L.layerGroup().addTo(m);
-    m.on("zoomend", () => {
-      const r = radiusFor(m.getZoom());
-      markers.current?.eachLayer((l) => (l as L.CircleMarker).setRadius?.(r));
-    });
     map.current = m;
     return () => { m.remove(); map.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // punkti
+  // punkti: tuvu esošie apvienoti burbulī ar skaitu; tuvinot sadalās pa sludinājumiem
+  const index = useRef<Supercluster<Props> | null>(null);
+  const draw = useRef<() => void>(() => {});
   useEffect(() => {
     const m = map.current;
     if (!m || !markers.current) return;
     let alive = true;
-    fetch(`/api/search/points?${query}`).then((r) => r.json()).then((pts: Point[]) => {
-      if (!alive || !markers.current) return;
-      markers.current.clearLayers();
-      setCount(pts.length);
-      for (const [id, lat, lon, kind, price, title] of pts) {
-        L.circleMarker([lat, lon], { radius: radiusFor(m.getZoom()), weight: 1, color: "#fff", fillColor: kind === 1 ? "#2f5fa8" : "#2f8a64", fillOpacity: 0.9 })
-          .bindPopup(`<a href="/sludinajumi/${id}" style="font-weight:700">${esc(title)}</a><br>${fmt.format(price)} €`)
-          .addTo(markers.current);
+    draw.current = () => {
+      const g = markers.current, idx = index.current;
+      if (!g || !idx) return;
+      g.clearLayers();
+      const b = m.getBounds().pad(0.2), z = Math.round(m.getZoom());
+      for (const c of idx.getClusters([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], z)) {
+        const [lon, lat] = c.geometry.coordinates;
+        const cp = c.properties as Supercluster.ClusterProperties & Props;
+        if (!cp.cluster) {
+          L.circleMarker([lat, lon], { radius: radiusFor(z) + 1.5, weight: 1.5, color: "#fff", fillColor: cp.kind === 1 ? "#2f5fa8" : "#2f8a64", fillOpacity: 0.95 }).bindPopup(popupHtml(cp)).addTo(g);
+          continue;
+        }
+        const n = cp.point_count, size = n < 10 ? 30 : n < 100 ? 36 : n < 1000 ? 44 : 52;
+        const mk = L.marker([lat, lon], { icon: L.divIcon({ className: "mcluster", html: `<span style="width:${size}px;height:${size}px">${short(n)}</span>`, iconSize: [size, size] }), keyboard: false }).addTo(g);
+        mk.on("click", () => {
+          const to = idx.getClusterExpansionZoom(cp.cluster_id);
+          if (to <= m.getMaxZoom() && z < m.getMaxZoom()) { m.setView([lat, lon], Math.max(to, z + 1)); return; }
+          // vienā vietā vairāki sludinājumi: saraksts
+          const leaves = idx.getLeaves(cp.cluster_id, 8);
+          const more = n > leaves.length ? `<div style="margin-top:6px;color:#5d6475">${esc(t("un vēl {n}", { n: n - leaves.length }))}</div>` : "";
+          L.popup({ maxHeight: 240 }).setLatLng([lat, lon]).setContent(leaves.map((l) => `<div style="margin-bottom:6px">${popupHtml(l.properties)}</div>`).join("") + more).openOn(m);
+        });
       }
+    };
+    fetch(`/api/search/points?${query}`).then((r) => r.json()).then((pts: Point[]) => {
+      if (!alive) return;
+      setCount(pts.length);
+      index.current = new Supercluster<Props>({ radius: 56, maxZoom: 18, minPoints: 2 }).load(
+        pts.map(([id, lat, lon, kind, price, title]) => ({ type: "Feature" as const, geometry: { type: "Point" as const, coordinates: [lon, lat] }, properties: { id, kind, price, title } })));
+      draw.current();
     }).catch(() => {});
-    return () => { alive = false; };
+    const redraw = () => draw.current();
+    m.on("moveend", redraw);
+    return () => { alive = false; m.off("moveend", redraw); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
   // zona no URL

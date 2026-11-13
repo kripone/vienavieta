@@ -11,7 +11,7 @@
 - React 19 atiestata nekontrolētus formas laukus pēc servera darbības, tāpēc formās ar kļūdu paziņojumiem lieto kontrolētus laukus.
 - Sludinājumu saglabāšana: `src/app/sludinajumi/actions.ts`; validācija `src/lib/listing-input.ts`; antispam `src/lib/antispam.ts`. Bildes: `src/lib/storage.ts` (lokāli vai S3) un `src/lib/images.ts`.
 - Antispam pārbauda, vai forma aizpildīta ne ātrāk kā 4 s pēc lapas atvēršanas; automātiskajos testos pirms iesniegšanas jāpagaida.
-- Meklēšana: parametri un SQL `src/lib/search.ts` (parseSearch → conditions); filtru UI `src/components/search-filters.tsx`; karte `src/components/search-map.tsx`. Jaunu filtru pievieno visās trijās vietās.
+- Meklēšana: parametri un SQL `src/lib/search.ts` (parseSearch → conditions); filtru UI `src/components/search-filters.tsx`; karte `src/components/search-map.tsx` (punkti apvienoti klasteros ar `supercluster`: burbulis ar skaitu, klikšķis pietuvina, vienas vietas sludinājumiem saraksts). Jaunu filtru pievieno visās trijās vietās.
 - `getCurrentUser()` sauc `headers()` ārpus try/catch un `unstable_rethrow`, lai neapklusinātu Next dinamiskās renderēšanas signālus.
 - Bilžu krātuve: `STORAGE_DRIVER` = s3 | db | local; startējot `src/instrumentation.ts` pārbauda krātuvi un ieraksta rezultātu žurnālā.
 - Sludinājumu vēsture: `price_history` glabā cenu no katra izmaiņas brīža (arī sākuma cenu); `listings.first_price` = sākuma cena, ja cena mainīta (kārtošanai "Lielākais cenu kritums"). Lapas `/cenu-kritumi`, `/vesture`; loģika `src/lib/history.ts`.

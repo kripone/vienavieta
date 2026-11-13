@@ -2,6 +2,7 @@
 import type { Dict } from "./core";
 
 export const lt: Dict = {
+  "un vēl {n}": "ir dar {n}",
   "Apskate": "Apžiūra",
   "Pievienot Google kalendāram": "Pridėti į Google kalendorių",
   "Apple / Outlook (.ics)": "Apple / Outlook (.ics)",

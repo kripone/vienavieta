@@ -609,3 +609,8 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 @media (max-width: 560px) { .mapwrap .map.pmap { height: 420px; } }
 .fav-cal { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; background: var(--accent-soft); border-radius: 8px; padding: 8px 10px; font-size: 14px; }
 .fav-cal-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Kartes klasteri: burbulis ar sludinājumu skaitu */
+.mcluster { background: none; border: 0; }
+.mcluster span { display: grid; place-items: center; border-radius: 50%; background: #24304a; color: #fff; font: 700 13px/1 system-ui, sans-serif; box-shadow: 0 0 0 4px rgba(36,48,74,.25), 0 1px 4px rgba(0,0,0,.35); cursor: pointer; font-variant-numeric: tabular-nums; }
+.mcluster:hover span { background: #9e3039; box-shadow: 0 0 0 4px rgba(158,48,57,.25), 0 1px 4px rgba(0,0,0,.35); }
