@@ -62,7 +62,7 @@ async function main() {
     if (!script) continue;
     console.log(`🔧 palaižu ${script} ...`);
     try {
-      const { stdout } = await run("npx", ["tsx", script], { env: process.env, cwd: process.cwd(), timeout: 20 * 60_000, maxBuffer: 1024 * 1024 });
+      const { stdout } = await run("npx", ["tsx", script], { env: process.env, cwd: process.cwd(), timeout: 45 * 60_000, maxBuffer: 1024 * 1024 });
       console.log(stdout.trim().split("\n").slice(-2).join("\n"));
     } catch (e) {
       console.error(`${script} neizdevās:`, e instanceof Error ? e.message.slice(0, 300) : e);

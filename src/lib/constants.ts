@@ -201,9 +201,9 @@ export const EXTERNAL_TTL_DAYS = 21;
 export const AUTOPLIUS = {
   key: "autoplius:cars",
   url: "https://lv.autoplius.lt/sludinajumi/lietotas-automasinas",
-  delayMs: 3000,
+  delayMs: 2000,
   quickPages: 2,
-  maxPages: 40,
+  maxPages: 250,
   quickEveryMin: 30,
   fullEveryHours: 24,
 } as const;
@@ -215,7 +215,7 @@ export const AUTOPLIUS_LT = {
   key: "autoplius:cars-lt",
   url: "https://autoplius.lt/skelbimai/naudoti-automobiliai",
   quickPages: 2,
-  maxPages: 40,
+  maxPages: 250,
   quickEveryMin: 30,
   fullEveryHours: 24,
 } as const;
