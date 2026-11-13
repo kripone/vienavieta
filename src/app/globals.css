@@ -108,6 +108,11 @@ main .fine { margin-top: 14px; }
 .checks { display: flex; flex-wrap: wrap; gap: 8px 16px; font-weight: 500; color: var(--fg); font-size: 14px; }
 .checks label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
 .checks input { accent-color: var(--accent); margin: 0; }
+.src-more summary { display: flex; align-items: center; gap: 6px; }
+.src-more summary .fine { margin: 0; }
+.src-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 7px 14px; margin-top: 4px; }
+.src-chips label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.src-chips label .fine { margin: 0 0 0 2px; font-size: 12px; }
 .src-chips label.off { opacity: 0.45; }
 .seg { display: inline-flex; background: var(--surface-2); padding: 4px; border-radius: 10px; gap: 4px; align-self: flex-start; }
 .seg button { border: 0; background: transparent; padding: 8px 14px; border-radius: 7px; font: inherit; font-weight: 600; color: var(--muted); cursor: pointer; }

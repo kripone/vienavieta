@@ -231,10 +231,13 @@ export function SearchFilters({ initial, regions, sources = [] }: { initial: Fil
           <option value="verified">{t("Tikai ar apstiprinātu identitāti")}</option>
         </select>
       </label>
-      <div className="field">
-        {t("Avoti")}
+      <details className="more src-more" open={Boolean(v.sources)}>
+        <summary>
+          {t("Avoti")}
+          {v.sources ? <span className="fine"> ({v.sources.split(",").filter(Boolean).length})</span> : null}
+        </summary>
         <SourceChips value={v.sources ?? ""} sources={sources} onChange={(sources) => update({ sources, src: "" })} />
-      </div>
+      </details>
 
       {active > 0 && (
         <button type="button" className="btn small" onClick={() => update({ ...Object.fromEntries(Object.keys(v).map((k) => [k, ""])), cat: v.cat ?? "", vc: v.vc ?? "", sort: v.sort ?? "" })}>
