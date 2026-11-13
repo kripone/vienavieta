@@ -6,7 +6,7 @@
 // Nomas sludinājumi (cena "Parai/Mēnesī") tiek izlaisti — ņemam tikai pārdošanas sludinājumus.
 import { and, eq, inArray, lt, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { AUTOPLIUS, AUTOPLIUS_LT, EXTERNAL_TTL_DAYS } from "../constants";
+import { AUTOPLIUS, AUTOPLIUS_CAMPER, AUTOPLIUS_CAMPER_LT, AUTOPLIUS_LT, AUTOPLIUS_MOTO, AUTOPLIUS_MOTO_LT, EXTERNAL_TTL_DAYS } from "../constants";
 import { linkDuplicate } from "../dedupe";
 import { inferBody } from "../illustrations";
 import { findMake, matchModel, slug, vehicleTitle, type ImportRow, type MakeRow, type ModelRow, type PlaceRow } from "./ss-rss";
@@ -135,7 +135,8 @@ export function parseListPage(html: string): { rows: ApRow[]; lastPage: number }
     const em = engineRaw?.match(/([\d]+(?:\.\d+)?)\s*l\.,\s*(\d+)\s*kW/i);
     const engineL = em ? em[1] : null;
     const powerKw = Number(em?.[2] ?? engineRaw?.match(/(\d+)\s*kW/i)?.[1]) || null;
-    const mileageKm = Number(mileageRaw?.replace(/[^\d]/g, "")) || null;
+    const mileageNum = Number(mileageRaw?.replace(/[^\d]/g, "")) || null;
+    const mileageKm = mileageNum && mileageNum <= 9_999_999 ? mileageNum : null; // aizsardzība pret int4 pārplūdi (mūļķības tipa "2222222222")
 
     // sīktēls: tikai no autoplius bilžu servera (rādām no turienes, neglabājam)
     const thumb = body.match(/<img[^>]*src="(https:\/\/autoplius-img\.[^"]+\.(?:jpg|jpeg|webp))"/)?.[1] ?? null;
@@ -149,15 +150,15 @@ export function parseListPage(html: string): { rows: ApRow[]; lastPage: number }
 type Ctx = { makes: MakeRow[]; models: ModelRow[]; findCity: (t: string) => PlaceRow | null };
 
 /** Saraksta kartīte → mūsu sludinājums (virsrakstu veidojam paši no faktiem, tāpat kā ss.com). */
-export function mapRow(r: ApRow, ctx: Ctx, createdAt: Date): ImportRow | null {
+export function mapRow(r: ApRow, ctx: Ctx, createdAt: Date, vc: "car" | "moto" | "camper" = "car"): ImportRow | null {
   const titleSlug = slug(r.titleRaw);
   // marka: garākā kataloga marka, ar kuru sākas virsraksts ("Mercedes-Benz GLC300", "Land Rover Discovery")
-  const cars = ctx.makes.filter((m) => m.vehicleClass === "car").sort((a, b) => slug(b.name).length - slug(a.name).length);
+  const cars = ctx.makes.filter((m) => m.vehicleClass === vc).sort((a, b) => slug(b.name).length - slug(a.name).length);
   let make = cars.find((m) => titleSlug === slug(m.name) || titleSlug.startsWith(`${slug(m.name)}-`)) ?? null;
   let modelRaw = make ? r.titleRaw.trim().slice(make.name.length).replace(/^[\s-]+/, "") : "";
   if (!make) {
     const firstWord = r.titleRaw.trim().split(/\s+/)[0] ?? "";
-    make = findMake(ctx.makes, "car", firstWord);
+    make = findMake(ctx.makes, vc, firstWord);
     modelRaw = r.titleRaw.trim().slice(firstWord.length).trim();
   }
   const model = make ? matchModel(ctx.models, make.id, modelRaw, make.name) : null;
@@ -175,7 +176,7 @@ export function mapRow(r: ApRow, ctx: Ctx, createdAt: Date): ImportRow | null {
     externalId: r.externalId,
     externalThumbUrl: r.thumb,
     title: title.slice(0, 120),
-    vehicleClass: "car",
+    vehicleClass: vc,
     makeId: make?.id ?? null,
     modelId: model?.id ?? null,
     makeText: make ? null : makeName || null,
@@ -186,7 +187,7 @@ export function mapRow(r: ApRow, ctx: Ctx, createdAt: Date): ImportRow | null {
     powerKw: r.powerKw,
     fuel,
     gearbox: mapGearbox(r.gearboxRaw),
-    body: mapBody(r.bodyRaw) ?? inferBody(modelName) ?? inferBody(modelRaw),
+    body: vc === "car" ? mapBody(r.bodyRaw) ?? inferBody(modelName) ?? inferBody(modelRaw) : null,
     price: r.price,
     placeId: city?.id ?? null,
     lat: city ? city.lat + (Math.random() - 0.5) * 0.01 : null,
@@ -200,11 +201,11 @@ export function mapRow(r: ApRow, ctx: Ctx, createdAt: Date): ImportRow | null {
 export type CrawlResult = { mode: "quick" | "full"; pages: number; rows: number; created: number; updated: number; priceChanged: number; duplicates: number; removed: number; errors: string[]; ms: number };
 
 /** Saglabā vienas lapas kartītes: jaunos ievieto, esošajiem atjauno cenu un "redzēts" laiku. */
-async function saveRows(apRows: ApRow[], ctx: Ctx, res: CrawlResult, mode: "quick" | "full") {
+async function saveRows(apRows: ApRow[], ctx: Ctx, res: CrawlResult, mode: "quick" | "full", vc: "car" | "moto" | "camper") {
   const now = new Date();
   // pilnajā kārtā atrastie ir vecāki sludinājumi: lai neaizsprosto "jaunākos", ienākšanas laiks diennakti agrāk
   const createdAt = mode === "full" ? new Date(now.getTime() - 86_400_000) : now;
-  const mapped = apRows.map((r) => mapRow(r, ctx, createdAt)).filter((x): x is ImportRow => Boolean(x));
+  const mapped = apRows.map((r) => mapRow(r, ctx, createdAt, vc)).filter((x): x is ImportRow => Boolean(x));
   const byId = new Map(mapped.map((m) => [m.externalId!, m]));
   if (!byId.size) return;
   const existing = await db
@@ -250,10 +251,11 @@ async function saveRows(apRows: ApRow[], ctx: Ctx, res: CrawlResult, mode: "quic
 }
 
 /** Ievākšanas mērķis: viena valoda/plūsma ar savu crawl_state atslēgu un lapas adresi. */
-export type ApTarget = { key: string; url: string; quickPages: number; maxPages: number; quickEveryMin: number; fullEveryHours: number };
+export type ApTarget = { key: string; url: string; vc: "car" | "moto" | "camper"; quickPages: number; maxPages: number; quickEveryMin: number; fullEveryHours: number };
 
-/** Plūsmas, kuras ievācam: latviešu (lv.autoplius.lt) un lietuviešu (autoplius.lt). Sludinājumu ID ir kopīgi. */
-export const AP_TARGETS: ApTarget[] = [AUTOPLIUS, AUTOPLIUS_LT];
+/** Plūsmas, kuras ievācam: vieglie auto, motocikli un kemperi, latviešu (lv.autoplius.lt) un
+ *  lietuviešu (autoplius.lt) valodā. Sludinājumu ID ir kopīgi visām — pārklāšanās vienkārši atjauno rindu. */
+export const AP_TARGETS: ApTarget[] = [AUTOPLIUS, AUTOPLIUS_LT, AUTOPLIUS_MOTO, AUTOPLIUS_MOTO_LT, AUTOPLIUS_CAMPER, AUTOPLIUS_CAMPER_LT];
 
 const pageUrl = (t: ApTarget, n: number) => (n <= 1 ? t.url : `${t.url}?page_nr=${n}`);
 
@@ -273,7 +275,7 @@ export async function crawlAutoplius(mode: "quick" | "full", target: ApTarget = 
       const { rows, lastPage } = parseListPage(await fetchHtml(pageUrl(target, n)));
       res.pages++;
       res.rows += rows.length;
-      await saveRows(rows, ctx, res, mode);
+      await saveRows(rows, ctx, res, mode, target.vc);
       failsInRow = 0;
       if (!rows.length) break;
       // lapošana ir slidošs logs (lapā redzami tikai ~5 numuri ap pašreizējo): pilnajā kārtā
@@ -294,7 +296,7 @@ export async function crawlAutoplius(mode: "quick" | "full", target: ApTarget = 
     const stale = await db
       .update(listings)
       .set({ status: "hidden" })
-      .where(and(eq(listings.source, "autoplius.lt"), eq(listings.kind, "vehicle"), eq(listings.vehicleClass, "car"), eq(listings.status, "active"), lt(listings.updatedAt, cutoff)))
+      .where(and(eq(listings.source, "autoplius.lt"), eq(listings.kind, "vehicle"), eq(listings.vehicleClass, target.vc), eq(listings.status, "active"), lt(listings.updatedAt, cutoff)))
       .returning({ id: listings.id });
     res.removed = stale.length;
   }

@@ -201,6 +201,7 @@ export const EXTERNAL_TTL_DAYS = 21;
 export const AUTOPLIUS = {
   key: "autoplius:cars",
   url: "https://lv.autoplius.lt/sludinajumi/lietotas-automasinas",
+  vc: "car",
   delayMs: 2000,
   quickPages: 2,
   maxPages: 250,
@@ -214,11 +215,18 @@ export const AUTOPLIUS = {
 export const AUTOPLIUS_LT = {
   key: "autoplius:cars-lt",
   url: "https://autoplius.lt/skelbimai/naudoti-automobiliai",
+  vc: "car",
   quickPages: 2,
   maxPages: 250,
   quickEveryMin: 30,
   fullEveryHours: 24,
 } as const;
+/** autoplius.lt motocikli (LV/LT valodas; ID kopīgi ar citām plūsmām). */
+export const AUTOPLIUS_MOTO = { key: "autoplius:moto", url: "https://lv.autoplius.lt/sludinajumi/motocikli-motociklistu-apgerbs/motocikli", vc: "moto", quickPages: 2, maxPages: 250, quickEveryMin: 30, fullEveryHours: 24 } as const;
+export const AUTOPLIUS_MOTO_LT = { key: "autoplius:moto-lt", url: "https://autoplius.lt/skelbimai/motociklai-moto-apranga/motociklai", vc: "moto", quickPages: 2, maxPages: 250, quickEveryMin: 30, fullEveryHours: 24 } as const;
+/** autoplius.lt kemperi (LV/LT valodas). */
+export const AUTOPLIUS_CAMPER = { key: "autoplius:campers", url: "https://lv.autoplius.lt/sludinajumi/autobusi-mikroautobusi-turistu-majinas/turistu-automasinas-kemperi", vc: "camper", quickPages: 2, maxPages: 250, quickEveryMin: 30, fullEveryHours: 24 } as const;
+export const AUTOPLIUS_CAMPER_LT = { key: "autoplius:campers-lt", url: "https://autoplius.lt/skelbimai/autobusai-mikroautobusai-turistiniai-nameliai/turistiniai-automobiliai-prikabinami-nameliai", vc: "camper", quickPages: 2, maxPages: 250, quickEveryMin: 30, fullEveryHours: 24 } as const;
 /** Avotu nosaukumi kartītēs. */
 export const SOURCE_LABEL: Record<string, string> = {
   own: "VienāVietā", "ss.com": "ss.com", "mm.lv": "mm.lv", "city24.lv": "city24.lv",
