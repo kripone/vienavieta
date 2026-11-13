@@ -384,3 +384,18 @@ export const SHARE_COMMENT_MAX = 500;
 
 /** Cenu kartes krāsu skala (/cenu-karte): viens tonis, gaišs = lēti, tumšs = dārgi. */
 export const PRICE_RAMP = ["#cfe1f2", "#93c0e0", "#4e97cc", "#1f6bb0", "#0b3a75"] as const;
+
+/** SEO lapas „auto līdz N €” (/auto/lidz-5000, /auto/bmw/lidz-5000). */
+export const SEO_PRICE_STEPS = [1000, 2000, 3000, 5000, 7000, 10000, 15000, 20000, 30000] as const;
+/** SEO lapas pēc istabu skaita (/ipasumi/dzivokli/riga/3-istabu); pēdējais nozīmē „un vairāk”. */
+export const SEO_ROOMS = [1, 2, 3, 4, 5] as const;
+/** Cik sludinājumu vajag, lai kombinētā SEO lapa (marka + filtrs, apkaime u.c.) nonāktu sitemap. */
+export const SEO_COMBO_MIN = 10;
+/** Kopsavilkuma frāzes visu auto lapām pēc degvielas un virsbūves (/auto/dizelis, /auto/universals). */
+export const SEO_FUEL_ROOT: Record<string, string> = {
+  "Benzīns": "Benzīna auto", "Dīzelis": "Dīzeļa auto", "Hibrīds": "Hibrīdauto", "Elektro": "Elektroauto", "Benzīns/gāze": "Auto ar gāzes iekārtu",
+};
+export const SEO_BODY_ROOT: Record<string, string> = {
+  "Sedans": "Sedani", "Universāls": "Universāļi", "Hečbeks": "Hečbeki", "Apvidus": "Apvidus auto", "Minivens": "Minivēni",
+  "Kupeja": "Kupejas", "Kabriolets": "Kabrioleti", "Pikaps": "Pikapi", "Mikroautobuss": "Mikroautobusi",
+};

@@ -1,13 +1,14 @@
 // SEO lapas: tīras adreses meklētājiem (/auto/bmw/3-serija, /ipasumi/dzivokli/riga, /ipasumi/dzivokli-ire/riga).
 // Katra adrese = noteikti meklēšanas filtri + savs virsraksts, apraksts un iekšējās saites.
 // Meklēšanas lapas ar ?parametriem netiek indeksētas (noindex, follow); indeksējam šīs lapas.
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq, isNull } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { PROPERTY_PLURAL, PROPERTY_SLUG, PROPERTY_TYPES, VEHICLE_SLUG, type PropertyType, type VehicleClass } from "./constants";
+import { BODY_TYPES, FUELS, PROPERTY_PLURAL, PROPERTY_SLUG, PROPERTY_TYPES, SEO_BODY_ROOT, SEO_FUEL_ROOT, SEO_PRICE_STEPS, SEO_ROOMS, VEHICLE_SLUG, type PropertyType, type VehicleClass } from "./constants";
+import { formatPrice } from "./format";
 import { LOCALES, type Locale, type T } from "@/i18n/core";
 import { trTitle } from "@/i18n/content";
 
-const { makes, models, regions } = schema;
+const { makes, models, regions, places } = schema;
 
 export const appBase = () => (process.env.APP_URL || process.env.BETTER_AUTH_URL || "http://localhost:3000").replace(/\/$/, "");
 
@@ -29,6 +30,14 @@ export function locative(name: string): string | null {
   if (/a$/.test(name)) return name.replace(/a$/, "ā");
   if (/e$/.test(name)) return name.replace(/e$/, "ē");
   return null;
+}
+
+/** Apkaimes forma latviski: Purvciems → Purvciemā, Centrs → Centrā, Pļavnieki → Pļavniekos, Šampēteris → Šampēterī, Teika → Teikā. */
+export function areaLocative(name: string): string | null {
+  if (/[^aeiouāēīū]is$/.test(name)) return name.replace(/is$/, "ī");
+  if (/s$/.test(name) && !/[aeiouāēīū]s$/.test(name)) return name.replace(/s$/, "ā");
+  if (/i$/.test(name)) return name.replace(/i$/, "os");
+  return locative(name);
 }
 
 /** Lielāko pilsētu nosaukumi un "kur" forma citās valodās; pārējiem rādām latvisko nosaukumu. */
@@ -68,20 +77,25 @@ type Catalog = {
   makes: { id: number; name: string; vehicleClass: string; slug: string }[];
   models: { id: number; makeId: number; name: string; slug: string }[];
   regions: { id: number; name: string; slug: string }[];
+  /** valstspilsētu apkaimes (vietas bez veida pilsētas reģionā) */
+  areas: { id: number; regionId: number; name: string; slug: string }[];
 };
 let catalog: { at: number; v: Promise<Catalog> } | null = null;
 export function getCatalog(): Promise<Catalog> {
   if (catalog && catalog.at > Date.now() - 30 * 60_000) return catalog.v;
   const v = (async () => {
-    const [m, mo, r] = await Promise.all([
+    const [m, mo, r, a] = await Promise.all([
       db.select({ id: makes.id, name: makes.name, vehicleClass: makes.vehicleClass }).from(makes),
       db.select({ id: models.id, makeId: models.makeId, name: models.name }).from(models),
       db.select({ id: regions.id, name: regions.name }).from(regions).where(eq(regions.country, "LV")).orderBy(asc(regions.id)),
+      db.select({ id: places.id, regionId: places.regionId, name: places.name }).from(places).innerJoin(regions, eq(regions.id, places.regionId))
+        .where(and(isNull(places.kind), eq(regions.kind, "city"), eq(regions.country, "LV"))),
     ]);
     return {
       makes: m.map((x) => ({ ...x, vehicleClass: String(x.vehicleClass), slug: seoSlug(x.name) })),
       models: mo.map((x) => ({ ...x, slug: seoSlug(x.name) })),
       regions: r.map((x) => ({ ...x, slug: seoSlug(x.name) })),
+      areas: a.map((x) => ({ ...x, slug: seoSlug(x.name) })),
     };
   })();
   catalog = { at: Date.now(), v };
@@ -111,44 +125,123 @@ export type Landing = {
   facet: "make" | "model" | "region" | "ptype" | null;
   /** pāreja uz īri/pirkšanu */
   dealSwitch?: { href: string; label: string };
+  /** papildu saišu grupas (cenas, degviela, virsbūve, pilsētas, istabas, apkaimes): no kuras lapas tās veidot */
+  more?:
+    | { kind: "vehicle"; vc: VehicleClass; base: string; level: "root" | "make" | "model"; raw: Record<string, string>; current?: string }
+    | { kind: "property"; type: PropertyType; deal: string; base: string; regionId?: number; raw: Record<string, string>; current?: string };
 };
+
+// ---------- kombinētie filtri adresē ----------
+export const priceSlug = (n: number) => `lidz-${n}`;
+export const roomsSlug = (n: number) => (n === 1 ? "1-istabas" : `${n}-istabu`);
+export const fuelSlug = (f: string) => seoSlug(f);
+export const bodySlug = (b: string) => seoSlug(b);
+/** Istabu filtrs: pēdējais solis nozīmē „un vairāk”. */
+export const roomsRaw = (n: number): Record<string, string> => (n >= SEO_ROOMS[SEO_ROOMS.length - 1] ? { rmin: String(n) } : { rmin: String(n), rmax: String(n) });
+export function roomsLabel(n: number, t: T) {
+  return n === 1 ? t("1 istabas") : n >= SEO_ROOMS[SEO_ROOMS.length - 1] ? t("{n}+ istabu", { n }) : t("{n} istabu", { n });
+}
 
 type Tr = { t: T; locale: Locale };
 export const RIGA_DISTRICT = { slug: "rigas-rajons", name: "Rīgas rajons" };
 
-/** /auto, /auto/bmw, /auto/bmw/3-serija (un /moto/...) */
+type VehicleFacet =
+  | { kind: "price"; value: number; slug: string }
+  | { kind: "fuel"; value: string; slug: string }
+  | { kind: "body"; value: string; slug: string }
+  | { kind: "region"; value: { id: number; name: string }; slug: string };
+
+/** Pēdējā adreses daļa transporta lapā: lidz-5000, dizelis, universals, riga. */
+function vehicleFacet(vc: VehicleClass, part: string, cat: Catalog): VehicleFacet | null {
+  const pm = /^lidz-(\d+)$/.exec(part);
+  if (pm && (SEO_PRICE_STEPS as readonly number[]).includes(Number(pm[1]))) return { kind: "price", value: Number(pm[1]), slug: part };
+  const fuel = vc === "car" ? FUELS.find((f) => fuelSlug(f) === part) : undefined;
+  if (fuel) return { kind: "fuel", value: fuel, slug: part };
+  const body = BODY_TYPES[vc].find((b) => bodySlug(b) === part);
+  if (body) return { kind: "body", value: body, slug: part };
+  const region = cat.regions.find((r) => r.slug === part);
+  if (region) return { kind: "region", value: region, slug: part };
+  return null;
+}
+
+/** /auto, /auto/bmw, /auto/bmw/3-serija (un /moto/...), un katrā līmenī viens papildu filtrs: /auto/lidz-5000, /auto/bmw/dizelis, /auto/riga */
 export async function resolveVehicle(vc: VehicleClass, parts: string[], { t, locale }: Tr): Promise<Landing | null> {
   const root = VEHICLE_SLUG[vc];
-  if (!root || (vc !== "car" && vc !== "moto") || parts.length > 2) return null;
+  if (!root || (vc !== "car" && vc !== "moto") || parts.length > 3) return null;
   const cat = await getCatalog();
   const crumbs: Crumb[] = [{ name: t(vc === "car" ? "Auto" : "Moto"), href: `/${root}` }];
   const of = (name: string) => (vc === "car" ? t("{name} pārdošanā", { name }) : t("{name} motocikli pārdošanā", { name }));
   const about = (name: string) => t("{name} sludinājumi no visiem portāliem vienā vietā.", { name });
-  if (!parts.length) {
-    const h1 = t(vc === "car" ? "Lietotas automašīnas pārdošanā" : "Motocikli pārdošanā");
-    return { raw: { cat: "vehicle", vc }, path: `/${root}`, h1, title: h1, about: t(vc === "car" ? "Lietoti un jauni auto no ss.com, autoplius.lt un citiem portāliem vienā meklētājā." : "Motocikli no visiem portāliem vienā meklētājā."), crumbs, facet: "make" };
+
+  // marka un modelis (ja ir), pārējais — filtrs
+  let i = 0;
+  const make = parts[i] ? cat.makes.find((m) => m.slug === parts[i] && m.vehicleClass === vc) : undefined;
+  if (make) i++;
+  const model = make && parts[i] ? cat.models.find((m) => m.makeId === make.id && m.slug === parts[i]) : undefined;
+  if (model) i++;
+  const rest = parts.slice(i);
+  if (rest.length > 1) return null;
+  const facet = rest.length ? vehicleFacet(vc, rest[0], cat) : null;
+  if (rest.length && !facet) return null;
+
+  const raw: Record<string, string> = { cat: "vehicle", vc };
+  let base = `/${root}`;
+  let name: string | null = null;
+  let level: "root" | "make" | "model" = "root";
+  if (make) {
+    raw.make = String(make.id);
+    base += `/${make.slug}`;
+    crumbs.push({ name: make.name, href: base });
+    name = make.name;
+    level = "make";
   }
-  const make = cat.makes.find((m) => m.slug === parts[0] && m.vehicleClass === vc);
-  if (!make) return null;
-  crumbs.push({ name: make.name, href: `/${root}/${make.slug}` });
-  if (parts.length === 1) {
-    const h1 = of(make.name);
-    return { raw: { cat: "vehicle", vc, make: String(make.id) }, path: `/${root}/${make.slug}`, h1, title: h1, about: about(make.name), crumbs, facet: "model" };
+  if (make && model) {
+    const modelName = trTitle(model.name, t);
+    raw.model = String(model.id);
+    base += `/${model.slug}`;
+    crumbs.push({ name: modelName, href: base });
+    name = `${make.name} ${modelName}`;
+    level = "model";
   }
-  const model = cat.models.find((m) => m.makeId === make.id && m.slug === parts[1]);
-  if (!model) return null;
-  const modelName = trTitle(model.name, t);
-  const name = `${make.name} ${modelName}`;
-  crumbs.push({ name: modelName, href: `/${root}/${make.slug}/${model.slug}` });
-  const h1 = of(name);
-  return { raw: { cat: "vehicle", vc, make: String(make.id), model: String(model.id) }, path: `/${root}/${make.slug}/${model.slug}`, h1, title: h1, about: about(name), crumbs, facet: null };
+  const baseH1 = name ? of(name) : t(vc === "car" ? "Lietotas automašīnas pārdošanā" : "Motocikli pārdošanā");
+  const more = { kind: "vehicle" as const, vc, base, level, raw: { ...raw }, current: facet?.slug };
+  if (!facet) {
+    if (!make) return { raw, path: base, h1: baseH1, title: baseH1, about: t(vc === "car" ? "Lietoti un jauni auto no ss.com, autoplius.lt un citiem portāliem vienā meklētājā." : "Motocikli no visiem portāliem vienā meklētājā."), crumbs, facet: "make", more };
+    return { raw, path: base, h1: baseH1, title: baseH1, about: about(name!), crumbs, facet: model ? null : "model", more };
+  }
+
+  let h1: string;
+  let crumb: string;
+  if (facet.kind === "price") {
+    raw.pmax = String(facet.value);
+    crumb = t("līdz {p}", { p: formatPrice(facet.value) });
+    h1 = `${baseH1} ${crumb}`;
+  } else if (facet.kind === "region") {
+    raw.loc = `r:${facet.value.id}`;
+    crumb = regionName(facet.value.name, locale);
+    h1 = withPlace(baseH1, facet.value.name, locale);
+  } else {
+    raw[facet.kind] = facet.value;
+    crumb = t(facet.value);
+    const word = t(facet.value).toLocaleLowerCase(locale);
+    if (vc === "moto") h1 = t("{name} motocikli pārdošanā", { name: name ? `${name} ${t(facet.value)}` : t(facet.value) });
+    else if (!name) h1 = t("{what} pārdošanā", { what: t((facet.kind === "fuel" ? SEO_FUEL_ROOT : SEO_BODY_ROOT)[facet.value]) });
+    else h1 = of(`${name} ${word}`);
+  }
+  const path = `${base}/${facet.slug}`;
+  crumbs.push({ name: crumb, href: path });
+  return { raw, path, h1, title: h1, about: about(h1), crumbs, facet: null, more };
 }
 
 const typeBySlug = new Map(PROPERTY_TYPES.map((t) => [PROPERTY_SLUG[t], t] as const));
+const roomsBySlug = new Map(SEO_ROOMS.map((n) => [roomsSlug(n), n] as const));
 
-/** /ipasumi, /ipasumi/dzivokli, /ipasumi/dzivokli/riga, /ipasumi/dzivokli-ire/riga */
+/**
+ * /ipasumi, /ipasumi/dzivokli, /ipasumi/dzivokli/riga, /ipasumi/dzivokli-ire/riga,
+ * istabas: /ipasumi/dzivokli/3-istabu, /ipasumi/dzivokli/riga/3-istabu; apkaimes: /ipasumi/dzivokli/riga/purvciems
+ */
 export async function resolveProperty(parts: string[], { t, locale }: Tr): Promise<Landing | null> {
-  if (parts.length > 2) return null;
+  if (parts.length > 3) return null;
   const crumbs: Crumb[] = [{ name: t("Īpašumi"), href: "/ipasumi" }];
   if (!parts.length) {
     return { raw: { cat: "property" }, path: "/ipasumi", h1: t("Nekustamais īpašums"), title: t("Nekustamais īpašums – dzīvokļi, mājas, zeme"), about: t("Dzīvokļi, mājas, zeme un komercīpašumi no visiem portāliem vienā meklētājā."), crumbs, facet: "ptype" };
@@ -162,21 +255,53 @@ export async function resolveProperty(parts: string[], { t, locale }: Tr): Promi
   const what = whatOf(rent);
   const typePath = propertyHref(type, deal);
   const about = (x: string) => t("{name} sludinājumi no visiem portāliem vienā vietā.", { name: x });
+  const flats = type === "Dzīvoklis";
+  const roomsWhat = (n: number) => t(rent ? "{r} dzīvokļi īrei" : "{r} dzīvokļi pārdošanā", { r: roomsLabel(n, t) });
   crumbs.push({ name: plural, href: propertyHref(type, "sell") });
   if (rent) crumbs.push({ name: t("Īre"), href: typePath });
+  const raw: Record<string, string> = { cat: "property", ptype: type, deal };
   if (parts.length === 1) {
-    return { raw: { cat: "property", ptype: type, deal }, path: typePath, h1: what, title: what, about: about(what), crumbs, facet: "region", dealSwitch: { href: propertyHref(type, rent ? "sell" : "rent"), label: whatOf(!rent) } };
+    return { raw, path: typePath, h1: what, title: what, about: about(what), crumbs, facet: "region", dealSwitch: { href: propertyHref(type, rent ? "sell" : "rent"), label: whatOf(!rent) }, more: { kind: "property", type, deal, base: typePath, raw: { ...raw } } };
   }
+
+  // /ipasumi/dzivokli/3-istabu (bez vietas)
+  const rooms1 = flats ? roomsBySlug.get(parts[1]) : undefined;
+  if (rooms1 != null) {
+    if (parts.length > 2) return null;
+    const h1 = roomsWhat(rooms1);
+    const path = `${typePath}/${parts[1]}`;
+    crumbs.push({ name: roomsLabel(rooms1, t), href: path });
+    return { raw: { ...raw, ...roomsRaw(rooms1) }, path, h1, title: h1, about: about(h1), crumbs, facet: "region", more: { kind: "property", type, deal, base: typePath, raw: { ...raw }, current: parts[1] } };
+  }
+
   const cat = await getCatalog();
   // "Rīgas rajons" (Pierīgas novadi) kā ss.com
   const region = parts[1] === RIGA_DISTRICT.slug ? { id: 0, name: RIGA_DISTRICT.name, slug: RIGA_DISTRICT.slug } : cat.regions.find((r) => r.slug === parts[1]);
   if (!region) return null;
-  const h1 = withPlace(what, region.name, locale);
-  const path = `${typePath}/${region.slug}`;
-  crumbs.push({ name: regionName(region.name, locale), href: path });
-  return {
-    raw: { cat: "property", ptype: type, deal, loc: region.id ? `r:${region.id}` : "g:pieriga" },
-    path, h1, title: h1, about: about(h1), crumbs, facet: null,
-    dealSwitch: { href: `${propertyHref(type, rent ? "sell" : "rent")}/${region.slug}`, label: withPlace(whatOf(!rent), region.name, locale) },
-  };
+  const regionPath = `${typePath}/${region.slug}`;
+  const regionRaw = { ...raw, loc: region.id ? `r:${region.id}` : "g:pieriga" };
+  crumbs.push({ name: regionName(region.name, locale), href: regionPath });
+  const more = { kind: "property" as const, type, deal, base: regionPath, regionId: region.id || undefined, raw: { ...regionRaw }, current: parts[2] };
+  const switchTo = (sub = "") => ({ href: `${propertyHref(type, rent ? "sell" : "rent")}/${region.slug}${sub}`, label: withPlace(whatOf(!rent), region.name, locale) });
+  if (parts.length === 2) {
+    const h1 = withPlace(what, region.name, locale);
+    return { raw: regionRaw, path: regionPath, h1, title: h1, about: about(h1), crumbs, facet: null, dealSwitch: switchTo(), more };
+  }
+
+  // /ipasumi/dzivokli/riga/3-istabu
+  const rooms = flats ? roomsBySlug.get(parts[2]) : undefined;
+  if (rooms != null) {
+    const h1 = withPlace(roomsWhat(rooms), region.name, locale);
+    const path = `${regionPath}/${parts[2]}`;
+    crumbs.push({ name: roomsLabel(rooms, t), href: path });
+    return { raw: { ...regionRaw, ...roomsRaw(rooms) }, path, h1, title: h1, about: about(h1), crumbs, facet: null, more };
+  }
+  // /ipasumi/dzivokli/riga/purvciems
+  const area = region.id ? cat.areas.find((a) => a.regionId === region.id && a.slug === parts[2]) : undefined;
+  if (!area) return null;
+  const loc = locale === "lv" ? areaLocative(area.name) : null;
+  const h1 = loc ? `${what} ${loc}` : `${what}: ${area.name}, ${regionName(region.name, locale)}`;
+  const path = `${regionPath}/${area.slug}`;
+  crumbs.push({ name: area.name, href: path });
+  return { raw: { ...raw, loc: `p:${area.id}` }, path, h1, title: locale === "lv" ? `${h1}, ${region.name}` : h1, about: about(h1), crumbs, facet: null, dealSwitch: switchTo(`/${area.slug}`), more };
 }

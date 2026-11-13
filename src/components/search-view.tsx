@@ -10,6 +10,7 @@ import { SortSelect } from "./sort-select";
 import { SmartSearch } from "./smart-search";
 import { PriceInsights } from "./price-insights";
 import { TypeStrip } from "./type-strip";
+import { SeoMoreLinks } from "./seo-more-links";
 import { VEHICLE_CLASS_LABEL, VEHICLE_CLASSES, type VehicleClass } from "@/lib/constants";
 import { alsoAt } from "@/lib/dedupe";
 import { priceEvals } from "@/lib/price-eval";
@@ -191,6 +192,7 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
                 {PROPERTY_TYPES.map((pt: PropertyType) => <li key={pt}><a href={lp(propertyHref(pt, "sell"))}>{t(PROPERTY_PLURAL[pt])}</a></li>)}
               </ul>
             )}
+            {landing.more && <SeoMoreLinks more={landing.more} />}
             {facets.length > 0 && (
               <ul className="seo-links">
                 {facetBy === "region" && <li><a href={lp(`${landing!.path}/${RIGA_DISTRICT.slug}`)}>{regionName(RIGA_DISTRICT.name, locale)}</a></li>}

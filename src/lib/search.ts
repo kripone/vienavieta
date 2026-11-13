@@ -202,7 +202,7 @@ function conditions(s: SearchParams): SQL[] {
 const coverThumb = sql<string | null>`(select ${listingPhotos.thumbKey} from ${listingPhotos} where ${listingPhotos.listingId} = ${listings.id} order by ${listingPhotos.position} limit 1)`;
 const photoCount = sql<number>`(select count(*)::int from ${listingPhotos} where ${listingPhotos.listingId} = ${listings.id})`;
 
-/** Kopējais skaits nemainās bieži: kešojam 60 s (lēna datubāze). */
+/** Kopējais skaits nemainās bieži: kešojam 60 s, vecāku rādām un pārrēķinām fonā (lēna datubāze). */
 const countCache = new Map<string, { total: number; at: number }>();
 let topCheck = { at: 0, has: false };
 /** Vai ir kāds aktīvs TOP sludinājums (pārbauda reizi minūtē). */
@@ -266,8 +266,8 @@ export async function searchListings(s: SearchParams) {
     return ids.map((r) => byId.get(r.id)!).filter(Boolean);
   });
   const countKey = JSON.stringify({ ...s, page: 1, sort: "" });
-  const cached = countCache.get(countKey);
-  const countQuery = cached && cached.at > Date.now() - 60_000 ? Promise.resolve([{ total: cached.total }]) : db
+  const hitCount = countCache.get(countKey);
+  const countFresh = () => db
       .select({ total: count() })
       .from(listings)
       .leftJoin(places, eq(listings.placeId, places.id))
@@ -278,9 +278,13 @@ export async function searchListings(s: SearchParams) {
       .where(where)
       .then((r) => {
         countCache.set(countKey, { total: r[0].total, at: Date.now() });
-        if (countCache.size > 500) countCache.delete(countCache.keys().next().value!);
+        if (countCache.size > 2000) countCache.delete(countCache.keys().next().value!);
         return r;
       });
+  // svaigs (< 60 s) → no keša; vecāks par 60 s, bet jaunāks par 1 h → no keša un pārrēķina fonā; citādi gaida
+  const countAge = hitCount ? Date.now() - hitCount.at : Infinity;
+  if (hitCount && countAge >= 60_000 && countAge < 3600_000) { hitCount.at = Date.now() - 50_000; countFresh().catch(() => {}); }
+  const countQuery = hitCount && countAge < 3600_000 ? Promise.resolve([{ total: hitCount.total }]) : countFresh();
   const [rows, [{ total }]] = await Promise.all([pageRows, countQuery]);
   return { rows, total, pages: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
 }
@@ -438,13 +442,26 @@ export async function typeCounts(s: SearchParams): Promise<Record<string, number
 }
 
 // ---------- SEO lapām: skaiti pa markām/modeļiem/reģioniem un cenu kopsavilkums (kešots 10 min) ----------
-const facetCache = new Map<string, { at: number; v: unknown }>();
-async function cached<T>(key: string, fn: () => Promise<T>): Promise<T> {
+const facetCache = new Map<string, { at: number; v: unknown; refreshing?: boolean }>();
+/**
+ * Kešs ar „rādi veco, atjauno fonā”: svaigu vērtību (līdz 10 min) atdod uzreiz; vecāku (līdz 6 h) arī atdod uzreiz,
+ * bet fonā pārrēķina, lai meklētāja robots vai lietotājs negaidītu uz lēniem skaitiem.
+ */
+export async function cached<T>(key: string, fn: () => Promise<T>): Promise<T> {
   const hit = facetCache.get(key);
-  if (hit && hit.at > Date.now() - 10 * 60_000) return hit.v as T;
+  const age = hit ? Date.now() - hit.at : Infinity;
+  if (hit && age < 10 * 60_000) return hit.v as T;
+  if (hit && age < 6 * 3600_000) {
+    if (!hit.refreshing) {
+      hit.refreshing = true;
+      fn().then((v) => facetCache.set(key, { at: Date.now(), v })).catch(() => { hit.refreshing = false; });
+    }
+    return hit.v as T;
+  }
   const v = await fn();
+  facetCache.delete(key);
   facetCache.set(key, { at: Date.now(), v });
-  if (facetCache.size > 2000) facetCache.delete(facetCache.keys().next().value!);
+  if (facetCache.size > 5000) facetCache.delete(facetCache.keys().next().value!);
   return v;
 }
 
@@ -555,5 +572,36 @@ export function priceInsights(s: SearchParams): Promise<PriceInsights | null> {
       cheap, dear, mid: n - cheap - dear, cheapMax, dearMin,
       drops: Number(st.drops ?? 0), dropPct: st.dropPct != null ? Math.round(Number(st.dropPct) * 10) / 10 : null,
     };
+  });
+}
+
+/**
+ * SEO lapu saišu grupām: sludinājumu skaits pa degvielu, virsbūvi, reģioniem, istabām, apkaimēm (vieta bez veida) vai
+ * kumulatīvi pa cenu sliekšņiem (≤ N €). Pašu dimensiju filtros neņem vērā. Kešots.
+ */
+export function seoLinkCounts(s: SearchParams, by: "price" | "fuel" | "body" | "region" | "rooms" | "area", steps: readonly number[] = []): Promise<{ key: string; n: number }[]> {
+  const base: SearchParams = {
+    ...s, page: 1, sort: "new",
+    ...(by === "price" ? { pmax: undefined } : by === "fuel" ? { fuel: undefined } : by === "body" ? { body: undefined }
+      : by === "rooms" ? { rmin: undefined, rmax: undefined } : by === "region" ? { loc: undefined } : {}),
+  };
+  return cached(`seo:${by}:${steps.join(",")}:${JSON.stringify(base)}`, async () => {
+    const from = <T extends Record<string, unknown>>(sel: T) =>
+      db.select(sel as never).from(listings)
+        .leftJoin(places, eq(listings.placeId, places.id))
+        .leftJoin(regions, eq(places.regionId, regions.id))
+        .leftJoin(makes, eq(listings.makeId, makes.id))
+        .leftJoin(models, eq(listings.modelId, models.id))
+        .leftJoin(users, eq(listings.userId, users.id));
+    const where = and(...conditions(base));
+    if (by === "price") {
+      const sel = Object.fromEntries(steps.map((p) => [`p${p}`, sql<number>`count(*) filter (where ${listings.price} > 0 and ${listings.price} <= ${p}::int)`]));
+      const [r] = (await from(sel).where(where)) as unknown as Record<string, number>[];
+      return steps.map((p) => ({ key: String(p), n: Number(r?.[`p${p}`] ?? 0) }));
+    }
+    const col = by === "fuel" ? listings.fuel : by === "body" ? listings.body : by === "region" ? sql`${regions.id}::text` : by === "rooms" ? sql`least(${listings.rooms}, 5)::text` : sql`${places.id}::text`;
+    const extra = by === "area" ? sql`${places.kind} is null and ${regions.kind} = 'city'` : sql`true`;
+    const rows = (await from({ k: col, n: count() }).where(and(where, sql`${col} is not null`, extra)).groupBy(sql`1`).orderBy(desc(count()))) as unknown as { k: string; n: number }[];
+    return rows.map((r) => ({ key: String(r.k), n: Number(r.n) }));
   });
 }

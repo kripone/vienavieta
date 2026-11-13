@@ -41,8 +41,8 @@ export function landingRoute(resolve: (parts: string[], tr: { t: T; locale: Loca
         const a = langAlternates(landing.path, locale);
         return page > 1 ? { canonical: `${a.canonical}?page=${page}` } : a;
       })(),
-      // tukšas lapas meklētājiem nerādām
-      robots: sum && sum.n === 0 ? { index: false, follow: true } : undefined,
+      // tukšas un gandrīz tukšas lapas meklētājiem nerādām (sitemap arī tikai ar ≥3)
+      robots: sum && sum.n < 3 ? { index: false, follow: true } : undefined,
       openGraph: { title, description, url: langAlternates(landing.path, locale).canonical, images: [{ url: "/og.png", width: 1200, height: 630 }] },
     };
   }
