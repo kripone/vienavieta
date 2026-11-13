@@ -218,6 +218,13 @@
       "when": 1794558351256,
       "tag": "0030_blue_lady_mastermind",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1794559330751,
+      "tag": "0031_amused_marvel_boy",
+      "breakpoints": true
     }
   ]
 }
