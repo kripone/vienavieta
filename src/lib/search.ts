@@ -285,36 +285,39 @@ export async function searchListings(s: SearchParams) {
   return { rows, total, pages: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
 }
 
+/** Kartes skats: robežas un tālummaiņa, ko pārlūks atsūta pēc katras kustības. */
+export type MapView = { west: number; south: number; east: number; north: number; zoom: number };
+export type MapPoint = { id: string; lat: number; lon: number; kind: "vehicle" | "property"; price: number; title: string };
+export type MapCell = { lat: number; lon: number; n: number };
+/** Ja redzamajā laukumā ir vairāk sludinājumu, serveris atdod rūtiņu kopsavilkumu (skaits + vidējā vieta), nevis katru punktu. */
+export const MAP_POINTS_MAX = 2000;
+
 /**
- * Punkti kartei visiem atbilstošajiem sludinājumiem (bez zonas filtra, lai redzētu arī apkārtni).
- * Retināšana pa ģeogrāfiskajām šūnām (~5 km): no katras šūnas ne vairāk kā PER_CELL jaunākie,
- * lai limits netiktu apēsts viena avota blīvajiem punktiem un karte rādītu visu reģionu.
+ * Kartes dati redzamajam laukumam ar tiem pašiem filtriem kā sarakstā (zona netiek piemērota: tā kartē ir uzzīmēta).
+ * Skaiti ir īsti: vai nu visi punkti (≤ MAP_POINTS_MAX; tālāk tos klasterē pārlūks), vai rūtiņas ar sludinājumu skaitu.
  */
-export async function searchPoints(s: SearchParams, limit = 3000) {
-  const PER_CELL = 4;
-  const where = and(...conditions({ ...s, zone: undefined }), isNotNull(listings.lat)) ?? sql`true`;
-  const q = sql`
-    select id, lat, lon, kind, price, title from (
-      select ${listings.id} as id, ${listings.lat} as lat, ${listings.lon} as lon,
-        ${listings.kind} as kind, ${listings.price} as price, ${listings.title} as title,
-        row_number() over (
-          partition by floor(${listings.lat} * 20), floor(${listings.lon} * 20)
-          order by ${listings.updatedAt} desc
-        ) as rn
+export async function searchMapView(s: SearchParams, v: MapView): Promise<{ total: number; points?: MapPoint[]; cells?: MapCell[] }> {
+  const where = and(...conditions({ ...s, zone: undefined }), isNotNull(listings.lat),
+    sql`${listings.lat} between ${v.south} and ${v.north}`, sql`${listings.lon} between ${v.west} and ${v.east}`) ?? sql`true`;
+  const from = sql`
       from ${listings}
       left join ${places} on ${eq(listings.placeId, places.id)}
       left join ${regions} on ${eq(places.regionId, regions.id)}
       left join ${makes} on ${eq(listings.makeId, makes.id)}
       left join ${models} on ${eq(listings.modelId, models.id)}
       left join ${users} on ${eq(listings.userId, users.id)}
-      where ${where}
-    ) t
-    where rn <= ${PER_CELL}
-    limit ${limit}`;
-  const r = await db.execute(q);
-  return (r.rows as { id: string; lat: number | null; lon: number | null; kind: string; price: number; title: string }[]).map((p) => ({
-    id: p.id, lat: p.lat, lon: p.lon, kind: p.kind as "vehicle" | "property", price: p.price, title: p.title,
-  }));
+      where ${where}`;
+  const total = Number((await db.execute<{ n: string }>(sql`select count(*) n ${from}`)).rows[0]?.n ?? 0);
+  if (total <= MAP_POINTS_MAX) {
+    const r = await db.execute(sql`select ${listings.id} as id, ${listings.lat} as lat, ${listings.lon} as lon, ${listings.kind} as kind, ${listings.price} as price, ${listings.title} as title ${from}`);
+    return { total, points: (r.rows as MapPoint[]).map((p) => ({ ...p, lat: Number(p.lat), lon: Number(p.lon) })) };
+  }
+  // rūtiņa ≈ 90 ekrāna pikseļi šajā tālummaiņā (platuma grādi Latvijas platumā ir ~1,8× garāki par garuma grādiem)
+  const cx = (360 / (256 * 2 ** v.zoom)) * 90, cy = cx * 0.55;
+  const r = await db.execute<{ lat: number; lon: number; n: string }>(sql`
+    select avg(${listings.lat}) lat, avg(${listings.lon}) lon, count(*) n ${from}
+    group by floor(${listings.lat} / ${cy}), floor(${listings.lon} / ${cx})`);
+  return { total, cells: r.rows.map((c) => ({ lat: Number(c.lat), lon: Number(c.lon), n: Number(c.n) })) };
 }
 
 /** Pārvērš parametrus atpakaļ URL (izlaižot tukšos un noklusētos). */

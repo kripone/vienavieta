@@ -16,7 +16,9 @@ const SATELLITE_ATTR = process.env.NEXT_PUBLIC_MAP_SATELLITE_ATTRIBUTION || "";
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 const fmt = new Intl.NumberFormat("lv-LV");
-type Props = { id: string; kind: 1 | 2; price: number; title: string };
+/** Punkts (n = 1) vai servera rūtiņa ar sludinājumu skaitu (n > 1, bez id). */
+type Props = { n: number; id: string; kind: 1 | 2; price: number; title: string };
+type MapData = { total: number; points?: Point[]; cells?: [number, number, number][] };
 /** Skaits burbulī: 150, 2,5k, 12k. */
 const short = (n: number) => (n < 1000 ? String(n) : n < 10000 ? `${(Math.floor(n / 100) / 10).toString().replace(".", ",")}k` : `${Math.floor(n / 1000)}k`);
 /** Līdz cik sludinājumiem vienā adresē izklāj punktus; virs tā rāda sarakstu. */
@@ -70,6 +72,8 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
   // punkti: tuvu esošie apvienoti burbulī ar skaitu; tuvinot sadalās pa sludinājumiem
   const index = useRef<Supercluster<Props> | null>(null);
   const spider = useRef<L.LayerGroup | null>(null);
+  /** true, ja serveris atdevis rūtiņu kopsavilkumu, nevis atsevišķus punktus */
+  const cells = useRef(false);
   const spiderRenderer = useRef<L.Renderer | null>(null);
   const draw = useRef<() => void>(() => {});
   useEffect(() => {
@@ -108,34 +112,51 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
       if (!g || !idx) return;
       g.clearLayers();
       const b = m.getBounds().pad(0.2), z = Math.round(m.getZoom());
+      const bubble = (lat: number, lon: number, n: number, onClick: () => void) => {
+        const size = n < 10 ? 28 : n < 100 ? 34 : n < 1000 ? 40 : 48;
+        // krāsa pēc apjoma: jo vairāk sludinājumu, jo „karstāks” burbulis
+        const heat = n < 10 ? 0 : n < 100 ? 1 : n < 1000 ? 2 : 3;
+        L.marker([lat, lon], { icon: L.divIcon({ className: `mcluster heat${heat}`, html: `<span style="width:${size}px;height:${size}px">${short(n)}</span>`, iconSize: [size, size] }), keyboard: false }).addTo(g).on("click", onClick);
+      };
       for (const c of idx.getClusters([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], z)) {
         const [lon, lat] = c.geometry.coordinates;
         const cp = c.properties as Supercluster.ClusterProperties & Props;
-        if (!cp.cluster) {
+        if (!cp.cluster && cp.n === 1) {
           L.circleMarker([lat, lon], { radius: radiusFor(z) + 1.5, weight: 1.5, color: "#fff", fillColor: cp.kind === 1 ? "#2f5fa8" : "#2f8a64", fillOpacity: 0.95 }).bindPopup(popupHtml(cp)).addTo(g);
           continue;
         }
-        const n = cp.point_count, size = n < 10 ? 28 : n < 100 ? 34 : n < 1000 ? 40 : 48;
-        // krāsa pēc apjoma: jo vairāk sludinājumu, jo „karstāks” burbulis
-        const heat = n < 10 ? 0 : n < 50 ? 1 : n < 200 ? 2 : 3;
-        const mk = L.marker([lat, lon], { icon: L.divIcon({ className: `mcluster heat${heat}`, html: `<span style="width:${size}px;height:${size}px">${short(n)}</span>`, iconSize: [size, size] }), keyboard: false }).addTo(g);
-        mk.on("click", () => {
+        // servera rūtiņa (daudz sludinājumu): tuvinot serveris atdos sīkāku dalījumu
+        if (!cp.cluster) { bubble(lat, lon, cp.n, () => m.setView([lat, lon], Math.min(m.getMaxZoom(), z + 2))); continue; }
+        bubble(lat, lon, cp.n, () => {
           const to = idx.getClusterExpansionZoom(cp.cluster_id);
+          if (cells.current) { m.setView([lat, lon], Math.min(m.getMaxZoom(), Math.max(to, z + 2))); return; }
           if (to <= m.getMaxZoom() && z < m.getMaxZoom()) { m.setView([lat, lon], Math.max(to, z + 1)); return; }
-          spread(lat, lon, idx.getLeaves(cp.cluster_id, SPREAD_MAX + 1), n);
+          spread(lat, lon, idx.getLeaves(cp.cluster_id, SPREAD_MAX + 1), cp.n);
         });
       }
     };
-    fetch(`/api/search/points?${query}`).then((r) => r.json()).then((pts: Point[]) => {
-      if (!alive) return;
-      setCount(pts.length);
-      index.current = new Supercluster<Props>({ radius: 84, maxZoom: 18, minPoints: 2 }).load(
-        pts.map(([id, lat, lon, kind, price, title]) => ({ type: "Feature" as const, geometry: { type: "Point" as const, coordinates: [lon, lat] }, properties: { id, kind, price, title } })));
-      draw.current();
-    }).catch(() => {});
-    const redraw = () => draw.current();
-    m.on("moveend", redraw);
-    return () => { alive = false; m.off("moveend", redraw); m.off("zoomstart", closeSpread); m.off("click", closeSpread); closeSpread(); };
+    // dati redzamajam laukumam: pēc katras kustības pieprasa serverim (īsti skaiti arī tad, ja sludinājumu ir tūkstošiem)
+    let seq = 0, timer: ReturnType<typeof setTimeout> | undefined, first = true;
+    const load = () => {
+      const my = ++seq;
+      const b = m.getBounds().pad(0.25), z = Math.round(m.getZoom());
+      const view = `b=${b.getWest().toFixed(4)},${b.getSouth().toFixed(4)},${b.getEast().toFixed(4)},${b.getNorth().toFixed(4)}&z=${z}`;
+      fetch(`/api/search/points?${query ? `${query}&` : ""}${view}`).then((r) => r.json()).then((d: MapData) => {
+        if (!alive || my !== seq) return;
+        if (first) { setCount(d.total); first = false; }
+        cells.current = !d.points;
+        const feature = (lat: number, lon: number, properties: Props) => ({ type: "Feature" as const, geometry: { type: "Point" as const, coordinates: [lon, lat] }, properties });
+        index.current = new Supercluster<Props, { n: number }>({ radius: 84, maxZoom: 18, minPoints: 2, map: (p) => ({ n: p.n }), reduce: (acc, p) => { acc.n += p.n; } }).load(
+          d.points
+            ? d.points.map(([id, lat, lon, kind, price, title]) => feature(lat, lon, { n: 1, id, kind, price, title }))
+            : (d.cells ?? []).map(([lat, lon, n]) => feature(lat, lon, { n, id: "", kind: 1, price: 0, title: "" }))) as unknown as Supercluster<Props>;
+        draw.current();
+      }).catch(() => {});
+    };
+    load();
+    const onMove = () => { clearTimeout(timer); timer = setTimeout(load, 200); };
+    m.on("moveend", onMove);
+    return () => { alive = false; clearTimeout(timer); m.off("moveend", onMove); m.off("zoomstart", closeSpread); m.off("click", closeSpread); closeSpread(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
