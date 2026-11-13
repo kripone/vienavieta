@@ -612,5 +612,11 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 
 /* Kartes klasteri: burbulis ar sludinājumu skaitu */
 .mcluster { background: none; border: 0; }
-.mcluster span { display: grid; place-items: center; border-radius: 50%; background: #24304a; color: #fff; font: 700 13px/1 system-ui, sans-serif; box-shadow: 0 0 0 3px rgba(36,48,74,.25), 0 1px 4px rgba(0,0,0,.35); cursor: pointer; font-variant-numeric: tabular-nums; }
-.mcluster:hover span { background: #9e3039; box-shadow: 0 0 0 4px rgba(158,48,57,.25), 0 1px 4px rgba(0,0,0,.35); }
+.mcluster span { display: grid; place-items: center; border-radius: 50%; background: var(--c); color: var(--ink, #fff); font: 700 13px/1 system-ui, sans-serif; box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 35%, transparent), 0 0 0 1px rgba(255,255,255,.9) inset, 0 1px 4px rgba(0,0,0,.35); cursor: pointer; font-variant-numeric: tabular-nums; transition: transform .12s; }
+.mcluster.heat0 { --c: #f7c873; --ink: #3a2a06; }
+.mcluster.heat1 { --c: #ee8f3b; --ink: #2b1503; }
+.mcluster.heat2 { --c: #cf4a2c; }
+.mcluster.heat3 { --c: #8a1c2b; }
+.mcluster:hover span { transform: scale(1.08); }
+@media (prefers-reduced-motion: no-preference) { .spider-pt { animation: spider-in .18s ease-out; } }
+@keyframes spider-in { from { opacity: 0; } to { opacity: 1; } }

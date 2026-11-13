@@ -19,6 +19,8 @@ const fmt = new Intl.NumberFormat("lv-LV");
 type Props = { id: string; kind: 1 | 2; price: number; title: string };
 /** Skaits burbulī: 150, 2,5k, 12k. */
 const short = (n: number) => (n < 1000 ? String(n) : n < 10000 ? `${(Math.floor(n / 100) / 10).toString().replace(".", ",")}k` : `${Math.floor(n / 1000)}k`);
+/** Līdz cik sludinājumiem vienā adresē izklāj punktus; virs tā rāda sarakstu. */
+const SPREAD_MAX = 24;
 const popupHtml = (p: Props) => `<a href="/sludinajumi/${p.id}" style="font-weight:700">${esc(p.title)}</a><br>${fmt.format(p.price)} €`;
 
 /** Vienkāršo zīmēto līniju: atstāj punktus, kas ir vismaz `min` pikseļu attālumā. */
@@ -56,6 +58,10 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
     }
     m.setMaxBounds([[53.3, 19.5], [58.8, 29.5]]); // Latvija un Lietuva
     markers.current = L.layerGroup().addTo(m);
+    // izklātie vienas adreses punkti: SVG slānis virs burbuļiem, lai uz tiem var uzspiest
+    m.createPane("spider").style.zIndex = "650";
+    spiderRenderer.current = L.svg({ pane: "spider" });
+    spider.current = L.layerGroup().addTo(m);
     map.current = m;
     return () => { m.remove(); map.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -63,11 +69,40 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
 
   // punkti: tuvu esošie apvienoti burbulī ar skaitu; tuvinot sadalās pa sludinājumiem
   const index = useRef<Supercluster<Props> | null>(null);
+  const spider = useRef<L.LayerGroup | null>(null);
+  const spiderRenderer = useRef<L.Renderer | null>(null);
   const draw = useRef<() => void>(() => {});
   useEffect(() => {
     const m = map.current;
     if (!m || !markers.current) return;
     let alive = true;
+    // Vienā adresē vairāki sludinājumi: izklāj punktus aplī (līdz 8) vai spirālē ap burbuli, lai katram var uzspiest.
+    // Ja to ir ļoti daudz, rāda sarakstu.
+    const spread = (lat: number, lon: number, leaves: Supercluster.PointFeature<Props>[], n: number) => {
+      const sg = spider.current;
+      if (!sg) return;
+      sg.clearLayers();
+      if (n > SPREAD_MAX) {
+        const shown = leaves.slice(0, 12);
+        L.popup({ maxHeight: 240 }).setLatLng([lat, lon])
+          .setContent(shown.map((l) => `<div style="margin-bottom:6px">${popupHtml(l.properties)}</div>`).join("") + `<div style="margin-top:6px;color:#5d6475">${esc(t("un vēl {n}", { n: n - shown.length }))}</div>`).openOn(m);
+        return;
+      }
+      const c = m.latLngToLayerPoint([lat, lon]);
+      leaves.forEach((l, i) => {
+        // aplis: vienāds leņķis; spirāle: rādiuss aug ar katru punktu
+        const circle = leaves.length <= 8;
+        const a = circle ? (2 * Math.PI * i) / leaves.length - Math.PI / 2 : i * 0.75;
+        const r = circle ? 38 : 30 + i * 4.2;
+        const ll = m.layerPointToLatLng(L.point(c.x + r * Math.cos(a), c.y + r * Math.sin(a)));
+        L.polyline([[lat, lon], ll], { color: "#24304a", weight: 1, opacity: 0.55, interactive: false, renderer: spiderRenderer.current ?? undefined }).addTo(sg);
+        L.circleMarker(ll, { radius: 8, weight: 2, color: "#fff", fillColor: l.properties.kind === 1 ? "#2f5fa8" : "#2f8a64", fillOpacity: 1, className: "spider-pt", bubblingMouseEvents: false, renderer: spiderRenderer.current ?? undefined })
+          .bindPopup(popupHtml(l.properties), { autoPan: false }).addTo(sg);
+      });
+    };
+    const closeSpread = () => spider.current?.clearLayers();
+    m.on("zoomstart", closeSpread);
+    m.on("click", closeSpread);
     draw.current = () => {
       const g = markers.current, idx = index.current;
       if (!g || !idx) return;
@@ -81,14 +116,13 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
           continue;
         }
         const n = cp.point_count, size = n < 10 ? 28 : n < 100 ? 34 : n < 1000 ? 40 : 48;
-        const mk = L.marker([lat, lon], { icon: L.divIcon({ className: "mcluster", html: `<span style="width:${size}px;height:${size}px">${short(n)}</span>`, iconSize: [size, size] }), keyboard: false }).addTo(g);
+        // krāsa pēc apjoma: jo vairāk sludinājumu, jo „karstāks” burbulis
+        const heat = n < 10 ? 0 : n < 50 ? 1 : n < 200 ? 2 : 3;
+        const mk = L.marker([lat, lon], { icon: L.divIcon({ className: `mcluster heat${heat}`, html: `<span style="width:${size}px;height:${size}px">${short(n)}</span>`, iconSize: [size, size] }), keyboard: false }).addTo(g);
         mk.on("click", () => {
           const to = idx.getClusterExpansionZoom(cp.cluster_id);
           if (to <= m.getMaxZoom() && z < m.getMaxZoom()) { m.setView([lat, lon], Math.max(to, z + 1)); return; }
-          // vienā vietā vairāki sludinājumi: saraksts
-          const leaves = idx.getLeaves(cp.cluster_id, 8);
-          const more = n > leaves.length ? `<div style="margin-top:6px;color:#5d6475">${esc(t("un vēl {n}", { n: n - leaves.length }))}</div>` : "";
-          L.popup({ maxHeight: 240 }).setLatLng([lat, lon]).setContent(leaves.map((l) => `<div style="margin-bottom:6px">${popupHtml(l.properties)}</div>`).join("") + more).openOn(m);
+          spread(lat, lon, idx.getLeaves(cp.cluster_id, SPREAD_MAX + 1), n);
         });
       }
     };
@@ -101,7 +135,7 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
     }).catch(() => {});
     const redraw = () => draw.current();
     m.on("moveend", redraw);
-    return () => { alive = false; m.off("moveend", redraw); };
+    return () => { alive = false; m.off("moveend", redraw); m.off("zoomstart", closeSpread); m.off("click", closeSpread); closeSpread(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
