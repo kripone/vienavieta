@@ -333,9 +333,14 @@ export async function browserFetch(url: string): Promise<string> {
         await page.waitForSelector("a[href*='/details/']", { timeout: 40_000 });
         return await page.content();
       } catch (e) {
+        // virsraksts var būt tukšs, kamēr lapa vēl ielādējas — mazliet pagaidām pirms sprieduma
+        await page.waitForTimeout(3000);
         const title = await page.title().catch(() => "");
-        if (/vercel|security|checkpoint/i.test(title)) {
-          if (attempt >= 3) throw e;
+        if (/vercel|security|checkpoint/i.test(title) || !title) {
+          if (attempt >= 3) {
+            if (/porsche/i.test(title)) return await page.content(); // tukša rezultātu lapa pēc atkārtojumiem
+            throw e;
+          }
           await page.reload({ waitUntil: "domcontentloaded", timeout: 45_000 });
           continue;
         }
