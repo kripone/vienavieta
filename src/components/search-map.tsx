@@ -80,7 +80,7 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
           L.circleMarker([lat, lon], { radius: radiusFor(z) + 1.5, weight: 1.5, color: "#fff", fillColor: cp.kind === 1 ? "#2f5fa8" : "#2f8a64", fillOpacity: 0.95 }).bindPopup(popupHtml(cp)).addTo(g);
           continue;
         }
-        const n = cp.point_count, size = n < 10 ? 30 : n < 100 ? 36 : n < 1000 ? 44 : 52;
+        const n = cp.point_count, size = n < 10 ? 28 : n < 100 ? 34 : n < 1000 ? 40 : 48;
         const mk = L.marker([lat, lon], { icon: L.divIcon({ className: "mcluster", html: `<span style="width:${size}px;height:${size}px">${short(n)}</span>`, iconSize: [size, size] }), keyboard: false }).addTo(g);
         mk.on("click", () => {
           const to = idx.getClusterExpansionZoom(cp.cluster_id);
@@ -95,7 +95,7 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
     fetch(`/api/search/points?${query}`).then((r) => r.json()).then((pts: Point[]) => {
       if (!alive) return;
       setCount(pts.length);
-      index.current = new Supercluster<Props>({ radius: 56, maxZoom: 18, minPoints: 2 }).load(
+      index.current = new Supercluster<Props>({ radius: 84, maxZoom: 18, minPoints: 2 }).load(
         pts.map(([id, lat, lon, kind, price, title]) => ({ type: "Feature" as const, geometry: { type: "Point" as const, coordinates: [lon, lat] }, properties: { id, kind, price, title } })));
       draw.current();
     }).catch(() => {});
