@@ -93,7 +93,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <a href={lp("/par-mums")}>{LEGAL[locale].footer.about}</a>
               <a href={lp("/noteikumi")}>{LEGAL[locale].footer.terms}</a>
               <a href={lp("/privatums")}>{LEGAL[locale].footer.privacy}</a>
-              <a href={lp("/par-mums#avoti")}>{LEGAL[locale].footer.sources}</a>
+              <a href={lp("/dati")}>{LEGAL[locale].footer.sources}</a>
             </nav>
           </div>
         </footer>

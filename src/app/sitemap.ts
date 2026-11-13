@@ -16,7 +16,7 @@ const MIN = 3;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (memo && memo.at > Date.now() - 3600_000) return memo.v;
   const b = appBase();
-  const urls: { path: string; lastModified?: Date }[] = ["/", "/auto", "/moto", "/ipasumi", "/tirgus", "/cenu-kritumi", "/darijumi", "/novertejums", "/cenu-karte", "/vesture", "/par-mums", "/noteikumi", "/privatums"].map((path) => ({ path }));
+  const urls: { path: string; lastModified?: Date }[] = ["/", "/auto", "/moto", "/ipasumi", "/tirgus", "/cenu-kritumi", "/darijumi", "/novertejums", "/cenu-karte", "/dati", "/vesture", "/par-mums", "/noteikumi", "/privatums"].map((path) => ({ path }));
   const add = (path: string) => urls.push({ path });
 
   try {

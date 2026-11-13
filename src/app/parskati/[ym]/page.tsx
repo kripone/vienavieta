@@ -47,6 +47,17 @@ export default async function ReportPage(props: Props) {
         {t("Automātisks kopsavilkums no visiem tajā mēnesī pieejamajiem sludinājumiem (VienāVietā un ss.com); viens objekts vairākos portālos skaitās vienreiz.")}
         {ongoing ? ` ${t("Mēnesis vēl turpinās, skaitļi mainās katru dienu.")}` : ""}
       </p>
+      {(() => {
+        // galvenie skaitļi vienā teikumā: meklētāji un AI asistenti to var citēt
+        const riga = r.flatRegions.find((x) => x.region === "Rīga");
+        const top = r.rigaFlats[0], low = r.rigaFlats[r.rigaFlats.length - 1];
+        const car = r.carModels[0];
+        const parts = [t("{m}: {v} transporta un {p} īpašumu sludinājumi.", { m, v: formatNumber(r.vehicles), p: formatNumber(r.property) })];
+        if (riga) parts.push(t("Dzīvokļa kvadrātmetra cenas mediāna Rīgā {x} €/m².", { x: formatNumber(riga.median) }));
+        if (top && low && top !== low) parts.push(t("Dārgākā apkaime {a} ({x} €/m²), lētākā {b} ({y} €/m²).", { a: top.place, x: formatNumber(top.median), b: low.place, y: formatNumber(low.median) }));
+        if (car) parts.push(t("Populārākais lietotais auto: {c} ({n} sludinājumi, mediānas cena {p}).", { c: `${car.make} ${trTitle(car.model, t)}`, n: formatNumber(car.n), p: formatPrice(car.median) }));
+        return <p className="facts">{parts.join(" ")} <a href={lp("/dati")}>{t("Kā skaitām")}</a></p>;
+      })()}
       <nav className="report-nav">
         {older ? <a className="btn small" href={lp(`/parskati/${older}`)}>← {monthName(older, locale)}</a> : <span />}
         {newer && <a className="btn small" href={lp(`/parskati/${newer}`)}>{monthName(newer, locale)} →</a>}

@@ -623,3 +623,7 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .seo-group { margin-top: 18px; }
 .seo-group h2 { font-size: 15px; color: var(--fg); margin: 0 0 4px; }
 .seo-links b[aria-current] { color: var(--fg); }
+/* Datēts faktu teikums (SEO lapas, pārskats, cenu karte) */
+.facts { margin: 4px 0 12px; font-size: 14px; line-height: 1.5; color: var(--fg); background: var(--surface-2); border-radius: 10px; padding: 9px 12px; }
+.facts time { font-weight: 700; }
+.facts a { color: var(--accent); white-space: nowrap; }

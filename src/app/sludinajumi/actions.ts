@@ -1,6 +1,7 @@
 "use server";
 import { and, count, eq, gt, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { indexNow, listingPaths } from "@/lib/indexnow";
 import { db, schema } from "@/db";
 import { checkContent, isValidEmail, isValidPhone, normalizePhone, normalizeTitle } from "@/lib/antispam";
 import { DAILY_LISTING_LIMIT } from "@/lib/constants";
@@ -156,6 +157,7 @@ export async function saveListing(raw: unknown): Promise<SaveResult> {
   revalidatePath("/");
   revalidatePath(`/sludinajumi/${id}`);
   revalidatePath("/mani-sludinajumi");
+  indexNow(listingPaths([id]));
   return { ok: true, id };
 }
 
@@ -176,6 +178,7 @@ export async function deleteListing(id: string): Promise<{ ok: boolean; error?: 
   }
   revalidatePath("/");
   revalidatePath("/mani-sludinajumi");
+  indexNow(listingPaths([id]));
   return { ok: true };
 }
 
@@ -187,5 +190,6 @@ export async function setSold(id: string, sold: boolean): Promise<{ ok: boolean 
   revalidatePath("/");
   revalidatePath(`/sludinajumi/${id}`);
   revalidatePath("/mani-sludinajumi");
+  indexNow(listingPaths([id]));
   return { ok: true };
 }

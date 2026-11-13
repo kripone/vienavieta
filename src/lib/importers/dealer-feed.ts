@@ -4,6 +4,7 @@
 // City24 formāta JSON (aģentūru eksports vai City24 partneru plūsma): city24-format.ts, bez brokeru datiem, viena bilde.
 // dealer_feeds.source = portāls (tikai administrators): sludinājumi ar portāla avotu, bez apraksta un kontaktiem,
 // viens sīktēls un saite uz oriģinālu ar UTM.
+import { indexNow, listingPaths } from "../indexnow";
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
 import { XMLParser } from "fast-xml-parser";
@@ -288,6 +289,7 @@ export async function runFeed(feedId: number): Promise<FeedResult> {
     const source = feed.source ?? "own";
     const partner = source !== "own";
     const seen: string[] = [];
+    const changed: string[] = [];
     for (const [i, f] of rows.entries()) {
       const itemId = (get(f, "id") ?? get(f, "url") ?? `${i}`).slice(0, 120);
       const externalId = `feed:${feed.id}:${itemId}`;
@@ -401,13 +403,17 @@ export async function runFeed(feedId: number): Promise<FeedResult> {
           .update(listings)
           .set({ ...upd, ...(existing.price !== price ? { firstPrice: sql`coalesce(${listings.firstPrice}, ${existing.price})` } : {}) })
           .where(eq(listings.id, existing.id));
-        if (existing.price !== price) await db.insert(priceHistory).values({ listingId: existing.id, price });
+        if (existing.price !== price) {
+          await db.insert(priceHistory).values({ listingId: existing.id, price });
+          if (row.source === "own") changed.push(existing.id);
+        }
         res.updated++;
       } else {
         const [ins] = await db.insert(listings).values(row).onConflictDoNothing().returning({ id: listings.id });
         if (ins) {
           await db.insert(priceHistory).values({ listingId: ins.id, price });
           await linkDuplicate(ins.id).catch(() => null); // tas pats auto ss.com → viena kartīte
+          if (row.source === "own") changed.push(ins.id);
           res.created++;
         }
       }
@@ -420,7 +426,10 @@ export async function runFeed(feedId: number): Promise<FeedResult> {
         .where(and(eq(listings.feedId, feed.id), eq(listings.status, "active"), notInArray(listings.externalId, seen)))
         .returning({ id: listings.id });
       res.removed = gone.length;
+      if (!feed.source) changed.push(...gone.map((g) => g.id));
     }
+    // tikai mūsu pašu (indeksējamie) sludinājumi; partneru portālu sludinājumi ir noindex
+    indexNow(listingPaths(changed));
   } catch (e) {
     res.errors.unshift(e instanceof Error ? e.message : String(e));
   }

@@ -2,6 +2,15 @@
 import type { Dict } from "./core";
 
 export const ru: Dict = {
+  "kvadrātmetra cenas mediāna {p} €/m²": "медиана цены за квадратный метр {p} €/м²",
+  "īres mediāna {p} €/m² mēnesī": "медиана аренды {p} €/м² в месяц",
+  "Kā skaitām": "Как мы считаем",
+  "{m}: {v} transporta un {p} īpašumu sludinājumi.": "{m}: {v} объявлений о транспорте и {p} о недвижимости.",
+  "Dzīvokļa kvadrātmetra cenas mediāna Rīgā {x} €/m².": "Медиана цены квадратного метра квартиры в Риге: {x} €/м².",
+  "Dārgākā apkaime {a} ({x} €/m²), lētākā {b} ({y} €/m²).": "Самый дорогой район {a} ({x} €/м²), самый дешёвый {b} ({y} €/м²).",
+  "Populārākais lietotais auto: {c} ({n} sludinājumi, mediānas cena {p}).": "Самый популярный подержанный автомобиль: {c} ({n} объявлений, медианная цена {p}).",
+  "dārgākā vieta {a} ({x} {u}), lētākā {b} ({y} {u}); {n} vietas ar vismaz {k} sludinājumiem.": "самое дорогое место {a} ({x} {u}), самое дешёвое {b} ({y} {u}); {n} мест с не менее чем {k} объявлениями.",
+  "aktīvs sludinājums": {"one": "активное объявление", "few": "активных объявления", "many": "активных объявлений", "other": "активного объявления"},
   "1 istabas": "1-комнатные",
   "{n}+ istabu": "{n}+ комнатные",
   "{n} istabu": "{n}-комнатные",

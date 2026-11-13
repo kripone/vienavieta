@@ -20,7 +20,8 @@ import { regionOptions } from "@/lib/listings";
 import { describeSearch, priceInsights, parseSearch, searchListings, typeCounts, sourceCounts } from "@/lib/search";
 import { getCurrentUser } from "@/lib/session";
 
-import { formatPrice } from "@/lib/format";
+import { formatNumber, formatPrice } from "@/lib/format";
+import { INTL_LOCALE } from "@/i18n/core";
 import { facetCounts, priceSummary } from "@/lib/search";
 import { appBase, propertyHref, regionName, RIGA_DISTRICT, vehicleHref, seoSlug, type Landing } from "@/lib/seo";
 import { trTitle } from "@/i18n/content";
@@ -137,6 +138,20 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
             <SortSelect value={s.sort} base={flat} />
           </Suspense>
         </div>
+        {landing && summary && summary.n > 0 && (
+          // īss, datēts fakts: meklētāji un AI asistenti to var citēt kā atbildi
+          <p className="facts">
+            <time dateTime={new Date().toISOString().slice(0, 10)}>{new Date().toLocaleDateString(INTL_LOCALE[locale], { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Riga" })}</time>
+            {": "}
+            {tp(summary.n, "aktīvs sludinājums", "aktīvi sludinājumi")}
+            {summary.median ? `, ${t("cenas mediāna {p}", { p: formatPrice(summary.median) })}` : ""}
+            {summary.sqm && s.deal === "sell" ? `, ${t("kvadrātmetra cenas mediāna {p} €/m²", { p: formatNumber(summary.sqm) })}` : ""}
+            {summary.sqm && s.deal === "rent" ? `, ${t("īres mediāna {p} €/m² mēnesī", { p: String(summary.sqm).replace(".", ",") })}` : ""}
+            {insights && insights.drops > 0 ? `. ${t("Pēdējās 30 dienās cena samazināta {n} sludinājumiem", { n: formatNumber(insights.drops) })}${insights.dropPct != null ? ` (${t("vidēji −{p}%", { p: String(insights.dropPct).replace(".", ",") })})` : ""}` : ""}
+            {". "}
+            <a href={lp("/dati")}>{t("Kā skaitām")}</a>
+          </p>
+        )}
         <Suspense>
           <SaveSearchButton loggedIn={Boolean(user)} filters={flat} />
         </Suspense>

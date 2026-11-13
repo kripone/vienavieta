@@ -114,5 +114,6 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [ ] Veikalu aplikācijas (Capacitor) – kad būs lietotāji
 - [x] SEO: Search Console, SEO lapas (/auto/<marka>/<modelis>, /moto, /ipasumi/<veids>[-ire]/<reģions>), sitemap ar tām, noindex filtru lapām un citu portālu sludinājumiem, JSON-LD (Car/Product, BreadcrumbList, WebSite), OG attēls
 - [x] SEO: kombinētās lapas (auto līdz N €, pēc degvielas, virsbūves, pilsētas; dzīvokļi pēc istabām; valstspilsētu apkaimes), saišu grupas, sitemap; skaitu kešs „rādi veco, atjauno fonā”
-- [ ] SEO: IndexNow (Bing) saviem sludinājumiem; ItemList marķējums SEO lapām
+- [x] AI/Bing: datēti faktu teikumi, /dati metodoloģija, /llms.txt, IndexNow saviem sludinājumiem
+- [ ] SEO: ItemList marķējums SEO lapām; Bing Webmaster Tools
 - [x] SEO: valodas ar atsevišķām adresēm (/en, /ru, /lt; hreflang, sitemap, tulkoti SEO lapu virsraksti un pilsētu nosaukumi)

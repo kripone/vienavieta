@@ -507,12 +507,16 @@ export function sourceCounts(s: SearchParams): Promise<{ source: string; n: numb
   });
 }
 
-/** Skaits un cenas mediāna (bez nulles cenām). */
-export function priceSummary(s: SearchParams): Promise<{ n: number; median: number | null }> {
+/** Skaits, cenas mediāna (bez nulles cenām) un īpašumiem kvadrātmetra cenas mediāna. */
+export function priceSummary(s: SearchParams): Promise<{ n: number; median: number | null; sqm: number | null }> {
   const base = { ...s, page: 1, sort: "new" as const };
-  return cached(`sum:${JSON.stringify(base)}`, async () => {
+  return cached(`sum2:${JSON.stringify(base)}`, async () => {
     const [r] = await db
-      .select({ n: count(), median: sql<number | null>`percentile_cont(0.5) within group (order by ${listings.price}) filter (where ${listings.price} > 0)` })
+      .select({
+        n: count(),
+        median: sql<number | null>`percentile_cont(0.5) within group (order by ${listings.price}) filter (where ${listings.price} > 0)`,
+        sqm: sql<number | null>`percentile_cont(0.5) within group (order by ${listings.price}::float / ${listings.areaM2}) filter (where ${listings.price} > 0 and ${listings.areaM2} > 10 and ${listings.kind} = 'property')`,
+      })
       .from(listings)
       .leftJoin(places, eq(listings.placeId, places.id))
       .leftJoin(regions, eq(places.regionId, regions.id))
@@ -520,7 +524,8 @@ export function priceSummary(s: SearchParams): Promise<{ n: number; median: numb
       .leftJoin(models, eq(listings.modelId, models.id))
       .leftJoin(users, eq(listings.userId, users.id))
       .where(and(...conditions(base)));
-    return { n: Number(r?.n ?? 0), median: r?.median != null ? Math.round(Number(r.median)) : null };
+    const sqm = r?.sqm != null ? Number(r.sqm) : null;
+    return { n: Number(r?.n ?? 0), median: r?.median != null ? Math.round(Number(r.median)) : null, sqm: sqm == null ? null : sqm < 50 ? Math.round(sqm * 10) / 10 : Math.round(sqm) };
   });
 }
 

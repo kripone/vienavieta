@@ -2,6 +2,15 @@
 import type { Dict } from "./core";
 
 export const lt: Dict = {
+  "kvadrātmetra cenas mediāna {p} €/m²": "kvadratinio metro kainos mediana {p} €/m²",
+  "īres mediāna {p} €/m² mēnesī": "nuomos mediana {p} €/m² per mėnesį",
+  "Kā skaitām": "Kaip skaičiuojame",
+  "{m}: {v} transporta un {p} īpašumu sludinājumi.": "{m}: {v} transporto ir {p} nekilnojamojo turto skelbimų.",
+  "Dzīvokļa kvadrātmetra cenas mediāna Rīgā {x} €/m².": "Buto kvadratinio metro kainos mediana Rygoje: {x} €/m².",
+  "Dārgākā apkaime {a} ({x} €/m²), lētākā {b} ({y} €/m²).": "Brangiausias mikrorajonas {a} ({x} €/m²), pigiausias {b} ({y} €/m²).",
+  "Populārākais lietotais auto: {c} ({n} sludinājumi, mediānas cena {p}).": "Populiariausias naudotas automobilis: {c} ({n} skelbimų, medianinė kaina {p}).",
+  "dārgākā vieta {a} ({x} {u}), lētākā {b} ({y} {u}); {n} vietas ar vismaz {k} sludinājumiem.": "brangiausia vieta {a} ({x} {u}), pigiausia {b} ({y} {u}); {n} vietos su bent {k} skelbimais.",
+  "aktīvs sludinājums": {"one": "aktyvus skelbimas", "few": "aktyvūs skelbimai", "many": "aktyvių skelbimų", "other": "aktyvių skelbimų"},
   "1 istabas": "1 kambario",
   "{n}+ istabu": "{n}+ kambarių",
   "{n} istabu": "{n} kambarių",
