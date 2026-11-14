@@ -299,7 +299,7 @@ async function getBrowser() {
   if (!browserPromise) {
     browserPromise = (async () => {
       const { chromium } = await import("playwright");
-      return chromium.launch({ headless: true, args: ["--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"] });
+      return chromium.launch({ headless: true, timeout: 30_000, args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"] });
     })().catch((e) => {
       browserPromise = null;
       throw e;
