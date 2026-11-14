@@ -15,6 +15,7 @@ import { UserMenu } from "@/components/user-menu";
 import { LangSwitch } from "@/components/lang-switch";
 import { InstallBanner, PwaRegister } from "@/components/pwa";
 import { ErrorReporter } from "@/components/error-reporter";
+import { AiChat } from "@/components/ai-chat";
 import { I18nProvider } from "@/i18n/client";
 import { getLocale, getT } from "@/i18n/server";
 import { DICTS } from "@/i18n/dicts";
@@ -101,6 +102,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <PwaRegister />
         <ErrorReporter />
         <InstallBanner />
+        {process.env.GEMINI_API_KEY && <AiChat />}
         </I18nProvider>
         {/* Apmeklējumu statistika bez sīkdatnēm (Cloudflare Web Analytics); ieslēdz ar CF_ANALYTICS_TOKEN */}
         {process.env.CF_ANALYTICS_TOKEN && (
