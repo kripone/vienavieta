@@ -301,7 +301,7 @@ async function getBrowser() {
       const { chromium } = await import("playwright");
       // headless shell (vieglāks par pilno chromium: Render starter ir tikai 512 MB, pilnais deva OOM).
       // --disable-dev-shm-usage: konteineru /dev/shm ir mazs, citādi pārlūks krīt ar atmiņas kļūdām.
-      return chromium.launch({ headless: true, args: ["--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"] });
+      return chromium.launch({ headless: true, timeout: 30_000, args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"] });
     })().catch((e) => {
       browserPromise = null;
       throw e;

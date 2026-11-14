@@ -131,6 +131,7 @@ export function startSsCrawler() {
   if (autopliusEnabled() && process.env.AP_DETAILS !== "off") {
     (async () => {
       await new Promise((r) => setTimeout(r, 100_000));
+      console.log("autoplius.lt detaļas: cilpa startēta");
       for (;;) {
         const r = await fillAutopliusDetails().catch((e) => (console.error("autoplius.lt detaļas:", e instanceof Error ? e.message : e), null));
         if (r && (r.features || r.errors)) console.log("autoplius.lt detaļas:", JSON.stringify(r));
@@ -142,6 +143,7 @@ export function startSsCrawler() {
   if (city24Enabled() && process.env.C24_DETAILS !== "off") {
     (async () => {
       await new Promise((r) => setTimeout(r, 130_000));
+      console.log("city24.lv detaļas: cilpa startēta");
       for (;;) {
         const r = await fillCity24Details().catch((e) => (console.error("city24.lv detaļas:", e instanceof Error ? e.message : e), null));
         if (r && (r.filled || r.errors)) console.log("city24.lv detaļas:", JSON.stringify(r));

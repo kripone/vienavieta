@@ -50,7 +50,7 @@ let browser: Browser | null = null;
 
 async function fetchDetail(url: string): Promise<string> {
   if (!browser || !browser.isConnected()) {
-    browser = await chromium.launch({ headless: true, args: ["--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"] });
+    browser = await chromium.launch({ headless: true, timeout: 30_000, args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"] });
   }
   const ctx = await browser.newContext({
     userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
