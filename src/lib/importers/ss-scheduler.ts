@@ -6,6 +6,7 @@ import { SS_FULL_EVERY_HOURS, SS_QUICK_EVERY_MIN, SS_SECTIONS } from "../constan
 import { geocodePending, geocodingEnabled } from "../geocode";
 import { ensureDailySnapshot } from "../market";
 import { autopliusEnabled, tickAutoplius } from "./autoplius-pages";
+import { fillAutopliusDetails } from "./autoplius-details";
 import { tickZip, zipEnabled } from "./zip-pages";
 import { ppEnabled, tickPp } from "./pp-pages";
 import { bravoEnabled, tickBravo } from "./bravo-pages";
@@ -120,6 +121,17 @@ export function startSsCrawler() {
         const rs = await tickAutoplius().catch((e) => (console.error("autoplius.lt ievākšana:", e instanceof Error ? e.message : e), null));
         for (const r of rs ?? []) console.log(`autoplius.lt ${r.key} ${r.mode}:`, JSON.stringify({ ...r, key: undefined, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
         await new Promise((res) => setTimeout(res, 60_000));
+      }
+    })();
+  }
+  // autoplius.lt detaļas: aprīkojums un fakti no sludinājuma lapām (lēni, katra lapa vienreiz)
+  if (autopliusEnabled() && process.env.AP_DETAILS !== "off") {
+    (async () => {
+      await new Promise((r) => setTimeout(r, 100_000));
+      for (;;) {
+        const r = await fillAutopliusDetails().catch((e) => (console.error("autoplius.lt detaļas:", e instanceof Error ? e.message : e), null));
+        if (r && (r.features || r.errors)) console.log("autoplius.lt detaļas:", JSON.stringify(r));
+        await new Promise((res) => setTimeout(res, r ? 30_000 : 600_000));
       }
     })();
   }
