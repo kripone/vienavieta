@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { trackAiUsage } from "@/lib/ai-usage";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +57,7 @@ export async function POST(req: Request) {
     const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
     const text = (data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "").trim().slice(0, 500);
     if (!text) return NextResponse.json({ error: "Nedzirdēju neko — pamēģini runāt skaidrāk un tuvāk mikrofonam." }, { status: 422 });
+    void trackAiUsage("transcribe");
     return NextResponse.json({ text });
   } catch (e) {
     console.error("ai-transcribe:", e);
