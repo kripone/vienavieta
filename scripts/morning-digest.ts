@@ -24,8 +24,10 @@ async function main() {
     lines.push(`• ${src}: <b>+${fresh.c}</b> (aktīvi ${active.c})`);
   }
 
-  // crawl kārtu laiki un kļūdas (autoplius/city24 skrien no lokālā datora — tā uzreiz redzams, vai dzīvi)
-  const states = await db.select().from(crawlState).orderBy(crawlState.name);
+  // crawl kārtu laiki un kļūdas (autoplius/city24 skrien no lokālā datora — tā uzreiz redzams, vai dzīvi).
+  // Izslēdzam vienreizējos darbu marķierus (backfill:/recrawl:/seed:) — tie nav periodiski crawleri.
+  const states = (await db.select().from(crawlState).orderBy(crawlState.name))
+    .filter((s) => !/^(backfill|recrawl|seed):/.test(s.name));
   const fmt = (d: Date | null) => (d ? d.toISOString().slice(5, 16).replace("T", " ") + "Z" : "—");
   const crawls: string[] = [];
   const problems: string[] = [];
