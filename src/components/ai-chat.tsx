@@ -13,14 +13,22 @@ export function AiChat() {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [micOk, setMicOk] = useState(false);
+  const recRef = useRef<{ stop: () => void } | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const w = window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown };
+    setMicOk(!!(w.SpeechRecognition || w.webkitSpeechRecognition));
+  }, []);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
   }, [msgs, busy]);
 
-  const send = async () => {
-    const text = input.trim();
+  const send = async (override?: string) => {
+    const text = (override ?? input).trim();
     if (!text || busy) return;
     setInput("");
     const history = msgs.slice(-8).map((m) => ({ role: m.role, text: m.text }));
@@ -43,6 +51,43 @@ export function AiChat() {
     } finally {
       setBusy(false);
     }
+  };
+
+  const toggleMic = () => {
+    if (listening) {
+      recRef.current?.stop();
+      return;
+    }
+    const w = window as unknown as { SpeechRecognition?: new () => any; webkitSpeechRecognition?: new () => any };
+    const Ctor = w.SpeechRecognition || w.webkitSpeechRecognition;
+    if (!Ctor) return;
+    const rec = new Ctor();
+    rec.lang = "lv-LV";
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+    let finalText = "";
+    rec.onresult = (e: any) => {
+      let interim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const tr = e.results[i][0]?.transcript ?? "";
+        if (e.results[i].isFinal) finalText += tr;
+        else interim += tr;
+      }
+      setInput((finalText + interim).trim());
+    };
+    rec.onend = () => {
+      setListening(false);
+      recRef.current = null;
+      const text = finalText.trim();
+      if (text) send(text);
+    };
+    rec.onerror = () => {
+      setListening(false);
+      recRef.current = null;
+    };
+    recRef.current = rec;
+    setListening(true);
+    try { rec.start(); } catch { setListening(false); recRef.current = null; }
   };
 
   if (!open) {
@@ -109,7 +154,18 @@ export function AiChat() {
           maxLength={500}
           autoFocus
         />
-        <button onClick={send} disabled={busy || !input.trim()} aria-label={t("Sūtīt")}>➤</button>
+        {micOk && (
+          <button
+            className={`ai-mic${listening ? " on" : ""}`}
+            onClick={toggleMic}
+            disabled={busy}
+            aria-label={t(listening ? "Apturēt ierakstu" : "Runāt")}
+            title={t(listening ? "Apturēt ierakstu" : "Runāt")}
+          >
+            🎤
+          </button>
+        )}
+        <button onClick={() => send()} disabled={busy || !input.trim()} aria-label={t("Sūtīt")}>➤</button>
       </div>
     </div>
   );
