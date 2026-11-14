@@ -674,6 +674,8 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .ai-r-deals:hover { text-decoration: underline; }
 .ai-r-meta b { color: var(--accent); }
 .ai-more { font-size: 13px; font-weight: 600; text-align: center; padding: 4px; }
+.ai-more-solo { display: inline-block; margin-top: 8px; background: var(--accent); color: var(--accent-fg); font-weight: 600; font-size: 13px; padding: 8px 14px; border-radius: 9px; text-decoration: none; }
+.ai-more-solo:hover { filter: brightness(1.1); }
 .ai-input { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); background: var(--surface); }
 .ai-input input { flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 14px; background: var(--bg); color: var(--fg); font-family: inherit; }
 .ai-input input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
