@@ -38,12 +38,23 @@ async function main() {
     else if (errs) problems.push(`⚠️ ${s.name}: pēdējā kārta ar ${errs} kļūdām`);
   }
 
+  // detaļu (aprīkojuma/ērtību) nolasīšanas progress pa avotiem
+  const detailLines: string[] = [];
+  for (const src of ["autoplius.lt", "city24.lv", "ss.com"] as const) {
+    const [done] = await db.select({ c: count() }).from(listings).where(sql`${listings.source} = ${src} AND ${listings.status} = 'active' AND ${listings.detailCheckedAt} IS NOT NULL`);
+    const [total] = await db.select({ c: count() }).from(listings).where(sql`${listings.source} = ${src} AND ${listings.status} = 'active'`);
+    if (total.c > 0) detailLines.push(`• ${src}: <b>${done.c}</b> / ${total.c} (${Math.round((done.c / total.c) * 100)}%)`);
+  }
+
   const date = new Date().toLocaleDateString("lv-LV", { day: "numeric", month: "long", timeZone: "Europe/Riga" });
   const msg = [
     `🌅 <b>VienāVietā rīts — ${date}</b>`,
     `Jauni pēdējās 24h: <b>${newTotal}</b>`,
     "",
     ...lines,
+    "",
+    "🔎 Detaļu nolasīšana:",
+    ...detailLines,
     "",
     "🕷 Crawl kārtas:",
     ...crawls,
