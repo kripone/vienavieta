@@ -208,15 +208,21 @@ export function SearchFilters({ initial, regions, sources = [] }: { initial: Fil
                 {pkeys.includes("condition") && sel("condition", "Stāvoklis", CONDITIONS)}
                 {pkeys.includes("builtYear") && numIn("builtmin", "Būvēts no gada")}
               </div>
-              {pkeys.includes("amenities") && (
-                <div className="checks" style={{ marginTop: 10 }}>
-                  {AMENITIES.map((a) => (
-                    <label key={a}>
-                      <input type="checkbox" checked={amen.includes(a)} onChange={(e) => update({ amen: (e.target.checked ? [...amen, a] : amen.filter((x) => x !== a)).join(",") })} /> {t(a)}
-                    </label>
-                  ))}
-                </div>
-              )}
+            </details>
+          )}
+          {pkeys.includes("amenities") && (
+            <details className="more src-more" open={amen.length > 0}>
+              <summary>
+                {t("Ērtības")}
+                {amen.length > 0 ? <span className="fine"> ({amen.length})</span> : null}
+              </summary>
+              <div className="checks" style={{ marginTop: 10 }}>
+                {AMENITIES.map((a) => (
+                  <label key={a}>
+                    <input type="checkbox" checked={amen.includes(a)} onChange={(e) => update({ amen: (e.target.checked ? [...amen, a] : amen.filter((x) => x !== a)).join(",") })} /> {t(a)}
+                  </label>
+                ))}
+              </div>
             </details>
           )}
         </>
