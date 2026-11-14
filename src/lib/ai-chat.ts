@@ -3,6 +3,7 @@
 import { and, eq, ilike, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { parseSearch, searchListings, toQuery } from "./search";
+import { recentDrops } from "./history";
 
 const { places, regions, makes, models } = schema;
 
@@ -16,6 +17,8 @@ export type ChatResultItem = {
   url: string;
   ext: boolean;
   thumb: string | null;
+  /** cenu kritumiem: iepriekšējā cena (rādam "bija X →"). */
+  prevPrice?: number | null;
 };
 
 export type AssistantAnswer = {
@@ -55,6 +58,8 @@ search lauki (visi neobligāti, liec tikai tos, ko lietotājs minēja):
 - rmin, rmax: istabu skaits
 - amin, amax: platība m²
 
+- drops: ja lietotājs jautā par CENU KRITUMIEM ("kādi auto samazinājuši cenu", "cenu kritumi šodien", "atlaižu auto"), tad search = null un aizpildi drops:
+  {"kind": "vehicle" | "property" | null, "days": 1 (šodien) | 7 (nedēļā) | 30 (mēnesī), "minPct": minimālais kritums % (piem. "vairāk kā 10%" → 10; ja nemin — 1)}
 - appraisal: ja lietotājs jautā, CIK VĒRTS ir viņa auto vai dzīvoklis (nevis meklē sludinājumus), tad search = null un aizpildi appraisal:
   {"veids":"car","make":"BMW","model":"X5","gads":2016,"km":180000} vai {"veids":"flat","city":"Rīga","platiba":50,"istabas":2,"adrese":"iela ja ir minēta"}
   Auto jautājumos bez gada/ modeļa pajautā pēc trūkstošā un appraisal neliec.
@@ -63,6 +68,7 @@ Piemēri:
 "meklēju dīzeļa universāli līdz 8000 Rīgā" → {"reply":"Meklēju dīzeļa auto līdz 8000 € Rīgā…","search":{"cat":"vehicle","vc":"car","fuel":"Dīzelis","pmax":8000,"city":"Rīga"}}
 "2 istabu dzīvoklis īrē Jūrmalā līdz 500" → {"reply":"Meklēju 2 istabu dzīvokli īrē Jūrmalā līdz 500 €…","search":{"cat":"property","ptype":"Dzīvoklis","deal":"rent","rmin":2,"rmax":2,"pmax":500,"city":"Jūrmala"}}
 "dzīvoklis Rīgā vai tuvākajā apkārtnē līdz 20 km" → {"reply":"Meklēju dzīvokli Rīgā un līdz 20 km apkārtnē…","search":{"cat":"property","ptype":"Dzīvoklis","city":"Rīga","radiusKm":20}}
+"kādi auto šodien samazinājuši cenu vairāk kā 10%" → {"reply":"Meklēju auto, kuriem šodien cena kritusies vairāk nekā par 10%…","search":null,"drops":{"kind":"vehicle","days":1,"minPct":10}}
 "paldies!" → {"reply":"Veselīti! Ja vajadzēs vēl ko atrast — raksti.","search":null}`;
 
 type SearchFilters = {
@@ -87,6 +93,8 @@ type SearchFilters = {
   amax?: number;
   radiusKm?: number;
 };
+
+type DropsFilters = { kind?: "vehicle" | "property" | null; days?: number; minPct?: number };
 
 type AppraisalFilters = {
   veids?: "car" | "flat";
@@ -140,7 +148,7 @@ function circle(lat: number, lon: number, km: number, n = 40): [number, number][
 }
 
 /** Gemini REST izsaukums (bezmaksas AI Studio atslēga; atbildi prasām JSON). */
-async function callGemini(history: ChatMsg[], userText: string): Promise<{ reply: string; search: SearchFilters | null; appraisal: AppraisalFilters | null }> {
+async function callGemini(history: ChatMsg[], userText: string): Promise<{ reply: string; search: SearchFilters | null; appraisal: AppraisalFilters | null; drops: DropsFilters | null }> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("GEMINI_API_KEY nav iestatīta");
   const model = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
@@ -165,15 +173,15 @@ async function callGemini(history: ChatMsg[], userText: string): Promise<{ reply
   const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
   const text = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
   try {
-    const parsed = JSON.parse(text) as { reply?: string; search?: SearchFilters | null; appraisal?: AppraisalFilters | null };
+    const parsed = JSON.parse(text) as { reply?: string; search?: SearchFilters | null; appraisal?: AppraisalFilters | null; drops?: DropsFilters | null };
     return {
       reply: String(parsed.reply ?? "").slice(0, 800) || "Atradu dažus variantus.",
       search: parsed.search ?? null,
-      appraisal: parsed.appraisal ?? null,
+      appraisal: parsed.appraisal ?? null, drops: parsed.drops ?? null,
     };
   } catch {
     // ja modelis neatgrieza JSON, visu tekstu rādām kā atbildi bez meklēšanas
-    return { reply: text.slice(0, 800) || "Neizdevās saprast — pamēģini citādi.", search: null, appraisal: null };
+    return { reply: text.slice(0, 800) || "Neizdevās saprast — pamēģini citādi.", search: null, appraisal: null, drops: null };
   }
 }
 
@@ -222,6 +230,23 @@ async function appraisalUrl(a: AppraisalFilters): Promise<string | null> {
 export async function runAssistant(history: ChatMsg[], userText: string): Promise<AssistantAnswer> {
   const ai = await callGemini(history, userText);
   const f = ai.search;
+  if (!f && ai.drops) {
+    const d = ai.drops;
+    const days = d.days === 1 || d.days === 30 ? d.days : 7;
+    const minPct = num(d.minPct, 1, 99) ?? 1;
+    const kind = d.kind === "vehicle" || d.kind === "property" ? d.kind : undefined;
+    const all = await recentDrops({ kind, days, limit: 60 }).catch(() => []);
+    const rows = all.filter((r) => (r.prev - r.card.price) / r.prev >= minPct / 100);
+    const results: ChatResultItem[] = rows.slice(0, 6).map((r) => {
+      const ext = r.card.source !== "own" && r.card.externalUrl ? true : false;
+      return { id: r.card.id, title: r.card.title, price: r.card.price, place: r.card.place ?? null, url: ext ? r.card.externalUrl! : `/sludinajumi/${r.card.id}`, ext, thumb: r.card.externalThumbUrl ?? null, prevPrice: r.prev };
+    });
+    const p = new URLSearchParams();
+    if (kind === "vehicle") p.set("k", "auto");
+    else if (kind === "property") p.set("k", "ipasumi");
+    if (days !== 7) p.set("d", String(days));
+    return { reply: ai.reply, results, total: rows.length, moreUrl: `/cenu-kritumi${p.size ? `?${p}` : ""}`, appraisalUrl: null };
+  }
   if (!f) {
     const apUrl = ai.appraisal ? await appraisalUrl(ai.appraisal) : null;
     return { reply: ai.reply, results: [], total: 0, moreUrl: null, appraisalUrl: apUrl };

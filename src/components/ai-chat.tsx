@@ -86,7 +86,7 @@ export function AiChat() {
                     {r.thumb && <img src={r.thumb} alt="" loading="lazy" />}
                     <span className="ai-r-title">{r.title}</span>
                     <span className="ai-r-meta">
-                      <b>{fmtPrice(r.price)}</b>
+                      {r.prevPrice != null && <s className="ai-r-prev">{fmtPrice(r.prevPrice)}</s>}<b>{fmtPrice(r.price)}</b>
                       {r.place ? ` · ${r.place}` : ""}
                     </span>
                   </a>
