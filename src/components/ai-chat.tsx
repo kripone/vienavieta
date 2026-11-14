@@ -15,12 +15,12 @@ export function AiChat() {
   const [busy, setBusy] = useState(false);
   const [listening, setListening] = useState(false);
   const [micOk, setMicOk] = useState(false);
-  const recRef = useRef<{ stop: () => void } | null>(null);
+  const recRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const w = window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown };
-    setMicOk(!!(w.SpeechRecognition || w.webkitSpeechRecognition));
+    setMicOk(typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== "undefined");
   }, []);
 
   useEffect(() => {
@@ -53,41 +53,58 @@ export function AiChat() {
     }
   };
 
-  const toggleMic = () => {
+  const micError = (msg: string) => setMsgs((m) => [...m, { role: "model", text: msg }]);
+
+  const toggleMic = async () => {
     if (listening) {
       recRef.current?.stop();
       return;
     }
-    const w = window as unknown as { SpeechRecognition?: new () => any; webkitSpeechRecognition?: new () => any };
-    const Ctor = w.SpeechRecognition || w.webkitSpeechRecognition;
-    if (!Ctor) return;
-    const rec = new Ctor();
-    rec.lang = "lv-LV";
-    rec.interimResults = true;
-    rec.maxAlternatives = 1;
-    let finalText = "";
-    rec.onresult = (e: any) => {
-      let interim = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const tr = e.results[i][0]?.transcript ?? "";
-        if (e.results[i].isFinal) finalText += tr;
-        else interim += tr;
+    let stream: MediaStream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch {
+      micError(t("Mikrofons nav pieejams — atļauj to pārlūka iestatījumos un pamēģini vēlreiz."));
+      return;
+    }
+    streamRef.current = stream;
+    const mime = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"].find((m) => MediaRecorder.isTypeSupported(m)) ?? "";
+    const rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+    const chunks: Blob[] = [];
+    rec.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+    rec.onstop = async () => {
+      setListening(false);
+      recRef.current = null;
+      streamRef.current?.getTracks().forEach((tr) => tr.stop());
+      streamRef.current = null;
+      const blob = new Blob(chunks, { type: rec.mimeType || "audio/webm" });
+      if (blob.size < 800) return; // pārāk īss/tukšs ieraksts — neko nesūtām
+      setBusy(true);
+      try {
+        const buf = new Uint8Array(await blob.arrayBuffer());
+        let bin = "";
+        for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
+        const res = await fetch("/api/chat/transcribe", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ audio: btoa(bin), mimeType: blob.type }),
+        });
+        const data = (await res.json()) as { text?: string; error?: string };
+        if (!res.ok || !data.text) {
+          micError(data.error || t("Neizdevās saklausīt — pamēģini vēlreiz."));
+        } else {
+          setInput(data.text);
+          send(data.text);
+        }
+      } catch {
+        micError(t("Savienojuma kļūda — pamēģini vēlreiz."));
+      } finally {
+        setBusy(false);
       }
-      setInput((finalText + interim).trim());
-    };
-    rec.onend = () => {
-      setListening(false);
-      recRef.current = null;
-      const text = finalText.trim();
-      if (text) send(text);
-    };
-    rec.onerror = () => {
-      setListening(false);
-      recRef.current = null;
     };
     recRef.current = rec;
     setListening(true);
-    try { rec.start(); } catch { setListening(false); recRef.current = null; }
+    try { rec.start(250); } catch { setListening(false); recRef.current = null; }
   };
 
   if (!open) {
