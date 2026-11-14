@@ -1,6 +1,6 @@
 // AI meklēšanas palīgs (Gemini). Lietotāja brīvā teksta vaicājums → strukturēti filtri →
 // mūsu pašu searchListings. Modelis nekad "neizdomā" sludinājumus: rezultāti nāk tikai no DB.
-import { and, eq, ilike } from "drizzle-orm";
+import { and, eq, ilike, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { parseSearch, searchListings, toQuery } from "./search";
 
@@ -51,6 +51,7 @@ search lauki (visi neobligāti, liec tikai tos, ko lietotājs minēja):
 - body: virsbūves tips: "Sedans" | "Universāls" | "Hečbeks" | "Apvidus" | "Minivens" | "Kupeja" | "Kabriolets" | "Pikaps" | "Mikroautobuss" (vārdus "kombi/universālis/karavāns" tulko kā "Universāls", "suv/džips/krosovers" kā "Apvidus")
 - ptype: "Dzīvoklis" | "Istaba" | "Māja" | "Vasarnīca" | "Lauku īpašums" | "Zeme" | "Mežs" | "Birojs" | "Tirdzniecības telpas" | "Noliktava" | "Ražošanas telpas" | "Garāža" | "Stāvvieta"
 - deal: "sell" (pārdod) | "rent" (izīrē) — tikai īpašumiem
+- radiusKm: attālums km no pilsētas, ja lietotājs saka "līdz X km", "tuvumā", "apkārtnē", "rajonā" (piem. "Rīgas rajonā" → city "Rīga", radiusKm 30; "līdz 20 km no Jelgavas" → city "Jelgava", radiusKm 20)
 - rmin, rmax: istabu skaits
 - amin, amax: platība m²
 
@@ -61,6 +62,7 @@ search lauki (visi neobligāti, liec tikai tos, ko lietotājs minēja):
 Piemēri:
 "meklēju dīzeļa universāli līdz 8000 Rīgā" → {"reply":"Meklēju dīzeļa auto līdz 8000 € Rīgā…","search":{"cat":"vehicle","vc":"car","fuel":"Dīzelis","pmax":8000,"city":"Rīga"}}
 "2 istabu dzīvoklis īrē Jūrmalā līdz 500" → {"reply":"Meklēju 2 istabu dzīvokli īrē Jūrmalā līdz 500 €…","search":{"cat":"property","ptype":"Dzīvoklis","deal":"rent","rmin":2,"rmax":2,"pmax":500,"city":"Jūrmala"}}
+"dzīvoklis Rīgā vai tuvākajā apkārtnē līdz 20 km" → {"reply":"Meklēju dzīvokli Rīgā un līdz 20 km apkārtnē…","search":{"cat":"property","ptype":"Dzīvoklis","city":"Rīga","radiusKm":20}}
 "paldies!" → {"reply":"Veselīti! Ja vajadzēs vēl ko atrast — raksti.","search":null}`;
 
 type SearchFilters = {
@@ -83,6 +85,7 @@ type SearchFilters = {
   rmax?: number;
   amin?: number;
   amax?: number;
+  radiusKm?: number;
 };
 
 type AppraisalFilters = {
@@ -102,26 +105,38 @@ const num = (v: unknown, min: number, max: number) => {
   return Number.isFinite(n) && n >= min && n <= max ? Math.round(n) : undefined;
 };
 
-/** Pilsētas nosaukums → meklēšanas loc: lielās pilsētas ir regions (r:<id>), mazās vietas — places (p:<id>). */
-async function resolveCity(city: string): Promise<string | undefined> {
+/** Pilsētas nosaukums → meklēšanas loc + centra koordinātes: lielās pilsētas ir regions (r:<id>), mazās vietas — places (p:<id>). */
+async function resolveCity(city: string): Promise<{ loc: string; lat: number | null; lon: number | null } | undefined> {
   const like = `%${city.replace(/[%_\\]/g, (m) => "\\" + m)}%`;
   const regs = await db
     .select({ id: regions.id, name: regions.name, kind: regions.kind })
     .from(regions)
     .where(ilike(regions.name, like))
     .limit(10);
-  const regExact = regs.find((r) => r.name.toLowerCase() === city.toLowerCase());
-  const regCity = regs.find((r) => r.kind === "city");
-  if (regExact ?? regCity) return `r:${(regExact ?? regCity)!.id}`;
+  const reg = regs.find((r) => r.name.toLowerCase() === city.toLowerCase()) ?? regs.find((r) => r.kind === "city");
+  if (reg) {
+    // reģionam koordinātu nav — centrs ir tā vietu viduspunkts
+    const c = await db.select({ la: sql<number | null>`avg(${places.lat})`, lo: sql<number | null>`avg(${places.lon})` }).from(places).where(eq(places.regionId, reg.id));
+    return { loc: `r:${reg.id}`, lat: c[0]?.la ?? null, lon: c[0]?.lo ?? null };
+  }
   const rows = await db
-    .select({ id: places.id, name: places.name, kind: places.kind })
+    .select({ id: places.id, name: places.name, kind: places.kind, lat: places.lat, lon: places.lon })
     .from(places)
     .where(ilike(places.name, like))
     .limit(10);
   if (!rows.length) return undefined;
-  const exact = rows.find((r) => r.name.toLowerCase() === city.toLowerCase());
-  const town = rows.find((r) => r.kind === "town");
-  return `p:${(exact ?? town ?? rows[0]).id}`;
+  const hit = rows.find((r) => r.name.toLowerCase() === city.toLowerCase()) ?? rows.find((r) => r.kind === "town") ?? rows[0];
+  return { loc: `p:${hit.id}`, lat: hit.lat, lon: hit.lon };
+}
+
+/** Aplis ap punktu kā daudzstūris (tā pati formula, ko lieto /api/zone rādiusa meklēšanai). */
+function circle(lat: number, lon: number, km: number, n = 40): [number, number][] {
+  const out: [number, number][] = [];
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * 2 * Math.PI;
+    out.push([lat + (km / 111.2) * Math.cos(a), lon + (km / (111.2 * Math.cos((lat * Math.PI) / 180))) * Math.sin(a)]);
+  }
+  return out;
 }
 
 /** Gemini REST izsaukums (bezmaksas AI Studio atslēga; atbildi prasām JSON). */
@@ -218,7 +233,12 @@ export async function runAssistant(history: ChatMsg[], userText: string): Promis
   if (f.q) raw.q = String(f.q).slice(0, 80);
   if (f.country === "LT" || f.country === "LV") raw.country = f.country;
   const loc = f.city ? await resolveCity(String(f.city).slice(0, 60)) : undefined;
-  if (loc) raw.loc = loc;
+  const radiusKm = num(f.radiusKm, 1, 100);
+  if (loc && radiusKm && loc.lat != null && loc.lon != null) {
+    // rādiuss ap pilsētu: zona (daudzstūris) + zl etiķete, ko rāda "Attālums no adreses" lodziņš
+    raw.zone = circle(loc.lat, loc.lon, radiusKm).map(([a, b]) => `${a.toFixed(5)},${b.toFixed(5)}`).join(";");
+    raw.zl = ["km", String(radiusKm), "0", `${String(f.city).slice(0, 40)} +${radiusKm} km`].join("|");
+  } else if (loc) raw.loc = loc.loc;
   const ranges: [string, number | undefined][] = [
     ["pmin", num(f.pmin, 0, 50_000_000)],
     ["pmax", num(f.pmax, 0, 50_000_000)],
