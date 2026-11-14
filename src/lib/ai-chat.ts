@@ -331,6 +331,64 @@ async function dealsAnswer(d: DealsFilters): Promise<{ reply: string; moreUrl: s
   };
 }
 
+/** AI filtri → meklēšanas URL parametri (kopīgs čatam un /mekle). */
+async function filtersToRaw(f: SearchFilters): Promise<Record<string, string>> {
+  const raw: Record<string, string> = {};
+  if (f.cat === "vehicle" || f.cat === "property") raw.cat = f.cat;
+  if (f.vc && ["car", "moto", "camper", "van", "truck"].includes(f.vc)) raw.vc = f.vc;
+  if (f.q) raw.q = String(f.q).slice(0, 80);
+  if (f.country === "LT" || f.country === "LV") raw.country = f.country;
+  const loc = f.city ? await resolveCity(String(f.city).slice(0, 60)) : undefined;
+  const radiusKm = num(f.radiusKm, 1, 100);
+  if (loc && radiusKm && loc.lat != null && loc.lon != null) {
+    raw.zone = circle(loc.lat, loc.lon, radiusKm).map(([a, b]) => `${a.toFixed(5)},${b.toFixed(5)}`).join(";");
+    raw.zl = ["km", String(radiusKm), "0", `${String(f.city).slice(0, 40)} +${radiusKm} km`].join("|");
+  } else if (loc) raw.loc = loc.loc;
+  const ranges: [string, number | undefined][] = [
+    ["pmin", num(f.pmin, 0, 50_000_000)],
+    ["pmax", num(f.pmax, 0, 50_000_000)],
+    ["ymin", num(f.ymin, 1900, 2100)],
+    ["ymax", num(f.ymax, 1900, 2100)],
+    ["kmmax", num(f.kmmax, 0, 9_999_999)],
+    ["rmin", num(f.rmin, 0, 50)],
+    ["rmax", num(f.rmax, 0, 50)],
+    ["amin", num(f.amin, 0, 100_000)],
+    ["amax", num(f.amax, 0, 100_000)],
+  ];
+  for (const [k, v] of ranges) if (v != null) raw[k] = String(v);
+  if (f.fuel && ["Benzīns", "Dīzelis", "Hibrīds", "Elektro", "Benzīns/gāze"].includes(f.fuel)) raw.fuel = f.fuel;
+  if (f.gear && ["Manuāla", "Automāts"].includes(f.gear)) raw.gear = f.gear;
+  if (f.body && ["Sedans", "Universāls", "Hečbeks", "Apvidus", "Minivens", "Kupeja", "Kabriolets", "Pikaps", "Mikroautobuss"].includes(f.body)) raw.body = f.body;
+  if (f.ptype) raw.ptype = String(f.ptype);
+  if (f.deal === "sell" || f.deal === "rent") raw.deal = f.deal;
+  const AMEN_OK = ["Balkons", "Terase", "Lifts", "Stāvvieta", "Mēbelēts", "Dzīvnieki atļauti", "Kamīns", "Pirts", "Signalizācija"];
+  const amen = Array.isArray(f.amen) ? f.amen.map((a) => String(a)).filter((a) => AMEN_OK.includes(a)).slice(0, 6) : [];
+  if (amen.length) raw.amen = amen.join(",");
+  return raw;
+}
+
+/** /mekle: brīvais teksts → AI filtri (vai pāradresācija uz kritumiem/tirgu/darījumiem/novērtējumu). null = pārslēgties uz lokālo parsētāju. */
+export async function aiTextToQuery(text: string): Promise<{ params?: Record<string, string>; redirect?: string } | null> {
+  const ai = await callGemini([], text);
+  if (ai.drops) {
+    const d = ai.drops;
+    const days = d.days === 1 || d.days === 30 ? d.days : 7;
+    const p = new URLSearchParams();
+    if (d.kind === "vehicle") p.set("k", "auto");
+    else if (d.kind === "property") p.set("k", "ipasumi");
+    if (days !== 7) p.set("d", String(days));
+    return { redirect: `/cenu-kritumi${p.size ? `?${p}` : ""}` };
+  }
+  if (ai.deals?.address) return { redirect: `/darijumi?q=${encodeURIComponent(String(ai.deals.address).slice(0, 120))}` };
+  if (ai.market) return { redirect: "/tirgus" };
+  if (ai.appraisal && !ai.search) {
+    const u = await appraisalUrl(ai.appraisal).catch(() => null);
+    if (u) return { redirect: u };
+  }
+  if (!ai.search) return null;
+  return { params: await filtersToRaw(ai.search) };
+}
+
 /** Galvenā funkcija: vaicājums → AI filtri → DB rezultāti + saite uz pilnu meklējumu. */
 export async function runAssistant(history: ChatMsg[], userText: string): Promise<AssistantAnswer> {
   const ai = await callGemini(history, userText);
@@ -365,38 +423,7 @@ export async function runAssistant(history: ChatMsg[], userText: string): Promis
     return { reply: ai.reply, results: [], total: 0, moreUrl: null, appraisalUrl: apUrl };
   }
 
-  const raw: Record<string, string> = {};
-  if (f.cat === "vehicle" || f.cat === "property") raw.cat = f.cat;
-  if (f.vc && ["car", "moto", "camper", "van", "truck"].includes(f.vc)) raw.vc = f.vc;
-  if (f.q) raw.q = String(f.q).slice(0, 80);
-  if (f.country === "LT" || f.country === "LV") raw.country = f.country;
-  const loc = f.city ? await resolveCity(String(f.city).slice(0, 60)) : undefined;
-  const radiusKm = num(f.radiusKm, 1, 100);
-  if (loc && radiusKm && loc.lat != null && loc.lon != null) {
-    // rādiuss ap pilsētu: zona (daudzstūris) + zl etiķete, ko rāda "Attālums no adreses" lodziņš
-    raw.zone = circle(loc.lat, loc.lon, radiusKm).map(([a, b]) => `${a.toFixed(5)},${b.toFixed(5)}`).join(";");
-    raw.zl = ["km", String(radiusKm), "0", `${String(f.city).slice(0, 40)} +${radiusKm} km`].join("|");
-  } else if (loc) raw.loc = loc.loc;
-  const ranges: [string, number | undefined][] = [
-    ["pmin", num(f.pmin, 0, 50_000_000)],
-    ["pmax", num(f.pmax, 0, 50_000_000)],
-    ["ymin", num(f.ymin, 1900, 2100)],
-    ["ymax", num(f.ymax, 1900, 2100)],
-    ["kmmax", num(f.kmmax, 0, 9_999_999)],
-    ["rmin", num(f.rmin, 0, 50)],
-    ["rmax", num(f.rmax, 0, 50)],
-    ["amin", num(f.amin, 0, 100_000)],
-    ["amax", num(f.amax, 0, 100_000)],
-  ];
-  for (const [k, v] of ranges) if (v != null) raw[k] = String(v);
-  if (f.fuel && ["Benzīns", "Dīzelis", "Hibrīds", "Elektro", "Benzīns/gāze"].includes(f.fuel)) raw.fuel = f.fuel;
-  if (f.gear && ["Manuāla", "Automāts"].includes(f.gear)) raw.gear = f.gear;
-  if (f.body && ["Sedans", "Universāls", "Hečbeks", "Apvidus", "Minivens", "Kupeja", "Kabriolets", "Pikaps", "Mikroautobuss"].includes(f.body)) raw.body = f.body;
-  if (f.ptype) raw.ptype = String(f.ptype);
-  if (f.deal === "sell" || f.deal === "rent") raw.deal = f.deal;
-  const AMEN_OK = ["Balkons", "Terase", "Lifts", "Stāvvieta", "Mēbelēts", "Dzīvnieki atļauti", "Kamīns", "Pirts", "Signalizācija"];
-  const amen = Array.isArray(f.amen) ? f.amen.map((a) => String(a)).filter((a) => AMEN_OK.includes(a)).slice(0, 6) : [];
-  if (amen.length) raw.amen = amen.join(",");
+  const raw = await filtersToRaw(f);
 
   const s = parseSearch(raw);
   const { rows, total } = await searchListings(s);

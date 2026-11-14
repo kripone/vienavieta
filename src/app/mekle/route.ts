@@ -1,13 +1,32 @@
-// Brīvā teksta meklēšana: /mekle?q=… → saprot tekstu (src/lib/text-query.ts) un pāradresē uz "/" ar filtriem.
+// Brīvā teksta meklēšana: /mekle?q=… → vispirms mēģina saprast ar Gemini AI (src/lib/ai-chat.ts),
+// neveiksmes gadījumā — lokālais noteikumu parsētājs (src/lib/text-query.ts) → pāradresē uz "/" ar filtriem.
 // tq = lietotāja teksts (rādām virs rezultātiem), tn = piezīmes, tu = nesaprastie vārdi.
 import { NextResponse, type NextRequest } from "next/server";
 import { parseTextQuery, textQueryCatalog } from "@/lib/text-query";
+import { aiTextToQuery } from "@/lib/ai-chat";
 
 export async function GET(req: NextRequest) {
   const q = (req.nextUrl.searchParams.get("q") ?? "").trim().slice(0, 200);
   const prefix = req.headers.get("x-url-locale") ? `/${req.headers.get("x-url-locale")}` : "";
   const base = process.env.APP_URL || req.nextUrl.origin;
   if (!q) return NextResponse.redirect(`${base}${prefix || "/"}`, 303);
+
+  // 1) AI (Gemini): saprot dabisko valodu, rādiusus, ērtības, arī cenu kritumus/tirgu/darījumus/novērtējumu
+  if (process.env.GEMINI_API_KEY) {
+    try {
+      const ai = await aiTextToQuery(q);
+      if (ai?.redirect) return NextResponse.redirect(`${base}${prefix}${ai.redirect}`, 303);
+      if (ai?.params && Object.keys(ai.params).length) {
+        const p = new URLSearchParams(ai.params);
+        p.set("tq", q);
+        return NextResponse.redirect(`${base}${prefix}/?${p}`, 303);
+      }
+    } catch (err) {
+      console.error("AI teksta meklēšana neizdevās (krītam uz lokālo parsētāju):", err);
+    }
+  }
+
+  // 2) Lokālais noteikumu parsētājs (rezerves variants)
   const p = new URLSearchParams();
   try {
     const r = parseTextQuery(q, await textQueryCatalog());
