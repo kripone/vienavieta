@@ -15,6 +15,7 @@ import { mollerEnabled, tickMoller } from "./moller-pages";
 import { toyotaEnabled, tickToyota } from "./toyota-pages";
 import { wessEnabled, tickWess } from "./wess-pages";
 import { city24Enabled, tickCity24 } from "./city24-pages";
+import { fillCity24Details } from "./city24-details";
 import { backfillBodies, backfillHouseTail, backfillMakeModel, ensureMotoModels, forceModelRecrawl, forcePlacesRecrawl } from "./backfill";
 import { crawlSection } from "./ss-pages";
 import { detailsEnabled, fillVehicleCities } from "./ss-details";
@@ -131,6 +132,17 @@ export function startSsCrawler() {
       for (;;) {
         const r = await fillAutopliusDetails().catch((e) => (console.error("autoplius.lt detaļas:", e instanceof Error ? e.message : e), null));
         if (r && (r.features || r.errors)) console.log("autoplius.lt detaļas:", JSON.stringify(r));
+        await new Promise((res) => setTimeout(res, r ? 30_000 : 600_000));
+      }
+    })();
+  }
+  // city24.lv detaļas: ērtības un fakti no sludinājuma lapām (lēni, katra lapa vienreiz)
+  if (city24Enabled() && process.env.C24_DETAILS !== "off") {
+    (async () => {
+      await new Promise((r) => setTimeout(r, 130_000));
+      for (;;) {
+        const r = await fillCity24Details().catch((e) => (console.error("city24.lv detaļas:", e instanceof Error ? e.message : e), null));
+        if (r && (r.filled || r.errors)) console.log("city24.lv detaļas:", JSON.stringify(r));
         await new Promise((res) => setTimeout(res, r ? 30_000 : 600_000));
       }
     })();
