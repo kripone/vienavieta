@@ -226,12 +226,7 @@ async function appraisalUrl(a: AppraisalFilters): Promise<string | null> {
     const mk = await db.select({ id: makes.id, name: makes.name }).from(makes).where(ilike(makes.name, like(String(a.make).slice(0, 40)))).limit(5);
     const make = mk.find((m) => m.name.toLowerCase() === String(a.make).toLowerCase()) ?? mk[0];
     if (!make) return "/novertejums";
-    const md = await db
-      .select({ id: models.id, name: models.name })
-      .from(models)
-      .where(and(eq(models.makeId, make.id), ilike(models.name, like(String(a.model).slice(0, 60)))))
-      .limit(5);
-    const model = md.find((m) => m.name.toLowerCase() === String(a.model).toLowerCase()) ?? md[0];
+    const model = await findModel(make.id, String(a.model).slice(0, 60));
     if (!model) return "/novertejums";
     const p = new URLSearchParams({ make: String(make.id), model: String(model.id), gads: String(y) });
     const km = num(a.km, 0, 2_000_000);
@@ -242,6 +237,20 @@ async function appraisalUrl(a: AppraisalFilters): Promise<string | null> {
 }
 
 const eur = (n: number) => `${Math.round(n).toLocaleString("lv-LV")} €`;
+
+/** Modeļu salīdzināšanai: "3 sērija" ≡ "3. sērija", "X 5" ≡ "X5". */
+const normName = (s: string) => s.toLowerCase().replace(/[.\s\-]+/g, "");
+
+/** Atrod modeli markai: precīzs/ilike, tad normalizēta salīdzināšana pār visiem markas modeļiem. */
+async function findModel(makeId: number, q: string): Promise<{ id: number; name: string } | undefined> {
+  const like = `%${q.replace(/[%_\\]/g, (m) => "\\" + m)}%`;
+  const md = await db.select({ id: models.id, name: models.name }).from(models).where(and(eq(models.makeId, makeId), ilike(models.name, like))).limit(5);
+  const direct = md.find((m) => m.name.toLowerCase() === q.toLowerCase()) ?? md[0];
+  if (direct) return direct;
+  const all = await db.select({ id: models.id, name: models.name }).from(models).where(eq(models.makeId, makeId)).limit(400);
+  const nq = normName(q);
+  return all.find((m) => normName(m.name) === nq) ?? all.find((m) => normName(m.name).includes(nq) || (nq.length >= 2 && nq.includes(normName(m.name))));
+}
 
 /** Tirgus jautājumi: mediānas cenas un tendences no market_stats / aktīvajiem sludinājumiem. */
 async function marketAnswer(m: MarketFilters): Promise<{ reply: string; moreUrl: string } | null> {
@@ -255,9 +264,9 @@ async function marketAnswer(m: MarketFilters): Promise<{ reply: string; moreUrl:
     if (m.city) {
       const c = String(m.city).toLowerCase();
       const hit = regs.find((r) => r.region.toLowerCase().includes(c) || c.includes(r.region.toLowerCase()));
-      if (hit) return { reply: `${ptype} ${dar} reģionā „${hit.region}”: mediāna ${eur(hit.median)} €/m² (${hit.n} sludinājumi). Pilns tirgus pārskats zem pogas.`, moreUrl: "/tirgus" };
+      if (hit) return { reply: `${ptype} ${dar} reģionā „${hit.region}”: mediāna ${eur(hit.median)}/m² (${hit.n} sludinājumi). Pilns tirgus pārskats zem pogas.`, moreUrl: "/tirgus" };
     }
-    const top = regs.slice(0, 3).map((r) => `${r.region} ${eur(r.median)} €/m²`).join(", ");
+    const top = regs.slice(0, 3).map((r) => `${r.region} ${eur(r.median)}/m²`).join(", ");
     return { reply: `${ptype} ${dar} mediāna par m² pa reģioniem: ${top}. Vairāk — tirgus pārskatā.`, moreUrl: "/tirgus" };
   }
   // auto konkrēts modelis: tirgus momentuzņēmumu vēsture
@@ -268,8 +277,7 @@ async function marketAnswer(m: MarketFilters): Promise<{ reply: string; moreUrl:
     if (!make) return null;
     const vc = ["car", "moto", "camper", "van", "truck"].includes(String(m.vc)) ? String(m.vc) : "car";
     if (m.model) {
-      const md = await db.select({ id: models.id, name: models.name }).from(models).where(and(eq(models.makeId, make.id), ilike(models.name, like(String(m.model).slice(0, 60))))).limit(5);
-      const model = md.find((x) => x.name.toLowerCase() === String(m.model).toLowerCase()) ?? md[0];
+      const model = await findModel(make.id, String(m.model).slice(0, 60));
       if (model) {
         const t = await segmentTrend(`${vc}:${make.id}:${model.id}`).catch(() => []);
         if (t.length) {
@@ -315,7 +323,7 @@ async function dealsAnswer(d: DealsFilters): Promise<{ reply: string; moreUrl: s
   const h = res.houses[0];
   const last = h.deals.slice(0, 3).map((x) => `${String(x.day).slice(0, 7)}: ${eur(Number(x.amount))} (${x.areaM2} m²${x.rooms ? `, ${x.rooms} ist.` : ""})`).join("; ");
   return {
-    reply: `${h.address}: zemesgrāmatā reģistrēti ${h.deals.length} dzīvokļu darījumi kopš 2016. gada${h.median != null ? `, mediāna ${eur(h.median)} €/m²` : ""}.${last ? ` Pēdējie: ${last}.` : ""} Viss saraksts zem pogas.`,
+    reply: `${h.address}: zemesgrāmatā reģistrēti ${h.deals.length} dzīvokļu darījumi kopš 2016. gada${h.median != null ? `, mediāna ${eur(h.median)}/m²` : ""}.${last ? ` Pēdējie: ${last}.` : ""} Viss saraksts zem pogas.`,
     moreUrl,
   };
 }
