@@ -461,6 +461,13 @@ export const marketStats = pgTable(
   (t) => [primaryKey({ columns: [t.day, t.segment] }), index("market_stats_segment_idx").on(t.segment, t.day)],
 );
 
+/** AI meklētāja lietojuma uzskaite pa dienām (rīta kopsavilkumam un Gemini kvotas uzraudzībai). Diena pēc Rīgas laika. */
+export const aiUsageDaily = pgTable("ai_usage_daily", {
+  day: date("day").primaryKey(),
+  requests: integer("requests").notNull().default(0),
+  transcribes: integer("transcribes").notNull().default(0),
+});
+
 /** Ģeokodēšanas kešs: katra adrese tiek vaicāta tikai vienreiz (Google Geocoding API). */
 export const geocodeCache = pgTable("geocode_cache", {
   query: text("query").primaryKey(),

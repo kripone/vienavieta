@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { runAssistant, type ChatMsg } from "@/lib/ai-chat";
+import { trackAiUsage } from "@/lib/ai-usage";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,7 @@ export async function POST(req: Request) {
 
   try {
     const answer = await runAssistant(history, message);
+    void trackAiUsage("chat");
     return NextResponse.json(answer);
   } catch (e) {
     console.error("ai-chat:", e);

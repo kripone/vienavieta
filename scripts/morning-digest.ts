@@ -40,6 +40,11 @@ async function main() {
     else if (errs) problems.push(`⚠️ ${s.name}: pēdējā kārta ar ${errs} kļūdām`);
   }
 
+  // AI meklētāja lietojums vakar (Rīgas laika diena)
+  const yDay = new Date(Date.now() - 24 * 3600_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Riga" });
+  const [usage] = await db.select().from(schema.aiUsageDaily).where(sql`${schema.aiUsageDaily.day} = ${yDay}`);
+  const aiLine = `🤖 AI meklētājs vakar: <b>${usage?.requests ?? 0}</b> pieprasījumi (t.sk. ${usage?.transcribes ?? 0} balss)`;
+
   // detaļu (aprīkojuma/ērtību) nolasīšanas progress pa avotiem
   const detailLines: string[] = [];
   for (const src of ["autoplius.lt", "city24.lv", "ss.com"] as const) {
@@ -54,6 +59,8 @@ async function main() {
     `Jauni pēdējās 24h: <b>${newTotal}</b>`,
     "",
     ...lines,
+    "",
+    aiLine,
     "",
     "🔎 Detaļu nolasīšana:",
     ...detailLines,
