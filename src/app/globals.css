@@ -634,8 +634,22 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .facts a { color: var(--accent); white-space: nowrap; }
 
 /* ---- AI meklēšanas palīgs (peldošais čats) ---- */
-.ai-fab { position: fixed; right: 18px; bottom: 18px; z-index: 60; width: 54px; height: 54px; border-radius: 50%; border: 0; cursor: pointer; font-size: 24px; background: var(--accent); color: var(--accent-fg); box-shadow: 0 4px 16px rgba(0,0,0,.25); transition: transform .15s; }
+@property --ai-rot { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+.ai-fab { position: fixed; right: 18px; bottom: 18px; z-index: 60; width: 54px; height: 54px; border-radius: 50%; border: 0; cursor: pointer; font-size: 22px; color: #fff;
+  background: conic-gradient(from var(--ai-rot), #7c3aed, #06b6d4, #22d3ee, #a855f7, #ec4899, #7c3aed);
+  box-shadow: 0 4px 18px rgba(124, 58, 237, .45), 0 0 24px rgba(6, 182, 212, .25);
+  transition: transform .15s;
+  animation: ai-fab-rot 6s linear infinite, ai-fab-breathe 3.2s ease-in-out infinite; }
 .ai-fab:hover { transform: scale(1.08); }
+.ai-fab::before { content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 32% 30%, rgba(255,255,255,.38), rgba(255,255,255,0) 45%); }
+.ai-fab::after { content: ""; position: absolute; inset: 0; border-radius: 50%; z-index: -1; pointer-events: none;
+  border: 2px solid rgba(124, 58, 237, .55);
+  animation: ai-fab-ripple 2.4s ease-out infinite; }
+@keyframes ai-fab-rot { to { --ai-rot: 360deg; } }
+@keyframes ai-fab-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+@keyframes ai-fab-ripple { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(1.65); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ai-fab, .ai-fab::after { animation: none; } }
 .ai-panel { position: fixed; right: 18px; bottom: 18px; z-index: 60; width: min(380px, calc(100vw - 24px)); height: min(560px, calc(100dvh - 90px)); display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,.3); overflow: hidden; }
 .ai-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; font-weight: 700; border-bottom: 1px solid var(--line); background: var(--surface-2); }
 .ai-close { border: 0; background: none; cursor: pointer; font-size: 15px; color: var(--muted); padding: 4px 8px; border-radius: 6px; }
