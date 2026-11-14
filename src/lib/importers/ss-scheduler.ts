@@ -127,8 +127,9 @@ export function startSsCrawler() {
       }
     })();
   }
-  // autoplius.lt detaļas: aprīkojums un fakti no sludinājuma lapām (lēni, katra lapa vienreiz)
-  if (autopliusEnabled() && process.env.AP_DETAILS !== "off") {
+  // autoplius.lt detaļas: aprīkojums un fakti no sludinājuma lapām (lēni, katra lapa vienreiz).
+  // AP_DETAILS=on ieslēdz arī tad, kad lapu ievākšana (AUTOPLIUS_CRAWL) ir izslēgta.
+  if (process.env.AP_DETAILS === "on" || (autopliusEnabled() && process.env.AP_DETAILS !== "off")) {
     (async () => {
       await new Promise((r) => setTimeout(r, 100_000));
       console.log("autoplius.lt detaļas: cilpa startēta");
@@ -139,8 +140,9 @@ export function startSsCrawler() {
       }
     })();
   }
-  // city24.lv detaļas: ērtības un fakti no sludinājuma lapām (lēni, katra lapa vienreiz)
-  if (city24Enabled() && process.env.C24_DETAILS !== "off") {
+  // city24.lv detaļas: ērtības un fakti no sludinājuma lapām (lēni, katra lapa vienreiz).
+  // C24_DETAILS=on ieslēdz arī tad, kad lapu ievākšana (CITY24_CRAWL) ir izslēgta.
+  if (process.env.C24_DETAILS === "on" || (city24Enabled() && process.env.C24_DETAILS !== "off")) {
     (async () => {
       await new Promise((r) => setTimeout(r, 130_000));
       console.log("city24.lv detaļas: cilpa startēta");
