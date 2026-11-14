@@ -125,7 +125,7 @@ export function parseListPage(html: string): { rows: ApRow[]; lastPage: number }
     // apakšējo parametru rinda: degviela, ātrumkārba, "2.0 l., 103 kW", "338 000 km", pilsēta (secība mainās)
     const paramsBlock = body.match(/class="announcement-parameters-block">([\s\S]*?)<\/div>\s*<\/div>/)?.[1] ?? "";
     const spans = [...paramsBlock.matchAll(/<span[^>]*>([\s\S]*?)<\/span>/g)].map((m) => text(m[1])).filter(Boolean);
-    const engineRaw = spans.find((s) => /kW/i.test(s)) ?? null;
+    const engineRaw = spans.find((s) => /kW(?!h)/i.test(s)) ?? null; // (?!h): "42 kWh" ir baterija, nevis jauda
     const mileageRaw = spans.find((s) => /km$/i.test(s)) ?? null;
     const gearboxRaw = spans.find((s) => /^(mehāniskā|automātiskā|mechaninė|automatinė)/i.test(s)) ?? null;
     const fuelRaw = spans.find((s) => s !== engineRaw && s !== mileageRaw && s !== gearboxRaw && /(benz|dīzel|dzel|dyzel|elektr|gāze|gaze|duj)/i.test(s)) ?? null;
@@ -134,7 +134,7 @@ export function parseListPage(html: string): { rows: ApRow[]; lastPage: number }
 
     const em = engineRaw?.match(/([\d]+(?:\.\d+)?)\s*l\.,\s*(\d+)\s*kW/i);
     const engineL = em ? em[1] : null;
-    const powerKw = Number(em?.[2] ?? engineRaw?.match(/(\d+)\s*kW/i)?.[1]) || null;
+    const powerKw = Number(em?.[2] ?? engineRaw?.match(/(\d+)\s*kW(?!h)/i)?.[1]) || null;
     const mileageNum = Number(mileageRaw?.replace(/[^\d]/g, "")) || null;
     const mileageKm = mileageNum && mileageNum <= 9_999_999 ? mileageNum : null; // aizsardzība pret int4 pārplūdi (mūļķības tipa "2222222222")
 
@@ -209,7 +209,7 @@ async function saveRows(apRows: ApRow[], ctx: Ctx, res: CrawlResult, mode: "quic
   const byId = new Map(mapped.map((m) => [m.externalId!, m]));
   if (!byId.size) return;
   const existing = await db
-    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl, makeId: listings.makeId, modelId: listings.modelId, placeId: listings.placeId })
+    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl, makeId: listings.makeId, modelId: listings.modelId, placeId: listings.placeId, fuel: listings.fuel, powerKw: listings.powerKw })
     .from(listings)
     .where(and(eq(listings.source, "autoplius.lt"), inArray(listings.externalId, [...byId.keys()])));
   const seen = new Set<string>();
@@ -220,7 +220,8 @@ async function saveRows(apRows: ApRow[], ctx: Ctx, res: CrawlResult, mode: "quic
     if (e.status === "hidden") continue; // paslēpis moderators: neaiztiekam
     const better = (row.makeId && !e.makeId) || (row.modelId && !e.modelId);
     const newPlace = row.placeId && !e.placeId;
-    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl || better || newPlace) {
+    const newSpecs = (!e.fuel && row.fuel) || (!e.powerKw && row.powerKw); // piem., EV degviela/jauda, ko vecais parsētājs laida garām
+    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl || better || newPlace || newSpecs) {
       await db
         .update(listings)
         .set({
@@ -231,6 +232,7 @@ async function saveRows(apRows: ApRow[], ctx: Ctx, res: CrawlResult, mode: "quic
           ...(e.price !== row.price ? { firstPrice: sql`coalesce(${listings.firstPrice}, ${e.price})` } : {}),
           ...(newPlace ? { placeId: row.placeId, lat: row.lat, lon: row.lon, geoPrecision: "place" } : {}),
           ...(better ? { makeId: row.makeId, modelId: row.modelId, makeText: row.makeText, modelText: row.modelText, title: row.title, body: row.body } : {}),
+          ...(newSpecs ? { fuel: row.fuel, powerKw: row.powerKw, title: row.title } : {}),
         })
         .where(eq(listings.id, e.id));
       if (e.price !== row.price) {
