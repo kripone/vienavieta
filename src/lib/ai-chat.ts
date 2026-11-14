@@ -340,8 +340,8 @@ export async function runAssistant(history: ChatMsg[], userText: string): Promis
     const all = await recentDrops({ kind, days, limit: 60 }).catch(() => []);
     const rows = all.filter((r) => (r.prev - r.card.price) / r.prev >= minPct / 100);
     const results: ChatResultItem[] = rows.slice(0, 6).map((r) => {
-      const ext = r.card.source !== "own" && r.card.externalUrl ? true : false;
-      return { id: r.card.id, title: r.card.title, price: r.card.price, place: r.card.place ?? null, url: ext ? r.card.externalUrl! : `/sludinajumi/${r.card.id}`, ext, thumb: r.card.externalThumbUrl ?? null, prevPrice: r.prev };
+      // saites ved uz mūsu sludinājuma lapu (nevis uzreiz uz avota portālu) — avota saite ir tur
+      return { id: r.card.id, title: r.card.title, price: r.card.price, place: r.card.place ?? null, url: `/sludinajumi/${r.card.id}`, ext: false, thumb: r.card.externalThumbUrl ?? null, prevPrice: r.prev };
     });
     const p = new URLSearchParams();
     if (kind === "vehicle") p.set("k", "auto");
@@ -394,18 +394,16 @@ export async function runAssistant(history: ChatMsg[], userText: string): Promis
 
   const s = parseSearch(raw);
   const { rows, total } = await searchListings(s);
-  const results: ChatResultItem[] = rows.slice(0, 6).map((r) => {
-    const ext = r.source !== "own" && r.externalUrl ? true : false;
-    return {
-      id: r.id,
-      title: r.title,
-      price: r.price,
-      place: r.place ?? r.region ?? null,
-      url: ext ? r.externalUrl! : `/sludinajumi/${r.id}`,
-      ext,
-      thumb: r.externalThumbUrl,
-    };
-  });
+  const results: ChatResultItem[] = rows.slice(0, 6).map((r) => ({
+    // saites ved uz mūsu sludinājuma lapu (nevis uzreiz uz avota portālu) — avota saite ir tur
+    id: r.id,
+    title: r.title,
+    price: r.price,
+    place: r.place ?? r.region ?? null,
+    url: `/sludinajumi/${r.id}`,
+    ext: false,
+    thumb: r.externalThumbUrl,
+  }));
   const qs = toQuery({ ...raw, cat: raw.cat, vc: raw.vc });
   // meklēšanas rezultāti dzīvo sākumlapā ("/" ar filtru parametriem); /mekle ir tikai teksta pāradresētājs
   return { reply: ai.reply, results, total, moreUrl: total > 0 ? `/${qs ? `?${qs}` : ""}` : null, appraisalUrl: null };
