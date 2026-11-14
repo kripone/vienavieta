@@ -47,6 +47,96 @@ export function detailsEnabled() {
   return process.env.SS_DETAILS !== "off";
 }
 
+/** Ērtību atslēgvārdi → kanoniskais saraksts (kā city24 nolasītājā). */
+const AMENITY_KEYS: [string, RegExp][] = [
+  ["Balkons", /balkon/i],
+  ["Terase", /teras/i],
+  ["Lifts", /lifts/i],
+  ["Stāvvieta", /stāvvieta|garāža|autonovietne/i],
+  ["Mēbelēts", /mēbel/i],
+  ["Dzīvnieki atļauti", /dzīvniek/i],
+  ["Kamīns", /kamīn/i],
+  ["Pirts", /pirts|sauna/i],
+  ["Signalizācija", /signaliz/i],
+];
+
+/** Īpašuma sludinājuma lauki: Sērija, Mājas tips, Apkure, Stāvoklis, Izbūves gads, Ērtības. */
+export function parseAdPropertyDetails(html: string) {
+  const opts: Record<string, string> = {};
+  for (const m of html.matchAll(/class="ads_opt_name"[^>]*>\s*([^<:]{2,40}):?\s*<\/td>\s*<td[^>]*class="ads_opt"[^>]*>([\s\S]{0,300}?)<\/td>/g)) {
+    opts[decode(m[1])] = decode(m[2].replace(/<[^>]+>/g, " "));
+  }
+  const series = (opts["Sērija"] ?? "").slice(0, 40) || null;
+  const material = (opts["Mājas tips"] ?? "").slice(0, 40) || null;
+  const heating = (opts["Apkure"] ?? "").slice(0, 60) || null;
+  const condition = (opts["Stāvoklis"] ?? opts["Īpašuma stāvoklis"] ?? "").slice(0, 40) || null;
+  const purpose = (opts["Izmantošanas mērķis"] ?? "").slice(0, 60) || null;
+  const builtYear = /^\d{4}$/.test(opts["Izbūves gads"] ?? "") ? Number(opts["Izbūves gads"]) : null;
+  const floorM = (opts["Stāvs"] ?? "").match(/^(\d{1,2})\/(\d{1,2})$/);
+  const ert = opts["Ērtības"] ?? "";
+  const amenities = AMENITY_KEYS.filter(([, re]) => re.test(ert)).map(([name]) => name);
+  return {
+    series,
+    material,
+    heating,
+    condition,
+    purpose,
+    builtYear,
+    floor: floorM ? Number(floorM[1]) : null,
+    floors: floorM ? Number(floorM[2]) : null,
+    amenities: [...new Set(amenities)],
+  };
+}
+
+/** Apstrādā nākamos vēl neatvērtos ss.com īpašuma sludinājumus, jaunākos vispirms. */
+export async function fillPropertyDetails(limit = SS_DETAIL_PER_MIN, fetchHtml = defaultFetch, delayMs = SS_DETAIL_DELAY_MS) {
+  const todo = await db
+    .select({ id: listings.id, url: listings.externalUrl })
+    .from(listings)
+    .where(and(eq(listings.source, "ss.com"), eq(listings.kind, "property"), eq(listings.status, "active"), isNull(listings.detailCheckedAt)))
+    .orderBy(desc(listings.createdAt))
+    .limit(limit);
+  if (!todo.length) return null;
+  const res = { checked: 0, filled: 0, errors: 0 };
+  for (const [i, t] of todo.entries()) {
+    if (i) await sleep(delayMs);
+    if (!t.url?.startsWith("https://www.ss.com/msg/")) {
+      await db.update(listings).set({ detailCheckedAt: new Date() }).where(eq(listings.id, t.id));
+      continue;
+    }
+    try {
+      const html = await fetchHtml(t.url);
+      res.checked++;
+      const d = parseAdPropertyDetails(html);
+      if (d.series || d.material || d.heating || d.builtYear || d.amenities.length) res.filled++;
+      await db
+        .update(listings)
+        .set({
+          detailCheckedAt: new Date(),
+          ...(d.series ? { series: d.series } : {}),
+          ...(d.material ? { material: d.material } : {}),
+          ...(d.heating ? { heating: d.heating } : {}),
+          ...(d.condition ? { condition: d.condition } : {}),
+          ...(d.purpose ? { purpose: d.purpose } : {}),
+          ...(d.builtYear ? { builtYear: d.builtYear } : {}),
+          ...(d.floor ? { floor: d.floor } : {}),
+          ...(d.floors ? { floors: d.floors } : {}),
+          amenities: d.amenities,
+        })
+        .where(eq(listings.id, t.id));
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (/\b404\b/.test(msg)) {
+        await db.update(listings).set({ detailCheckedAt: new Date() }).where(eq(listings.id, t.id));
+      } else {
+        res.errors++;
+        if ((e as { retryAfter?: number }).retryAfter) break;
+      }
+    }
+  }
+  return res;
+}
+
 /** Apstrādā nākamos vēl neatvērtos (vai pirms aprīkojuma nolasīšanas atvērtos) sludinājumus, jaunākos vispirms. */
 export async function fillVehicleCities(limit = SS_DETAIL_PER_MIN, fetchHtml = defaultFetch, delayMs = SS_DETAIL_DELAY_MS) {
   const todo = await db
