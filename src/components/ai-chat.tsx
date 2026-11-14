@@ -161,6 +161,9 @@ export function AiChat() {
                 )}
               </div>
             )}
+            {m.moreUrl && !m.results?.length && (
+              <a className="ai-more ai-more-solo" href={lp(m.moreUrl)}>{t("Skatīt pilnu sarakstu →")}</a>
+            )}
           </div>
         ))}
         {busy && <div className="ai-msg model ai-typing">{t("Meklēju")}…</div>}
