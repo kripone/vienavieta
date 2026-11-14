@@ -59,6 +59,7 @@ search lauki (visi neobligāti, liec tikai tos, ko lietotājs minēja):
 - radiusKm: attālums km no pilsētas, ja lietotājs saka "līdz X km", "tuvumā", "apkārtnē", "rajonā" (piem. "Rīgas rajonā" → city "Rīga", radiusKm 30; "līdz 20 km no Jelgavas" → city "Jelgava", radiusKm 20)
 - rmin, rmax: istabu skaits
 - amin, amax: platība m²
+- amen: ērtību saraksts īpašumiem (tikai no šīm): "Balkons", "Terase", "Lifts", "Stāvvieta", "Mēbelēts", "Dzīvnieki atļauti", "Kamīns", "Pirts", "Signalizācija" (piem. "ar balkonu un liftu" → ["Balkons","Lifts"]; "ar garāžu/autostāvvietu" → ["Stāvvieta"])
 
 - drops: ja lietotājs jautā par CENU KRITUMIEM ("kādi auto samazinājuši cenu", "cenu kritumi šodien", "atlaižu auto"), tad search = null un aizpildi drops:
   {"kind": "vehicle" | "property" | null, "days": 1 (šodien) | 7 (nedēļā) | 30 (mēnesī), "minPct": minimālais kritums % (piem. "vairāk kā 10%" → 10; ja nemin — 1)}
@@ -75,6 +76,7 @@ search lauki (visi neobligāti, liec tikai tos, ko lietotājs minēja):
 Piemēri:
 "meklēju dīzeļa universāli līdz 8000 Rīgā" → {"reply":"Meklēju dīzeļa auto līdz 8000 € Rīgā…","search":{"cat":"vehicle","vc":"car","fuel":"Dīzelis","pmax":8000,"city":"Rīga"}}
 "2 istabu dzīvoklis īrē Jūrmalā līdz 500" → {"reply":"Meklēju 2 istabu dzīvokli īrē Jūrmalā līdz 500 €…","search":{"cat":"property","ptype":"Dzīvoklis","deal":"rent","rmin":2,"rmax":2,"pmax":500,"city":"Jūrmala"}}
+"atrod dzīvokli Rīgā ar balkonu un liftu" → {"reply":"Meklēju dzīvokli Rīgā ar balkonu un liftu…","search":{"cat":"property","ptype":"Dzīvoklis","city":"Rīga","amen":["Balkons","Lifts"]}}
 "dzīvoklis Rīgā vai tuvākajā apkārtnē līdz 20 km" → {"reply":"Meklēju dzīvokli Rīgā un līdz 20 km apkārtnē…","search":{"cat":"property","ptype":"Dzīvoklis","city":"Rīga","radiusKm":20}}
 "kādi auto šodien samazinājuši cenu vairāk kā 10%" → {"reply":"Meklēju auto, kuriem šodien cena kritusies vairāk nekā par 10%…","search":null,"drops":{"kind":"vehicle","days":1,"minPct":10}}
 "kāda šobrīd ir BMW X5 tirgus cena?" → {"reply":"Paskatīšos, kādas ir BMW X5 cenas tirgū…","search":null,"market":{"make":"BMW","model":"X5","vc":"car"}}
@@ -103,6 +105,7 @@ type SearchFilters = {
   amin?: number;
   amax?: number;
   radiusKm?: number;
+  amen?: string[];
 };
 
 type DropsFilters = { kind?: "vehicle" | "property" | null; days?: number; minPct?: number };
@@ -391,6 +394,9 @@ export async function runAssistant(history: ChatMsg[], userText: string): Promis
   if (f.body && ["Sedans", "Universāls", "Hečbeks", "Apvidus", "Minivens", "Kupeja", "Kabriolets", "Pikaps", "Mikroautobuss"].includes(f.body)) raw.body = f.body;
   if (f.ptype) raw.ptype = String(f.ptype);
   if (f.deal === "sell" || f.deal === "rent") raw.deal = f.deal;
+  const AMEN_OK = ["Balkons", "Terase", "Lifts", "Stāvvieta", "Mēbelēts", "Dzīvnieki atļauti", "Kamīns", "Pirts", "Signalizācija"];
+  const amen = Array.isArray(f.amen) ? f.amen.map((a) => String(a)).filter((a) => AMEN_OK.includes(a)).slice(0, 6) : [];
+  if (amen.length) raw.amen = amen.join(",");
 
   const s = parseSearch(raw);
   const { rows, total } = await searchListings(s);
