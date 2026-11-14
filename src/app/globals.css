@@ -663,3 +663,5 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .ai-input button { border: 0; border-radius: 10px; padding: 0 14px; background: var(--accent); color: var(--accent-fg); cursor: pointer; font-size: 15px; }
 .ai-input button:disabled { opacity: .45; cursor: default; }
 @media (max-width: 640px) { .ai-panel { right: 12px; bottom: 12px; } .ai-fab { right: 12px; bottom: 12px; } }
+.ai-appraisal { display: inline-block; margin-top: 8px; background: var(--accent); color: var(--accent-fg); font-weight: 600; font-size: 13px; padding: 8px 14px; border-radius: 9px; text-decoration: none; }
+.ai-appraisal:hover { filter: brightness(1.1); }
