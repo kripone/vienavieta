@@ -186,5 +186,6 @@ export async function runAssistant(history: ChatMsg[], userText: string): Promis
     };
   });
   const qs = toQuery({ ...raw, cat: raw.cat, vc: raw.vc });
-  return { reply: ai.reply, results, total, moreUrl: total > 0 ? `/mekle${qs ? `?${qs}` : ""}` : null };
+  // meklēšanas rezultāti dzīvo sākumlapā ("/" ar filtru parametriem); /mekle ir tikai teksta pāradresētājs
+  return { reply: ai.reply, results, total, moreUrl: total > 0 ? `/${qs ? `?${qs}` : ""}` : null };
 }
