@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useT } from "@/i18n/client";
 import type { AssistantAnswer } from "@/lib/ai-chat";
 
-type Msg = { role: "user" | "model"; text: string; results?: AssistantAnswer["results"]; total?: number; moreUrl?: string | null };
+type Msg = { role: "user" | "model"; text: string; results?: AssistantAnswer["results"]; total?: number; moreUrl?: string | null; appraisalUrl?: string | null };
 
 const fmtPrice = (n: number | null) => (n == null ? "" : `${n.toLocaleString("lv-LV")} €`);
 
@@ -36,7 +36,7 @@ export function AiChat() {
       if (!res.ok) {
         setMsgs((m) => [...m, { role: "model", text: data.error || t("Kaut kas nogāja greizi — pamēģini vēlreiz.") }]);
       } else {
-        setMsgs((m) => [...m, { role: "model", text: data.reply, results: data.results, total: data.total, moreUrl: data.moreUrl }]);
+        setMsgs((m) => [...m, { role: "model", text: data.reply, results: data.results, total: data.total, moreUrl: data.moreUrl, appraisalUrl: data.appraisalUrl }]);
       }
     } catch {
       setMsgs((m) => [...m, { role: "model", text: t("Savienojuma kļūda — pamēģini vēlreiz.") }]);
@@ -75,6 +75,9 @@ export function AiChat() {
         {msgs.map((m, i) => (
           <div key={i} className={`ai-msg ${m.role}`}>
             <div>{m.text}</div>
+            {m.appraisalUrl && (
+              <a className="ai-appraisal" href={lp(m.appraisalUrl)}>{t("Novērtēt bez maksas")} →</a>
+            )}
             {!!m.results?.length && (
               <div className="ai-results">
                 {m.total != null && <div className="ai-total">{t("Atrasti {n} sludinājumi", { n: m.total })}</div>}
