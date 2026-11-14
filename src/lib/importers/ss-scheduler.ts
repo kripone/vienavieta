@@ -129,7 +129,9 @@ export function startSsCrawler() {
   }
   // autoplius.lt detaļas: aprīkojums un fakti no sludinājuma lapām (lēni, katra lapa vienreiz).
   // AP_DETAILS=on ieslēdz arī tad, kad lapu ievākšana (AUTOPLIUS_CRAWL) ir izslēgta.
+  console.log("detaļu cilpu env:", JSON.stringify({ AP_DETAILS: process.env.AP_DETAILS ?? null, C24_DETAILS: process.env.C24_DETAILS ?? null, AUTOPLIUS_CRAWL: process.env.AUTOPLIUS_CRAWL ?? null, CITY24_CRAWL: process.env.CITY24_CRAWL ?? null }));
   if (process.env.AP_DETAILS === "on" || (autopliusEnabled() && process.env.AP_DETAILS !== "off")) {
+    console.log("autoplius.lt detaļas: cilpa reģistrēta");
     (async () => {
       await new Promise((r) => setTimeout(r, 100_000));
       console.log("autoplius.lt detaļas: cilpa startēta");
@@ -143,6 +145,7 @@ export function startSsCrawler() {
   // city24.lv detaļas: ērtības un fakti no sludinājuma lapām (lēni, katra lapa vienreiz).
   // C24_DETAILS=on ieslēdz arī tad, kad lapu ievākšana (CITY24_CRAWL) ir izslēgta.
   if (process.env.C24_DETAILS === "on" || (city24Enabled() && process.env.C24_DETAILS !== "off")) {
+    console.log("city24.lv detaļas: cilpa reģistrēta");
     (async () => {
       await new Promise((r) => setTimeout(r, 130_000));
       console.log("city24.lv detaļas: cilpa startēta");
