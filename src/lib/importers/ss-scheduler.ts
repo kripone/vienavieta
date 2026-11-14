@@ -18,7 +18,7 @@ import { city24Enabled, tickCity24 } from "./city24-pages";
 import { fillCity24Details } from "./city24-details";
 import { backfillBodies, backfillHouseTail, backfillMakeModel, ensureMotoModels, forceModelRecrawl, forcePlacesRecrawl } from "./backfill";
 import { crawlSection } from "./ss-pages";
-import { detailsEnabled, fillVehicleCities } from "./ss-details";
+import { detailsEnabled, fillPropertyDetails, fillVehicleCities } from "./ss-details";
 import { importVzdIfChanged } from "./vzd";
 import { runDueFeed } from "./dealer-feed";
 
@@ -110,7 +110,9 @@ export function startSsCrawler() {
       for (;;) {
         const r = await fillVehicleCities().catch((e) => (console.error("ss.com pilsētas:", e instanceof Error ? e.message : e), null));
         if (r && (r.found || r.errors)) console.log("ss.com pilsētas:", JSON.stringify(r));
-        await new Promise((res) => setTimeout(res, r ? 15_000 : 600_000));
+        const rp = await fillPropertyDetails().catch((e) => (console.error("ss.com ērtības:", e instanceof Error ? e.message : e), null));
+        if (rp && (rp.filled || rp.errors)) console.log("ss.com ērtības:", JSON.stringify(rp));
+        await new Promise((res) => setTimeout(res, r || rp ? 15_000 : 600_000));
       }
     })();
   }
