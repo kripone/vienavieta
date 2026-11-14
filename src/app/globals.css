@@ -662,7 +662,11 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .ai-input input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
 .ai-input button { border: 0; border-radius: 10px; padding: 0 14px; background: var(--accent); color: var(--accent-fg); cursor: pointer; font-size: 15px; }
 .ai-input button:disabled { opacity: .45; cursor: default; }
-@media (max-width: 640px) { .ai-panel { right: 12px; bottom: 12px; } .ai-fab { right: 12px; bottom: 12px; } }
+@media (max-width: 640px) {
+  .ai-fab { right: 12px; bottom: 12px; }
+  /* mobilajā: apakšas panels pār visu platumu, nevirs tastatūras vairs netiek */
+  .ai-panel { left: 0; right: 0; bottom: 0; width: 100%; height: min(85dvh, 100dvh - 40px); border-radius: 16px 16px 0 0; border-left: 0; border-right: 0; border-bottom: 0; }
+}
 .ai-appraisal { display: inline-block; margin-top: 8px; background: var(--accent); color: var(--accent-fg); font-weight: 600; font-size: 13px; padding: 8px 14px; border-radius: 9px; text-decoration: none; }
 .ai-appraisal:hover { filter: brightness(1.1); }
 .ai-r-prev { color: var(--muted); font-weight: 400; margin-right: 4px; }
