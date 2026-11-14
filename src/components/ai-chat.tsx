@@ -144,14 +144,17 @@ export function AiChat() {
               <div className="ai-results">
                 {m.total != null && <div className="ai-total">{t("Atrasti {n} sludinājumi", { n: m.total })}</div>}
                 {m.results.map((r) => (
-                  <a key={r.id} className="ai-result" href={r.ext ? r.url : lp(r.url)} {...(r.ext ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+                  <div key={r.id} className="ai-result">
                     {r.thumb && <img src={r.thumb} alt="" loading="lazy" />}
-                    <span className="ai-r-title">{r.title}</span>
+                    <a className="ai-r-title" href={r.ext ? r.url : lp(r.url)} {...(r.ext ? { target: "_blank", rel: "noopener noreferrer" } : {})}>{r.title}</a>
                     <span className="ai-r-meta">
                       {r.prevPrice != null && <s className="ai-r-prev">{fmtPrice(r.prevPrice)}</s>}<b>{fmtPrice(r.price)}</b>
                       {r.place ? ` · ${r.place}` : ""}
                     </span>
-                  </a>
+                    {r.address && (
+                      <a className="ai-r-deals" href={lp(`/darijumi?q=${encodeURIComponent(r.address)}`)}>{t("Darījumi adresē")} →</a>
+                    )}
+                  </div>
                 ))}
                 {m.moreUrl && m.total != null && m.total > m.results!.length && (
                   <a className="ai-more" href={lp(m.moreUrl)}>{t("Skatīt visus {n} →", { n: m.total })}</a>

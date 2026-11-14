@@ -21,6 +21,8 @@ export type ChatResultItem = {
   thumb: string | null;
   /** cenu kritumiem: iepriekšējā cena (rādam "bija X →"). */
   prevPrice?: number | null;
+  /** īpašumiem: adrese (rādam saiti uz darījumu cenām šajā adresē). */
+  address?: string | null;
 };
 
 export type AssistantAnswer = {
@@ -402,7 +404,7 @@ export async function runAssistant(history: ChatMsg[], userText: string): Promis
     const rows = all.filter((r) => (r.prev - r.card.price) / r.prev >= minPct / 100);
     const results: ChatResultItem[] = rows.slice(0, 6).map((r) => {
       // saites ved uz mūsu sludinājuma lapu (nevis uzreiz uz avota portālu) — avota saite ir tur
-      return { id: r.card.id, title: r.card.title, price: r.card.price, place: r.card.place ?? null, url: `/sludinajumi/${r.card.id}`, ext: false, thumb: r.card.externalThumbUrl ?? null, prevPrice: r.prev };
+      return { id: r.card.id, title: r.card.title, price: r.card.price, place: r.card.place ?? null, url: `/sludinajumi/${r.card.id}`, ext: false, thumb: r.card.externalThumbUrl ?? null, prevPrice: r.prev, address: r.card.address ?? null };
     });
     const p = new URLSearchParams();
     if (kind === "vehicle") p.set("k", "auto");
@@ -436,6 +438,7 @@ export async function runAssistant(history: ChatMsg[], userText: string): Promis
     url: `/sludinajumi/${r.id}`,
     ext: false,
     thumb: r.externalThumbUrl,
+    address: r.address ?? null,
   }));
   const qs = toQuery({ ...raw, cat: raw.cat, vc: raw.vc });
   // meklēšanas rezultāti dzīvo sākumlapā ("/" ar filtru parametriem); /mekle ir tikai teksta pāradresētājs
