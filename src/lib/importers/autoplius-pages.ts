@@ -6,7 +6,7 @@
 // Nomas sludinājumi (cena "Parai/Mēnesī") tiek izlaisti — ņemam tikai pārdošanas sludinājumus.
 import { and, eq, inArray, lt, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { AUTOPLIUS, AUTOPLIUS_CAMPER, AUTOPLIUS_CAMPER_LT, AUTOPLIUS_LT, AUTOPLIUS_MOTO, AUTOPLIUS_MOTO_LT, EXTERNAL_TTL_DAYS } from "../constants";
+import { AUTOPLIUS_CAMPER, AUTOPLIUS_CAR_BANDS, AUTOPLIUS_DELAY_MS, AUTOPLIUS_MOTO_BANDS, EXTERNAL_TTL_DAYS } from "../constants";
 import { linkDuplicate } from "../dedupe";
 import { inferBody } from "../illustrations";
 import { findMake, matchModel, slug, vehicleTitle, type ImportRow, type MakeRow, type ModelRow, type PlaceRow } from "./ss-rss";
@@ -255,17 +255,18 @@ async function saveRows(apRows: ApRow[], ctx: Ctx, res: CrawlResult, mode: "quic
 /** Ievākšanas mērķis: viena valoda/plūsma ar savu crawl_state atslēgu un lapas adresi. */
 export type ApTarget = { key: string; url: string; vc: "car" | "moto" | "camper"; quickPages: number; maxPages: number; quickEveryMin: number; fullEveryHours: number };
 
-/** Plūsmas, kuras ievācam: vieglie auto, motocikli un kemperi, latviešu (lv.autoplius.lt) un
- *  lietuviešu (autoplius.lt) valodā. Sludinājumu ID ir kopīgi visām — pārklāšanās vienkārši atjauno rindu. */
-export const AP_TARGETS: ApTarget[] = [AUTOPLIUS, AUTOPLIUS_LT, AUTOPLIUS_MOTO, AUTOPLIUS_MOTO_LT, AUTOPLIUS_CAMPER, AUTOPLIUS_CAMPER_LT];
+/** Plūsmas, kuras ievācam: vieglie auto pa gadu joslām (portāla lapošanas griesti 200 lapas /
+ *  ~4000 sludinājumi — sk. constants.ts), motocikli divās joslās, kemperi viena plūsma.
+ *  Tikai lv.autoplius.lt: LT valodas versija ir tā pati datubāze ar tiem pašiem sludinājumu ID. */
+export const AP_TARGETS: ApTarget[] = [...AUTOPLIUS_CAR_BANDS, ...AUTOPLIUS_MOTO_BANDS, AUTOPLIUS_CAMPER];
 
-const pageUrl = (t: ApTarget, n: number) => (n <= 1 ? t.url : `${t.url}?page_nr=${n}`);
+const pageUrl = (t: ApTarget, n: number) => (n <= 1 ? t.url : `${t.url}${t.url.includes("?") ? "&" : "?"}page_nr=${n}`);
 
 /**
  * Viena kārta vienai plūsmai. "quick": pirmās target.quickPages lapas (jaunie un cenu maiņas).
  * "full": līdz target.maxPages lapām; beigās ilgi neredzētie tiek paslēpti (sk. EXTERNAL_TTL_DAYS).
  */
-export async function crawlAutoplius(mode: "quick" | "full", target: ApTarget = AUTOPLIUS, fetchHtml: (url: string) => Promise<string> = browserFetch, delayMs = AUTOPLIUS.delayMs): Promise<CrawlResult> {
+export async function crawlAutoplius(mode: "quick" | "full", target: ApTarget = AP_TARGETS[0], fetchHtml: (url: string) => Promise<string> = browserFetch, delayMs = AUTOPLIUS_DELAY_MS): Promise<CrawlResult> {
   const started = new Date();
   const res: CrawlResult = { mode, pages: 0, rows: 0, created: 0, updated: 0, priceChanged: 0, duplicates: 0, removed: 0, errors: [], ms: 0 };
   const fullCtx = await loadCtx();
@@ -291,8 +292,8 @@ export async function crawlAutoplius(mode: "quick" | "full", target: ApTarget = 
   }
 
   if (mode === "full") {
-    // pilnā kārta apklāj tikai AUTOPLIUS.maxPages jaunākās lapas (portālā ir desmitiem tūkstošu),
-    // tāpēc neredzētos nedzēšam pēc vienas kārtas. Tā vietā paslēpjam tos, kas ilgāk par
+    // pilnā kārta apklāj vienu gadu joslu (katra <200 lapu portāla griestu, sk. constants.ts).
+    // Neredzētos nedzēšam pēc vienas kārtas — paslēpjam tikai tos, kas ilgāk par
     // EXTERNAL_TTL_DAYS nav redzēti nevienā kārtā — avotā izdzēstie vairs neparādās sarakstos.
     const cutoff = new Date(Date.now() - EXTERNAL_TTL_DAYS * 86_400_000);
     const stale = await db
