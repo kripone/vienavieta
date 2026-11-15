@@ -59,7 +59,7 @@ async function flush() {
 
 /**
  * Ikdienas kārta: visas sitemap adreses (SEO lapas, rīki, pašu sludinājumi, visās valodās), kuras vēl nav sūtītas
- * vai sūtītas pirms INDEXNOW_RESEND_DAYS, līdz INDEXNOW_DAILY_MAX dienā. Atgriež nosūtīto skaitu.
+ * vai sūtītas pirms INDEXNOW_RESEND_DAYS, līdz INDEXNOW_DAILY_MAX dienā. Atgriež nosūtīto skaitu vai -1, ja IndexNow neapstiprināja.
  */
 export async function indexNowDaily(): Promise<number> {
   if (!enabled()) return 0;
@@ -72,7 +72,7 @@ export async function indexNowDaily(): Promise<number> {
   const todo = all.filter((u) => !fresh.has(u)).slice(0, INDEXNOW_DAILY_MAX);
   if (!todo.length) return 0;
   const ok = await post(todo);
-  if (!ok) return 0;
+  if (!ok) return -1;
   for (let i = 0; i < todo.length; i += 1000) {
     const chunk = todo.slice(i, i + 1000);
     await db.insert(schema.indexnowSent).values(chunk.map((url) => ({ url })))
@@ -83,9 +83,15 @@ export async function indexNowDaily(): Promise<number> {
   return todo.length;
 }
 
-/** Fona plānotājs: pirmā kārta 15 min pēc starta, tad ik 24 h. */
+/**
+ * Fona plānotājs: pirmā kārta 15 min pēc starta, tad ik 24 h. Ja IndexNow neapstiprina (piem. pirmajā reizē
+ * „SiteVerificationNotCompleted”, kamēr Bing pārbauda atslēgas failu), mēģina vēlreiz pēc 1 h.
+ */
 export function startIndexNowDaily() {
   if (!enabled()) return;
-  const run = () => indexNowDaily().catch((e) => console.error("IndexNow ikdienas kārta neizdevās:", e instanceof Error ? e.message : e));
-  setTimeout(() => { run(); setInterval(run, 24 * 3600_000); }, 15 * 60_000);
+  const loop = async () => {
+    const n = await indexNowDaily().catch((e) => { console.error("IndexNow ikdienas kārta neizdevās:", e instanceof Error ? e.message : e); return -1; });
+    setTimeout(loop, n < 0 ? 3600_000 : 24 * 3600_000);
+  };
+  setTimeout(loop, 15 * 60_000);
 }
