@@ -5,7 +5,8 @@
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { chromium, type Browser } from "playwright";
 import { db, schema } from "@/db";
-import { BODY_TYPES, COLORS } from "../constants";
+import { BODY_TYPES } from "../constants";
+import { mapBody } from "./autoplius-pages";
 
 const { listings } = schema;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -35,15 +36,33 @@ export function parseApDetails(html: string) {
       if (v) features.push(`${group}|${v}`);
     }
   }
-  const gearRaw = opts["Ātrumkārba"] ?? "";
-  const gearbox = /autom/i.test(gearRaw) ? "Automāts" : /mehān|manu/i.test(gearRaw) ? "Manuāla" : null;
-  const colorRaw = (opts["Krāsa"] ?? "").split(/[\s/]/)[0];
-  const color = colorRaw ? ((COLORS as readonly string[]).find((c) => c.toLowerCase() === colorRaw.toLowerCase()) ?? "Cita") : null;
-  const bodyRaw = opts["Virsbūves tips"] ?? "";
-  const body = (BODY_TYPES.car as readonly string[]).find((b) => b.toLowerCase() === bodyRaw.toLowerCase()) ?? null;
-  const inspectionUntil = opts["Tehniskā apskate"]?.match(/^\d{2}\.\d{4}$/)?.[0] ?? null;
+  const gearRaw = opts["Ātrumkārba"] ?? opts["Pavarų dėžė"] ?? "";
+  const gearbox = /autom/i.test(gearRaw) ? "Automāts" : /mehān|manu|mechan/i.test(gearRaw) ? "Manuāla" : null;
+  // Krāsas: LV lapās lauks "Krāsa", LT lapās "Spalva"; vērtības nāk abās valodās jaukti
+  // (piem., "Juoda / grafito" vai "Melna, metālika") — tāpēc kartējam pirmo vārdu uz mūsu katalogu.
+  const colorRaw = (opts["Krāsa"] ?? opts["Spalva"] ?? "").split(/[\s/,]+/)[0]?.toLowerCase() ?? "";
+  const color = colorRaw ? (AP_COLOR_MAP[colorRaw] ?? "Cita") : null;
+  const bodyRaw = opts["Virsbūves tips"] ?? opts["Kėbulo tipas"] ?? "";
+  const body = (BODY_TYPES.car as readonly string[]).find((b) => b.toLowerCase() === bodyRaw.toLowerCase()) ?? mapBody(bodyRaw);
+  // tehniskā apskate: "09.2027" vai "2027-09" → glabājam vienotā formātā "09.2027"
+  const inspRaw = opts["Tehniskā apskate"] ?? opts["Techninė apžiūra"] ?? "";
+  const inspLv = inspRaw.match(/^(\d{2})\.(\d{4})$/);
+  const inspIso = inspRaw.match(/^(\d{4})-(\d{2})$/);
+  const inspectionUntil = inspLv ? inspLv[0] : inspIso ? `${inspIso[2]}.${inspIso[1]}` : null;
   return { gearbox, color, body, inspectionUntil, features: [...new Set(features)].slice(0, 150) };
 }
+
+/** autoplius krāsu pieraksti (lv/lt, pirmais vārds, mazie burti) → mūsu katalogs. */
+const AP_COLOR_MAP: Record<string, string> = {
+  melna: "Melna", juoda: "Melna",
+  balta: "Balta",
+  "pelēka": "Pelēka", pilka: "Pelēka",
+  sudraba: "Sudraba", "sidabrinė": "Sudraba", "sidabrinis": "Sudraba",
+  zila: "Zila", "mėlyna": "Zila",
+  sarkana: "Sarkana", raudona: "Sarkana",
+  "zaļa": "Zaļa", "žalia": "Zaļa",
+  "brūna": "Brūna", ruda: "Brūna",
+};
 
 // Detaļu lapām sarakstu kartīšu selektora nav — tāpēc atsevišķs pārlūks bez announcement-item gaidīšanas.
 let browser: Browser | null = null;
@@ -59,8 +78,19 @@ async function fetchDetail(url: string): Promise<string> {
   const page = await ctx.newPage();
   try {
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45_000 });
-    await page.waitForTimeout(1500);
-    return await page.content();
+    // Cloudflare pārbaudei ("Mazliet uzgaidiet…") ļaujam pabeigties: gaidām parametru/aprīkojuma bloku,
+    // vajadzības gadījumā pārlādējam (tā pati loģika kā sarakstu lapu browserFetch).
+    for (let attempt = 1; ; attempt++) {
+      try {
+        await page.waitForSelector(".announcement-parameters-content, .feature-row", { timeout: 30_000 });
+        return await page.content();
+      } catch (e) {
+        const title = await page.title().catch(() => "");
+        if (attempt >= 4 || !/uzgaidiet|just a moment|cloudflare|autoplius/i.test(title)) throw e;
+        await sleep([10_000, 30_000, 60_000][attempt - 1] ?? 60_000);
+        await page.reload({ waitUntil: "domcontentloaded", timeout: 45_000 });
+      }
+    }
   } finally {
     await ctx.close().catch(() => {});
   }
