@@ -194,39 +194,65 @@ export const SS_FULL_EVERY_HOURS = 24;
 /** Ārējie sludinājumi tiek paslēpti, ja nav redzēti tik dienas (drošībai, ja pilnā kārta ilgi neizdodas). */
 export const EXTERNAL_TTL_DAYS = 21;
 /**
- * autoplius.lt vieglie auto (lietotājs 2026-11-11, sk. CLAUDE.md; imports src/lib/importers/autoplius-pages.ts).
- * Lapas atver ar reālu pārlūku (Playwright), jo parasto HTTP bloķē Cloudflare. maxPages ierobežo pilno kārtu
- * (portālā desmitiem tūkstošu sludinājumu; jaunākie ir pirmajās lapās), izdzēstos paslēpj pēc EXTERNAL_TTL_DAYS.
+ * autoplius.lt ievākšana (lietotājs 2026-11-11, sk. CLAUDE.md; imports src/lib/importers/autoplius-pages.ts).
+ * Lapas atver ar reālu pārlūku (Playwright), jo parasto HTTP bloķē Cloudflare.
+ *
+ * LAPOŠANAS GRIESTI: portāls apgriež lapošanu pie 200. lapas (pārbaudīts 2026-11-15: lapas 202/220/250
+ * atdod to pašu 200. lapu), tātad caur vienu sarakstu aizsniedzami tikai ~4000 jaunākie sludinājumi.
+ * Vieglajiem auto (kopā 47 233) tāpēc ejam PA GADU JOSLĀM (make_date_from/to parametri) — katra josla
+ * ir zem griestiem (apjomi nomērīti 2026-11-15; lielākā 3213). Motocikli (4678) divās joslās.
+ * Lietuviešu valodas (autoplius.lt) plūsmas izmestas: tā ir tā pati datubāze ar tiem pašiem sludinājumu ID
+ * (abi auto saraksti rāda 47 233), LT kārta bija tīra dublēšanās. Izdzēstos paslēpj pēc EXTERNAL_TTL_DAYS.
  */
-export const AUTOPLIUS = {
-  key: "autoplius:cars",
-  url: "https://lv.autoplius.lt/sludinajumi/lietotas-automasinas",
-  vc: "car",
-  delayMs: 2000,
+export const AUTOPLIUS_DELAY_MS = 2000;
+
+const AP_CARS_URL = "https://lv.autoplius.lt/sludinajumi/lietotas-automasinas";
+const AP_MOTO_URL = "https://lv.autoplius.lt/sludinajumi/motocikli-motociklistu-apgerbs/motocikli";
+const AP_CAMPER_URL = "https://lv.autoplius.lt/sludinajumi/autobusi-mikroautobusi-turistu-majinas/turistu-automasinas-kemperi";
+
+const apYearQs = (from: number | null, to: number | null) =>
+  [from ? `make_date_from=${from}` : "", to ? `make_date_to=${to}` : ""].filter(Boolean).join("&");
+
+const apTarget = (key: string, base: string, vc: "car" | "moto" | "camper", from: number | null = null, to: number | null = null) => ({
+  key,
+  url: from || to ? `${base}?${apYearQs(from, to)}` : base,
+  vc,
   quickPages: 2,
   maxPages: 250,
   quickEveryMin: 30,
   fullEveryHours: 24,
-} as const;
-/**
- * Lietuvas autoplius.lt plūsma (lietuviešu valoda; tie paši sludinājumu ID, tāpēc latviešu auto,
- * kas parādās abās plūsmās, vienkārši atjauno to pašu rindu). Atsevišķa crawl_state atslēga.
- */
-export const AUTOPLIUS_LT = {
-  key: "autoplius:cars-lt",
-  url: "https://autoplius.lt/skelbimai/naudoti-automobiliai",
-  vc: "car",
-  quickPages: 2,
-  maxPages: 250,
-  quickEveryMin: 30,
-  fullEveryHours: 24,
-} as const;
-/** autoplius.lt motocikli (LV/LT valodas; ID kopīgi ar citām plūsmām). */
-export const AUTOPLIUS_MOTO = { key: "autoplius:moto", url: "https://lv.autoplius.lt/sludinajumi/motocikli-motociklistu-apgerbs/motocikli", vc: "moto", quickPages: 2, maxPages: 250, quickEveryMin: 30, fullEveryHours: 24 } as const;
-export const AUTOPLIUS_MOTO_LT = { key: "autoplius:moto-lt", url: "https://autoplius.lt/skelbimai/motociklai-moto-apranga/motociklai", vc: "moto", quickPages: 2, maxPages: 250, quickEveryMin: 30, fullEveryHours: 24 } as const;
-/** autoplius.lt kemperi (LV/LT valodas). */
-export const AUTOPLIUS_CAMPER = { key: "autoplius:campers", url: "https://lv.autoplius.lt/sludinajumi/autobusi-mikroautobusi-turistu-majinas/turistu-automasinas-kemperi", vc: "camper", quickPages: 2, maxPages: 250, quickEveryMin: 30, fullEveryHours: 24 } as const;
-export const AUTOPLIUS_CAMPER_LT = { key: "autoplius:campers-lt", url: "https://autoplius.lt/skelbimai/autobusai-mikroautobusai-turistiniai-nameliai/turistiniai-automobiliai-prikabinami-nameliai", vc: "camper", quickPages: 2, maxPages: 250, quickEveryMin: 30, fullEveryHours: 24 } as const;
+});
+
+/** autoplius.lt vieglie auto pa gadu joslām (2026-11-15 mērījumi: 2024+ → 2951, 2023 → 2142, … 2016 → 3213). */
+export const AUTOPLIUS_CAR_BANDS = [
+  apTarget("autoplius:cars-2024plus", AP_CARS_URL, "car", 2024, null),
+  apTarget("autoplius:cars-2023", AP_CARS_URL, "car", 2023, 2023),
+  apTarget("autoplius:cars-2022", AP_CARS_URL, "car", 2022, 2022),
+  apTarget("autoplius:cars-2021", AP_CARS_URL, "car", 2021, 2021),
+  apTarget("autoplius:cars-2020", AP_CARS_URL, "car", 2020, 2020),
+  apTarget("autoplius:cars-2019", AP_CARS_URL, "car", 2019, 2019),
+  apTarget("autoplius:cars-2018", AP_CARS_URL, "car", 2018, 2018),
+  apTarget("autoplius:cars-2017", AP_CARS_URL, "car", 2017, 2017),
+  apTarget("autoplius:cars-2016", AP_CARS_URL, "car", 2016, 2016),
+  apTarget("autoplius:cars-2015", AP_CARS_URL, "car", 2015, 2015),
+  apTarget("autoplius:cars-2014", AP_CARS_URL, "car", 2014, 2014),
+  apTarget("autoplius:cars-2013", AP_CARS_URL, "car", 2013, 2013),
+  apTarget("autoplius:cars-2012", AP_CARS_URL, "car", 2012, 2012),
+  apTarget("autoplius:cars-2011", AP_CARS_URL, "car", 2011, 2011),
+  apTarget("autoplius:cars-2010", AP_CARS_URL, "car", 2010, 2010),
+  apTarget("autoplius:cars-2008-2009", AP_CARS_URL, "car", 2008, 2009),
+  apTarget("autoplius:cars-2005-2007", AP_CARS_URL, "car", 2005, 2007),
+  apTarget("autoplius:cars-2000-2004", AP_CARS_URL, "car", 2000, 2004),
+  apTarget("autoplius:cars-1990-1999", AP_CARS_URL, "car", 1990, 1999),
+  apTarget("autoplius:cars-1989minus", AP_CARS_URL, "car", null, 1989),
+];
+/** autoplius.lt motocikli (4678 kopā): 2010-2026 → 3410, līdz 2009 → 1268 (2026-11-15 mērījumi). */
+export const AUTOPLIUS_MOTO_BANDS = [
+  apTarget("autoplius:moto-2010plus", AP_MOTO_URL, "moto", 2010, null),
+  apTarget("autoplius:moto-2009minus", AP_MOTO_URL, "moto", null, 2009),
+];
+/** autoplius.lt kemperi (541 kopā — ietilpst zem lapošanas griestiem, joslas nevajag). */
+export const AUTOPLIUS_CAMPER = apTarget("autoplius:campers", AP_CAMPER_URL, "camper");
 /** Avotu nosaukumi kartītēs. */
 export const SOURCE_LABEL: Record<string, string> = {
   own: "VienāVietā", "ss.com": "ss.com", "mm.lv": "mm.lv", "city24.lv": "city24.lv",

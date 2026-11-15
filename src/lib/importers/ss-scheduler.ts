@@ -116,7 +116,8 @@ export function startSsCrawler() {
       }
     })();
   }
-  // autoplius.lt vieglie auto: ātrā kārta ik AUTOPLIUS.quickEveryMin, pilnā reizi diennaktī (Playwright pārlūks)
+  // autoplius.lt: vieglie auto pa gadu joslām (portāla 200 lapu griesti), moto 2 joslās, kemperi;
+  // katras plūsmas ātrā kārta ik quickEveryMin, pilnā reizi diennaktī (Playwright pārlūks)
   if (autopliusEnabled()) {
     (async () => {
       await new Promise((r) => setTimeout(r, 150_000));
