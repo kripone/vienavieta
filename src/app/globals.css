@@ -652,7 +652,10 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 @keyframes ai-fab-cloud { 0%, 100% { opacity: .55; transform: scale(.95); } 50% { opacity: .85; transform: scale(1.05); } }
 /* actiņas mirgo ik pa ~5 s */
 .ai-fab .eye { transform-box: fill-box; transform-origin: center; animation: ai-eye-blink 5s ease-in-out infinite; }
+/* zīlītes lēni apkārt skatās */
+.ai-fab .pupil { animation: ai-look 6s ease-in-out infinite; }
 @keyframes ai-eye-blink { 0%, 91%, 100% { transform: scaleY(1); } 94% { transform: scaleY(.12); } 97% { transform: scaleY(1); } }
+@keyframes ai-look { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(1px, .6px); } 45% { transform: translate(-1.1px, .2px); } 70% { transform: translate(.3px, -1px); } }
 @media (prefers-reduced-motion: reduce) { .ai-fab::after { animation: none; } }
 .ai-panel { position: fixed; right: 18px; bottom: 18px; z-index: 60; width: min(380px, calc(100vw - 24px)); height: min(560px, calc(100dvh - 90px)); display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,.3); overflow: hidden; }
 .ai-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; font-weight: 700; border-bottom: 1px solid var(--line); background: var(--surface-2); }
