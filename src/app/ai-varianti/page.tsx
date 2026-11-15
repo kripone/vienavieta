@@ -16,6 +16,9 @@ const VARIANTS: { id: string; name: string; desc: string; cls: string; inner: st
   { id: "I", name: "Dūmiņš", desc: "4 maigi dūmu pūpli lēni paceļas un izgaist — kā tvaiks", cls: "av-i", inner: `<i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><em>✨</em>` },
   { id: "J", name: "Biezs dūmiņš", desc: "Lielāki, lēnāki pūpli ar vairāk izplūduma — nosvaidītāks", cls: "av-j", inner: `<i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><em>✨</em>` },
   { id: "K", name: "Dūmiņš + vilnis", desc: "Dūmu pūpli + rets maigs viļņa gredzens pa virsu", cls: "av-k", inner: `<i class="s"></i><i class="s"></i><i class="s"></i><em>✨</em>` },
+  { id: "L", name: "Siri orbs", desc: "Tumša stiklotā sfēra ar maigu gaismas vilni iekšā — kā Siri ikona", cls: "av-l", inner: `<i class="w1"></i><i class="w2"></i><i class="w3"></i>` },
+  { id: "M", name: "Siri orbs krāsains", desc: "Tas pats orbs, bet vilnis ar violetu-zilu-rozā mirdzumu", cls: "av-m", inner: `<i class="w1"></i><i class="w2"></i><i class="w3"></i>` },
+  { id: "N", name: "Kūpošs orbs", desc: "Tumšā sfērā lēni kūpo dūmu slāņi, kontūra maigi elpo", cls: "av-n", inner: `<i class="w1"></i><i class="w2"></i><i class="w3"></i><i class="w4"></i>` },
 ];
 
 export default function AiVarianti() {
@@ -149,6 +152,60 @@ const CSS = `
   background: radial-gradient(circle, rgba(165,243,252,.5) 0%, rgba(34,211,238,.22) 45%, transparent 70%); }
 .av-k .s:nth-child(3) { animation-delay: 2.8s; --dx: -10px; --dy: -12px; }
 .av-k::after { border: 2px solid rgba(139,92,246,.4); animation: av-siri 4.2s cubic-bezier(.2,.6,.35,1) infinite; }
+
+/* L — Siri orbs: tumša stiklotā sfēra ar ūdens vilni */
+.av-l, .av-m, .av-n { overflow: hidden; animation: av-blob 7s ease-in-out infinite;
+  background: radial-gradient(circle at 32% 26%, #454c5c 0%, #23262e 45%, #0e1013 100%);
+  box-shadow: inset 0 1px 2px rgba(255,255,255,.35), inset 0 -6px 12px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.4); }
+.av-l::before, .av-m::before, .av-n::before { background: radial-gradient(circle at 34% 24%, rgba(255,255,255,.5), rgba(255,255,255,0) 42%); z-index: 2; }
+.av-l i, .av-m i, .av-n i { position: absolute; border-radius: 50%; filter: blur(7px); pointer-events: none; }
+.av-l .w1 { left: -30%; top: 40%; width: 160%; height: 26%;
+  background: radial-gradient(ellipse, rgba(255,255,255,.8), rgba(186,230,253,.4) 55%, transparent 75%);
+  animation: av-wave1 5.5s ease-in-out infinite; }
+.av-l .w2 { left: -20%; top: 58%; width: 130%; height: 30%;
+  background: radial-gradient(ellipse, rgba(226,232,240,.45), transparent 70%);
+  animation: av-wave2 7s ease-in-out infinite; }
+.av-l .w3 { left: -10%; top: 18%; width: 90%; height: 32%;
+  background: radial-gradient(ellipse, rgba(255,255,255,.25), transparent 70%);
+  animation: av-wave2 8.5s ease-in-out reverse infinite; }
+
+/* M — Siri orbs krāsains */
+.av-m .w1 { left: -30%; top: 40%; width: 160%; height: 26%;
+  background: radial-gradient(ellipse, rgba(255,255,255,.85), rgba(103,232,249,.5) 45%, transparent 75%);
+  animation: av-wave1 5.5s ease-in-out infinite; }
+.av-m .w2 { left: -25%; top: 55%; width: 140%; height: 32%;
+  background: radial-gradient(ellipse, rgba(216,180,254,.55), rgba(168,85,247,.25) 55%, transparent 75%);
+  animation: av-wave2 7s ease-in-out infinite; }
+.av-m .w3 { left: -15%; top: 25%; width: 110%; height: 30%;
+  background: radial-gradient(ellipse, rgba(249,168,212,.4), transparent 70%);
+  animation: av-wave2 8.5s ease-in-out reverse infinite; }
+
+/* N — kūpošs orbs: dūmu slāņi sfērā */
+.av-n .w1 { left: -25%; top: 30%; width: 120%; height: 45%;
+  background: radial-gradient(ellipse, rgba(203,213,225,.4), transparent 70%);
+  animation: av-swirl 9s ease-in-out infinite; }
+.av-n .w2 { left: -10%; top: 45%; width: 110%; height: 40%;
+  background: radial-gradient(ellipse, rgba(148,163,184,.35), transparent 70%);
+  animation: av-swirl 12s ease-in-out reverse infinite; }
+.av-n .w3 { left: -35%; top: 20%; width: 140%; height: 38%;
+  background: radial-gradient(ellipse, rgba(226,232,240,.3), transparent 70%);
+  animation: av-swirl 10.5s ease-in-out 2s infinite; }
+.av-n .w4 { left: -5%; top: 55%; width: 90%; height: 35%;
+  background: radial-gradient(ellipse, rgba(241,245,249,.3), transparent 70%);
+  animation: av-swirl 13s ease-in-out 4s reverse infinite; }
+.av-n::after { inset: -3px; filter: blur(6px); opacity: .35;
+  background: radial-gradient(circle, rgba(148,163,184,.5), transparent 70%);
+  animation: av-d-pulse 5s ease-in-out infinite; }
+
+@keyframes av-blob {
+  0%,100% { border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; }
+  25% { border-radius: 47% 53% 51% 49% / 52% 48% 52% 48%; }
+  50% { border-radius: 52% 48% 49% 51% / 48% 52% 47% 53%; }
+  75% { border-radius: 49% 51% 53% 47% / 51% 49% 52% 48%; }
+}
+@keyframes av-wave1 { 0%,100% { transform: translate(0,0) scaleY(1); } 33% { transform: translate(6%,-16%) scaleY(.8); } 66% { transform: translate(-5%,10%) scaleY(1.15); } }
+@keyframes av-wave2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-8%,-14%) scale(1.08); } }
+@keyframes av-swirl { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(9%,-10%) scale(1.12); } 66% { transform: translate(-7%,8%) scale(.94); } }
 
 @keyframes av-rot { to { --av-rot: 360deg; } }
 @keyframes av-breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
