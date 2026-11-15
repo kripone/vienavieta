@@ -111,8 +111,14 @@ export function AiChat() {
     return (
       <button className="ai-fab" onClick={() => setOpen(true)} aria-label={t("AI meklēšanas palīgs")} title={t("AI meklēšanas palīgs")}>
         <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
-          <circle className="eye" cx="9.2" cy="11.5" r="2.7" fill="#fff" />
-          <circle className="eye" cx="14.8" cy="11.5" r="2.7" fill="#fff" />
+          <g className="eye">
+            <ellipse cx="8.6" cy="12" rx="3.5" ry="4" fill="#fff" />
+            <circle cx="9.5" cy="12.7" r="1.7" fill="#1f2937" />
+          </g>
+          <g className="eye">
+            <ellipse cx="15.4" cy="12" rx="3.5" ry="4" fill="#fff" />
+            <circle cx="16.3" cy="12.7" r="1.7" fill="#1f2937" />
+          </g>
         </svg>
       </button>
     );
