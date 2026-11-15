@@ -50,8 +50,10 @@ export function SmartSearch({ flat, action }: { flat: Record<string, string>; ac
   return (
     <div className="smart">
       <form className="smart-text" action={action} method="get" role="search">
-        <input name="q" type="search" defaultValue={flat.tq ?? ""} maxLength={200} aria-label={t("Raksti, ko meklē")}
-          placeholder={t("Raksti, ko meklē: „dīzeļa universālis līdz 6000 € ar automātu” vai „3 istabu dzīvoklis Rīgas centrā”")} />
+        <span className="smart-field">
+          <input name="q" type="search" defaultValue={flat.tq ?? ""} maxLength={200} aria-label={t("Raksti, ko meklē")}
+            placeholder={t("Raksti, ko meklē: „dīzeļa universālis līdz 6000 € ar automātu” vai „3 istabu dzīvoklis Rīgas centrā”")} />
+        </span>
         <button className="btn primary">🔎 <span>{t("Meklēt")}</span></button>
       </form>
       <details className="smart-near" open={Boolean(flat.zone && flat.zl)}>

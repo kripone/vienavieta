@@ -525,7 +525,13 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 /* Brīvā teksta meklēšana un attāluma zona (src/components/smart-search.tsx) */
 .smart { display: grid; gap: 8px; margin-bottom: 12px; }
 .smart-text { display: flex; gap: 8px; }
-.smart-text input { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 12px 14px; border: 2px solid var(--accent); border-radius: 12px; background: var(--surface); color: var(--fg); }
+/* rotējošais krāsu mākonis aiz meklēšanas lauka (kā AI pogai) */
+.smart-field { position: relative; flex: 1; min-width: 0; display: block; }
+.smart-field::after { content: ""; position: absolute; inset: -7px; border-radius: 16px; z-index: -1; pointer-events: none;
+  filter: blur(9px); opacity: .7;
+  background: conic-gradient(from var(--ai-rot), #7c3aed, #06b6d4, #ec4899, #7c3aed);
+  animation: ai-fab-rot 8s linear infinite, ai-fab-cloud 3.5s ease-in-out infinite; }
+.smart-field input { width: 100%; min-width: 0; font: inherit; font-size: 16px; padding: 12px 14px; border: 2px solid var(--accent); border-radius: 12px; background: var(--surface); color: var(--fg); }
 .smart-text .btn { flex: none; border-radius: 12px; }
 .smart-near > summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--accent); list-style: none; width: fit-content; }
 .smart-near > summary::-webkit-details-marker { display: none; }
