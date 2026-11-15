@@ -94,8 +94,11 @@ export function mapBody(v?: string | null) {
 /**
  * Izvelk saraksta kartītes no lapas HTML. Kartītes atdala pēc atverošajiem
  * <a class="announcement-item"> tagiem (iekšējo </a> ligzdošanas dēļ negriežam pēc aizverošā).
+ * total: kopējais sludinājumu skaits no h1 ("Vieglie auto (2 lpp.) (2149)" → 2149) — filtrētām
+ * (gadu joslu) lapām vienīgais uzticamais lapu skaita avots, jo tur lapošanas saites ir tikai
+ * HTML-entītiju veidā (&amp;page_nr=) slidošā logā. lastPage: lielākais redzamais lapas numurs.
  */
-export function parseListPage(html: string): { rows: ApRow[]; lastPage: number } {
+export function parseListPage(html: string): { rows: ApRow[]; lastPage: number; total: number | null } {
   const opens = [...html.matchAll(/<a\b[^>]*class="announcement-item[^"]*"[^>]*>/g)];
   const rows: ApRow[] = [];
   for (let i = 0; i < opens.length; i++) {
@@ -143,8 +146,14 @@ export function parseListPage(html: string): { rows: ApRow[]; lastPage: number }
 
     rows.push({ link: href, externalId, titleRaw, price, year: year && year > 1900 && year < 2100 ? year : null, bodyRaw, fuelRaw, gearboxRaw, engineL, powerKw, mileageKm, city, thumb });
   }
-  const pages = [...html.matchAll(/[?&]page_nr=(\d+)/g)].map((m) => Number(m[1]));
-  return { rows, lastPage: Math.max(1, ...pages) };
+  // lapošanas saites filtrētās lapās ir HTML-entītiju veidā (&amp;page_nr=), tāpēc vispirms atškifrējam
+  const plain = html.replace(/&amp;/g, "&");
+  const pages = [...plain.matchAll(/[?&]page_nr=(\d+)/g)].map((m) => Number(m[1]));
+  const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] ?? "";
+  const counts = [...h1.matchAll(/\((\d[\d\s]{1,12})\)/g)].map((m) => Number(m[1].replace(/\s/g, "")));
+  // pēdējā iekava h1 ir kopējais sludinājumu skaits ("Vieglie auto (2 lpp.) (2149)")
+  const total = counts.length ? counts[counts.length - 1] : null;
+  return { rows, lastPage: Math.max(1, ...pages), total };
 }
 
 type Ctx = { makes: MakeRow[]; models: ModelRow[]; findCity: (t: string) => PlaceRow | null };
@@ -275,15 +284,18 @@ export async function crawlAutoplius(mode: "quick" | "full", target: ApTarget = 
   let failsInRow = 0;
   for (let n = 1; n <= last; n++) {
     try {
-      const { rows, lastPage } = parseListPage(await fetchHtml(pageUrl(target, n)));
+      const { rows, lastPage, total } = parseListPage(await fetchHtml(pageUrl(target, n)));
       res.pages++;
       res.rows += rows.length;
       await saveRows(rows, ctx, res, mode, target.vc);
       failsInRow = 0;
       if (!rows.length) break;
-      // lapošana ir slidošs logs (lapā redzami tikai ~5 numuri ap pašreizējo): pilnajā kārtā
-      // ejam līdz maxPages, bet apstājamies, kad saitēs vairs nav nākamā lapas numura
-      if (mode === "full" && lastPage <= n) break;
+      // pilnajā kārtā: ja zināms kopējais sludinājumu skaits (h1), lapu skaitu rēķinām no tā
+      // (20 kartītes lapā) — filtrētām joslu lapām slidošā loga saites nav uzticamas.
+      if (mode === "full" && total && n === 1) last = Math.min(target.maxPages, Math.ceil(total / 20));
+      if (n >= last) break;
+      // rezerves variants, ja total nav zināms: apstājamies, kad saitēs vairs nav nākamā lapas numura
+      if (mode === "full" && !total && lastPage <= n) break;
     } catch (err) {
       res.errors.push(`lapa ${n}: ${err instanceof Error ? err.message : err}`);
       if (++failsInRow >= 3) break;
