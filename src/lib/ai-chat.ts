@@ -34,6 +34,13 @@ export type AssistantAnswer = {
   appraisalUrl: string | null;
 };
 
+/** Lietotāja saskarnes valoda: atbildes teksts tajā (filtru vērtības paliek latviski, kā sistēma tās gaida). */
+const LANG_NAME: Record<string, string> = { lv: "latviešu", en: "angļu (English)", ru: "krievu (русский)", lt: "lietuviešu (lietuvių)" };
+function langNote(lang: string) {
+  if (lang === "lv" || !LANG_NAME[lang]) return "";
+  return `\n\nLietotāja saskarnes valoda: ${LANG_NAME[lang]}. Lauku "reply" raksti šajā valodā (ja vien lietotājs nepārprotami raksta citā valodā). Filtru vērtības (fuel, body, city u.c.) joprojām latviski, kā norādīts augstāk.`;
+}
+
 const SYSTEM_PROMPT = `Tu esi sludinājumu portāla VienāVietā (vienavieta.lv) AI meklēšanas palīgs. Portālā ir auto, motociklu, kemperu un nekustamā īpašuma sludinājumi no Latvijas un Lietuvas avotiem (ss.com, autoplius.lt, city24.lv u.c.).
 
 Tavi uzdevumi:
@@ -167,7 +174,7 @@ function circle(lat: number, lon: number, km: number, n = 40): [number, number][
 }
 
 /** Gemini REST izsaukums (bezmaksas AI Studio atslēga; atbildi prasām JSON). */
-async function callGemini(history: ChatMsg[], userText: string): Promise<{ reply: string; search: SearchFilters | null; appraisal: AppraisalFilters | null; drops: DropsFilters | null; market: MarketFilters | null; deals: DealsFilters | null }> {
+async function callGemini(history: ChatMsg[], userText: string, lang = "lv"): Promise<{ reply: string; search: SearchFilters | null; appraisal: AppraisalFilters | null; drops: DropsFilters | null; market: MarketFilters | null; deals: DealsFilters | null }> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("GEMINI_API_KEY nav iestatīta");
   const model = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
@@ -179,7 +186,7 @@ async function callGemini(history: ChatMsg[], userText: string): Promise<{ reply
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      systemInstruction: { parts: [{ text: SYSTEM_PROMPT + langNote(lang) }] },
       contents,
       generationConfig: { temperature: 0.3, maxOutputTokens: 600, responseMimeType: "application/json" },
     }),
@@ -392,8 +399,8 @@ export async function aiTextToQuery(text: string): Promise<{ params?: Record<str
 }
 
 /** Galvenā funkcija: vaicājums → AI filtri → DB rezultāti + saite uz pilnu meklējumu. */
-export async function runAssistant(history: ChatMsg[], userText: string): Promise<AssistantAnswer> {
-  const ai = await callGemini(history, userText);
+export async function runAssistant(history: ChatMsg[], userText: string, lang = "lv"): Promise<AssistantAnswer> {
+  const ai = await callGemini(history, userText, lang);
   const f = ai.search;
   if (!f && ai.drops) {
     const d = ai.drops;

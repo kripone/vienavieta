@@ -26,7 +26,7 @@ export async function POST(req: Request) {
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "local";
   if (limited(ip)) return NextResponse.json({ error: "Šodienas sarunu limits izsmelts (20/dienā). Pamēģini rīt!" }, { status: 429 });
 
-  let body: { message?: string; history?: ChatMsg[] };
+  let body: { message?: string; history?: ChatMsg[]; lang?: string };
   try {
     body = await req.json();
   } catch {
@@ -39,7 +39,8 @@ export async function POST(req: Request) {
     : [];
 
   try {
-    const answer = await runAssistant(history, message);
+    const lang = ["lv", "en", "ru", "lt"].includes(String(body.lang)) ? String(body.lang) : "lv";
+    const answer = await runAssistant(history, message, lang);
     void trackAiUsage("chat");
     return NextResponse.json(answer);
   } catch (e) {

@@ -2,6 +2,23 @@
 import type { Dict } from "./core";
 
 export const ru: Dict = {
+  "AI meklēšanas palīgs": "AI-помощник поиска",
+  "AI palīgs": "AI-помощник",
+  "Atrasti {n} sludinājumi": "Найдено объявлений: {n}",
+  "Darījumi adresē": "Сделки по адресу",
+  "Kaut kas nogāja greizi — pamēģini vēlreiz.": "Что-то пошло не так — попробуйте ещё раз.",
+  "Ko meklējam?": "Что ищем?",
+  "Meklēju": "Ищу",
+  "Mikrofons nav pieejams — atļauj to pārlūka iestatījumos un pamēģini vēlreiz.": "Микрофон недоступен — разрешите его в настройках браузера и попробуйте снова.",
+  "Neizdevās saklausīt — pamēģini vēlreiz.": "Не удалось расслышать — попробуйте ещё раз.",
+  "Novērtēt bez maksas": "Оценить бесплатно",
+  "Savienojuma kļūda — pamēģini vēlreiz.": "Ошибка соединения — попробуйте ещё раз.",
+  "Skatīt pilnu sarakstu →": "Смотреть весь список →",
+  "Skatīt visus {n} →": "Смотреть все {n} →",
+  "Sveiki! Pastāsti, ko meklē — piemēram:": "Здравствуйте! Расскажите, что ищете, — например:",
+  "Dīzeļa universāls līdz 8000 € Rīgā": "Дизельный универсал до 8000 € в Риге",
+  "2 istabu dzīvoklis īrē Jūrmalā": "2-комнатная квартира в аренду в Юрмале",
+  "Elektro auto līdz 20000": "Электромобиль до 20000",
   "kvadrātmetra cenas mediāna {p} €/m²": "медиана цены за квадратный метр {p} €/м²",
   "īres mediāna {p} €/m² mēnesī": "медиана аренды {p} €/м² в месяц",
   "Kā skaitām": "Как мы считаем",

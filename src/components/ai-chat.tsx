@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/i18n/client";
+import { trTitle } from "@/i18n/content";
 import type { AssistantAnswer } from "@/lib/ai-chat";
 
 type Msg = { role: "user" | "model"; text: string; results?: AssistantAnswer["results"]; total?: number; moreUrl?: string | null; appraisalUrl?: string | null };
@@ -8,7 +9,7 @@ type Msg = { role: "user" | "model"; text: string; results?: AssistantAnswer["re
 const fmtPrice = (n: number | null) => (n == null ? "" : `${n.toLocaleString("lv-LV")} €`);
 
 export function AiChat() {
-  const { t, lp } = useT();
+  const { t, lp, locale } = useT();
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -38,7 +39,7 @@ export function AiChat() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ message: text, history }),
+        body: JSON.stringify({ message: text, history, lang: locale }),
       });
       const data = (await res.json()) as AssistantAnswer & { error?: string };
       if (!res.ok) {
@@ -155,7 +156,7 @@ export function AiChat() {
                 {m.results.map((r) => (
                   <div key={r.id} className="ai-result">
                     {r.thumb && <img src={r.thumb} alt="" loading="lazy" />}
-                    <a className="ai-r-title" href={r.ext ? r.url : lp(r.url)} {...(r.ext ? { target: "_blank", rel: "noopener noreferrer" } : {})}>{r.title}</a>
+                    <a className="ai-r-title" href={r.ext ? r.url : lp(r.url)} {...(r.ext ? { target: "_blank", rel: "noopener noreferrer" } : {})}>{trTitle(r.title, t)}</a>
                     <span className="ai-r-meta">
                       {r.prevPrice != null && <s className="ai-r-prev">{fmtPrice(r.prevPrice)}</s>}<b>{fmtPrice(r.price)}</b>
                       {r.place ? ` · ${r.place}` : ""}
