@@ -6,6 +6,9 @@ export async function register() {
   // ss.com sarakstu ievākšana fonā (izslēdzama ar SS_CRAWL=off; izstrādē ieslēdz ar SS_CRAWL=on)
   const { startSsCrawler } = await import("./lib/importers/ss-scheduler");
   startSsCrawler();
+  // IndexNow: reizi dienā paziņo Bing par jaunām sitemap lapām (izslēdzams ar INDEXNOW=off)
+  const { startIndexNowDaily } = await import("./lib/indexnow");
+  startIndexNowDaily();
 }
 
 /** Servera kļūdas (lapas, server actions, API) → kļūdu žurnāls (src/lib/errors.ts). */

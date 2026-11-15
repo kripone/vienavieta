@@ -437,3 +437,7 @@ export const SEO_BODY_ROOT: Record<string, string> = {
   "Sedans": "Sedani", "Universāls": "Universāļi", "Hečbeks": "Hečbeki", "Apvidus": "Apvidus auto", "Minivens": "Minivēni",
   "Kupeja": "Kupejas", "Kabriolets": "Kabrioleti", "Pikaps": "Pikapi", "Mikroautobuss": "Mikroautobusi",
 };
+
+/** IndexNow ikdienas kārta: cik adreses dienā (protokola limits vienā pieprasījumā 10 000) un pēc cik dienām sūtīt atkārtoti. */
+export const INDEXNOW_DAILY_MAX = 10_000;
+export const INDEXNOW_RESEND_DAYS = 30;

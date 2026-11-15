@@ -580,3 +580,12 @@ export const errorEvents = pgTable(
   },
   (t) => [index("error_events_last_idx").on(t.lastAt)],
 );
+
+/**
+ * Kuras adreses jau paziņotas Bing caur IndexNow (src/lib/indexnow.ts, ikdienas kārta): lai katru lapu
+ * sūtītu vienreiz un atkārtoti tikai pēc INDEXNOW_RESEND_DAYS, nevis katru dienu.
+ */
+export const indexnowSent = pgTable("indexnow_sent", {
+  url: text("url").primaryKey(),
+  sentAt: timestamp("sent_at", { withTimezone: true }).notNull().defaultNow(),
+});
