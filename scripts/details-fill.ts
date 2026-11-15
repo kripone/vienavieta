@@ -6,7 +6,7 @@
 import { closeApDetailsBrowser, fillAutopliusDetails } from "../src/lib/importers/autoplius-details";
 import { closeC24DetailsBrowser, fillCity24Details } from "../src/lib/importers/city24-details";
 
-const BATCHES = 6; // 6 × 25 = līdz 150 sludinājumiem katram avotam vienā palaišanā
+const BATCHES = 20; // 20 × 25 = līdz 500 sludinājumiem katram avotam vienā palaišanā (autoplius pilnā seguma dēļ rinda ir liela)
 
 async function main() {
   const url = process.env.DATABASE_URL ?? "";

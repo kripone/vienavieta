@@ -298,7 +298,12 @@ export async function crawlAutoplius(mode: "quick" | "full", target: ApTarget = 
       if (mode === "full" && !total && lastPage <= n) break;
     } catch (err) {
       res.errors.push(`lapa ${n}: ${err instanceof Error ? err.message : err}`);
-      if (++failsInRow >= 3) break;
+      failsInRow++;
+      if (failsInRow >= 5) break;
+      // Cloudflare rate-limit gadījumā dzesējamies ar pieaugošu pauzi (10s, 30s, 90s, 180s) un mēģinām to pašu lapu vēlreiz
+      await sleep([10_000, 30_000, 90_000, 180_000][failsInRow - 1] ?? 180_000);
+      n--;
+      continue;
     }
     if (n < last) await sleep(delayMs);
   }
@@ -317,7 +322,13 @@ export async function crawlAutoplius(mode: "quick" | "full", target: ApTarget = 
   }
   res.ms = Date.now() - started.getTime();
 
-  const set = mode === "full" ? { lastFullAt: started, lastResult: res as unknown as Record<string, unknown> } : { lastQuickAt: started };
+  // Pilnā kārta, kas neieguva NE VIENAS rindas (tipiski Cloudflare rate-limit), neatzīmējas kā pabeigta:
+  // lastFullAt paliek vecs, tāpēc nākamā plānotā kārta to mēģinās no jauna (līdz 5 atkārtojumiem lapai).
+  const fullFailed = mode === "full" && res.rows === 0 && res.errors.length > 0;
+  const set =
+    mode === "full"
+      ? { ...(fullFailed ? {} : { lastFullAt: started }), lastResult: res as unknown as Record<string, unknown> }
+      : { lastQuickAt: started };
   await db.insert(crawlState).values({ name: target.key, ...set }).onConflictDoUpdate({ target: crawlState.name, set });
   return res;
 }
