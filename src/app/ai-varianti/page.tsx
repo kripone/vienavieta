@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "AI pogas varianti" };
 
-const SPARKLE = `<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><circle class="eye" cx="9.2" cy="11.5" r="2.7" fill="#fff"/><circle class="eye" cx="14.8" cy="11.5" r="2.7" fill="#fff"/></svg>`;
+const SPARKLE = `<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><g class="eye"><ellipse cx="8.6" cy="12" rx="3.5" ry="4" fill="#fff"/><circle cx="9.5" cy="12.7" r="1.7" fill="#1f2937"/></g><g class="eye"><ellipse cx="15.4" cy="12" rx="3.5" ry="4" fill="#fff"/><circle cx="16.3" cy="12.7" r="1.7" fill="#1f2937"/></g></svg>`;
 
 const VARIANTS: { id: string; name: string; desc: string; cls: string; inner: string }[] = [
   { id: "A", name: "Pašreizējā", desc: "Rotējošs gradients + viļņotā mala — tas, kas tagad lapā", cls: "av-a", inner: "✨" },
