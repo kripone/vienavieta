@@ -54,11 +54,11 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
       <a href={lp(`/sludinajumi/${l.id}`)} className="thumb" aria-hidden="true" tabIndex={-1}>
         {l.thumbKey ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={mediaUrl(l.thumbKey)} alt="" loading="lazy" />
+          <img src={mediaUrl(l.thumbKey)} alt={trTitle(l.title, t)} loading="lazy" />
         ) : ext && l.externalThumbUrl && process.env.EXTERNAL_THUMBS !== "off" ? (
-          <ExtThumb src={l.externalThumbUrl} source={src} fallback={listingIll(l)} />
+          <ExtThumb src={l.externalThumbUrl} source={src} fallback={listingIll(l)} alt={trTitle(l.title, t)} />
         ) : !ext && l.externalThumbUrl ? (
-          <ExtThumb src={l.externalThumbUrl} source="" fallback={listingIll(l)} />
+          <ExtThumb src={l.externalThumbUrl} source="" fallback={listingIll(l)} alt={trTitle(l.title, t)} />
         ) : (
           <Ill svg={listingIll(l)} />
         )}

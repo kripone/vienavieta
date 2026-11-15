@@ -161,7 +161,7 @@ export default async function ListingPage(props: Props) {
         {!d.photos.length && l.source !== "own" && l.externalThumbUrl && process.env.EXTERNAL_THUMBS !== "off" ? (
           // ārējam sludinājumam: saraksta sīktēls no avota servera (lielākas bildes ir oriģinālajā sludinājumā)
           <div className="ext-hero">
-            <ExtThumb src={l.externalThumbUrl} source={SOURCE_LABEL[l.source] ?? l.source} fallback={listingIll(l)} />
+            <ExtThumb src={l.externalThumbUrl} source={SOURCE_LABEL[l.source] ?? l.source} fallback={listingIll(l)} alt={trTitle(l.title, t)} />
           </div>
         ) : (
           <Gallery photos={d.photos} title={l.title} placeholder={listingIll(l)} />
