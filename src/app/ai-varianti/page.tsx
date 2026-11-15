@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "AI pogas varianti" };
 
+const SPARKLE = `<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M12 2.5c.9 5.4 3 7.6 9.5 9.5-6.5 1.9-8.6 4.1-9.5 9.5-.9-5.4-3-7.6-9.5-9.5 6.5-1.9 8.6-4.1 9.5-9.5Z" fill="#fff"/><circle class="eye" cx="10.1" cy="11.2" r="1.05" fill="#6d28d9"/><circle class="eye" cx="13.9" cy="11.2" r="1.05" fill="#6d28d9"/></svg>`;
+
 const VARIANTS: { id: string; name: string; desc: string; cls: string; inner: string }[] = [
   { id: "A", name: "Pašreizējā", desc: "Rotējošs gradients + viļņotā mala — tas, kas tagad lapā", cls: "av-a", inner: "✨" },
   { id: "B", name: "Siri viļņi", desc: "3 ļoti maigi viļņi lēni izplešas un izgaist — vistuvāk Siri", cls: "av-b", inner: `<i class="w"></i><i class="w"></i><i class="w"></i><em>✨</em>` },
@@ -19,6 +21,7 @@ const VARIANTS: { id: string; name: string; desc: string; cls: string; inner: st
   { id: "L", name: "Siri orbs", desc: "Tumša stiklotā sfēra ar maigu gaismas vilni iekšā — kā Siri ikona", cls: "av-l", inner: `<i class="w1"></i><i class="w2"></i><i class="w3"></i>` },
   { id: "M", name: "Siri orbs krāsains", desc: "Tas pats orbs, bet vilnis ar violetu-zilu-rozā mirdzumu", cls: "av-m", inner: `<i class="w1"></i><i class="w2"></i><i class="w3"></i>` },
   { id: "N", name: "Kūpošs orbs", desc: "Tumšā sfērā lēni kūpo dūmu slāņi, kontūra maigi elpo", cls: "av-n", inner: `<i class="w1"></i><i class="w2"></i><i class="w3"></i><i class="w4"></i>` },
+  { id: "O", name: "Burbulis + actiņas", desc: "D burbulis + ✨ ar maziņām actiņām; ik pa 5 s maigs uzmanības mirdzums", cls: "av-o", inner: SPARKLE },
 ];
 
 export default function AiVarianti() {
@@ -196,6 +199,14 @@ const CSS = `
 .av-n::after { inset: -3px; filter: blur(6px); opacity: .35;
   background: radial-gradient(circle, rgba(148,163,184,.5), transparent 70%);
   animation: av-d-pulse 5s ease-in-out infinite; }
+
+/* O — D burbulis + zvaigznīte ar actiņām, kas mirgo */
+.av-o { animation: none; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
+.av-o::after { inset: -14px; filter: blur(10px); opacity: .8;
+  background: conic-gradient(from var(--av-rot), #7c3aed, #06b6d4, #ec4899, #7c3aed);
+  animation: av-rot 7s linear infinite, av-d-pulse 3.5s ease-in-out infinite; }
+.av-o .eye { transform-box: fill-box; transform-origin: center; animation: av-blink 5s ease-in-out infinite; }
+@keyframes av-blink { 0%, 91%, 100% { transform: scaleY(1); } 94% { transform: scaleY(.12); } 97% { transform: scaleY(1); } }
 
 @keyframes av-blob {
   0%,100% { border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; }
