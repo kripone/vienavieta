@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "AI pogas varianti" };
 
-const SPARKLE = `<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><g class="eye"><ellipse cx="8.6" cy="12" rx="3.5" ry="4" fill="#fff"/><circle cx="9.5" cy="12.7" r="1.7" fill="#1f2937"/></g><g class="eye"><ellipse cx="15.4" cy="12" rx="3.5" ry="4" fill="#fff"/><circle cx="16.3" cy="12.7" r="1.7" fill="#1f2937"/></g></svg>`;
+const SPARKLE = `<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><g class="eye"><ellipse cx="7.6" cy="12" rx="3.5" ry="4" fill="#fff"/><circle class="pupil" cx="8.5" cy="12.7" r="1.7" fill="#1f2937"/></g><g class="eye"><ellipse cx="16.4" cy="12" rx="3.5" ry="4" fill="#fff"/><circle class="pupil" cx="17.3" cy="12.7" r="1.7" fill="#1f2937"/></g></svg>`;
 
 const VARIANTS: { id: string; name: string; desc: string; cls: string; inner: string }[] = [
   { id: "A", name: "Pašreizējā", desc: "Rotējošs gradients + viļņotā mala — tas, kas tagad lapā", cls: "av-a", inner: "✨" },
@@ -206,7 +206,9 @@ const CSS = `
   background: conic-gradient(from var(--av-rot), #7c3aed, #06b6d4, #ec4899, #7c3aed);
   animation: av-rot 7s linear infinite, av-d-pulse 3.5s ease-in-out infinite; }
 .av-o .eye { transform-box: fill-box; transform-origin: center; animation: av-blink 5s ease-in-out infinite; }
+.av-o .pupil { animation: av-look 6s ease-in-out infinite; }
 @keyframes av-blink { 0%, 91%, 100% { transform: scaleY(1); } 94% { transform: scaleY(.12); } 97% { transform: scaleY(1); } }
+@keyframes av-look { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(1px, .6px); } 45% { transform: translate(-1.1px, .2px); } 70% { transform: translate(.3px, -1px); } }
 
 @keyframes av-blob {
   0%,100% { border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; }
