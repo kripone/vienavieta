@@ -63,6 +63,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </a>
             <span className="tag">{t("Visi Latvijas sludinājumi vienā meklētājā")}</span>
             <nav className="nav">
+              <UserMenu />
+              <a href="/pievienot" className="btn primary">+ {t("Pievienot")}</a>
               <MobileMenu>
                 <a href={lp("/tirgus")} className="btn" title={t("Tirgus tendences")}>📈 <span className="hide-sm">{t("Tirgus")}</span></a>
                 <a href={lp("/cenu-kritumi")} className="btn" title={t("Cenu kritumi")}>▼ <span className="hide-sm">{t("Kritumi")}</span></a>
@@ -73,8 +75,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <LangSwitch />
                 <ThemeToggle />
               </MobileMenu>
-              <UserMenu />
-              <a href="/pievienot" className="btn primary">+ {t("Pievienot")}</a>
             </nav>
           </div>
         </header>
