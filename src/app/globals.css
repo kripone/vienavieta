@@ -867,7 +867,7 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 @media (max-width: 560px) {
   .kat-row { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -16px; padding: 0 16px 4px; scrollbar-width: none; }
   .kat-row::-webkit-scrollbar { display: none; }
-  .kat-card { flex: 0 0 96px; scroll-snap-align: start; padding: 12px 4px 10px; }
+  .kat-row > .kat-card { flex: 0 0 96px; scroll-snap-align: start; padding: 12px 4px 10px; }
   .kat-card svg { width: 46px; height: 28px; }
   .kat-card b { font-size: 13px; }
 }
