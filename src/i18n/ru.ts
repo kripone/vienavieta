@@ -2,6 +2,9 @@
 import type { Dict } from "./core";
 
 export const ru: Dict = {
+  "Skatīt bildes un kontaktus": "Фото и контакты",
+  "atvērsies {src}": "откроется {src}",
+  "Sazināties ar pārdevēju": "Связаться с продавцом",
   "Skats": "Вид",
   "Režģis": "Плитка",
   "Saraksts": "Список",

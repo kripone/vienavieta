@@ -187,7 +187,7 @@ export default async function ListingPage(props: Props) {
           </p>
           {evaluation && <EvalBadge e={evaluation} long />}
           {!ext && (
-            <div className="panel seller">
+            <div className="panel seller" id="kontakti">
               <b>{seller}</b>
               <span className="fine">
                 {t(d.sellerType === "agency" ? "Aģentūra" : d.sellerType === "dealer" ? (l.kind === "vehicle" ? "Auto salons" : "Aģentūra") : "Privātpersona")}
@@ -272,6 +272,20 @@ export default async function ListingPage(props: Props) {
         {l.status === "active" && !isOwner && <ReportButton id={l.id} loggedIn={Boolean(user)} />}
       </div>
       </div>
+      {/* telefonā apakšā vienmēr redzama josla: sirsniņa + galvenā darbība */}
+      {l.status === "active" && !isOwner && (
+        <div className="det-bar">
+          <FavButton id={l.id} on={isFav} loggedIn={Boolean(user)} />
+          {ext ? (
+            <a className="btn primary" href={ext} rel="nofollow noopener noreferrer">
+              <span>{t("Skatīt bildes un kontaktus")}</span>
+              <small>{t("atvērsies {src}", { src })}</small>
+            </a>
+          ) : (
+            <a className="btn primary" href="#kontakti"><span>{t("Sazināties ar pārdevēju")}</span></a>
+          )}
+        </div>
+      )}
       {similar.length > 0 && (
         <section className="similar">
           <h2>{t("Līdzīgi sludinājumi")}</h2>
