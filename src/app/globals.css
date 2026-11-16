@@ -1,6 +1,7 @@
 /* VienāVietā: krāsas un burti no prototipa. Visas krāsas ir mainīgie, lai strādā gaišā un tumšā tēma. */
 :root {
-  --bg: #f3f4f7; --surface: #ffffff; --surface-2: #eceef3; --line: #d9dce5;
+  --bg: #f3f4f7; --bg-grad: linear-gradient(180deg, #f3f4f7 0%, #e9effa 55%, #dde8fa 100%);
+  --surface: #ffffff; --surface-2: #eceef3; --line: #d9dce5;
   --fg: #181b24; --muted: #5d6475; --accent: #9e3039; --accent-fg: #ffffff; --accent-soft: #f6e3e5;
   --car: #2f5fa8; --home: #2f8a64;
   --ill-body: #ffffff; --ill-line: #b3bac8; --ill-glass: #2c3442; --ill-tire: #1d2129; --ill-rim: #c3c9d4; --ill-shadow: rgba(20,24,34,.16); --ill-roof: #b85a52; --ill-ground: #86b56f; --ill-tree: #4f8f5b; --ill-bg: #eceef3; --tcard: #e6e9f0;
@@ -11,21 +12,23 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #12141a; --surface: #1b1e27; --surface-2: #242835; --line: #323748;
+    --bg: #12141a; --bg-grad: linear-gradient(180deg, #12141a 0%, #0e1424 55%, #0c1830 100%);
+    --surface: #1b1e27; --surface-2: #242835; --line: #323748;
     --fg: #eceef4; --muted: #9aa1b3; --accent: #e0606b; --accent-fg: #1a0b0d; --accent-soft: #3a1d22;
     --car: #7aa6ec; --home: #5fc79a; color-scheme: dark;
     --ill-body: #f1f3f7; --ill-line: #8d95a7; --ill-glass: #273041; --ill-tire: #0b0d12; --ill-rim: #b4bbc7; --ill-shadow: rgba(0,0,0,.55); --ill-roof: #c4665e; --ill-ground: #4f7d42; --ill-tree: #3f7a4c; --ill-bg: #14161c; --tcard: #14161c;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #12141a; --surface: #1b1e27; --surface-2: #242835; --line: #323748;
+  --bg: #12141a; --bg-grad: linear-gradient(180deg, #12141a 0%, #0e1424 55%, #0c1830 100%);
+  --surface: #1b1e27; --surface-2: #242835; --line: #323748;
   --fg: #eceef4; --muted: #9aa1b3; --accent: #e0606b; --accent-fg: #1a0b0d; --accent-soft: #3a1d22;
   --car: #7aa6ec; --home: #5fc79a; color-scheme: dark;
   --ill-body: #f1f3f7; --ill-line: #8d95a7; --ill-glass: #273041; --ill-tire: #0b0d12; --ill-rim: #b4bbc7; --ill-shadow: rgba(0,0,0,.55); --ill-roof: #c4665e; --ill-ground: #4f7d42; --ill-tree: #3f7a4c; --ill-bg: #14161c; --tcard: #14161c;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
-body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.45; }
+body { background: var(--bg); background: var(--bg-grad, var(--bg)) fixed; color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.45; min-height: 100dvh; }
 a { color: var(--accent); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .wrap { max-width: 1320px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
