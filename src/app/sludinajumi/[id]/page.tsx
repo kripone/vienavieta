@@ -159,6 +159,7 @@ export default async function ListingPage(props: Props) {
       {l.status === "pending" && isOwner && <p className="alert">{t("Sludinājums ir paslēpts pēc vairāku lietotāju sūdzībām. Moderators to pārbaudīs, un pēc tam tas atkal būs redzams.")}</p>}
       {isOwner && <OwnerActions id={l.id} status={l.status} />}
       <div className="det">
+        <div className="det-media">
         {!d.photos.length && l.source !== "own" && l.externalThumbUrl && process.env.EXTERNAL_THUMBS !== "off" ? (
           // ārējam sludinājumam: bilde no avota servera; ss.com gadījumā lielais 800px variants,
           // rezervē 174px sīktēls, tad ilustrācija (ja avots bloķē karstās saites)
@@ -168,33 +169,24 @@ export default async function ListingPage(props: Props) {
         ) : (
           <Gallery photos={d.photos} title={l.title} placeholder={listingIll(l)} />
         )}
+          {!isOwner && <div className="det-fav"><FavButton id={l.id} on={isFav} loggedIn={Boolean(user)} /></div>}
+        </div>
         <div className="det-side">
           <div className="det-title">
             <h1>{trTitle(l.title, t)}</h1>
             <div className="card-tools">
               <CompareToggle id={l.id} kind={l.kind} />
-              {!isOwner && <FavButton id={l.id} on={isFav} loggedIn={Boolean(user)} big />}
             </div>
           </div>
           <div className="det-price">
             {formatPrice(l.price)} {unit && <small>{unit}</small>}
           </div>
-          {evaluation && <EvalBadge e={evaluation} long />}
           <p className="meta">
             {(d.place || l.address) && <span>📍 {fullLocation(l.address, d.place, d.region, d.regionKind)}</span>}
             <span>{ext ? t("Pievienots {when}", { when: timeAgo(l.createdAt, t) }) : t("Ievietots {when}", { when: timeAgo(l.createdAt, t) })}</span>
           </p>
-          {l.status === "active" && l.kind === "vehicle" && !l.deal?.match(/^(rent|day|buy)$/) && l.price >= FINANCE.lease.minPrice && <FinanceCalc price={l.price} kind="lease" />}
-          {l.status === "active" && l.kind === "property" && l.deal === "sell" && l.price >= FINANCE.mortgage.minPrice && <FinanceCalc price={l.price} kind="mortgage" />}
-          {ext ? (
-            <div className="panel seller">
-              <b>{t("Sludinājums no {src}", { src })}</b>
-              <p className="ext-note">
-                {t("Šeit redzami tikai galvenie fakti. Bildes, aprakstu un pārdevēja kontaktus skaties oriģinālajā sludinājumā {src}.", { src })}
-              </p>
-              <a className="btn primary" href={ext} rel="nofollow noopener noreferrer">{t("Atvērt {src}", { src })} ↗</a>
-            </div>
-          ) : (
+          {evaluation && <EvalBadge e={evaluation} long />}
+          {!ext && (
             <div className="panel seller">
               <b>{seller}</b>
               <span className="fine">
@@ -207,24 +199,6 @@ export default async function ListingPage(props: Props) {
               )}
             </div>
           )}
-          {elsewhere.length > 0 && (
-            <div className="panel also-panel">
-              <b>{t("Šis pats sludinājums arī:")}</b>
-              <ul>
-                {elsewhere.map((a: { id: string; source: string; url: string; price: number }) => (
-                  <li key={a.id}>
-                    {a.source === "own" ? (
-                      <a href={lp(a.url)}>VienāVietā</a>
-                    ) : (
-                      <a href={a.url} rel="nofollow noopener noreferrer">{SOURCE_LABEL[a.source] ?? a.source} ↗</a>
-                    )}{" "}
-                    <span className="fine">{formatPrice(a.price)}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {l.status === "active" && !isOwner && <ReportButton id={l.id} loggedIn={Boolean(user)} />}
         </div>
       </div>
       <div className="det-body">
@@ -259,15 +233,44 @@ export default async function ListingPage(props: Props) {
             {l.source !== "own" && <p className="fine">{t("Aprīkojums pēc pārdevēja norādītā {src}.", { src: SOURCE_LABEL[l.source] ?? l.source })}</p>}
           </details>
         )}
-        {l.kind === "property" && l.lat != null && l.lon != null && <ListingMapLazy lat={l.lat} lon={l.lon} exact={l.geoPrecision === "street"} />}
-        {vzd && <VzdDeals data={vzd} perM2={l.areaM2 ? Math.round(l.price / Number(l.areaM2)) : null} />}
-        {history && <PriceHistory h={history} external={l.source !== "own"} />}
         {l.description && (
           <section>
             <h2>{t("Apraksts")}</h2>
             <p className="desc">{l.description}</p>
           </section>
         )}
+        {l.kind === "property" && l.lat != null && l.lon != null && <ListingMapLazy lat={l.lat} lon={l.lon} exact={l.geoPrecision === "street"} />}
+        {vzd && <VzdDeals data={vzd} perM2={l.areaM2 ? Math.round(l.price / Number(l.areaM2)) : null} />}
+        {history && <PriceHistory h={history} external={l.source !== "own"} />}
+        {l.status === "active" && l.kind === "vehicle" && !l.deal?.match(/^(rent|day|buy)$/) && l.price >= FINANCE.lease.minPrice && <FinanceCalc price={l.price} kind="lease" />}
+        {l.status === "active" && l.kind === "property" && l.deal === "sell" && l.price >= FINANCE.mortgage.minPrice && <FinanceCalc price={l.price} kind="mortgage" />}
+        {ext && (
+          <div className="panel seller ext-open">
+            <b>{t("Sludinājums no {src}", { src })}</b>
+            <p className="ext-note">
+              {t("Šeit redzami tikai galvenie fakti. Bildes, aprakstu un pārdevēja kontaktus skaties oriģinālajā sludinājumā {src}.", { src })}
+            </p>
+            <a className="btn primary" href={ext} rel="nofollow noopener noreferrer">{t("Atvērt {src}", { src })} ↗</a>
+          </div>
+        )}
+        {elsewhere.length > 0 && (
+          <div className="panel also-panel">
+            <b>{t("Šis pats sludinājums arī:")}</b>
+            <ul>
+              {elsewhere.map((a: { id: string; source: string; url: string; price: number }) => (
+                <li key={a.id}>
+                  {a.source === "own" ? (
+                    <a href={lp(a.url)}>VienāVietā</a>
+                  ) : (
+                    <a href={a.url} rel="nofollow noopener noreferrer">{SOURCE_LABEL[a.source] ?? a.source} ↗</a>
+                  )}{" "}
+                  <span className="fine">{formatPrice(a.price)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {l.status === "active" && !isOwner && <ReportButton id={l.id} loggedIn={Boolean(user)} />}
       </div>
       {similar.length > 0 && (
         <section className="similar">
