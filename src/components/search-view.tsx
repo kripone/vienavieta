@@ -7,6 +7,9 @@ import { SaveSearchButton } from "./save-search-button";
 import { SearchFilters } from "./search-filters";
 import { SearchMapLazy } from "./search-map-lazy";
 import { SortSelect } from "./sort-select";
+import { ViewToggle } from "./view-toggle";
+import { VIEW_COOKIE, type ListView } from "@/lib/constants";
+import { cookies } from "next/headers";
 import { SmartSearch } from "./smart-search";
 import { PriceInsights } from "./price-insights";
 import { TypeStrip } from "./type-strip";
@@ -35,6 +38,7 @@ export type SP = Record<string, string | string[] | undefined>;
  */
 export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing }) {
   const { t, tp, lp, locale } = await getT();
+  const view: ListView = (await cookies()).get(VIEW_COOKIE)?.value === "list" ? "list" : "grid";
   const s = parseSearch(raw);
   const flat: Record<string, string> = {};
   for (const [k, v] of Object.entries(raw)) if (typeof v === "string" && v) flat[k] = v;
@@ -134,6 +138,7 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
           {landing ? <h1>{landing.h1}</h1> : <h1>{heading}</h1>}
           {result && <span className="count">{tp(result.total, "sludinājums", "sludinājumi")}</span>}
           <span className="grow" />
+          <ViewToggle initial={view} />
           <Suspense>
             <SortSelect value={s.sort} base={flat} />
           </Suspense>
@@ -173,7 +178,7 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
           <div className="notice">{t("Nekas neatbilst izvēlētajiem filtriem. Pamēģini paplašināt meklēšanu.")}</div>
         ) : (
           <>
-            <div className="list">
+            <div className={`list results-list${view === "grid" ? " grid" : ""}`}>
               {result.rows.map((l) => (
                 <ListingCard key={l.id} l={l} favorite={{ on: favs.has(l.id), loggedIn: Boolean(user) }} also={also.get(l.id)} evaluation={evals.get(l.id)} oldPrice={l.firstPrice} vzd={vzd.get(l.id)} compare />
               ))}

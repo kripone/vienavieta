@@ -2,6 +2,9 @@
 import type { Dict } from "./core";
 
 export const en: Dict = {
+  "Skats": "View",
+  "Režģis": "Grid",
+  "Saraksts": "List",
   "AI meklēšanas palīgs": "AI search assistant",
   "AI palīgs": "AI assistant",
   "Atrasti {n} sludinājumi": "{n} listings found",
