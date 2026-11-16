@@ -9,6 +9,16 @@ export async function register() {
   // IndexNow: reizi dienā paziņo Bing par jaunām sitemap lapām (izslēdzams ar INDEXNOW=off)
   const { startIndexNowDaily } = await import("./lib/indexnow");
   startIndexNowDaily();
+  // Pēc starta „sasildām” galvenās lapas, lai pirmais apmeklētājs vai meklētāja robots negaida uz tukšiem kešiem
+  if (process.env.NODE_ENV === "production" && process.env.WARMUP !== "off") {
+    const { WARMUP_PATHS } = await import("./lib/constants");
+    const base = `http://127.0.0.1:${process.env.PORT || 3000}`;
+    setTimeout(async () => {
+      for (const p of WARMUP_PATHS) {
+        await fetch(base + p, { headers: { "user-agent": "VienaVieta-warmup" } }).then((r) => r.arrayBuffer()).catch(() => {});
+      }
+    }, 20_000);
+  }
 }
 
 /** Servera kļūdas (lapas, server actions, API) → kļūdu žurnāls (src/lib/errors.ts). */

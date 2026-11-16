@@ -461,3 +461,9 @@ export const HOME_CATEGORIES = [
   { key: "office", label: "Biroji", href: "/?cat=property&ptype=Birojs", group: "property" },
 ] as const;
 export const HOME_CAT_MIN = 20;
+
+/** Lapas, ko serveris pēc starta ielādē pats, lai sasildītu kešus (`src/instrumentation.ts`, izslēdz ar WARMUP=off). */
+export const WARMUP_PATHS = [
+  "/", "/auto", "/moto", "/ipasumi", "/ipasumi/dzivokli", "/ipasumi/dzivokli/riga", "/ipasumi/dzivokli-ire", "/ipasumi/dzivokli-ire/riga",
+  "/ipasumi/majas", "/ipasumi/zeme", "/ipasumi/dzivokli/jurmala", "/auto/lidz-5000", "/en", "/ru", "/lt",
+];
