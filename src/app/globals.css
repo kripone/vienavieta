@@ -114,6 +114,10 @@ main .fine { margin-top: 14px; }
 .src-chips label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .src-chips label .fine { margin: 0 0 0 2px; font-size: 12px; }
 .src-chips label.off { opacity: 0.45; }
+.loc-chips { max-height: 340px; overflow-y: auto; align-content: flex-start; }
+.loc-chips .loc-group { display: contents; }
+.loc-chips .loc-group > label strong { font-weight: 600; }
+.loc-chips .loc-group > label:not(:first-child) { padding-left: 18px; }
 .seg { display: inline-flex; background: var(--surface-2); padding: 4px; border-radius: 10px; gap: 4px; align-self: flex-start; }
 .seg button { border: 0; background: transparent; padding: 8px 14px; border-radius: 7px; font: inherit; font-weight: 600; color: var(--muted); cursor: pointer; }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.12); }

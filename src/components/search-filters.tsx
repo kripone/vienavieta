@@ -83,6 +83,9 @@ export function SearchFilters({ initial, regions, sources = [] }: { initial: Fil
   const make = makes.find((m) => String(m.id) === v.make);
   const pkeys = propertyKeys(v.ptype ?? "");
   const amen = useMemo(() => (v.amen ? v.amen.split(",") : []), [v.amen]);
+  // vieta: vairākas atķeksētas vērtības ("p:12,r:34,g:pieriga")
+  const locSel = useMemo(() => (v.loc ? v.loc.split(",").filter(Boolean) : []), [v.loc]);
+  const toggleLoc = (tok: string) => update({ loc: (locSel.includes(tok) ? locSel.filter((x) => x !== tok) : [...locSel, tok]).join(",") });
   const active = Object.entries(v).filter(([k, val]) => val && !["sort", "page", "cat", "vc"].includes(k)).length;
 
   return (
@@ -117,19 +120,34 @@ export function SearchFilters({ initial, regions, sources = [] }: { initial: Fil
           </button>
         ))}
       </div>}
-      <label className="field">
-        {t("Vieta")}
-        <select value={v.loc ?? ""} onChange={(e) => update({ loc: e.target.value })}>
-          <option value="">{t(v.cat !== "vehicle" || v.country === "LV" ? "Visa Latvija" : v.country === "LT" ? "Visa Lietuva" : "Visas vietas")}</option>
-          {(v.cat !== "vehicle" || v.country !== "LT") && <option value="g:pieriga">{t("Rīgas rajons (Pierīga)")}</option>}
+      <details className="more src-more" open={locSel.length > 0}>
+        <summary>
+          {t("Vieta")}
+          {locSel.length > 0 ? <span className="fine"> ({locSel.length})</span> : null}
+        </summary>
+        <div className="checks src-chips loc-chips">
+          <label className={!locSel.length ? "on" : "off"}>
+            <input type="checkbox" checked={!locSel.length} onChange={() => update({ loc: "" })} /> {t(v.cat !== "vehicle" || v.country === "LV" ? "Visa Latvija" : v.country === "LT" ? "Visa Lietuva" : "Visas vietas")}
+          </label>
+          {(v.cat !== "vehicle" || v.country !== "LT") && (
+            <label className={locSel.includes("g:pieriga") ? "on" : "off"}>
+              <input type="checkbox" checked={locSel.includes("g:pieriga")} onChange={() => toggleLoc("g:pieriga")} /> {t("Rīgas rajons (Pierīga)")}
+            </label>
+          )}
           {regions.filter((r) => (v.cat === "vehicle" ? !v.country || r.country === v.country : r.country === "LV")).map((r) => (
-            <optgroup key={r.region} label={v.cat === "vehicle" && !v.country && r.country === "LT" ? `${t("Lietuva")} · ${r.region}` : r.region}>
-              <option value={`r:${r.regionId}`}>{r.kind === "city" || r.country === "LT" ? t("Visa {r}", { r: r.region }) : t("Viss {r}", { r: r.region })}</option>
-              {r.places.map((p) => <option key={p.id} value={`p:${p.id}`}>{p.name}</option>)}
-            </optgroup>
+            <div key={r.region} className="loc-group">
+              <label className={locSel.includes(`r:${r.regionId}`) ? "on" : "off"}>
+                <input type="checkbox" checked={locSel.includes(`r:${r.regionId}`)} onChange={() => toggleLoc(`r:${r.regionId}`)} /> <strong>{v.cat === "vehicle" && !v.country && r.country === "LT" ? `${t("Lietuva")} · ` : ""}{r.kind === "city" || r.country === "LT" ? t("Visa {r}", { r: r.region }) : t("Viss {r}", { r: r.region })}</strong>
+              </label>
+              {r.places.map((p) => (
+                <label key={p.id} className={locSel.includes(`p:${p.id}`) ? "on" : "off"}>
+                  <input type="checkbox" checked={locSel.includes(`p:${p.id}`)} onChange={() => toggleLoc(`p:${p.id}`)} /> {p.name}
+                </label>
+              ))}
+            </div>
           ))}
-        </select>
-      </label>
+        </div>
+      </details>
 
       {v.cat === "vehicle" && (
         <>

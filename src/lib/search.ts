@@ -50,8 +50,8 @@ export function parseSearch(raw: Raw) {
   const vc = pick(raw.vc, VEHICLE_CLASSES) ?? (cat === "vehicle" ? "car" : undefined);
   const ptypeRaw = one(raw.ptype);
   const ptype = ptypeRaw?.startsWith("g:") ? (ptypeRaw.slice(2) in PROPERTY_GROUPS ? ptypeRaw : undefined) : pick(raw.ptype, PROPERTY_TYPES);
-  const locRaw = one(raw.loc);
-  const loc = locRaw && (/^[rp]:\d{1,6}$/.test(locRaw) || locRaw in REGION_GROUPS_LOC) ? locRaw : undefined;
+  // vieta: viena vai vairākas (komatā atdalītas) — "p:12", "r:34", "g:pieriga" jebkurā kombinācijā
+  const loc = many(raw.loc).filter((x) => /^[rp]:\d{1,6}$/.test(x) || x in REGION_GROUPS_LOC).slice(0, 12);
   return {
     cat,
     vc,
@@ -116,15 +116,19 @@ function conditions(s: SearchParams): SQL[] {
   if (s.cat) add(eq(listings.kind, s.cat));
   if (s.pmin != null) add(gte(listings.price, s.pmin));
   if (s.pmax != null) add(lte(listings.price, s.pmax));
-  if (s.loc) {
-    const group = REGION_GROUPS_LOC[s.loc];
-    const id = Number(s.loc.slice(2));
-    add(
-      group ? inArray(regions.name, group)
-      // pagasts vai pilsēta: ieskaitot tās ciemus
-      : s.loc[0] === "p" ? or(eq(listings.placeId, id), sql`${listings.placeId} in (select id from places where parent_id = ${id})`)!
-      : eq(places.regionId, id),
-    );
+  if (s.loc.length) {
+    const locParts: SQL[] = [];
+    for (const tok of s.loc) {
+      const group = REGION_GROUPS_LOC[tok];
+      const id = Number(tok.slice(2));
+      locParts.push(
+        group ? inArray(regions.name, group)
+        // pagasts vai pilsēta: ieskaitot tās ciemus
+        : tok[0] === "p" ? or(eq(listings.placeId, id), sql`${listings.placeId} in (select id from places where parent_id = ${id})`)!
+        : eq(places.regionId, id),
+      );
+    }
+    add(locParts.length === 1 ? locParts[0] : or(...locParts)!);
   }
   // Ārējiem sludinājumiem vieta var nebūt zināma (piem. ss.com auto RSS); valsti tad nosaka avots.
   const inCountry = (c: "LV" | "LT") =>
@@ -410,13 +414,17 @@ export async function describeSearch(s: SearchParams) {
     if (s.fmin != null && s.fmin === s.fmax) parts.push(`${s.fmin}. stāvs`);
     if (s.series) parts.push(s.series);
   }
-  if (s.loc && REGION_GROUPS_LOC[s.loc]) parts.push(REGION_GROUP_LABEL[s.loc]);
-  else if (s.loc) {
-    const id = Number(s.loc.slice(2));
-    const row = s.loc[0] === "p"
-      ? await db.query.places.findFirst({ where: eq(places.id, id), columns: { name: true } })
-      : await db.query.regions.findFirst({ where: eq(regions.id, id), columns: { name: true } });
-    if (row) parts.push(row.name);
+  if (s.loc.length) {
+    const names: string[] = [];
+    for (const tok of s.loc) {
+      if (REGION_GROUPS_LOC[tok]) { names.push(REGION_GROUP_LABEL[tok]); continue; }
+      const id = Number(tok.slice(2));
+      const row = tok[0] === "p"
+        ? await db.query.places.findFirst({ where: eq(places.id, id), columns: { name: true } })
+        : await db.query.regions.findFirst({ where: eq(regions.id, id), columns: { name: true } });
+      if (row) names.push(row.name);
+    }
+    if (names.length) parts.push(names.join(", "));
   } else if (s.country === "LT") parts.push("Lietuva");
   if (s.zone) parts.push("zona kartē");
   if (s.src === "own") parts.push("tikai VienāVietā");
@@ -469,7 +477,7 @@ export type Facet = { id: number; name: string; n: number };
 
 /** Sludinājumu skaits pa markām, modeļiem vai reģioniem pie dotajiem filtriem (pašu dimensiju neskaitot). */
 export function facetCounts(s: SearchParams, by: "make" | "model" | "region"): Promise<Facet[]> {
-  const base = { ...s, page: 1, sort: "new" as const, ...(by === "make" ? { make: undefined, model: undefined } : by === "model" ? { model: undefined } : { loc: undefined }) };
+  const base = { ...s, page: 1, sort: "new" as const, ...(by === "make" ? { make: undefined, model: undefined } : by === "model" ? { model: undefined } : { loc: [] as string[] }) };
   return cached(`facet:${by}:${JSON.stringify(base)}`, async () => {
     const idCol = by === "make" ? makes.id : by === "model" ? models.id : regions.id;
     const nameCol = by === "make" ? makes.name : by === "model" ? models.name : regions.name;
@@ -588,7 +596,7 @@ export function seoLinkCounts(s: SearchParams, by: "price" | "fuel" | "body" | "
   const base: SearchParams = {
     ...s, page: 1, sort: "new",
     ...(by === "price" ? { pmax: undefined } : by === "fuel" ? { fuel: undefined } : by === "body" ? { body: undefined }
-      : by === "rooms" ? { rmin: undefined, rmax: undefined } : by === "region" ? { loc: undefined } : {}),
+      : by === "rooms" ? { rmin: undefined, rmax: undefined } : by === "region" ? { loc: [] as string[] } : {}),
   };
   return cached(`seo:${by}:${steps.join(",")}:${JSON.stringify(base)}`, async () => {
     const from = <T extends Record<string, unknown>>(sel: T) =>
