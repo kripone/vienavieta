@@ -141,8 +141,10 @@ export function parseListPage(html: string): { rows: ApRow[]; lastPage: number; 
     const mileageNum = Number(mileageRaw?.replace(/[^\d]/g, "")) || null;
     const mileageKm = mileageNum && mileageNum <= 9_999_999 ? mileageNum : null; // aizsardzība pret int4 pārplūdi (mūļķības tipa "2222222222")
 
-    // sīktēls: tikai no autoplius bilžu servera (rādām no turienes, neglabājam)
-    const thumb = body.match(/<img[^>]*src="(https:\/\/autoplius-img\.[^"]+\.(?:jpg|jpeg|webp))"/)?.[1] ?? null;
+    // sīktēls: no grupas bilžu serveriem — autoplius-img.dgn.lt un skelbiu-img.dgn.lt
+    // (no skelbiu.lt pārpublicētie sludinājumi; rādām no turienes, neglabājam).
+    // Daļa bilžu ir slinkajā ielādē: src="" un adrese ir data-src atribūtā.
+    const thumb = body.match(/<img[^>]*(?:data-src|src)="(https:\/\/(?:autoplius|skelbiu)-img\.[^"]+\.(?:jpg|jpeg|webp))"/)?.[1] ?? null;
 
     rows.push({ link: href, externalId, titleRaw, price, year: year && year > 1900 && year < 2100 ? year : null, bodyRaw, fuelRaw, gearboxRaw, engineL, powerKw, mileageKm, city, thumb });
   }
