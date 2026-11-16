@@ -86,6 +86,17 @@ export function SearchFilters({ initial, regions, sources = [] }: { initial: Fil
   // vieta: vairākas atķeksētas vērtības ("p:12,r:34,g:pieriga")
   const locSel = useMemo(() => (v.loc ? v.loc.split(",").filter(Boolean) : []), [v.loc]);
   const toggleLoc = (tok: string) => update({ loc: (locSel.includes(tok) ? locSel.filter((x) => x !== tok) : [...locSel, tok]).join(",") });
+  // izvēlēto vietu nosaukumi pogas tekstam
+  const locName = (tok: string): string => {
+    if (tok === "g:pieriga") return t("Rīgas rajons (Pierīga)");
+    const id = Number(tok.slice(2));
+    if (tok[0] === "r") return regions.find((r) => r.regionId === id)?.region ?? tok;
+    for (const r of regions) { const p = r.places.find((x) => x.id === id); if (p) return p.name; }
+    return tok;
+  };
+  const locSummary = !locSel.length
+    ? t(v.cat !== "vehicle" || v.country === "LV" ? "Visa Latvija" : v.country === "LT" ? "Visa Lietuva" : "Visas vietas")
+    : locSel.slice(0, 2).map(locName).join(", ") + (locSel.length > 2 ? ` +${locSel.length - 2}` : "");
   const active = Object.entries(v).filter(([k, val]) => val && !["sort", "page", "cat", "vc"].includes(k)).length;
 
   return (
@@ -120,10 +131,11 @@ export function SearchFilters({ initial, regions, sources = [] }: { initial: Fil
           </button>
         ))}
       </div>}
-      <details className="more src-more" open={locSel.length > 0}>
+      <details className="more loc-more" open={locSel.length > 0}>
         <summary>
-          {t("Vieta")}
-          {locSel.length > 0 ? <span className="fine"> ({locSel.length})</span> : null}
+          <span className="loc-cap">{t("Vieta")}</span>
+          <span className="loc-val">{locSummary}</span>
+          <span className="loc-caret" aria-hidden>▾</span>
         </summary>
         <div className="checks src-chips loc-chips">
           <label className={!locSel.length ? "on" : "off"}>
