@@ -46,7 +46,7 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
   const unit = priceUnit(l.deal, t);
   const ext = l.source !== "own" && l.externalUrl ? l.externalUrl : null;
   const src = SOURCE_LABEL[l.source] ?? l.source;
-  // Ārējie sludinājumi: virsraksts ved uz oriģinālu; mūsu lapā ir tikai fakti un saite.
+  // Visi sludinājumi vispirms atveras pie mums; saite uz oriģinālu ir sludinājuma lapā.
   const extLink = { rel: "nofollow noopener noreferrer" } as const; // tajā pašā cilnē, lai darbojas poga "Atpakaļ"
   const where = l.kind === "property" ? fullLocation(l.address, l.place, l.region, l.regionKind) : locationLabel(l.place, l.region, l.regionKind);
   return (
@@ -68,11 +68,7 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
         <span className={`kind ${l.kind}`}>{l.kind === "vehicle" ? t("Transports") : t("Īpašums")}</span>
         {showStatus && l.status !== "active" && <span className="status">{t(STATUS[l.status])}</span>}
         <h2>
-          {ext ? (
-            <a href={ext} {...extLink} title={t("Atvērt sludinājumu {src}", { src })}>{trTitle(l.title, t)}</a>
-          ) : (
-            <a href={lp(`/sludinajumi/${l.id}`)}>{trTitle(l.title, t)}</a>
-          )}
+          <a href={lp(`/sludinajumi/${l.id}`)}>{trTitle(l.title, t)}</a>
         </h2>
         <div className="meta">
           {meta.filter(Boolean).map((m, i) => (
@@ -84,8 +80,6 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
         {ext && (
           <div className="ext-row">
             <span className="src-badge">{t("Avots: {src}", { src })}</span>
-            <a className="ext-link" href={ext} {...extLink}>{t("Skatīt {src}", { src })} ↗</a>
-            <a className="more-btn" href={lp(`/sludinajumi/${l.id}`)}>{t("Sīkāk")} →</a>
           </div>
         )}
         {also && also.length > 0 && (

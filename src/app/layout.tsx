@@ -59,7 +59,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <header className="top">
           <div className="wrap">
             <a href={lp("/")} className="logo">
-              {t("Vienā")}<b>{t("Vietā")}</b>
+              Vienā<b>Vietā</b>
             </a>
             <span className="tag">{t("Visi Latvijas sludinājumi vienā meklētājā")}</span>
             <nav className="nav">
