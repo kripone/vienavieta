@@ -12,8 +12,11 @@ export function ExtThumb({ src, fallbackSrc, source, fallback, alt = "" }: { src
   if (idx >= candidates.length) return <Ill svg={fallback} />;
   return (
     <>
+      {/* izplūdis fons tai pašai bildei: stāvas bildes lielajās kartītēs rāda veselas (CSS .ext-bg) */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={candidates[idx]} alt={alt} loading="lazy" onError={() => setIdx((i) => i + 1)} />
+      <img className="ext-bg" src={candidates[idx]} alt="" aria-hidden="true" loading="lazy" />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img className="ext-main" src={candidates[idx]} alt={alt} loading="lazy" onError={() => setIdx((i) => i + 1)} />
       {source && <span className="ext-credit">Foto: {source}</span>}
     </>
   );
