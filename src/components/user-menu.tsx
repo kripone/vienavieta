@@ -19,13 +19,13 @@ export async function UserMenu() {
   return (
     <>
       {mod && (
-        <a href="/moderacija" className="btn" title={t("Moderācija")}>
+        <a href="/moderacija" className="btn hide-sm" title={t("Moderācija")}>
           ⚑ <span className="hide-sm">{t("Moderācija")}</span>
           {mod.open > 0 && <span className="badge">{mod.open}</span>}
         </a>
       )}
-      <a href="/favoriti" className="btn" title={t("Favorīti")}>♥ <span className="hide-sm">{t("Favorīti")}</span></a>
-      <a href="/mani-sludinajumi" className="btn">{t("Mani sludinājumi")}</a>
+      <a href="/favoriti" className="btn hide-sm" title={t("Favorīti")}>♥ <span className="hide-sm">{t("Favorīti")}</span></a>
+      <a href="/mani-sludinajumi" className="btn hide-sm">{t("Mani sludinājumi")}</a>
       <a href="/profils" className="btn user-btn" title={t("Mans profils")}>
         👤 <span>{label}</span>
       </a>
