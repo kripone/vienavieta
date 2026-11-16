@@ -10,7 +10,7 @@ type Msg = { role: "user" | "model"; text: string; results?: AssistantAnswer["re
 export const AI_EXAMPLES = [
   "Labs ģimenes auto līdz 8000 €",
   "2 istabu dzīvoklis Rīgā līdz 90 000 €",
-  "Par cik pārdoti dzīvokļi Rusova ielā 7, Rīgā?",
+  "Par cik pārdoti dzīvokļi Brīvības ielā 100B, Rīgā?",
   "Kas šonedēļ kļuvis lētāks?",
 ];
 

@@ -186,6 +186,21 @@ export default async function ListingPage(props: Props) {
             <span>{ext ? t("Pievienots {when}", { when: timeAgo(l.createdAt, t) }) : t("Ievietots {when}", { when: timeAgo(l.createdAt, t) })}</span>
           </p>
           {evaluation && <EvalBadge e={evaluation} long />}
+          {(() => {
+            // „Cik vērts ir tavs …?” — aicinājums novērtēt savu auto/dzīvokli (iepildām šī sludinājuma marku/modeli vai vietu)
+            const v = l.kind === "vehicle" && l.vehicleClass === "car"
+              ? { h: t("Cik vērts ir tavs auto?"), p: t("Uzzini sava auto tirgus cenu pēc tūkstošiem līdzīgu sludinājumu."), href: `/novertejums?${new URLSearchParams({ ...(l.makeId ? { make: String(l.makeId) } : {}), ...(l.modelId ? { model: String(l.modelId) } : {}) })}` }
+              : l.kind === "property" && l.propertyType === "Dzīvoklis"
+                ? { h: t("Cik vērts ir tavs dzīvoklis?"), p: t("Uzzini cenu pēc līdzīgiem sludinājumiem un reālajiem darījumiem tavā mājā."), href: `/novertejums?${new URLSearchParams({ veids: "dzivoklis", ...(l.placeId ? { vieta: String(l.placeId) } : {}) })}` }
+                : null;
+            return v ? (
+              <a className="value-cta" href={lp(v.href)}>
+                <b>{v.h}</b>
+                <span>{v.p}</span>
+                <span className="btn">{t("Novērtēt bez maksas")} →</span>
+              </a>
+            ) : null;
+          })()}
           {!ext && (
             <div className="panel seller" id="kontakti">
               <b>{seller}</b>

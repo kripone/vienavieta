@@ -2,13 +2,17 @@
 import type { Dict } from "./core";
 
 export const en: Dict = {
+  "Cik vērts ir tavs auto?": "What is your car worth?",
+  "Uzzini sava auto tirgus cenu pēc tūkstošiem līdzīgu sludinājumu.": "Find out your car’s market price based on thousands of similar listings.",
+  "Cik vērts ir tavs dzīvoklis?": "What is your flat worth?",
+  "Uzzini cenu pēc līdzīgiem sludinājumiem un reālajiem darījumiem tavā mājā.": "Find out the price from similar listings and real transactions in your building.",
   "Jautā AI": "Ask AI",
   "AI asistents": "AI assistant",
   "Atbild par visiem VienāVietā sludinājumiem": "Answers about all VienāVietā listings",
   "Sveiks! Jautā brīvi, tāpat kā jautātu cilvēkam. Varu atrast sludinājumus, salīdzināt cenas, pateikt, vai cena ir laba, un parādīt reālos darījumus adresē.": "Hi! Ask freely, just as you would ask a person. I can find listings, compare prices, tell you whether a price is good and show real transactions at an address.",
   "Labs ģimenes auto līdz 8000 €": "A good family car up to €8000",
   "2 istabu dzīvoklis Rīgā līdz 90 000 €": "2-room flat in Riga up to €90,000",
-  "Par cik pārdoti dzīvokļi Rusova ielā 7, Rīgā?": "What did flats at Rusova iela 7, Riga sell for?",
+  "Par cik pārdoti dzīvokļi Brīvības ielā 100B, Rīgā?": "What did flats at Brīvības iela 100B, Riga sell for?",
   "Kas šonedēļ kļuvis lētāks?": "What got cheaper this week?",
   "Raksti savu jautājumu…": "Type your question…",
   "Jautā AI asistentam": "Ask the AI assistant",

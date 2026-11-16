@@ -906,3 +906,10 @@ body:has(.det-bar) .ai-pill { bottom: 90px; }
   .ai-input { padding: 10px 12px max(12px, env(safe-area-inset-bottom, 0px)); }
   .ai-input input { height: 48px; font-size: 16px; }
 }
+
+/* sludinājuma lapa: „Cik vērts ir tavs …?” sānu kolonnā */
+.value-cta { display: flex; flex-direction: column; gap: 6px; margin-top: 16px; padding: 16px; border-radius: 16px; border: 1px solid var(--line); background: linear-gradient(135deg, var(--accent-soft), var(--surface)); color: var(--fg); text-decoration: none; }
+.value-cta b { font-family: var(--f-display); font-size: 18px; }
+.value-cta > span:not(.btn) { font-size: 14px; color: var(--muted); line-height: 1.45; }
+.value-cta .btn { align-self: flex-start; margin-top: 4px; background: var(--accent); color: #fff; border-color: var(--accent); }
+.value-cta:hover .btn { filter: brightness(1.08); }
