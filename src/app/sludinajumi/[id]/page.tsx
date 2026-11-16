@@ -275,7 +275,7 @@ export default async function ListingPage(props: Props) {
       {similar.length > 0 && (
         <section className="similar">
           <h2>{t("Līdzīgi sludinājumi")}</h2>
-          <div className="list">
+          <div className="list results-list grid">
             {similar.map((x) => <ListingCard key={x.id} l={x} evaluation={simEvals.get(x.id)} />)}
           </div>
         </section>
