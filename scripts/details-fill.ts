@@ -13,7 +13,7 @@ async function main() {
   if (!url) throw new Error("Nav DATABASE_URL");
   for (let i = 0; i < BATCHES; i++) {
     const ap = await fillAutopliusDetails().catch((e) => (console.error("autoplius.lt detaļas:", e instanceof Error ? e.message : e), null));
-    if (ap && (ap.features || ap.errors)) console.log("autoplius.lt detaļas:", JSON.stringify(ap));
+    if (ap && (ap.features || ap.errors || ap.gone)) console.log("autoplius.lt detaļas:", JSON.stringify(ap));
     await closeApDetailsBrowser().catch(() => {});
     const c24 = await fillCity24Details().catch((e) => (console.error("city24.lv detaļas:", e instanceof Error ? e.message : e), null));
     if (c24 && (c24.filled || c24.errors)) console.log("city24.lv detaļas:", JSON.stringify(c24));
