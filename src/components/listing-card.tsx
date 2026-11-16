@@ -6,6 +6,7 @@ import type { PriceEval } from "@/lib/price-eval";
 import { Ill } from "@/components/ill";
 import { DEAL_LABEL, SOURCE_LABEL } from "@/lib/constants";
 import { listingIll } from "@/lib/illustrations";
+import { ssBigThumb } from "@/lib/ext-img";
 import { formatNumber, formatPrice, timeAgo } from "@/lib/format";
 import { landLabel } from "@/lib/listing-input";
 import { fullLocation, locationLabel, type ListingCard as Card } from "@/lib/listings";
@@ -56,9 +57,9 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
           // eslint-disable-next-line @next/next/no-img-element
           <img src={mediaUrl(l.thumbKey)} alt={trTitle(l.title, t)} loading="lazy" />
         ) : ext && l.externalThumbUrl && process.env.EXTERNAL_THUMBS !== "off" ? (
-          <ExtThumb src={l.externalThumbUrl} source={src} fallback={listingIll(l)} alt={trTitle(l.title, t)} />
+          <ExtThumb src={ssBigThumb(l.externalThumbUrl) ?? l.externalThumbUrl} fallbackSrc={l.externalThumbUrl} source={src} fallback={listingIll(l)} alt={trTitle(l.title, t)} />
         ) : !ext && l.externalThumbUrl ? (
-          <ExtThumb src={l.externalThumbUrl} source="" fallback={listingIll(l)} alt={trTitle(l.title, t)} />
+          <ExtThumb src={ssBigThumb(l.externalThumbUrl) ?? l.externalThumbUrl} fallbackSrc={l.externalThumbUrl} source="" fallback={listingIll(l)} alt={trTitle(l.title, t)} />
         ) : (
           <Ill svg={listingIll(l)} />
         )}

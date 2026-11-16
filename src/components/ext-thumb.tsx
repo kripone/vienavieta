@@ -4,15 +4,16 @@ import { Ill } from "./ill";
 
 /**
  * Ārēja sludinājuma sīktēls tieši no avota servera (piem. i.ss.com). Mēs to neglabājam un nelejupielādējam.
- * Ja avots bildi neatdod, rāda mūsu ilustrāciju.
+ * Rezerves ķēde pret karsto saišu bloķēšanu: src → fallbackSrc (ja dots) → mūsu ilustrācija.
  */
-export function ExtThumb({ src, source, fallback, alt = "" }: { src: string; source: string; fallback: string; alt?: string }) {
-  const [failed, setFailed] = useState(false);
-  if (failed) return <Ill svg={fallback} />;
+export function ExtThumb({ src, fallbackSrc, source, fallback, alt = "" }: { src: string; fallbackSrc?: string | null; source: string; fallback: string; alt?: string }) {
+  const candidates = [src, ...(fallbackSrc && fallbackSrc !== src ? [fallbackSrc] : [])];
+  const [idx, setIdx] = useState(0);
+  if (idx >= candidates.length) return <Ill svg={fallback} />;
   return (
     <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} loading="lazy" onError={() => setFailed(true)} />
+      <img src={candidates[idx]} alt={alt} loading="lazy" onError={() => setIdx((i) => i + 1)} />
       {source && <span className="ext-credit">Foto: {source}</span>}
     </>
   );

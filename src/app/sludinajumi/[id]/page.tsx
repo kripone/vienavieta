@@ -13,6 +13,7 @@ import { OwnerActions } from "@/components/owner-actions";
 import { DEAL_LABEL, FINANCE, PROPERTY_PLURAL, SOURCE_LABEL, VEHICLE_CLASS_LABEL, type VehicleClass } from "@/lib/constants";
 import { formatNumber, formatPrice, timeAgo } from "@/lib/format";
 import { listingIll } from "@/lib/illustrations";
+import { ssBigThumb } from "@/lib/ext-img";
 import { landLabel } from "@/lib/listing-input";
 import { CompareToggle } from "@/components/compare";
 import { EvalBadge } from "@/components/eval-badge";
@@ -159,9 +160,10 @@ export default async function ListingPage(props: Props) {
       {isOwner && <OwnerActions id={l.id} status={l.status} />}
       <div className="det">
         {!d.photos.length && l.source !== "own" && l.externalThumbUrl && process.env.EXTERNAL_THUMBS !== "off" ? (
-          // ārējam sludinājumam: saraksta sīktēls no avota servera (lielākas bildes ir oriģinālajā sludinājumā)
+          // ārējam sludinājumam: bilde no avota servera; ss.com gadījumā lielais 800px variants,
+          // rezervē 174px sīktēls, tad ilustrācija (ja avots bloķē karstās saites)
           <div className="ext-hero">
-            <ExtThumb src={l.externalThumbUrl} source={SOURCE_LABEL[l.source] ?? l.source} fallback={listingIll(l)} alt={trTitle(l.title, t)} />
+            <ExtThumb src={ssBigThumb(l.externalThumbUrl) ?? l.externalThumbUrl} fallbackSrc={l.externalThumbUrl} source={SOURCE_LABEL[l.source] ?? l.source} fallback={listingIll(l)} alt={trTitle(l.title, t)} />
           </div>
         ) : (
           <Gallery photos={d.photos} title={l.title} placeholder={listingIll(l)} />
