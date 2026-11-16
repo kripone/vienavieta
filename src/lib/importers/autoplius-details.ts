@@ -77,7 +77,9 @@ async function fetchDetail(url: string): Promise<string> {
   });
   const page = await ctx.newPage();
   try {
-    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45_000 });
+    const resp = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45_000 });
+    // Sludinājums dzēsts (404/410) — tūlīt izmetam; nav jēga gaidīt selektoru vai mēģināt vēlreiz.
+    if (resp && (resp.status() === 404 || resp.status() === 410)) throw new Error(`HTTP ${resp.status()}`);
     // Cloudflare pārbaudei ("Mazliet uzgaidiet…") ļaujam pabeigties: gaidām parametru/aprīkojuma bloku,
     // vajadzības gadījumā pārlādējam (tā pati loģika kā sarakstu lapu browserFetch).
     for (let attempt = 1; ; attempt++) {
@@ -110,7 +112,7 @@ export async function fillAutopliusDetails(limit = AP_DETAILS_PER_TICK, fetchHtm
     .orderBy(desc(listings.createdAt))
     .limit(limit);
   if (!todo.length) return null;
-  const res = { checked: 0, features: 0, errors: 0 };
+  const res = { checked: 0, features: 0, errors: 0, gone: 0 };
   let consecutiveErrors = 0;
   for (const [i, t] of todo.entries()) {
     if (i) await sleep(delayMs);
@@ -135,7 +137,14 @@ export async function fillAutopliusDetails(limit = AP_DETAILS_PER_TICK, fetchHtm
           features: d.features,
         })
         .where(eq(listings.id, t.id));
-    } catch {
+    } catch (e) {
+      // Dzēsts sludinājums (404/410): atzīmējam kā pārbaudītu un ejam tālāk —
+      // citādi rindas galva ar mirušām lapām mūžīgi bloķē visu nolasīšanu.
+      if (e instanceof Error && /^HTTP (404|410)$/.test(e.message)) {
+        res.gone++;
+        await db.update(listings).set({ detailCheckedAt: new Date() }).where(eq(listings.id, t.id));
+        continue;
+      }
       res.errors++;
       if (++consecutiveErrors >= 3) break; // iespējama Cloudflare/tilta problēma — pārtraucam kārtu
     }
