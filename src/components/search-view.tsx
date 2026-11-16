@@ -8,6 +8,7 @@ import { SearchFilters } from "./search-filters";
 import { SearchMapLazy } from "./search-map-lazy";
 import { SortSelect } from "./sort-select";
 import { ViewToggle } from "./view-toggle";
+import { HomeCategories } from "./home-categories";
 import { VIEW_COOKIE, type ListView } from "@/lib/constants";
 import { cookies } from "next/headers";
 import { SmartSearch } from "./smart-search";
@@ -131,6 +132,7 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
             {flat.tu && <p className="fine">{t("Nesaprasti vārdi:")} {flat.tu}</p>}
           </div>
         )}
+        {!landing && Object.keys(flat).length === 0 && <HomeCategories />}
         {stripMode && <TypeStrip mode={stripMode} flat={flat} counts={counts} />}
         <SearchMapLazy query={pointsQuery} zone={flat.zone} />
         {insights && <PriceInsights d={insights} flat={flat} rent={s.deal === "rent"} />}

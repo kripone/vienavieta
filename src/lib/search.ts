@@ -618,3 +618,23 @@ export function seoLinkCounts(s: SearchParams, by: "price" | "fuel" | "body" | "
     return rows.map((r) => ({ key: String(r.k), n: Number(r.n) }));
   });
 }
+
+/** Sākumlapas rindas „Ko meklē?” skaiti (aktīvie sludinājumi; kešs kā citiem skaitiem). */
+export async function homeCategoryCounts(): Promise<Record<string, number>> {
+  return cached("home-cats", async () => {
+    const r = await db.execute<{ k: string; n: number }>(sql`
+      select k, count(*)::int as n from (
+        select case
+          when kind = 'vehicle' then vehicle_class::text
+          when property_type = 'Dzīvoklis' and deal = 'sell' then 'flat'
+          when property_type = 'Dzīvoklis' and deal = 'rent' then 'flat-rent'
+          when property_type = 'Māja' and deal = 'sell' then 'house'
+          when property_type = 'Zeme' and deal = 'sell' then 'land'
+          when property_type = 'Mežs' and deal = 'sell' then 'forest'
+          when property_type = 'Birojs' then 'office'
+        end as k
+        from listings where status = 'active'
+      ) q where k is not null group by k`);
+    return Object.fromEntries(r.rows.map((x) => [x.k, Number(x.n)]));
+  });
+}

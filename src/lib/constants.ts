@@ -445,3 +445,19 @@ export const INDEXNOW_RESEND_DAYS = 30;
 /** Rezultātu skats datorā: režģis vai saraksts (sīkdatne, `src/components/view-toggle.tsx`). */
 export type ListView = "grid" | "list";
 export const VIEW_COOKIE = "lv_view";
+
+/** Sākumlapas rinda „Ko meklē?”: atslēga (`homeCategoryCounts`), nosaukums, saite. Rāda, ja ≥ HOME_CAT_MIN sludinājumu. */
+export const HOME_CATEGORIES = [
+  { key: "car", label: "Vieglie auto", href: "/auto", group: "vehicle" },
+  { key: "moto", label: "Motocikli", href: "/moto", group: "vehicle" },
+  { key: "camper", label: "Kemperi", href: "/?cat=vehicle&vc=camper", group: "vehicle" },
+  { key: "van", label: "Furgoni", href: "/?cat=vehicle&vc=van", group: "vehicle" },
+  { key: "truck", label: "Kravas auto", href: "/?cat=vehicle&vc=truck", group: "vehicle" },
+  { key: "flat", label: "Dzīvokļi", href: "/ipasumi/dzivokli", group: "property" },
+  { key: "flat-rent", label: "Dzīvokļu īre", href: "/ipasumi/dzivokli-ire", group: "property" },
+  { key: "house", label: "Mājas", href: "/ipasumi/majas", group: "property" },
+  { key: "land", label: "Zeme", href: "/ipasumi/zeme", group: "property" },
+  { key: "forest", label: "Meži", href: "/ipasumi/mezi", group: "property" },
+  { key: "office", label: "Biroji", href: "/?cat=property&ptype=Birojs", group: "property" },
+] as const;
+export const HOME_CAT_MIN = 20;

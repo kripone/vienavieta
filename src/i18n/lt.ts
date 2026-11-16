@@ -2,6 +2,8 @@
 import type { Dict } from "./core";
 
 export const lt: Dict = {
+  "Ko meklē?": "Ko ieškote?",
+  "Meži": "Miškai",
   "Skatīt bildes un kontaktus": "Nuotraukos ir kontaktai",
   "atvērsies {src}": "atsidarys {src}",
   "Sazināties ar pārdevēju": "Susisiekti su pardavėju",
