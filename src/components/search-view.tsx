@@ -46,25 +46,35 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
   const flat: Record<string, string> = {};
   for (const [k, v] of Object.entries(raw)) if (typeof v === "string" && v) flat[k] = v;
 
-  const user = await getCurrentUser();
-  let result: Awaited<ReturnType<typeof searchListings>> | null = null;
-  let regions: Awaited<ReturnType<typeof regionOptions>> = [];
-  try {
-    [result, regions] = await Promise.all([searchListings(s), regionOptions()]);
-  } catch (err) {
-    console.error("Meklēšana neizdevās:", err);
-  }
   const stripMode = s.cat === "vehicle" && (s.vc ?? "car") === "car" ? "car" : s.cat === "property" && !s.ptype?.startsWith("g:") ? "home" : null;
-  const counts = stripMode && result ? await typeCounts(s).catch(() => ({})) : {};
-  const srcCounts = result ? await sourceCounts(s).catch(() => []) : [];
-  const [also, evals, vzd] = result
+  const wantInsights = s.page === 1 && (s.cat === "vehicle" || (s.cat === "property" && (s.deal === "sell" || s.deal === "rent")));
+  const facetBy = landing?.facet === "make" || landing?.facet === "model" || landing?.facet === "region" ? landing.facet : null;
+  // Visi no rezultātu rindām neatkarīgie vaicājumi iet paralēli (agrāk tie gāja pēc kārtas un krājās lēnās lapās)
+  const [user, searched, counts, srcCounts0, insights0, summary, facets] = await Promise.all([
+    getCurrentUser(),
+    Promise.all([searchListings(s), regionOptions()]).catch((err) => {
+      console.error("Meklēšana neizdevās:", err);
+      return null;
+    }),
+    stripMode ? typeCounts(s).catch(() => ({}) as Record<string, number>) : Promise.resolve({} as Record<string, number>),
+    sourceCounts(s).catch(() => []),
+    wantInsights ? priceInsights(s).catch(() => null) : Promise.resolve(null),
+    landing ? priceSummary(s).catch(() => null) : Promise.resolve(null),
+    facetBy ? facetCounts(s, facetBy).catch(() => []) : Promise.resolve([]),
+  ]);
+  const result: Awaited<ReturnType<typeof searchListings>> | null = searched ? searched[0] : null;
+  const regions: Awaited<ReturnType<typeof regionOptions>> = searched ? searched[1] : [];
+  const srcCounts = result ? srcCounts0 : [];
+  const insights = result ? insights0 : null;
+  const ids = result ? result.rows.map((r) => r.id) : [];
+  const [also, evals, vzd, favs] = result
     ? await Promise.all([
         alsoAt(result.rows).catch(() => new Map()),
-        priceEvals(result.rows.map((r) => r.id)).catch(() => new Map()),
+        priceEvals(ids).catch(() => new Map()),
         vzdBadges(result.rows.filter((r) => r.kind === "property").map((r) => r.id)).catch(() => new Map()),
+        user ? favoriteIds(user.id, ids).catch(() => new Set<string>()) : Promise.resolve(new Set<string>()),
       ])
-    : [new Map(), new Map(), new Map()];
-  const favs = user && result ? await favoriteIds(user.id, result.rows.map((r) => r.id)).catch(() => new Set<string>()) : new Set<string>();
+    : [new Map(), new Map(), new Map(), new Set<string>()];
 
   const heading = s.cat === "vehicle" ? t(VEHICLE_CLASS_LABEL[(s.vc ?? "car") as VehicleClass]) : s.cat === "property" ? t("Nekustamais īpašums") : t("Visi sludinājumi");
   const pointsQuery = new URLSearchParams(Object.entries(flat).filter(([k]) => !["page", "sort", "zone"].includes(k))).toString();
@@ -77,10 +87,6 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
   };
   // SEO lapām: kopsavilkums un iekšējās saites
   // mini analītika: tikai salīdzināmām cenām (transports vai īpašums ar zināmu darījumu), pirmajā lapā
-  const insights = result && s.page === 1 && (s.cat === "vehicle" || (s.cat === "property" && (s.deal === "sell" || s.deal === "rent"))) ? await priceInsights(s).catch(() => null) : null;
-  const summary = landing ? await priceSummary(s).catch(() => null) : null;
-  const facetBy = landing?.facet === "make" || landing?.facet === "model" || landing?.facet === "region" ? landing.facet : null;
-  const facets = facetBy ? await facetCounts(s, facetBy).catch(() => []) : [];
   const facetHref = (f: { id: number; name: string }) =>
     facetBy === "make" ? vehicleHref(s.vc as VehicleClass, f.name)
     : facetBy === "model" ? `${landing!.path}/${seoSlug(f.name)}`

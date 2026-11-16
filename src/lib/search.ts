@@ -218,7 +218,18 @@ async function hasTopListings() {
 }
 
 /** Atrod sludinājumus vienai lapai un kopējo skaitu. */
+// Rezultātu lapas īss kešs (60 s): robotiem un atkārtotiem skatiem nav jāgaida uz vaicājumu. Lietotājam specifisku datu te nav.
+const rowsCache = new Map<string, { at: number; v: Awaited<ReturnType<typeof searchListingsFresh>> }>();
 export async function searchListings(s: SearchParams) {
+  const key = JSON.stringify(s);
+  const hit = rowsCache.get(key);
+  if (hit && Date.now() - hit.at < 60_000) return hit.v;
+  const v = await searchListingsFresh(s);
+  rowsCache.set(key, { at: Date.now(), v });
+  if (rowsCache.size > 500) rowsCache.delete(rowsCache.keys().next().value!);
+  return v;
+}
+async function searchListingsFresh(s: SearchParams) {
   const where = and(...conditions(s));
   const base = () =>
     db
@@ -434,6 +445,9 @@ export async function describeSearch(s: SearchParams) {
 
 /** Joslai: sludinājumu skaits pa virsbūvēm (auto) vai īpašuma veidiem, ievērojot pārējos filtrus. */
 export async function typeCounts(s: SearchParams): Promise<Record<string, number>> {
+  return cached(`type:${JSON.stringify({ ...s, page: 1, sort: "" })}`, () => typeCountsFresh(s));
+}
+async function typeCountsFresh(s: SearchParams): Promise<Record<string, number>> {
   const isCar = s.cat === "vehicle";
   const col = isCar ? listings.body : listings.propertyType;
   const rows = await db
