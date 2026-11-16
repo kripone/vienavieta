@@ -16,6 +16,7 @@ import { LangSwitch } from "@/components/lang-switch";
 import { InstallBanner, PwaRegister } from "@/components/pwa";
 import { ErrorReporter } from "@/components/error-reporter";
 import { AiChat } from "@/components/ai-chat";
+import { MobileMenu } from "@/components/mobile-menu";
 import { I18nProvider } from "@/i18n/client";
 import { getLocale, getT } from "@/i18n/server";
 import { DICTS } from "@/i18n/dicts";
@@ -62,12 +63,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </a>
             <span className="tag">{t("Visi Latvijas sludinājumi vienā meklētājā")}</span>
             <nav className="nav">
-              <a href={lp("/tirgus")} className="btn" title={t("Tirgus tendences")}>📈 <span className="hide-sm">{t("Tirgus")}</span></a>
-              <a href={lp("/cenu-kritumi")} className="btn" title={t("Cenu kritumi")}>▼ <span className="hide-sm">{t("Kritumi")}</span></a>
-              <a href={lp("/darijumi")} className="btn" title={t("Reālās dzīvokļu darījumu cenas (VZD)")}>🏠 <span className="hide-sm">{t("Darījumi")}</span></a>
-              <a href={lp("/novertejums")} className="btn" title={t("Cik vērts mans auto vai dzīvoklis?")}>💶 <span className="hide-sm">{t("Cik vērts?")}</span></a>
-              <LangSwitch />
-              <ThemeToggle />
+              <MobileMenu>
+                <a href={lp("/tirgus")} className="btn" title={t("Tirgus tendences")}>📈 <span className="hide-sm">{t("Tirgus")}</span></a>
+                <a href={lp("/cenu-kritumi")} className="btn" title={t("Cenu kritumi")}>▼ <span className="hide-sm">{t("Kritumi")}</span></a>
+                <a href={lp("/darijumi")} className="btn" title={t("Reālās dzīvokļu darījumu cenas (VZD)")}>🏠 <span className="hide-sm">{t("Darījumi")}</span></a>
+                <a href={lp("/novertejums")} className="btn" title={t("Cik vērts mans auto vai dzīvoklis?")}>💶 <span className="hide-sm">{t("Cik vērts?")}</span></a>
+                <a href={lp("/favoriti")} className="btn mm-drawer">♥ {t("Favorīti")}</a>
+                <a href={lp("/mani-sludinajumi")} className="btn mm-drawer">📋 {t("Mani sludinājumi")}</a>
+                <LangSwitch />
+                <ThemeToggle />
+              </MobileMenu>
               <UserMenu />
               <a href="/pievienot" className="btn primary">+ {t("Pievienot")}</a>
             </nav>
