@@ -23,7 +23,9 @@ export function MobileMenu({ children }: { children: React.ReactNode }) {
   return (
     <div className="mm">
       <button type="button" className="btn mm-burger" aria-label="Izvēlne" aria-expanded={open} onClick={() => setOpen(true)}>
-        ☰
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
       </button>
       <div
         className="mm-panel"

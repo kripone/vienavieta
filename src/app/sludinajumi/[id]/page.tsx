@@ -184,6 +184,8 @@ export default async function ListingPage(props: Props) {
             {(d.place || l.address) && <span>📍 {fullLocation(l.address, d.place, d.region, d.regionKind)}</span>}
             <span>{ext ? t("Pievienots {when}", { when: timeAgo(l.createdAt, t) }) : t("Ievietots {when}", { when: timeAgo(l.createdAt, t) })}</span>
           </p>
+          {l.status === "active" && l.kind === "vehicle" && !l.deal?.match(/^(rent|day|buy)$/) && l.price >= FINANCE.lease.minPrice && <FinanceCalc price={l.price} kind="lease" />}
+          {l.status === "active" && l.kind === "property" && l.deal === "sell" && l.price >= FINANCE.mortgage.minPrice && <FinanceCalc price={l.price} kind="mortgage" />}
           {ext ? (
             <div className="panel seller">
               <b>{t("Sludinājums no {src}", { src })}</b>
@@ -260,8 +262,6 @@ export default async function ListingPage(props: Props) {
         {l.kind === "property" && l.lat != null && l.lon != null && <ListingMapLazy lat={l.lat} lon={l.lon} exact={l.geoPrecision === "street"} />}
         {vzd && <VzdDeals data={vzd} perM2={l.areaM2 ? Math.round(l.price / Number(l.areaM2)) : null} />}
         {history && <PriceHistory h={history} external={l.source !== "own"} />}
-        {l.status === "active" && l.kind === "vehicle" && !l.deal?.match(/^(rent|day|buy)$/) && l.price >= FINANCE.lease.minPrice && <FinanceCalc price={l.price} kind="lease" />}
-        {l.status === "active" && l.kind === "property" && l.deal === "sell" && l.price >= FINANCE.mortgage.minPrice && <FinanceCalc price={l.price} kind="mortgage" />}
         {l.description && (
           <section>
             <h2>{t("Apraksts")}</h2>

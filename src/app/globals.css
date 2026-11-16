@@ -175,7 +175,7 @@ main .fine { margin-top: 14px; }
 .mm-burger, .mm-close, .mm-drawer { display: none; }
 @media (max-width: 560px) {
   .mm { display: block; order: 99; }
-  .mm-burger { display: inline-flex; align-items: center; font-size: 18px; line-height: 1; }
+  .mm-burger { display: inline-flex; align-items: center; justify-content: center; padding: 0 9px; line-height: 1; }
   .mm-panel { display: none; position: fixed; inset: 0; z-index: 90; background: var(--bg); padding: 16px; padding-top: max(16px, env(safe-area-inset-top)); flex-direction: column; gap: 8px; overflow-y: auto; }
   .mm-panel[data-open="true"] { display: flex; }
   .mm-panel .btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 13px 14px; font-size: 16px; }
@@ -808,3 +808,15 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 }
 @media (min-width: 561px) { .list.grid .lcard .thumb > img:not(.ext-bg):not(.ext-main) { position: absolute; inset: 0; } }
 @media (max-width: 560px) { .list.results-list .lcard .thumb > img:not(.ext-bg):not(.ext-main) { position: absolute; inset: 0; } }
+
+/* galvenes pogas vienā augstumā (arī valoda un tēma) */
+.nav { align-items: center; }
+.nav .btn, .nav .lang { height: 42px; box-sizing: border-box; }
+.nav .lang { font-size: 15px; padding: 0 10px; border-radius: 8px; }
+@media (max-width: 560px) { .nav .btn, .nav .lang { height: 36px; } .mm-panel .btn { height: auto; } }
+
+/* sludinājuma lapas bilde: visa bilde rāmī, stāvām bildēm izplūdis fons */
+.ext-hero { display: block; width: 100%; max-height: none; aspect-ratio: 4 / 3; }
+.ext-hero .ext-bg { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(18px) brightness(.85); transform: scale(1.2); }
+.ext-hero .ext-main { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.ext-hero .ext-credit { z-index: 1; }
