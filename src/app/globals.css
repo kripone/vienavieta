@@ -172,6 +172,7 @@ main .fine { margin-top: 14px; }
 /* ---------- mobilā ☰ izvēlne ---------- */
 /* datorā: bērni ir inline navigācijā, poga paslēpta */
 .mm { display: contents; }
+@media (min-width: 561px) { .mm-panel { display: contents; } }
 .mm-burger, .mm-close, .mm-drawer { display: none; }
 @media (max-width: 560px) {
   .mm { display: block; order: 99; }
