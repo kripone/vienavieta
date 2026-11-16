@@ -1,6 +1,6 @@
 /* VienāVietā: krāsas un burti no prototipa. Visas krāsas ir mainīgie, lai strādā gaišā un tumšā tēma. */
 :root {
-  --bg: #f3f4f7; --bg-grad: linear-gradient(180deg, #f3f4f7 0%, #e9effa 55%, #dde8fa 100%);
+  --bg: #fafafa; --bg-grad: linear-gradient(180deg, #fafafa 0%, #f4f6f9 55%, #d7e9fb 100%);
   --surface: #ffffff; --surface-2: #eceef3; --line: #d9dce5;
   --fg: #181b24; --muted: #5d6475; --accent: #9e3039; --accent-fg: #ffffff; --accent-soft: #f6e3e5;
   --car: #2f5fa8; --home: #2f8a64;
@@ -12,7 +12,7 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #12141a; --bg-grad: linear-gradient(180deg, #12141a 0%, #0e1424 55%, #0c1830 100%);
+    --bg: #0f0f0f; --bg-grad: linear-gradient(180deg, #0f0f0f 0%, #10131f 55%, #1c285e 100%);
     --surface: #1b1e27; --surface-2: #242835; --line: #323748;
     --fg: #eceef4; --muted: #9aa1b3; --accent: #e0606b; --accent-fg: #1a0b0d; --accent-soft: #3a1d22;
     --car: #7aa6ec; --home: #5fc79a; color-scheme: dark;
@@ -20,7 +20,7 @@
   }
 }
 :root[data-theme="dark"] {
-  --bg: #12141a; --bg-grad: linear-gradient(180deg, #12141a 0%, #0e1424 55%, #0c1830 100%);
+  --bg: #0f0f0f; --bg-grad: linear-gradient(180deg, #0f0f0f 0%, #10131f 55%, #1c285e 100%);
   --surface: #1b1e27; --surface-2: #242835; --line: #323748;
   --fg: #eceef4; --muted: #9aa1b3; --accent: #e0606b; --accent-fg: #1a0b0d; --accent-soft: #3a1d22;
   --car: #7aa6ec; --home: #5fc79a; color-scheme: dark;
