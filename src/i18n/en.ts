@@ -8,7 +8,7 @@ export const en: Dict = {
   "Sveiks! Jautā brīvi, tāpat kā jautātu cilvēkam. Varu atrast sludinājumus, salīdzināt cenas, pateikt, vai cena ir laba, un parādīt reālos darījumus adresē.": "Hi! Ask freely, just as you would ask a person. I can find listings, compare prices, tell you whether a price is good and show real transactions at an address.",
   "Labs ģimenes auto līdz 8000 €": "A good family car up to €8000",
   "2 istabu dzīvoklis Rīgā līdz 90 000 €": "2-room flat in Riga up to €90,000",
-  "Par cik pārdoti dzīvokļi Brīvības ielā 100, Rīgā?": "What did flats at Brīvības iela 100, Riga sell for?",
+  "Par cik pārdoti dzīvokļi Rusova ielā 7, Rīgā?": "What did flats at Rusova iela 7, Riga sell for?",
   "Kas šonedēļ kļuvis lētāks?": "What got cheaper this week?",
   "Raksti savu jautājumu…": "Type your question…",
   "Jautā AI asistentam": "Ask the AI assistant",

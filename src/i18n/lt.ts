@@ -8,7 +8,7 @@ export const lt: Dict = {
   "Sveiks! Jautā brīvi, tāpat kā jautātu cilvēkam. Varu atrast sludinājumus, salīdzināt cenas, pateikt, vai cena ir laba, un parādīt reālos darījumus adresē.": "Sveiki! Klauskite laisvai, kaip žmogaus. Galiu rasti skelbimus, palyginti kainas, pasakyti, ar kaina gera, ir parodyti tikrus sandorius adresu.",
   "Labs ģimenes auto līdz 8000 €": "Geras šeimos automobilis iki 8000 €",
   "2 istabu dzīvoklis Rīgā līdz 90 000 €": "2 kambarių butas Rygoje iki 90 000 €",
-  "Par cik pārdoti dzīvokļi Brīvības ielā 100, Rīgā?": "Už kiek parduoti butai Brīvības iela 100, Rygoje?",
+  "Par cik pārdoti dzīvokļi Rusova ielā 7, Rīgā?": "Už kiek parduoti butai Rusova iela 7, Rygoje?",
   "Kas šonedēļ kļuvis lētāks?": "Kas šią savaitę atpigo?",
   "Raksti savu jautājumu…": "Parašykite savo klausimą…",
   "Jautā AI asistentam": "Klauskite AI asistento",
