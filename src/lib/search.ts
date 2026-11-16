@@ -638,3 +638,21 @@ export async function homeCategoryCounts(): Promise<Record<string, number>> {
     return Object.fromEntries(r.rows.map((x) => [x.k, Number(x.n)]));
   });
 }
+
+/** „Šodien tirgū”: jauni sludinājumi un cenu kritumi pēdējās 24 h, dzīvokļu €/m² mediāna Rīgā. */
+export async function todayStats(): Promise<{ fresh: number; drops: number; rigaM2: number | null }> {
+  return cached("today-stats", async () => {
+    const r = await db.execute<{ fresh: number; drops: number; riga: number | null }>(sql`
+      select
+        (select count(*)::int from listings where status = 'active' and created_at > now() - interval '24 hours') as fresh,
+        (select count(distinct e.listing_id)::int from (
+           select listing_id, price, changed_at, lag(price) over (partition by listing_id order by changed_at) as prev from price_history
+         ) e join listings l on l.id = e.listing_id
+         where l.status = 'active' and e.changed_at > now() - interval '24 hours' and e.prev > e.price and e.price::numeric / e.prev >= 0.5) as drops,
+        (select percentile_cont(0.5) within group (order by l.price::numeric / l.area_m2)
+           from listings l join places p on p.id = l.place_id join regions g on g.id = p.region_id
+           where l.status = 'active' and l.property_type = 'Dzīvoklis' and l.deal = 'sell' and g.name = 'Rīga' and l.area_m2 > 10) as riga`);
+    const x = r.rows[0];
+    return { fresh: Number(x?.fresh ?? 0), drops: Number(x?.drops ?? 0), rigaM2: x?.riga != null ? Math.round(Number(x.riga)) : null };
+  });
+}

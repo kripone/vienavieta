@@ -6,6 +6,14 @@ import type { AssistantAnswer } from "@/lib/ai-chat";
 
 type Msg = { role: "user" | "model"; text: string; results?: AssistantAnswer["results"]; total?: number; moreUrl?: string | null; appraisalUrl?: string | null };
 
+/** Jautājumu piemēri (čatā un kartītē „Jautā AI asistentam”). */
+export const AI_EXAMPLES = [
+  "Labs ģimenes auto līdz 8000 €",
+  "2 istabu dzīvoklis Rīgā līdz 90 000 €",
+  "Par cik pārdoti dzīvokļi Brīvības ielā 100, Rīgā?",
+  "Kas šonedēļ kļuvis lētāks?",
+];
+
 const fmtPrice = (n: number | null) => (n == null ? "" : `${n.toLocaleString("lv-LV")} €`);
 
 export function AiChat() {
@@ -23,6 +31,45 @@ export function AiChat() {
   useEffect(() => {
     setMicOk(typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== "undefined");
   }, []);
+
+  // atvēršana no citurienes (kartīte „Jautā AI asistentam”): window.dispatchEvent(new CustomEvent("vv-ai", { detail: "jautājums" }))
+  const pending = useRef<string | null>(null);
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      const q = (e as CustomEvent<string | undefined>).detail;
+      setOpen(true);
+      if (q) pending.current = q;
+    };
+    window.addEventListener("vv-ai", onOpen);
+    return () => window.removeEventListener("vv-ai", onOpen);
+  }, []);
+  useEffect(() => {
+    if (open && pending.current) {
+      const q = pending.current;
+      pending.current = null;
+      send(q);
+    }
+  });
+
+  // telefonā poga ritinot uz leju paslēpjas, uz augšu parādās
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => {
+    let last = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (Math.abs(y - last) > 8) setHidden(y > last && y > 200);
+      last = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // atvērts čats telefonā aizņem visu ekrānu: lapa zem tā neritinās
+  useEffect(() => {
+    if (!open || !window.matchMedia("(max-width: 560px)").matches) return;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
@@ -110,34 +157,32 @@ export function AiChat() {
 
   if (!open) {
     return (
-      <button className="ai-fab" onClick={() => setOpen(true)} aria-label={t("AI meklēšanas palīgs")} title={t("AI meklēšanas palīgs")}>
-        <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
-          <g className="eye">
-            <ellipse cx="7.6" cy="12" rx="3.5" ry="4" fill="#fff" />
-            <circle className="pupil" cx="8.5" cy="12.7" r="1.7" fill="#1f2937" />
-          </g>
-          <g className="eye">
-            <ellipse cx="16.4" cy="12" rx="3.5" ry="4" fill="#fff" />
-            <circle className="pupil" cx="17.3" cy="12.7" r="1.7" fill="#1f2937" />
-          </g>
-        </svg>
+      <button className={`ai-pill${hidden ? " away" : ""}`} onClick={() => setOpen(true)} aria-label={t("AI asistents")}>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"><path d="M12 3l1.8 4.9L19 9.7l-5.2 1.9L12 16.5l-1.8-4.9L5 9.7l5.2-1.8z" /><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z" /></svg>
+        <span>{t("Jautā AI")}</span>
       </button>
     );
   }
 
   return (
-    <div className="ai-panel" role="dialog" aria-label={t("AI meklēšanas palīgs")}>
+    <div className="ai-panel" role="dialog" aria-label={t("AI asistents")}>
       <div className="ai-head">
-        <span>✨ {t("AI palīgs")}</span>
+        <span className="ai-title">
+          <span className="ai-ico"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"><path d="M12 3l1.8 4.9L19 9.7l-5.2 1.9L12 16.5l-1.8-4.9L5 9.7l5.2-1.8z" /><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z" /></svg></span>
+          <span>
+            <b>{t("AI asistents")}</b>
+            <small>{t("Atbild par visiem VienāVietā sludinājumiem")}</small>
+          </span>
+        </span>
         <button className="ai-close" onClick={() => setOpen(false)} aria-label={t("Aizvērt")}>✕</button>
       </div>
       <div className="ai-msgs" ref={listRef}>
         {msgs.length === 0 && (
           <div className="ai-msg model">
-            {t("Sveiki! Pastāsti, ko meklē — piemēram:")}
+            {t("Sveiks! Jautā brīvi, tāpat kā jautātu cilvēkam. Varu atrast sludinājumus, salīdzināt cenas, pateikt, vai cena ir laba, un parādīt reālos darījumus adresē.")}
             <div className="ai-hints">
-              {["Dīzeļa universāls līdz 8000 € Rīgā", "2 istabu dzīvoklis īrē Jūrmalā", "Elektro auto līdz 20000"].map((h) => (
-                <button key={h} className="ai-hint" onClick={() => { setInput(t(h)); }}>
+              {AI_EXAMPLES.map((h) => (
+                <button key={h} className="ai-hint" onClick={() => send(t(h))}>
                   {t(h)}
                 </button>
               ))}
@@ -183,7 +228,7 @@ export function AiChat() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && send()}
-          placeholder={t("Ko meklējam?")}
+          placeholder={t("Raksti savu jautājumu…")}
           maxLength={500}
           autoFocus
         />

@@ -2,6 +2,23 @@
 import type { Dict } from "./core";
 
 export const ru: Dict = {
+  "Jautā AI": "Спросить AI",
+  "AI asistents": "AI-ассистент",
+  "Atbild par visiem VienāVietā sludinājumiem": "Отвечает по всем объявлениям VienāVietā",
+  "Sveiks! Jautā brīvi, tāpat kā jautātu cilvēkam. Varu atrast sludinājumus, salīdzināt cenas, pateikt, vai cena ir laba, un parādīt reālos darījumus adresē.": "Привет! Спрашивайте свободно, как человека. Могу найти объявления, сравнить цены, сказать, хорошая ли цена, и показать реальные сделки по адресу.",
+  "Labs ģimenes auto līdz 8000 €": "Хорошее семейное авто до 8000 €",
+  "2 istabu dzīvoklis Rīgā līdz 90 000 €": "2-комнатная квартира в Риге до 90 000 €",
+  "Par cik pārdoti dzīvokļi Brīvības ielā 100, Rīgā?": "За сколько продали квартиры на Brīvības iela 100 в Риге?",
+  "Kas šonedēļ kļuvis lētāks?": "Что подешевело на этой неделе?",
+  "Raksti savu jautājumu…": "Напишите свой вопрос…",
+  "Jautā AI asistentam": "Спросите AI-ассистента",
+  "Jautā brīvi, tāpat kā cilvēkam. Asistents pārzina visus sludinājumus, cenas un reālos darījumus.": "Спрашивайте свободно, как человека. Ассистент знает все объявления, цены и реальные сделки.",
+  "Piem.: labs ģimenes auto līdz 8000 €": "Напр.: семейное авто до 8000 €",
+  "Tavs jautājums": "Ваш вопрос",
+  "Šodien tirgū": "Рынок сегодня",
+  "Jauni sludinājumi": "Новые объявления",
+  "Dzīvokļi Rīgā, mediāna": "Квартиры в Риге, медиана",
+  "Pēdējās 24 stundās": "За последние 24 часа",
   "Ko meklē?": "Что ищете?",
   "Meži": "Леса",
   "Skatīt bildes un kontaktus": "Фото и контакты",

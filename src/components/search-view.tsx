@@ -9,6 +9,8 @@ import { SearchMapLazy } from "./search-map-lazy";
 import { SortSelect } from "./sort-select";
 import { ViewToggle } from "./view-toggle";
 import { HomeCategories } from "./home-categories";
+import { AiCard } from "./ai-card";
+import { TodayStats } from "./today-stats";
 import { VIEW_COOKIE, type ListView } from "@/lib/constants";
 import { cookies } from "next/headers";
 import { SmartSearch } from "./smart-search";
@@ -105,6 +107,8 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
         <FiltersBox active={Object.keys(flat).filter((k) => !["cat", "vc", "sort", "page"].includes(k)).length}>
           <SearchFilters initial={flat} regions={regions} sources={srcCounts} />
         </FiltersBox>
+        {process.env.GEMINI_API_KEY && <AiCard />}
+        {!landing && Object.keys(flat).length === 0 && <TodayStats />}
       </aside>
       <section className="results">
         {landing && (
