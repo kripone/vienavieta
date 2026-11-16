@@ -829,3 +829,11 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .det-fav .fav.on { color: var(--accent); }
 .det-body .ext-open { margin-top: 20px; }
 .det-body .also-panel { margin-top: 12px; }
+
+/* sludinājuma lapa datorā: kreisajā pusē bilde un saturs, labajā pielipusi kopsavilkuma kolonna */
+@media (min-width: 861px) {
+  .det { grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr); grid-template-areas: "media side" "body side"; column-gap: 32px; row-gap: 0; }
+  .det > .det-media { grid-area: media; }
+  .det > .det-side { grid-area: side; position: sticky; top: 16px; align-self: start; }
+  .det > .det-body { grid-area: body; max-width: none; }
+}

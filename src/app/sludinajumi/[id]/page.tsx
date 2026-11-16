@@ -200,7 +200,6 @@ export default async function ListingPage(props: Props) {
             </div>
           )}
         </div>
-      </div>
       <div className="det-body">
         <section>
           <h2>{t("Parametri")}</h2>
@@ -271,6 +270,7 @@ export default async function ListingPage(props: Props) {
           </div>
         )}
         {l.status === "active" && !isOwner && <ReportButton id={l.id} loggedIn={Boolean(user)} />}
+      </div>
       </div>
       {similar.length > 0 && (
         <section className="similar">
