@@ -9,6 +9,8 @@ export async function register() {
   // IndexNow: reizi dienā paziņo Bing par jaunām sitemap lapām (izslēdzams ar INDEXNOW=off)
   const { startIndexNowDaily } = await import("./lib/indexnow");
   startIndexNowDaily();
+  // Vecās sēriju vērtības (portālu saīsinājumi) → mūsu SERIES; idempotents, pēc normalizēšanas neko nedara
+  import("./lib/series-stats").then((m) => m.normalizeStoredSeries()).catch((e) => console.error("[series]", e));
   // Pēc starta „sasildām” galvenās lapas, lai pirmais apmeklētājs vai meklētāja robots negaida uz tukšiem kešiem
   if (process.env.NODE_ENV === "production" && process.env.WARMUP !== "off") {
     const { WARMUP_PATHS } = await import("./lib/constants");

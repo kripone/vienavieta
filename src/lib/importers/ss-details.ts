@@ -1,3 +1,4 @@
+import { normalizeSeries } from "@/lib/constants";
 // ss.com transporta sarakstos nav pilsētas, ātrumkārbas, krāsas un aprīkojuma, tāpēc katra sludinājuma lapu
 // atveram vienu reizi un nolasām TIKAI faktu laukus: Vieta, Ātrumkārba, Krāsa, Virsbūves tips, Vietu skaits,
 // Tehniskā apskate un atzīmēto aprīkojumu. Pārdevēja tekstu, kontaktus un bildes neņemam.
@@ -66,7 +67,7 @@ export function parseAdPropertyDetails(html: string) {
   for (const m of html.matchAll(/class="ads_opt_name"[^>]*>\s*([^<:]{2,40}):?\s*<\/td>\s*<td[^>]*class="ads_opt"[^>]*>([\s\S]{0,300}?)<\/td>/g)) {
     opts[decode(m[1])] = decode(m[2].replace(/<[^>]+>/g, " "));
   }
-  const series = (opts["Sērija"] ?? "").slice(0, 40) || null;
+  const series = normalizeSeries(opts["Sērija"]);
   const material = (opts["Mājas tips"] ?? "").slice(0, 40) || null;
   const heating = (opts["Apkure"] ?? "").slice(0, 60) || null;
   const condition = (opts["Stāvoklis"] ?? opts["Īpašuma stāvoklis"] ?? "").slice(0, 40) || null;

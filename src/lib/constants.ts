@@ -119,12 +119,26 @@ export const DEAL_LABEL: Record<(typeof DEALS)[number], string> = {
   buy: "Pērk",
 };
 
-export const SERIES = ["Lietuviešu", "103. sērija", "104. sērija", "119. sērija", "467. sērija", "602. sērija", "Hruščova laika", "Staļina laika", "Pirmskara", "Mazģimeņu", "Specprojekts", "Jaunais projekts", "Renovēta ēka"] as const;
+export const SERIES = ["Lietuviešu", "103. sērija", "104. sērija", "119. sērija", "467. sērija", "602. sērija", "Hruščova laika", "Staļina laika", "Pirmskara", "Mazģimeņu", "Čehu projekts", "Specprojekts", "Jaunais projekts", "Renovēta ēka", "Privātmāja"] as const;
+/** Portālu sēriju nosaukumi (ss.com saīsinājumi, city24 teksti) → mūsu `SERIES`. Nezināmu atgriež null. */
+export function normalizeSeries(raw?: string | null): (typeof SERIES)[number] | null {
+  if (!raw) return null;
+  if ((SERIES as readonly string[]).includes(raw)) return raw as (typeof SERIES)[number];
+  const k = raw.toLocaleLowerCase("lv").replace(/\s+/g, " ").trim();
+  const num = k.match(/^(103|104|119|467|602)\b/);
+  if (num) return `${num[1]}. sērija` as (typeof SERIES)[number];
+  const rules: [RegExp, (typeof SERIES)[number]][] = [
+    [/^(lit|lietuv|lt pr)/, "Lietuviešu"], [/^hru[sš]/, "Hruščova laika"], [/^sta[lļ]/, "Staļina laika"],
+    [/^(p\. ?kara|pirmskara|pirms kara)/, "Pirmskara"], [/^(m\. ?ģim|mazģim|mazgim)/, "Mazģimeņu"], [/^(čehu|cehu)/, "Čehu projekts"],
+    [/^spec/, "Specprojekts"], [/^jaun/, "Jaunais projekts"], [/^renov/, "Renovēta ēka"], [/^(priv\. ?m|privātm|privatm)/, "Privātmāja"],
+  ];
+  return rules.find(([re]) => re.test(k))?.[1] ?? null;
+}
 /** Sērijas filtrā un /serijas grupētas pēc laika (apraksti `src/content/series.ts`). */
 export const SERIES_GROUPS = {
   pre: ["Pirmskara"],
-  soviet: ["Staļina laika", "Hruščova laika", "103. sērija", "104. sērija", "119. sērija", "467. sērija", "602. sērija", "Lietuviešu", "Mazģimeņu", "Specprojekts"],
-  new: ["Jaunais projekts", "Renovēta ēka"],
+  soviet: ["Staļina laika", "Hruščova laika", "103. sērija", "104. sērija", "119. sērija", "467. sērija", "602. sērija", "Lietuviešu", "Čehu projekts", "Mazģimeņu", "Specprojekts"],
+  new: ["Jaunais projekts", "Renovēta ēka", "Privātmāja"],
 } as const satisfies Record<string, readonly (typeof SERIES)[number][]>;
 export const MATERIALS = ["Ķieģeļu", "Paneļu", "Ķieģeļu-paneļu", "Monolīts", "Koka", "Gāzbetona", "Karkasa"] as const;
 export const HEATING = ["Centrālā", "Gāzes", "Siltumsūknis", "Malkas", "Granulu", "Elektriskā", "Kombinētā"] as const;

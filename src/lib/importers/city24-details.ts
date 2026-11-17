@@ -1,3 +1,4 @@
+import { normalizeSeries } from "@/lib/constants";
 // city24.lv sarakstu kartītēs ir tikai pamatparametri; ērtības (apkure, materiāls, celšanas gads,
 // balkons, autostāvvieta u.tml.) ir sludinājuma lapas "full-specs" tabulās. Katru lapu atveram vienu
 // reizi un nolasām TIKAI strukturētos laukus. Pārdevēja tekstu un kontaktus neņemam.
@@ -44,7 +45,7 @@ export function parseC24Details(html: string) {
   const material = (opts["Mājas tips"] ?? "").slice(0, 40) || null;
   const heating = (opts["Apkure"] ?? "").slice(0, 60) || null;
   const condition = (opts["Īpašuma stāvoklis"] ?? "").slice(0, 40) || null;
-  const series = (opts["Mājas sērija"] ?? "").slice(0, 40) || null;
+  const series = normalizeSeries(opts["Mājas sērija"]);
   const purpose = (opts["Izmantošanas mērķis"] ?? opts["Pielietošanas mērķis"] ?? "").slice(0, 60) || null;
   const builtYear = /^\d{4}$/.test(opts["Celšanas gads"] ?? "") ? Number(opts["Celšanas gads"]) : null;
   // ērtības: skenējam visu lauku tekstu (virsraksts + vērtība)

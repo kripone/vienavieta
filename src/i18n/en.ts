@@ -2,6 +2,7 @@
 import type { Dict } from "./core";
 
 export const en: Dict = {
+  "Čehu projekts": "Czech project",
   "Kas ir sērijas?": "What do the series mean?",
   "Māju sērijas": "Building series",
   "Aizpildi ar AI": "Fill in with AI",

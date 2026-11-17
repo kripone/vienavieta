@@ -2,6 +2,7 @@
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { cached } from "@/lib/search";
+import { normalizeSeries, SERIES } from "@/lib/constants";
 
 const primary = sql.raw(`(l.group_key is null or not exists (select 1 from listings g where g.group_key = l.group_key and g.status = 'active' and g.id <> l.id and (g.source = 'own' and l.source <> 'own' or (g.source <> 'own' and l.source <> 'own' and g.created_at < l.created_at))))`);
 
@@ -18,4 +19,17 @@ export function seriesStats(): Promise<Record<string, SeriesStat>> {
       group by l.series`);
     return Object.fromEntries(r.rows.map((x) => [x.series, { n: Number(x.n), m2: x.m2 == null ? null : Number(x.m2), floors: x.floors == null ? null : Number(x.floors) }]));
   });
+}
+
+/** Startā: vecie ieraksti ar portālu saīsinājumiem ("Jaun.", "P. kara", "lietuviešu pr.") → mūsu `SERIES` (lai filtrs tos atrod). */
+export async function normalizeStoredSeries() {
+  const r = await db.execute<{ series: string }>(sql`select distinct series from listings where series is not null and series not in (${sql.join(SERIES.map((x) => sql`${x}`), sql`, `)})`);
+  let n = 0;
+  for (const { series } of r.rows) {
+    const to = normalizeSeries(series);
+    if (!to) continue;
+    const u = await db.execute(sql`update listings set series = ${to} where series = ${series}`);
+    n += u.rowCount ?? 0;
+  }
+  if (n) console.log(`[series] normalizētas ${n} sērijas vērtības`);
 }

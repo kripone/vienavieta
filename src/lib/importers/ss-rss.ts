@@ -3,7 +3,7 @@
 // Pārdevēja teksts un bildes netiek kopētas; virsrakstu veidojam paši; kartītē ir saite uz oriģinālu.
 import { and, eq, inArray, lt, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { EXTERNAL_TTL_DAYS, SERIES, SS_FEEDS, type PropertyType } from "../constants";
+import { EXTERNAL_TTL_DAYS, normalizeSeries, SS_FEEDS, type PropertyType } from "../constants";
 import { linkDuplicate } from "../dedupe";
 import { inferBody } from "../illustrations";
 import { landLabel } from "../listing-input";
@@ -106,7 +106,7 @@ const SERIES_MAP: Record<string, string> = {
   "Lit. pr.": "Lietuviešu", "Hrušč.": "Hruščova laika", "Staļina": "Staļina laika", "P. kara": "Pirmskara",
   "M. ģim.": "Mazģimeņu", "Specpr.": "Specprojekts", "Jaun.": "Jaunais projekts", "Renov.": "Renovēta ēka",
 };
-const series = (v?: string) => (v && SERIES_MAP[v] && (SERIES as readonly string[]).includes(SERIES_MAP[v]) ? SERIES_MAP[v] : null);
+const series = (v?: string) => normalizeSeries(v && SERIES_MAP[v] ? SERIES_MAP[v] : v);
 
 /** Burti bez garumzīmēm un ss.com transliterācijas īpatnībām: "Pļavnieki" un "plyavnieki" → "plavnieki". */
 export function slug(s: string) {
