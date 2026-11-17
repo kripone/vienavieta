@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db, schema } from "@/db";
 import { isValidPhone } from "@/lib/antispam";
+import { isBusiness } from "@/lib/constants";
+import { escapeHtml, sendMail } from "@/lib/email";
 import { getCurrentUser } from "@/lib/session";
 
 const ProfileSchema = z
@@ -42,6 +44,9 @@ export async function updateProfile(_prev: ProfileState, form: FormData): Promis
 
   const v = parsed.data;
   const phoneChanged = (v.phone || null) !== user.phone;
+  const companyName = v.sellerType !== "private" ? v.companyName : null;
+  // uzņēmuma statusu apstiprina moderators; mainot veidu vai nosaukumu, apstiprinājums jāsaņem no jauna
+  const businessChanged = v.sellerType !== user.sellerType || companyName !== user.companyName;
   await db
     .update(schema.users)
     .set({
@@ -50,10 +55,27 @@ export async function updateProfile(_prev: ProfileState, form: FormData): Promis
       // mainot tālruni, apstiprinājums jāveic no jauna
       ...(phoneChanged && { phoneVerifiedAt: null }),
       sellerType: v.sellerType,
-      companyName: v.sellerType !== "private" ? v.companyName : null,
+      companyName,
+      ...(businessChanged && { businessVerifiedAt: null }),
     })
     .where(eq(schema.users.id, user.id));
 
+  if (isBusiness(v.sellerType) && businessChanged) await notifyModerators(user.email, v.sellerType, v.companyName);
+
   revalidatePath("/profils");
   return { ok: true };
+}
+
+/** Paziņo administratoriem (ADMIN_EMAILS), ka uzņēmuma statuss gaida apstiprinājumu. Kļūda netraucē saglabāšanu. */
+async function notifyModerators(email: string, sellerType: string, company: string) {
+  const to = (process.env.ADMIN_EMAILS ?? "").split(",").map((e) => e.trim()).filter(Boolean);
+  if (!to.length) return;
+  const base = process.env.APP_URL ?? "https://vienavieta.lv";
+  const kind = sellerType === "agency" ? "Nekustamo īpašumu aģentūra" : "Auto salons";
+  const url = `${base}/moderacija?tab=uznemumi`;
+  const text = `${kind}: ${company}\nLietotājs: ${email}\n\nApstiprini vai noraidi: ${url}`;
+  const html = `<p>${escapeHtml(kind)}: <b>${escapeHtml(company)}</b><br>Lietotājs: ${escapeHtml(email)}</p><p><a href="${escapeHtml(url)}">Apstiprināt vai noraidīt</a></p>`;
+  await Promise.all(
+    to.map((addr) => sendMail({ to: addr, subject: `Uzņēmums gaida apstiprinājumu: ${company.replace(/[\r\n]+/g, " ")}`, text, html }).catch((e) => console.error("Moderatoru paziņojums:", e))),
+  );
 }

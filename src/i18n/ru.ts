@@ -1067,4 +1067,6 @@ export const ru: Dict = {
   "Pieslēgts čats:": "Подключён чат:",
   "Sūtīt Telegram ziņu, ja favorītos saglabātam sludinājumam samazinās cena": "Присылать сообщение в Telegram, когда цена избранного объявления снижается",
   "Pieslēdz mūsu botu un saņem jaunos sludinājumus un cenu kritumus Telegram čatā uzreiz.": "Подключите нашего бота и мгновенно получайте новые объявления и снижения цен в Telegram.",
+  "Uzņēmuma statuss vēl gaida apstiprinājumu. Imports būs pieejams, tiklīdz to apstiprināsim.": "Статус компании ещё ожидает подтверждения. Импорт станет доступен, как только мы его подтвердим.",
+  "Uzņēmuma statuss nav apstiprināts.": "Статус компании не подтверждён.",
 };

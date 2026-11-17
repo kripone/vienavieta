@@ -420,6 +420,9 @@ export const OPERATOR: { name: string | null; regNo: string | null; address: str
 /** Uzņēmumu pārdevēju veidi (salons, aģentūra): imports, uzņēmuma nosaukums, filtrs "Saloni un aģentūras". */
 export const BUSINESS_SELLERS = ["dealer", "agency"] as const;
 export const isBusiness = (t: string | null | undefined) => t === "dealer" || t === "agency";
+/** Salons/aģentūra, ko apstiprinājis moderators (tikai tad pieejams imports). */
+export const isVerifiedBusiness = (u: { sellerType: string | null | undefined; businessVerifiedAt?: Date | null }) =>
+  isBusiness(u.sellerType) && !!u.businessVerifiedAt;
 
 /** Reģionu grupas meklēšanā (loc=g:…): "Rīgas rajons" kā ss.com – Pierīgas novadi. */
 export const REGION_GROUPS_LOC: Record<string, string[]> = {

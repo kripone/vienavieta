@@ -2,18 +2,21 @@
 import { useT } from "@/i18n/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { approveListing, blockUser, hideListing, unblockUser, type ModResult } from "@/app/moderacija/actions";
+import { approveBusiness, approveListing, blockUser, hideListing, revokeBusiness, unblockUser, type ModResult } from "@/app/moderacija/actions";
 
-type Action = "approve" | "hide" | "block" | "unblock";
+type Action = "approve" | "hide" | "block" | "unblock" | "verify" | "unverify";
 
 const LABEL: Record<Action, string> = {
   approve: "✓ Viss kārtībā",
   hide: "Paslēpt",
   block: "Bloķēt lietotāju",
   unblock: "Atbloķēt",
+  verify: "✓ Apstiprināt uzņēmumu",
+  unverify: "Atsaukt apstiprinājumu",
 };
 const CONFIRM: Partial<Record<Action, string>> = {
   block: "Bloķēt? Lietotājs tiks izrakstīts, un visi viņa sludinājumi paslēpti.",
+  unverify: "Atsaukt? Plūsmas vairs netiks nolasītas; esošie sludinājumi paliek.",
 };
 
 /** Moderatora pogas sludinājumam vai lietotājam. */
@@ -32,6 +35,8 @@ export function ModActions({ listingId, userId, actions }: { listingId?: string;
       hide: () => hideListing(listingId!),
       block: () => blockUser(userId!),
       unblock: () => unblockUser(userId!),
+      verify: () => approveBusiness(userId!),
+      unverify: () => revokeBusiness(userId!),
     };
     const r = await fn[a]();
     setBusy(false);
@@ -52,7 +57,7 @@ export function ModActions({ listingId, userId, actions }: { listingId?: string;
   return (
     <div className="row mod-actions">
       {actions.map((a) => (
-        <button key={a} type="button" className={`btn small${a === "block" ? " danger" : a === "approve" ? " primary" : ""}`} disabled={busy} onClick={() => (CONFIRM[a] ? setConfirm(a) : run(a))}>
+        <button key={a} type="button" className={`btn small${a === "block" ? " danger" : a === "approve" || a === "verify" ? " primary" : ""}`} disabled={busy} onClick={() => (CONFIRM[a] ? setConfirm(a) : run(a))}>
           {LABEL[a]}
         </button>
       ))}

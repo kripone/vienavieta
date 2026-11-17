@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { ModActions } from "@/components/mod-actions";
 import { REPORT_REASONS } from "@/lib/constants";
 import { formatPrice, plural, timeAgo } from "@/lib/format";
-import { findUsers, hiddenListings, moderationCounts, reportedListings } from "@/lib/moderation";
+import { businessUsers, findUsers, hiddenListings, moderationCounts, reportedListings } from "@/lib/moderation";
 import { isModerator, requireModerator } from "@/lib/session";
 import { recentErrors } from "@/lib/errors";
 import { resolveErrors } from "./actions";
@@ -18,6 +18,7 @@ const TABS = [
   ["sudzibas", "Sūdzības"],
   ["paslepti", "Paslēptie"],
   ["lietotaji", "Lietotāji"],
+  ["uznemumi", "Uzņēmumi"],
   ["kludas", "Kļūdas"],
 ] as const;
 const STATUS: Record<string, string> = { active: "Aktīvs", pending: "Paslēpts pēc sūdzībām", hidden: "Paslēpis moderators", sold: "Pārdots" };
@@ -30,7 +31,7 @@ export default async function ModerationPage(props: { searchParams: Promise<SP> 
   await requireModerator(`/moderacija?tab=${tab}`);
   const counts = await moderationCounts();
   const errors = await recentErrors().catch(() => []);
-  const badge: Record<string, number> = { sudzibas: counts.open, paslepti: counts.hidden, lietotaji: counts.blocked, kludas: errors.filter((e) => !e.resolved).length };
+  const badge: Record<string, number> = { sudzibas: counts.open, paslepti: counts.hidden, lietotaji: counts.blocked, uznemumi: counts.business, kludas: errors.filter((e) => !e.resolved).length };
 
   return (
     <main className="wrap mod">
@@ -45,6 +46,7 @@ export default async function ModerationPage(props: { searchParams: Promise<SP> 
       {tab === "sudzibas" && <Reports />}
       {tab === "paslepti" && <Hidden />}
       {tab === "lietotaji" && <Users q={sp.q?.slice(0, 80)} />}
+      {tab === "uznemumi" && <Businesses />}
       {tab === "kludas" && <Errors rows={errors} />}
     </main>
   );
@@ -144,6 +146,38 @@ async function Users({ q }: { q?: string }) {
         </div>
       )}
     </>
+  );
+}
+
+async function Businesses() {
+  const rows = await businessUsers();
+  if (!rows.length) return <div className="notice">Neviens lietotājs nav norādījis, ka ir salons vai aģentūra.</div>;
+  return (
+    <div className="stack">
+      <p className="fine">Imports (plūsmas un faili) pieejams tikai apstiprinātiem uzņēmumiem. Pirms apstiprināšanas pārbaudi, vai uzņēmums tiešām eksistē (piem., Lursoft, mājaslapa, tālrunis).</p>
+      {rows.map((u) => (
+        <article key={u.id} className="panel mod-item">
+          <div className="row between">
+            <b>{u.companyName || "Bez nosaukuma"}</b>
+            <span className="fine">{u.email}</span>
+          </div>
+          <p className="meta">
+            {u.businessVerifiedAt ? (
+              <span className="mod-status s-active">Apstiprināts {timeAgo(u.businessVerifiedAt)}</span>
+            ) : (
+              <span className="mod-status s-pending">Gaida apstiprinājumu</span>
+            )}
+            {u.blockedAt && <span className="mod-status s-hidden">Bloķēts</span>}
+            <span>{u.sellerType === "agency" ? "NĪ aģentūra" : "Auto salons"}</span>
+            {u.name && <span>{u.name}</span>}
+            {u.phone && <span>{u.phone}</span>}
+            <span>Reģistrējies {timeAgo(u.createdAt)}</span>
+            {u.feedCount > 0 && <span>{plural(u.feedCount, "plūsma", "plūsmas")}</span>}
+          </p>
+          {!u.blockedAt && <ModActions userId={u.id} actions={u.businessVerifiedAt ? ["unverify"] : ["verify"]} />}
+        </article>
+      ))}
+    </div>
   );
 }
 

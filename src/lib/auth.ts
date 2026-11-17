@@ -28,6 +28,7 @@ export const auth = betterAuth({
       role: { type: "string", input: false, defaultValue: "user" },
       sellerType: { type: "string", input: false, defaultValue: "private" },
       companyName: { type: "string", input: false, required: false },
+      businessVerifiedAt: { type: "date", input: false, required: false },
       phone: { type: "string", input: false, required: false },
       blockedAt: { type: "date", input: false, required: false },
       locale: { type: "string", input: false, defaultValue: "lv" },

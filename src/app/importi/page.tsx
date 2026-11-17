@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { desc, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { getT } from "@/i18n/server";
-import { DEALER_FEED, isBusiness } from "@/lib/constants";
+import { DEALER_FEED, isBusiness, isVerifiedBusiness } from "@/lib/constants";
 import { timeAgo } from "@/lib/format";
 import { isAdmin, requireUser } from "@/lib/session";
 import type { FeedResult } from "@/lib/importers/dealer-feed";
@@ -19,13 +19,18 @@ export default async function ImportPage() {
   const user = await requireUser("/importi");
   const feeds = await db.select().from(schema.dealerFeeds).where(eq(schema.dealerFeeds.userId, user.id)).orderBy(desc(schema.dealerFeeds.createdAt));
   const admin = isAdmin(user);
-  const isDealer = isBusiness(user.sellerType) || admin;
+  const isDealer = isVerifiedBusiness(user) || admin;
+  const pending = !isDealer && isBusiness(user.sellerType);
   const defKind = user.sellerType === "agency" ? "property" : "vehicle";
   return (
     <main className="wrap narrow">
       <h1>{t("Sludinājumu imports")}</h1>
       <p className="lead">{t("Saloni un aģentūras var ielādēt savus sludinājumus failā vai pievienot plūsmas saiti. Saiti nolasām ik {h} stundas: jauni sludinājumi parādās, mainītās cenas atjaunojas, noņemtie pazūd. Failu atjauno, augšupielādējot to no jauna.", { h: DEALER_FEED.EVERY_HOURS })}</p>
-      {!isDealer ? (
+      {pending ? (
+        <div className="notice">
+          {t("Uzņēmuma statuss vēl gaida apstiprinājumu. Imports būs pieejams, tiklīdz to apstiprināsim.")}
+        </div>
+      ) : !isDealer ? (
         <div className="notice">
           {t("Imports pieejams tikai saloniem un aģentūrām. Profilā norādi, ka esi salons vai aģentūra.")} <a href="/profils">{t("Mans profils")}</a>
         </div>

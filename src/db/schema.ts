@@ -57,6 +57,8 @@ export const users = pgTable("users", {
   sellerType: sellerType("seller_type").notNull().default("private"),
   /** Saloniem un aģentūrām: nosaukums, kas redzams sludinājumos */
   companyName: text("company_name"),
+  /** Uzņēmuma (salons/aģentūra) statusu apstiprinājis moderators; bez tā imports (plūsmas, faili) nav pieejams. */
+  businessVerifiedAt: timestamp("business_verified_at", { withTimezone: true }),
   blockedAt: timestamp("blocked_at", { withTimezone: true }),
   locale: text("locale").notNull().default("lv"),
   /** E-pasts, ja favorītos saglabātam sludinājumam samazinās cena. */

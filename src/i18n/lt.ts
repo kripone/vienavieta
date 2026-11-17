@@ -1068,4 +1068,6 @@ export const lt: Dict = {
   "Pieslēgts čats:": "Prijungtas pokalbis:",
   "Sūtīt Telegram ziņu, ja favorītos saglabātam sludinājumam samazinās cena": "Siųsti Telegram žinutę, kai išsaugoto skelbimo kaina sumažėja",
   "Pieslēdz mūsu botu un saņem jaunos sludinājumus un cenu kritumus Telegram čatā uzreiz.": "Prijunkite mūsų botą ir gaukite naujus skelbimus bei kainų kritimus Telegram iškart.",
+  "Uzņēmuma statuss vēl gaida apstiprinājumu. Imports būs pieejams, tiklīdz to apstiprināsim.": "Įmonės statusas dar laukia patvirtinimo. Importas bus prieinamas, kai tik jį patvirtinsime.",
+  "Uzņēmuma statuss nav apstiprināts.": "Įmonės statusas nepatvirtintas.",
 };

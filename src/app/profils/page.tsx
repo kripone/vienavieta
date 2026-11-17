@@ -30,7 +30,11 @@ export default async function ProfilePage(props: { searchParams: Promise<{ jauns
         </p>
         <ProfileForm name={user.name} phone={user.phone ?? ""} sellerType={user.sellerType} companyName={user.companyName ?? ""} />
       </div>
-      {isBusiness(user.sellerType) ? (
+      {isBusiness(user.sellerType) && !user.businessVerifiedAt ? (
+        <div className="notice import-hint">
+          {t("Uzņēmuma statuss vēl gaida apstiprinājumu. Imports būs pieejams, tiklīdz to apstiprināsim.")}
+        </div>
+      ) : isBusiness(user.sellerType) ? (
         <div className="panel import-hint">
           <h2>{t("Sludinājumu imports")}</h2>
           <p>{t("Ielādē visus savus sludinājumus uzreiz: failā (XML, CSV, JSON) vai ar plūsmas saiti, ko atjaunojam automātiski.")}</p>

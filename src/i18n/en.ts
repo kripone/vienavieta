@@ -1059,4 +1059,6 @@ export const en: Dict = {
   "Pieslēgts čats:": "Connected chat:",
   "Sūtīt Telegram ziņu, ja favorītos saglabātam sludinājumam samazinās cena": "Send a Telegram message when a favorited listing's price drops",
   "Pieslēdz mūsu botu un saņem jaunos sludinājumus un cenu kritumus Telegram čatā uzreiz.": "Connect our bot to get new listings and price drops in Telegram instantly.",
+  "Uzņēmuma statuss vēl gaida apstiprinājumu. Imports būs pieejams, tiklīdz to apstiprināsim.": "Your business status is awaiting approval. Import will be available as soon as we approve it.",
+  "Uzņēmuma statuss nav apstiprināts.": "Business status has not been approved.",
 };

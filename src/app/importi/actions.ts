@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db, schema } from "@/db";
 import { DEALER_FEED, PARTNER_SOURCES, type PartnerSource } from "@/lib/constants";
 import { checkFeedUrl, parseFeed, removeFeedListings, runFeed } from "@/lib/importers/dealer-feed";
-import { isBusiness } from "@/lib/constants";
+import { isBusiness, isVerifiedBusiness } from "@/lib/constants";
 import { getCurrentUser, isAdmin } from "@/lib/session";
 
 const { dealerFeeds } = schema;
@@ -16,7 +16,10 @@ export type FeedState = { ok?: boolean; error?: string };
 async function dealer() {
   const user = await getCurrentUser();
   if (!user) return { error: "Sesija beigusies. Ielogojies vēlreiz." } as const;
-  if (!isBusiness(user.sellerType) && !isAdmin(user)) return { error: "Imports pieejams tikai saloniem un aģentūrām. Profilā norādi, ka esi salons vai aģentūra." } as const;
+  if (isAdmin(user)) return { user } as const;
+  if (!isBusiness(user.sellerType)) return { error: "Imports pieejams tikai saloniem un aģentūrām. Profilā norādi, ka esi salons vai aģentūra." } as const;
+  // pašdeklarēts uzņēmums bez moderatora apstiprinājuma varētu masveidā publicēt sludinājumus, apejot antispam
+  if (!isVerifiedBusiness(user)) return { error: "Uzņēmuma statuss vēl gaida apstiprinājumu. Imports būs pieejams, tiklīdz to apstiprināsim." } as const;
   return { user } as const;
 }
 

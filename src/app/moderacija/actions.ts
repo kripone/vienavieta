@@ -68,6 +68,23 @@ export async function unblockUser(userId: string): Promise<ModResult> {
   return done();
 }
 
+/** Apstiprina salona/aģentūras statusu: pēc tam pieejams imports (plūsmas un faili). */
+export async function approveBusiness(userId: string): Promise<ModResult> {
+  if (!(await moderator())) return { ok: false, error: "Nav tiesību." };
+  await db
+    .update(users)
+    .set({ businessVerifiedAt: new Date() })
+    .where(and(eq(users.id, userId), inArray(users.sellerType, ["dealer", "agency"])));
+  return done();
+}
+
+/** Atsauc uzņēmuma apstiprinājumu: plūsmas vairs netiek nolasītas (esošie sludinājumi paliek). */
+export async function revokeBusiness(userId: string): Promise<ModResult> {
+  if (!(await moderator())) return { ok: false, error: "Nav tiesību." };
+  await db.update(users).set({ businessVerifiedAt: null }).where(eq(users.id, userId));
+  return done();
+}
+
 /** Kļūdu žurnāls: atzīmē visas kļūdas kā izskatītas (atkārtojoties tās atkal kļūst neizskatītas). */
 export async function resolveErrors(): Promise<void> {
   if (!(await moderator())) return;

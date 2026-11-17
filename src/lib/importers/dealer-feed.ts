@@ -10,7 +10,8 @@ import { BlockList, isIP } from "node:net";
 import { XMLParser } from "fast-xml-parser";
 import { and, eq, inArray, notInArray, sql, isNull } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { BODY_TYPES, DEALER_FEED, PARTNER_UTM, type PropertyType } from "../constants";
+import { BODY_TYPES, DEALER_FEED, PARTNER_UTM, isVerifiedBusiness, type PropertyType } from "../constants";
+import { isAdmin } from "../session";
 import { city24ToFlat, isCity24Item } from "./city24-format";
 import { inferBody } from "../illustrations";
 import { landLabel } from "../listing-input";
@@ -280,9 +281,13 @@ export async function runFeed(feedId: number): Promise<FeedResult> {
   const res: FeedResult = { items: 0, created: 0, updated: 0, removed: 0, skipped: 0, errors: [], ms: 0 };
   const [feed] = await db.select().from(dealerFeeds).where(eq(dealerFeeds.id, feedId));
   if (!feed) throw new Error("Plūsma nav atrasta.");
-  const [owner] = await db.select({ id: users.id, phone: users.phone, email: users.email, blockedAt: users.blockedAt }).from(users).where(eq(users.id, feed.userId));
+  const [owner] = await db
+    .select({ id: users.id, phone: users.phone, email: users.email, blockedAt: users.blockedAt, role: users.role, sellerType: users.sellerType, businessVerifiedAt: users.businessVerifiedAt })
+    .from(users)
+    .where(eq(users.id, feed.userId));
   try {
     if (!owner || owner.blockedAt) throw new Error("Lietotājs bloķēts.");
+    if (!isVerifiedBusiness(owner) && !isAdmin(owner)) throw new Error("Uzņēmuma statuss nav apstiprināts.");
     const { text, type } = feed.content != null ? { text: feed.content, type: "" } : await fetchFeed(feed.url);
     let rows: Flat[];
     try {

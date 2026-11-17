@@ -1,4 +1,4 @@
-import { and, count, desc, eq, ilike, inArray, isNotNull, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, ilike, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 
 const { listings, reports, users } = schema;
@@ -76,10 +76,33 @@ export async function findUsers(q?: string) {
 }
 
 export async function moderationCounts() {
-  const [[open], [hidden], [blocked]] = await Promise.all([
+  const [[open], [hidden], [blocked], [business]] = await Promise.all([
     db.select({ n: sql<number>`count(distinct ${reports.listingId})::int` }).from(reports).where(eq(reports.status, "open")),
     db.select({ n: count() }).from(listings).where(inArray(listings.status, ["pending", "hidden"])),
     db.select({ n: count() }).from(users).where(isNotNull(users.blockedAt)),
+    db.select({ n: count() }).from(users).where(and(inArray(users.sellerType, ["dealer", "agency"]), isNull(users.businessVerifiedAt), isNull(users.blockedAt))),
   ]);
-  return { open: open.n, hidden: hidden.n, blocked: blocked.n };
+  return { open: open.n, hidden: hidden.n, blocked: blocked.n, business: business.n };
+}
+
+/** Saloni un aģentūras: vispirms neapstiprinātie (jaunākie augšā), tad apstiprinātie. */
+export async function businessUsers() {
+  const feedCount = sql<number>`(select count(*)::int from "dealer_feeds" f where f."user_id" = "users"."id")`;
+  return db
+    .select({
+      id: users.id,
+      email: users.email,
+      name: users.name,
+      phone: users.phone,
+      sellerType: users.sellerType,
+      companyName: users.companyName,
+      businessVerifiedAt: users.businessVerifiedAt,
+      blockedAt: users.blockedAt,
+      createdAt: users.createdAt,
+      feedCount,
+    })
+    .from(users)
+    .where(inArray(users.sellerType, ["dealer", "agency"]))
+    .orderBy(sql`${users.businessVerifiedAt} desc nulls first`, desc(users.createdAt))
+    .limit(100);
 }
