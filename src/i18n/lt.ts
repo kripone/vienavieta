@@ -2,6 +2,19 @@
 import type { Dict } from "./core";
 
 export const lt: Dict = {
+  "Aizpildi ar AI": "Užpildyk su DI",
+  "Uzraksti dažos vārdos, ko pārdod — AI aizpildīs laukus, sakārtos aprakstu un parādīs, cik maksā līdzīgi sludinājumi.": "Keliais žodžiais aprašyk, ką parduodi, — DI užpildys laukus, sutvarkys aprašymą ir parodys, kiek kainuoja panašūs skelbimai.",
+  "Piem.: Pārdodu VW Golf 2014, 1.6 dīzelis, 230 000 km, automāts, melns, Rīga, 6500 €": "Pvz.: Parduodu VW Golf 2014, 1.6 dyzelis, 230 000 km, automatas, juodas, Ryga, 6500 €",
+  "Piem.: Pārdodu 2 istabu dzīvokli Imantā, 52 m², 3/9 stāvs, 602. sērija, renovēts, 79 000 €": "Pvz.: Parduodu 2 kambarių butą Imantoje, 52 m², 3/9 aukštas, 602 serija, renovuotas, 79 000 €",
+  "Aizpilda…": "Pildoma…",
+  "Aizpildīt laukus": "Užpildyti laukus",
+  "Lauki aizpildīti. Pārbaudi tos un pievieno bildes pirms publicēšanas.": "Laukai užpildyti. Patikrink juos ir pridėk nuotraukų prieš skelbdamas.",
+  "Neizdevās — pamēģini vēlreiz vai aizpildi laukus pats.": "Nepavyko — bandyk dar kartą arba užpildyk laukus pats.",
+  "Pārāk daudz pieprasījumu — pamēģini pēc brīža.": "Per daug užklausų — bandyk po akimirkos.",
+  "Uzraksti mazliet vairāk par to, ko pārdod.": "Parašyk šiek tiek daugiau apie tai, ką parduodi.",
+  "AI nav pieejams": "DI nepasiekiamas",
+  "Līdzīgi sludinājumi maksā {a}–{b} € (mediāna {m} €, {n} sludinājumi).": "Panašūs skelbimai kainuoja {a}–{b} € (mediana {m} €, {n} skelbimų).",
+  "Līdzīgi dzīvokļi šajā vietā: {a}–{b} €/m² (mediāna {m} €/m², {n} sludinājumi).": "Panašūs butai čia: {a}–{b} €/m² (mediana {m} €/m², {n} skelbimų).",
   "Lietoti {name} pārdošanā Latvijā": "Naudoti {name} parduodami Latvijoje",
   "{name} motocikli pārdošanā Latvijā": "{name} motociklai parduodami Latvijoje",
   "Salīdzini cenas un cenu vēsturi.": "Palyginkite kainas ir kainų istoriją.",

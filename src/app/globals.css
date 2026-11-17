@@ -957,3 +957,13 @@ body:has(.det-bar) .ai-pill { bottom: 90px; }
 .ai-input .ai-mic.on { background: #dc2626; color: #fff; }
 .ai-card-in .ai-card-mic { width: 42px; height: 42px; }
 @media (max-width: 560px) { .ai-input .ai-mic { width: 48px; height: 48px; } }
+
+/* „Aizpildi ar AI” sludinājuma formā */
+.ai-fill { display: grid; gap: 8px; border: 1px dashed var(--line); }
+.ai-fill h2 { margin: 0; }
+.ai-fill p { margin: 0; }
+.ai-fill-hint { color: var(--muted); font-size: 14px; }
+.ai-fill textarea { width: 100%; box-sizing: border-box; font: inherit; }
+.ai-fill-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.ai-fill-row .ok { color: var(--fg); font-weight: 600; }
+.ai-fill-price { padding: 8px 10px; border-radius: 8px; background: var(--surface-2); font-weight: 600; }

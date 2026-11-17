@@ -39,7 +39,7 @@ export function ListingForm(props: {
   initialPhotos?: PhotoItem[];
   defaultPhone?: string;
 }) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const router = useRouter();
   const isEdit = Boolean(props.initial?.id);
   const [v, setV] = useState<FormValues>({ ...blank, contactPhone: props.defaultPhone ?? "", ...(props.initial as FormValues) });
@@ -50,6 +50,34 @@ export function ListingForm(props: {
   const [saving, setSaving] = useState(false);
   const [makes, setMakes] = useState<Make[]>([]);
   const honeypot = useRef<HTMLInputElement>(null);
+  // „Aizpildi ar AI” (/api/listing-assist)
+  const [aiText, setAiText] = useState("");
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiMsg, setAiMsg] = useState<{ ok: boolean; text: string; price?: string } | null>(null);
+
+  async function aiFill() {
+    setAiBusy(true);
+    setAiMsg(null);
+    try {
+      const r = await fetch("/api/listing-assist", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text: aiText, lang: locale }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) { setAiMsg({ ok: false, text: d.error ? t(d.error) : t("Neizdevās — pamēģini vēlreiz vai aizpildi laukus pats.") }); return; }
+      setV((p) => ({ ...p, ...(d.values as Record<string, string>) }));
+      if (Array.isArray(d.amenities) && d.amenities.length) setAmenities(d.amenities);
+      const pr = d.price as { median: number; p25: number; p75: number; n: number; unit: "eur" | "sqm" } | null;
+      const fmt = (n: number) => new Intl.NumberFormat("lv-LV").format(Math.round(n));
+      const price = pr
+        ? pr.unit === "eur"
+          ? t("Līdzīgi sludinājumi maksā {a}–{b} € (mediāna {m} €, {n} sludinājumi).", { a: fmt(pr.p25), b: fmt(pr.p75), m: fmt(pr.median), n: pr.n })
+          : t("Līdzīgi dzīvokļi šajā vietā: {a}–{b} €/m² (mediāna {m} €/m², {n} sludinājumi).", { a: fmt(pr.p25), b: fmt(pr.p75), m: fmt(pr.median), n: pr.n })
+        : undefined;
+      setAiMsg({ ok: true, text: t("Lauki aizpildīti. Pārbaudi tos un pievieno bildes pirms publicēšanas."), price });
+    } catch {
+      setAiMsg({ ok: false, text: t("Neizdevās — pamēģini vēlreiz vai aizpildi laukus pats.") });
+    } finally {
+      setAiBusy(false);
+    }
+  }
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setV((p) => ({ ...p, [k]: e.target.value }));
   const vc = v.vehicleClass as VehicleClass;
@@ -121,6 +149,20 @@ export function ListingForm(props: {
           <button type="button" aria-pressed={v.kind === "vehicle"} onClick={() => setV((p) => ({ ...p, kind: "vehicle" }))}>{t("Transports")}</button>
           <button type="button" aria-pressed={v.kind === "property"} onClick={() => setV((p) => ({ ...p, kind: "property", placeId: props.regions.some((r) => r.country === "LT" && r.places.some((pl) => String(pl.id) === p.placeId)) ? "" : p.placeId }))}>{t("Nekustamais īpašums")}</button>
         </div>
+      )}
+
+      {!isEdit && (
+        <section className="panel ai-fill">
+          <h2>✨ {t("Aizpildi ar AI")}</h2>
+          <p className="ai-fill-hint">{t("Uzraksti dažos vārdos, ko pārdod — AI aizpildīs laukus, sakārtos aprakstu un parādīs, cik maksā līdzīgi sludinājumi.")}</p>
+          <textarea rows={3} value={aiText} onChange={(e) => setAiText(e.target.value)} maxLength={2000}
+            placeholder={v.kind === "vehicle" ? t("Piem.: Pārdodu VW Golf 2014, 1.6 dīzelis, 230 000 km, automāts, melns, Rīga, 6500 €") : t("Piem.: Pārdodu 2 istabu dzīvokli Imantā, 52 m², 3/9 stāvs, 602. sērija, renovēts, 79 000 €")} />
+          <div className="ai-fill-row">
+            <button type="button" className="btn" onClick={aiFill} disabled={aiBusy || aiText.trim().length < 10}>{aiBusy ? t("Aizpilda…") : t("Aizpildīt laukus")}</button>
+            {aiMsg && <span className={aiMsg.ok ? "ok" : "err"} role="status">{aiMsg.text}</span>}
+          </div>
+          {aiMsg?.price && <p className="ai-fill-price">💶 {aiMsg.price}</p>}
+        </section>
       )}
 
       {v.kind === "vehicle" ? (

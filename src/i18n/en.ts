@@ -2,6 +2,19 @@
 import type { Dict } from "./core";
 
 export const en: Dict = {
+  "Aizpildi ar AI": "Fill in with AI",
+  "Uzraksti dažos vārdos, ko pārdod — AI aizpildīs laukus, sakārtos aprakstu un parādīs, cik maksā līdzīgi sludinājumi.": "Describe what you're selling in a few words — AI will fill in the fields, tidy up the description and show what similar listings cost.",
+  "Piem.: Pārdodu VW Golf 2014, 1.6 dīzelis, 230 000 km, automāts, melns, Rīga, 6500 €": "E.g.: Selling VW Golf 2014, 1.6 diesel, 230,000 km, automatic, black, Riga, €6500",
+  "Piem.: Pārdodu 2 istabu dzīvokli Imantā, 52 m², 3/9 stāvs, 602. sērija, renovēts, 79 000 €": "E.g.: Selling a 2-room flat in Imanta, 52 m², floor 3/9, 602 series, renovated, €79,000",
+  "Aizpilda…": "Filling in…",
+  "Aizpildīt laukus": "Fill in fields",
+  "Lauki aizpildīti. Pārbaudi tos un pievieno bildes pirms publicēšanas.": "Fields filled in. Check them and add photos before publishing.",
+  "Neizdevās — pamēģini vēlreiz vai aizpildi laukus pats.": "That didn't work — try again or fill in the fields yourself.",
+  "Pārāk daudz pieprasījumu — pamēģini pēc brīža.": "Too many requests — try again in a moment.",
+  "Uzraksti mazliet vairāk par to, ko pārdod.": "Write a little more about what you're selling.",
+  "AI nav pieejams": "AI is not available",
+  "Līdzīgi sludinājumi maksā {a}–{b} € (mediāna {m} €, {n} sludinājumi).": "Similar listings cost €{a}–{b} (median €{m}, {n} listings).",
+  "Līdzīgi dzīvokļi šajā vietā: {a}–{b} €/m² (mediāna {m} €/m², {n} sludinājumi).": "Similar flats here: €{a}–{b}/m² (median €{m}/m², {n} listings).",
   "Lietoti {name} pārdošanā Latvijā": "Used {name} for sale in Latvia",
   "{name} motocikli pārdošanā Latvijā": "{name} motorcycles for sale in Latvia",
   "Salīdzini cenas un cenu vēsturi.": "Compare prices and price history.",
