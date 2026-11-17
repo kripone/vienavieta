@@ -46,7 +46,8 @@ export async function createLinkToken(userId: string): Promise<string> {
 /** Webhook paraksta pārbaude (Telegram sūta X-Telegram-Bot-Api-Secret-Token galveni). */
 export function validWebhookSecret(header: string | null): boolean {
   const secret = process.env.TELEGRAM_WEBHOOK_SECRET;
-  if (!secret) return true; // nav iestatīts: nepārbaudām (izstrādes režīms)
+  // produkcijā bez noslēpuma webhook atsakām (citādi var viltot /start un /stop ar svešu chat.id); izstrādē nepārbaudām
+  if (!secret) return process.env.NODE_ENV !== "production";
   if (!header) return false;
   const a = Buffer.from(header);
   const b = Buffer.from(secret);

@@ -57,6 +57,9 @@ services:
       - key: EMAIL_FROM
         sync: false
       # Telegram paziņojumu bots (token no @BotFather; username bez @; secret — jebkāda garlaicīga virkne)
+      # /api/cron/notify atslēga (tā pati vērtība GitHub noslēpumā CRON_SECRET); produkcijā obligāta
+      - key: CRON_SECRET
+        sync: false
       - key: TELEGRAM_BOT_TOKEN
         sync: false
       - key: TELEGRAM_BOT_USERNAME

@@ -46,5 +46,5 @@ Katrs jauns commit `main` zarā GitHub automātiski tiek palaists Render.
 ## Paziņojumi (saglabātās meklēšanas, cenu kritumi)
 E-pastus sūta `/api/cron/notify`. To reizi stundā izsauc GitHub Actions (`.github/workflows/notify.yml`), un tas arī pamodina Render bezmaksas serveri.
 - Ja portāla adrese mainās (savs domēns), GitHub repozitorijā **Settings → Secrets and variables → Actions → Variables** pievieno `APP_URL`.
-- Pēc izvēles: Render iestati `CRON_SECRET` un to pašu vērtību GitHub **Secrets** sadaļā `CRON_SECRET`. Bez tā izsaukums arī ir drošs, jo e-pasti netiek sūtīti biežāk, nekā atļauj katras meklēšanas biežums.
+- Obligāti: Render iestati `CRON_SECRET` un to pašu vērtību GitHub **Secrets** sadaļā `CRON_SECRET`. Produkcijā bez tā `/api/cron/notify` atbild 401. Tāpat `TELEGRAM_WEBHOOK_SECRET` (ja ir Telegram bots): bez tā webhook atbild 403.
 - Vienā kārtā tiek nosūtīti ne vairāk kā `MAX_EMAILS_PER_RUN` e-pasti (Brevo bezmaksas plānā 300 dienā).

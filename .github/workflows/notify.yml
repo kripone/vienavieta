@@ -1,7 +1,7 @@
 # Paziņojumu kārta: reizi stundā izsauc portāla /api/cron/notify.
 # Render bezmaksas serveris dīkstāvē aizmieg, tāpēc pirmais pieprasījums to pamodina (līdz ~1 min).
 # Portāla adresi var mainīt repozitorija mainīgajā APP_URL (Settings → Secrets and variables → Actions → Variables).
-# Ja Render iestatīts CRON_SECRET, to pašu vērtību ieliec repozitorija noslēpumā CRON_SECRET.
+# Render iestatīts CRON_SECRET; to pašu vērtību ieliec repozitorija noslēpumā CRON_SECRET (bez tā produkcija atbild 401).
 name: Paziņojumi
 
 on:
