@@ -3,6 +3,8 @@ import sharp from "sharp";
 export const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
 const ACCEPTED = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "image/avif"]);
 
+const INPUT_FORMATS = new Set(["jpeg", "png", "webp", "heif", "avif"]);
+
 export function isAcceptedType(type: string) {
   return ACCEPTED.has(type);
 }
@@ -15,6 +17,8 @@ export async function processImage(input: Buffer) {
   const base = sharp(input, { failOn: "error", limitInputPixels: 100_000_000 }).rotate();
   const meta = await base.metadata();
   if (!meta.width || !meta.height) throw new Error("Fails nav bilde");
+  // tikai rastra formāti, ko pieņemam (ne SVG, PDF, TIFF u.c., arī ja pārlūks nenorāda faila tipu)
+  if (!INPUT_FORMATS.has(String(meta.format))) throw new Error("Neatbalstīts bildes formāts");
 
   const full = await base.clone().resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true }).webp({ quality: 82 }).toBuffer({ resolveWithObject: true });
   const thumb = await base.clone().resize({ width: 480, height: 360, fit: "cover", position: "attention" }).webp({ quality: 74 }).toBuffer();
