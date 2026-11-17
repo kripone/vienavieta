@@ -1,12 +1,16 @@
 // cars.bmwwess.lv (Wess Select — BMW un citu marku mazlietoto auto katalogs) ievākšana.
-// WooCommerce veikals ar servera renderētām kartītēm (?product-page=N), Cloudflare ir,
-// bet parastais HTTP paiet cauri (servera plūsma). Saraksta kartīte dod marku/modeli (virsraksts),
-// gadu, ātrumkārbu, nobraukumu, cenu un sīktēlu; degvielu, tilpumu, jaudu, krāsu un virsbūvi
-// paņemam no detaļu lapas (tikai jaunajiem sludinājumiem — ikonu bloks car-attributes).
+// WooCommerce veikals ar servera renderētām kartītēm (?product-page=N). Cloudflare kopš
+// 2026-11-13 bloķē parastos HTTP pieprasījumus no Render datacentra IP (HTTP 403; no
+// dzīvojamo adrešu IP joprojām paiet cauri), tāpēc pie HTTP kļūdas krītam atpakaļ uz
+// reālu pārlūku (Playwright chromium) — tas pats risinājums, kas autoplius.lt un city24.lv.
+// Saraksta kartīte dod marku/modeli (virsraksts), gadu, ātrumkārbu, nobraukumu, cenu un
+// sīktēlu; degvielu, tilpumu, jaudu, krāsu un virsbūvi paņemam no detaļu lapas (tikai
+// jaunajiem sludinājumiem — ikonu bloks car-attributes).
 // Virsrakstus veidojam paši no faktiem, tāpat kā ss.com.
 import { and, eq, inArray, lt, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { EXTERNAL_TTL_DAYS, WESS } from "../constants";
+import { withCrawlLock } from "./crawl-lock";
 import { linkDuplicate } from "../dedupe";
 import { inferBody } from "../illustrations";
 import { mapColor } from "./bravo-pages";
@@ -37,11 +41,17 @@ const UA = { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Appl
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/** Viena saraksta lapa (servera HTML). */
+/** Viena saraksta lapa (servera HTML). Ja parasto HTTP bloķē Cloudflare (Render IP), atver ar pārlūku. */
 export async function fetchListPage(p: number): Promise<string> {
-  const r = await fetch(p === 1 ? WESS.url : `${WESS.url}?product-page=${p}`, { headers: UA });
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  return r.text();
+  const url = p === 1 ? WESS.url : `${WESS.url}?product-page=${p}`;
+  try {
+    const r = await fetch(url, { headers: UA });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.text();
+  } catch (e) {
+    console.warn(`cars.bmwwess.lv HTTP neizdevās (${e instanceof Error ? e.message : e}), mēģinu ar pārlūku: ${url}`);
+    return browserFetch(url, "li.product-item-wrapper");
+  }
 }
 
 /** Izvelk kartītes no saraksta lapas HTML. */
@@ -55,9 +65,9 @@ export function parseListPage(html: string): WessRow[] {
     seen.add(link[2]);
     const price = Number((card.match(/<bdi>[\s\S]*?&nbsp;([\d\s]+)<\/bdi>/)?.[1] ?? "").replace(/\s/g, ""));
     if (!Number.isFinite(price) || price < 300 || price > 1_000_000) continue;
-    const title = card.match(/<h3>([^<]+)<\/h3>/)?.[1]?.trim() ?? "";
-    const year = Number(card.match(/products\/calendar\.png[\s\S]{0,300}?<span>(\d{4})/)?.[1]);
-    const km = Number((card.match(/products\/speedometer\.png[\s\S]{0,300}?<span>([\d\s]+)\s*km/)?.[1] ?? "").replace(/\s/g, ""));
+    const title = card.match(/<h3[^>]*>([^<]+)<\/h3>/)?.[1]?.trim() ?? "";
+    const year = Number(card.match(/products\/calendar\.png[\s\S]{0,300}?<span[^>]*>(\d{4})/)?.[1]);
+    const km = Number((card.match(/products\/speedometer\.png[\s\S]{0,300}?<span[^>]*>([\d\s]+)\s*km/)?.[1] ?? "").replace(/\s/g, ""));
     rows.push({
       link: link[1],
       externalId: link[2],
@@ -66,7 +76,7 @@ export function parseListPage(html: string): WessRow[] {
       price,
       year: year > 1950 && year < 2100 ? year : null,
       mileageKm: Number.isFinite(km) && km >= 0 && km < 2_000_000 ? km : null,
-      gearboxRaw: card.match(/products\/mt\.png[\s\S]{0,300}?<span>([^<]+)<\/span>/)?.[1]?.trim() ?? null,
+      gearboxRaw: card.match(/products\/mt\.png[\s\S]{0,300}?<span[^>]*>([^<]+)<\/span>/)?.[1]?.trim() ?? null,
       thumb: card.match(/<img[^>]*src="(https:\/\/[^"]+?\.(?:jpe?g|webp|png))"/)?.[1] ?? null,
       fuelRaw: null,
       engineL: null,
@@ -78,13 +88,14 @@ export function parseListPage(html: string): WessRow[] {
   return rows;
 }
 
-/** Detaļu lapa: papildu fakti no car-attributes ikonu bloka. */
+/** Detaļu lapa: papildu fakti no car-attributes ikonu bloka. Labvēlīga: kļūdas gadījumā fakti paliek null. */
 export async function enrichFromDetail(row: WessRow): Promise<void> {
-  const r = await fetch(row.link, { headers: UA });
-  if (!r.ok) return;
-  const html = await r.text();
+  const r = await fetch(row.link, { headers: UA }).catch(() => null);
+  let html = r?.ok ? await r.text() : null;
+  if (!html) html = await browserFetch(row.link, "section.car-attributes").catch(() => null);
+  if (!html) return;
   const section = html.match(/<section class="car-attributes">([\s\S]*?)<\/section>/)?.[1] ?? "";
-  const val = (icon: string) => section.match(new RegExp(`products/${icon}\\.png[\\s\\S]{0,300}?<span>([^<]+)<\\/span>`))?.[1]?.trim() ?? null;
+  const val = (icon: string) => section.match(new RegExp(`products/${icon}\\.png[\\s\\S]{0,300}?<span[^>]*>([^<]+)<\\/span>`))?.[1]?.trim() ?? null;
   row.fuelRaw = val("gas-station");
   const engine = val("engine_l"); // "3 l"
   const cc = engine ? Number(engine.replace(/[^\d.,]/g, "").replace(",", ".")) : NaN;
@@ -286,5 +297,86 @@ export async function tickWess(): Promise<CrawlResult | null> {
   const fullDue = !st?.lastFullAt || now - st.lastFullAt.getTime() > WESS.fullEveryHours * 3600_000;
   const quickDue = !st?.lastQuickAt || now - st.lastQuickAt.getTime() > WESS.quickEveryMin * 60_000;
   if (!fullDue && !quickDue) return null;
-  return crawlWess(fullDue ? "full" : "quick");
+  // pa vienam pārlūkam visiem crawleriem (512 MB instances) un pēc kārtas pārlūku aizveram
+  return withCrawlLock(async () => {
+    try {
+      return await crawlWess(fullDue ? "full" : "quick");
+    } finally {
+      await closeBrowser().catch(() => {});
+    }
+  });
+}
+
+// ---------- lapu ielāde ar reālu pārlūku (Playwright) ----------
+// Rezerves ceļš, kad Cloudflare parasto HTTP bloķē (Render datacentra IP → HTTP 403).
+// Tas pats risinājums, kas autoplius.lt un city24.lv crawleriem.
+
+let browserPromise: Promise<import("playwright").Browser> | null = null;
+
+async function getBrowser() {
+  if (!browserPromise) {
+    browserPromise = (async () => {
+      const { chromium } = await import("playwright");
+      // headless shell (vieglāks par pilno chromium: Render starter ir tikai 512 MB, pilnais deva OOM).
+      // --disable-dev-shm-usage: konteineru /dev/shm ir mazs, citādi pārlūks krīt ar atmiņas kļūdām.
+      return chromium.launch({ headless: true, timeout: 30_000, args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"] });
+    })().catch((e) => {
+      browserPromise = null;
+      throw e;
+    });
+  }
+  return browserPromise;
+}
+
+/** Aizver pārlūku un sesiju pēc kārtas — atmiņa (512 MB instances) netiek turēta starp kārtām. */
+export async function closeBrowser() {
+  const ctx = contextPromise;
+  contextPromise = null;
+  if (ctx) await ctx.then((c) => c.close()).catch(() => {});
+  const br = browserPromise;
+  browserPromise = null;
+  if (br) await br.then((b) => b.close()).catch(() => {});
+}
+
+/** Atver lapu chromium pārlūkā (apiet Cloudflare pārbaudi) un atgriež HTML. Tikai cars.bmwwess.lv adreses. */
+export async function browserFetch(url: string, waitSelector: string): Promise<string> {
+  if (!/(^|\.)bmwwess\.lv$/.test(new URL(url).host)) throw new Error(`Nav cars.bmwwess.lv adrese: ${url}`);
+  // viena kopīga konteksta "sesija": kad Cloudflare pārbaude reiz izieta, cf_clearance sīkdatne
+  // darbojas arī nākamajām lapām (citādi katra lapa no jauna dabūtu pārbaudi)
+  const context = await getContext();
+  const page = await context.newPage();
+  try {
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45_000 });
+    // Cloudflare pārbaudei ("Mazliet uzgaidiet…") ļaujam pabeigties: gaidām saturu, vajadzības gadījumā pārlādējam
+    for (let attempt = 1; ; attempt++) {
+      try {
+        await page.waitForSelector(waitSelector, { timeout: 40_000 });
+        return await page.content();
+      } catch (e) {
+        const title = await page.title().catch(() => "");
+        if (attempt >= 3 || !/uzgaidiet|just a moment|cloudflare|bmwwess/i.test(title)) throw e;
+        await page.reload({ waitUntil: "domcontentloaded", timeout: 45_000 });
+      }
+    }
+  } finally {
+    await page.close();
+  }
+}
+
+let contextPromise: Promise<import("playwright").BrowserContext> | null = null;
+
+async function getContext() {
+  if (!contextPromise) {
+    contextPromise = (async () => {
+      const browser = await getBrowser();
+      return browser.newContext({
+        locale: "lv-LV",
+        userAgent: UA["User-Agent"],
+      });
+    })().catch((e) => {
+      contextPromise = null;
+      throw e;
+    });
+  }
+  return contextPromise;
 }
