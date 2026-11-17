@@ -31,7 +31,8 @@ export async function requireUser(nextPath: string) {
 
 /** Atļauj tikai drošus iekšējos ceļus pāradresācijai pēc pieteikšanās. */
 export function safeNext(next: string | undefined | null, fallback = "/profils") {
-  return next && next.startsWith("/") && !next.startsWith("//") ? next : fallback;
+  // pārlūki "\" uztver kā "/", tāpēc "/\evil.com" būtu "//evil.com"; vadības rakstzīmes arī neatļaujam
+  return typeof next === "string" && next.startsWith("/") && !next.startsWith("//") && !/[\\\u0000-\u001f\u007f]/.test(next) ? next : fallback;
 }
 
 type Who = { role: string; email: string };

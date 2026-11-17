@@ -9,6 +9,7 @@
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { safeNext } from "@/lib/session";
 import { telegramEnabled } from "@/lib/telegram";
 
 const { users, verifications } = schema;
@@ -32,7 +33,7 @@ function validAuth(q: Record<string, string>, botToken: string): boolean {
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const q = Object.fromEntries(url.searchParams.entries());
-  const next = q.next?.startsWith("/") ? q.next : "/";
+  const next = safeNext(q.next, "/");
   delete q.next; // mūsu parametrs, nevis Telegram — neietilpst parakstā
   // aiz starpniekservera req.url origin ir iekšējā adrese (localhost:10000) — lietojam publisko
   const origin = (process.env.APP_URL || process.env.BETTER_AUTH_URL || url.origin).replace(/\/$/, "");
