@@ -38,7 +38,8 @@ type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ saglabat
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { id } = await props.params;
   const d = await getListing(id).catch(() => null);
-  if (!d || d.l.status === "deleted") return { title: (await getT()).t("Sludinājums nav atrasts") };
+  // paslēptus un moderācijā esošus nerādām arī metadatos (lapa citiem ir 404, bet virsraksts/cena/bilde nonāktu <head>)
+  if (!d || d.l.status === "deleted" || d.l.status === "hidden" || d.l.status === "pending") return { title: (await getT()).t("Sludinājums nav atrasts"), robots: { index: false, follow: false } };
   const external = d.l.source !== "own";
   return {
     title: trTitle(d.l.title, (await getT()).t),
