@@ -3,11 +3,6 @@
 // Stāvoklis glabājas tabulā crawl_state, tāpēc pēc pārstartēšanas pilnā kārta neatkārtojas lieki.
 import { db, schema } from "@/db";
 import { SS_FULL_EVERY_HOURS, SS_QUICK_EVERY_MIN, SS_SECTIONS } from "../constants";
-
-/** Servera fona darbu biežums — pārrakstāms ar Render env mainīgajiem, lai atvieglotu 512 MB instanci bez koda izmaiņām. */
-const QUICK_EVERY_MIN = Number(process.env.SS_QUICK_EVERY_MIN ?? SS_QUICK_EVERY_MIN);
-const GEOCODE_PER_MIN = Number(process.env.GEOCODE_PER_MIN ?? 20);
-const CITY_FILL_ACTIVE_DELAY_MS = Number(process.env.CITY_FILL_DELAY_MS ?? 45_000);
 import { geocodePending, geocodingEnabled } from "../geocode";
 import { ensureDailySnapshot } from "../market";
 import { autopliusEnabled, tickAutoplius } from "./autoplius-pages";
@@ -49,9 +44,9 @@ async function tick() {
     const snap = await ensureDailySnapshot().catch((e) => console.error("Tirgus momentuzņēmums neizdevās:", e));
     if (snap) console.log("Tirgus momentuzņēmums:", JSON.stringify(snap));
   }
-  // īpašumu adreses → precīza vieta kartē (katra adrese tikai vienreiz; temps regulējams ar GEOCODE_PER_MIN)
+  // īpašumu adreses → precīza vieta kartē (līdz 40 adresēm minūtē; katra tikai vienreiz)
   if (geocodingEnabled()) {
-    const g = await geocodePending(GEOCODE_PER_MIN).catch((e) => (console.error("Ģeokodēšana:", e), null));
+    const g = await geocodePending(40).catch((e) => (console.error("Ģeokodēšana:", e), null));
     if (g && (g.done || g.errors)) console.log("Ģeokodēšana:", JSON.stringify(g));
   }
   const state = new Map((await db.select().from(schema.crawlState)).map((s) => [s.name, s]));
@@ -59,7 +54,7 @@ async function tick() {
   for (const section of SS_SECTIONS) {
     const st = state.get(section.key);
     const fullDue = !st?.lastFullAt || now - st.lastFullAt.getTime() > SS_FULL_EVERY_HOURS * 3600_000;
-    const quickDue = !st?.lastQuickAt || now - st.lastQuickAt.getTime() > QUICK_EVERY_MIN * 60_000;
+    const quickDue = !st?.lastQuickAt || now - st.lastQuickAt.getTime() > SS_QUICK_EVERY_MIN * 60_000;
     if (!fullDue && !quickDue) continue;
     const r = await crawlSection(section, fullDue ? "full" : "quick");
     const { errors, ...rest } = r;
@@ -117,7 +112,7 @@ export function startSsCrawler() {
         if (r && (r.found || r.errors)) console.log("ss.com pilsētas:", JSON.stringify(r));
         const rp = await fillPropertyDetails().catch((e) => (console.error("ss.com ērtības:", e instanceof Error ? e.message : e), null));
         if (rp && (rp.filled || rp.errors)) console.log("ss.com ērtības:", JSON.stringify(rp));
-        await new Promise((res) => setTimeout(res, r || rp ? CITY_FILL_ACTIVE_DELAY_MS : 600_000));
+        await new Promise((res) => setTimeout(res, r || rp ? 15_000 : 600_000));
       }
     })();
   }
