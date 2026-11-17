@@ -911,7 +911,13 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .today a b { font-family: var(--f-display); font-size: 18px; white-space: nowrap; }
 .today .fine { margin: 6px 0 0; }
 @media (max-width: 860px) { .ai-card, .today { display: none; } }
-.ai-pill { position: fixed; right: 16px; bottom: max(18px, env(safe-area-inset-bottom, 0px)); z-index: 60; height: 48px; padding: 0 16px 0 13px; border: 0; border-radius: 24px; display: flex; align-items: center; gap: 8px; color: #fff; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; background: linear-gradient(135deg, #7b5cff, #d14b8f); box-shadow: 0 6px 20px rgba(80,40,140,.35); transition: transform .25s, opacity .25s; }
+.ai-pill { position: fixed; right: 16px; bottom: max(18px, env(safe-area-inset-bottom, 0px)); z-index: 60; height: 48px; padding: 0 16px 0 13px; border: 2px solid transparent; border-radius: 24px; display: flex; align-items: center; gap: 8px; color: #fff; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
+  background:
+    linear-gradient(135deg, #7b5cff, #d14b8f) padding-box,
+    conic-gradient(from var(--smart-a), #ff5f6d, #ffc371, #47e5a0, #3fa9f5, #a56bff, #ff5fa2, #ff5f6d) border-box;
+  animation: smart-spin 4s linear infinite;
+  box-shadow: 0 6px 20px rgba(80,40,140,.35); transition: transform .25s, opacity .25s; }
+@media (prefers-reduced-motion: reduce) { .ai-pill { animation: none; } }
 .ai-pill.away { transform: translateY(90px); opacity: 0; pointer-events: none; }
 @media (min-width: 861px) { body:has(.ai-card) .ai-pill { display: none; } }
 body:has(.det-bar) .ai-pill { bottom: 90px; }
