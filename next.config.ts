@@ -9,6 +9,16 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // pamata drošības galvenes visām lapām (CSP apzināti nav: ārējie skripti/kartes/sīktēli to padara riskantu)
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Strict-Transport-Security", value: "max-age=31536000" },
+        ],
+      },
+      {
         // servisa darbiniekam vienmēr jābūt svaigam
         source: "/sw.js",
         headers: [
