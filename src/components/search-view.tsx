@@ -11,6 +11,7 @@ import { ViewToggle } from "./view-toggle";
 import { HomeCategories } from "./home-categories";
 import { AiCard } from "./ai-card";
 import { TodayStats } from "./today-stats";
+import { MarketOverview } from "./market-overview";
 import { VIEW_COOKIE, type ListView } from "@/lib/constants";
 import { cookies } from "next/headers";
 import { SmartSearch } from "./smart-search";
@@ -28,7 +29,7 @@ import { getCurrentUser } from "@/lib/session";
 
 import { formatNumber, formatPrice } from "@/lib/format";
 import { INTL_LOCALE } from "@/i18n/core";
-import { facetCounts, priceSummary } from "@/lib/search";
+import { facetCounts, priceSummary, marketOverview } from "@/lib/search";
 import { appBase, propertyHref, regionName, RIGA_DISTRICT, vehicleHref, seoSlug, type Landing } from "@/lib/seo";
 import { trTitle } from "@/i18n/content";
 import { PROPERTY_PLURAL, PROPERTY_TYPES, type PropertyType } from "@/lib/constants";
@@ -50,7 +51,7 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
   const wantInsights = s.page === 1 && (s.cat === "vehicle" || (s.cat === "property" && (s.deal === "sell" || s.deal === "rent")));
   const facetBy = landing?.facet === "make" || landing?.facet === "model" || landing?.facet === "region" ? landing.facet : null;
   // Visi no rezultātu rindām neatkarīgie vaicājumi iet paralēli (agrāk tie gāja pēc kārtas un krājās lēnās lapās)
-  const [user, searched, counts, srcCounts0, insights0, summary, facets] = await Promise.all([
+  const [user, searched, counts, srcCounts0, insights0, summary, facets, overview] = await Promise.all([
     getCurrentUser(),
     Promise.all([searchListings(s), regionOptions()]).catch((err) => {
       console.error("Meklēšana neizdevās:", err);
@@ -61,6 +62,7 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
     wantInsights ? priceInsights(s).catch(() => null) : Promise.resolve(null),
     landing ? priceSummary(s).catch(() => null) : Promise.resolve(null),
     facetBy ? facetCounts(s, facetBy).catch(() => []) : Promise.resolve([]),
+    landing && s.page === 1 ? marketOverview(s).catch(() => null) : Promise.resolve(null),
   ]);
   const result: Awaited<ReturnType<typeof searchListings>> | null = searched ? searched[0] : null;
   const regions: Awaited<ReturnType<typeof regionOptions>> = searched ? searched[1] : [];
@@ -218,6 +220,7 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
               )}{" "}
               {t("Salīdzini cenas, skaties cenu vēsturi un saņem paziņojumus par jauniem sludinājumiem.")}
             </p>
+            {overview && <MarketOverview mo={overview} title={landing.h1} />}
             {landing.dealSwitch && <p><a href={lp(landing.dealSwitch.href)}>{landing.dealSwitch.label} →</a></p>}
             {landing.facet === "ptype" && (
               <ul className="seo-links">

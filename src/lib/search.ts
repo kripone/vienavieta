@@ -670,3 +670,91 @@ export async function todayStats(): Promise<{ fresh: number; drops: number; riga
     return { fresh: Number(x?.fresh ?? 0), drops: Number(x?.drops ?? 0), rigaM2: x?.riga != null ? Math.round(Number(x.riga)) : null };
   });
 }
+
+// ---------- SEO lapu „Tirgus šobrīd” (unikāls, no datiem ģenerēts teksts) ----------
+export type MarketOverview =
+  | { kind: "vehicle"; year: number | null; km: number | null; autoPct: number | null; fuel: { name: string; pct: number } | null; top: { name: string; n: number; median: number | null }[]; topBy: "make" | "model" | null }
+  | { kind: "property"; rooms: { rooms: string; n: number; median: number | null; sqm: number | null }[]; cheap: { name: string; sqm: number }[]; dear: { name: string; sqm: number }[] };
+
+export function marketOverview(s: SearchParams): Promise<MarketOverview | null> {
+  const base = { ...s, page: 1, sort: "new" as const };
+  return cached(`mo:${JSON.stringify(base)}`, async () => {
+    const where = and(...conditions(base));
+    const med = sql<number | null>`percentile_cont(0.5) within group (order by ${listings.price}) filter (where ${listings.price} > 0)`;
+    if (s.cat === "vehicle") {
+      const [a] = await db
+        .select({
+          n: count(),
+          year: sql<number | null>`percentile_cont(0.5) within group (order by ${listings.year})`,
+          km: sql<number | null>`percentile_cont(0.5) within group (order by ${listings.mileageKm}) filter (where ${listings.mileageKm} > 0)`,
+          auto: sql<number>`count(*) filter (where ${listings.gearbox} = 'Automāts')`,
+          gb: sql<number>`count(${listings.gearbox})`,
+        })
+        .from(listings)
+        .leftJoin(places, eq(listings.placeId, places.id)).leftJoin(regions, eq(places.regionId, regions.id))
+        .leftJoin(makes, eq(listings.makeId, makes.id)).leftJoin(models, eq(listings.modelId, models.id)).leftJoin(users, eq(listings.userId, users.id))
+        .where(where);
+      if (!a || Number(a.n) < 5) return null;
+      const fuels = await db
+        .select({ f: listings.fuel, n: count() })
+        .from(listings)
+        .leftJoin(places, eq(listings.placeId, places.id)).leftJoin(regions, eq(places.regionId, regions.id))
+        .leftJoin(makes, eq(listings.makeId, makes.id)).leftJoin(models, eq(listings.modelId, models.id)).leftJoin(users, eq(listings.userId, users.id))
+        .where(and(where, isNotNull(listings.fuel)))
+        .groupBy(listings.fuel)
+        .orderBy(desc(count()));
+      const fuelTotal = fuels.reduce((x, r) => x + Number(r.n), 0);
+      const topBy: "make" | "model" | null = !s.make ? "make" : !s.model ? "model" : null;
+      const top = topBy
+        ? (await db
+            .select({ name: topBy === "make" ? makes.name : models.name, n: count(), median: med })
+            .from(listings)
+            .leftJoin(places, eq(listings.placeId, places.id)).leftJoin(regions, eq(places.regionId, regions.id))
+            .leftJoin(makes, eq(listings.makeId, makes.id)).leftJoin(models, eq(listings.modelId, models.id)).leftJoin(users, eq(listings.userId, users.id))
+            .where(and(where, isNotNull(topBy === "make" ? listings.makeId : listings.modelId)))
+            .groupBy(topBy === "make" ? makes.name : models.name)
+            .orderBy(desc(count()))
+            .limit(6)).map((r) => ({ name: String(r.name), n: Number(r.n), median: r.median != null ? Math.round(Number(r.median)) : null }))
+        : [];
+      return {
+        kind: "vehicle" as const,
+        year: a.year != null ? Math.round(Number(a.year)) : null,
+        km: a.km != null ? Math.round(Number(a.km) / 1000) * 1000 : null,
+        autoPct: Number(a.gb) >= 5 ? Math.round((Number(a.auto) / Number(a.gb)) * 100) : null,
+        fuel: fuels[0]?.f && fuelTotal >= 5 ? { name: String(fuels[0].f), pct: Math.round((Number(fuels[0].n) / fuelTotal) * 100) } : null,
+        top: top.filter((r) => r.n >= 3),
+        topBy,
+      };
+    }
+    if (s.cat === "property") {
+      const sqm = sql<number | null>`percentile_cont(0.5) within group (order by ${listings.price}::float / ${listings.areaM2}) filter (where ${listings.price} > 0 and ${listings.areaM2} > 10)`;
+      const roomKey = sql<string>`case when ${listings.rooms} >= 4 then '4+' else ${listings.rooms}::text end`;
+      const rooms = s.ptype === "Dzīvoklis" && !s.rmin && !s.rmax
+        ? (await db
+            .select({ rooms: roomKey, n: count(), median: med, sqm })
+            .from(listings)
+            .leftJoin(places, eq(listings.placeId, places.id)).leftJoin(regions, eq(places.regionId, regions.id))
+            .leftJoin(makes, eq(listings.makeId, makes.id)).leftJoin(models, eq(listings.modelId, models.id)).leftJoin(users, eq(listings.userId, users.id))
+            .where(and(where, isNotNull(listings.rooms), gte(listings.rooms, 1)))
+            .groupBy(roomKey)
+            .orderBy(roomKey)).map((r) => ({ rooms: String(r.rooms), n: Number(r.n), median: r.median != null ? Math.round(Number(r.median)) : null, sqm: r.sqm != null ? Math.round(Number(r.sqm)) : null })).filter((r) => r.n >= 3)
+        : [];
+      const byPlace = (s.deal === "sell" || s.deal === "rent")
+        ? (await db
+            .select({ name: places.name, n: count(), sqm })
+            .from(listings)
+            .leftJoin(places, eq(listings.placeId, places.id)).leftJoin(regions, eq(places.regionId, regions.id))
+            .leftJoin(makes, eq(listings.makeId, makes.id)).leftJoin(models, eq(listings.modelId, models.id)).leftJoin(users, eq(listings.userId, users.id))
+            .where(and(where, isNotNull(listings.placeId), sql`${listings.areaM2} > 10`))
+            .groupBy(places.name)
+            .having(sql`count(*) >= 5`)).map((r) => ({ name: String(r.name), n: Number(r.n), sqm: r.sqm != null ? Math.round(Number(r.sqm) * (s.deal === "rent" ? 10 : 1)) / (s.deal === "rent" ? 10 : 1) : null })).filter((r): r is { name: string; n: number; sqm: number } => r.sqm != null)
+        : [];
+      byPlace.sort((x, y) => x.sqm - y.sqm);
+      const cheap = byPlace.length >= 6 ? byPlace.slice(0, 3) : [];
+      const dear = byPlace.length >= 6 ? byPlace.slice(-3).reverse() : [];
+      if (!rooms.length && !cheap.length) return null;
+      return { kind: "property" as const, rooms, cheap: cheap.map(({ name, sqm }) => ({ name, sqm })), dear: dear.map(({ name, sqm }) => ({ name, sqm })) };
+    }
+    return null;
+  });
+}

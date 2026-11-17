@@ -2,6 +2,15 @@
 import type { Dict } from "./core";
 
 export const ru: Dict = {
+  "Tirgus šobrīd: {x}": "Рынок сейчас: {x}",
+  "Tipiskais sludinājums ir {y}. gada auto ar aptuveni {km} km nobraukumu.": "Типичное объявление — автомобиль {y} года с пробегом около {km} км.",
+  "{p}% piedāvājuma ir ar automātisko ātrumkārbu.": "{p}% предложений — с автоматической коробкой передач.",
+  "Biežākā degviela: {f} ({p}%).": "Самое частое топливо: {f} ({p}%).",
+  "Cenas mediāna": "Медиана цены",
+  "€/m² mediāna": "Медиана €/м²",
+  "Lētākais kvadrātmetrs: {list}.": "Самый дешёвый м²: {list}.",
+  "Dārgākais: {list}.": "Самый дорогой: {list}.",
+  "Aprēķināts no aktīvajiem sludinājumiem, dublikāti skaitīti vienreiz; atjaunojas automātiski.": "Рассчитано по активным объявлениям, дубликаты учтены один раз; обновляется автоматически.",
   "Cik vērts ir tavs auto?": "Сколько стоит ваш автомобиль?",
   "Uzzini sava auto tirgus cenu pēc tūkstošiem līdzīgu sludinājumu.": "Узнайте рыночную цену своего авто по тысячам похожих объявлений.",
   "Cik vērts ir tavs dzīvoklis?": "Сколько стоит ваша квартира?",

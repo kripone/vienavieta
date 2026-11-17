@@ -2,6 +2,15 @@
 import type { Dict } from "./core";
 
 export const lt: Dict = {
+  "Tirgus šobrīd: {x}": "Rinka dabar: {x}",
+  "Tipiskais sludinājums ir {y}. gada auto ar aptuveni {km} km nobraukumu.": "Tipinis skelbimas — {y} m. automobilis su maždaug {km} km rida.",
+  "{p}% piedāvājuma ir ar automātisko ātrumkārbu.": "{p}% pasiūlos — su automatine pavarų dėže.",
+  "Biežākā degviela: {f} ({p}%).": "Dažniausias kuras: {f} ({p}%).",
+  "Cenas mediāna": "Kainos mediana",
+  "€/m² mediāna": "€/m² mediana",
+  "Lētākais kvadrātmetrs: {list}.": "Pigiausias m²: {list}.",
+  "Dārgākais: {list}.": "Brangiausias: {list}.",
+  "Aprēķināts no aktīvajiem sludinājumiem, dublikāti skaitīti vienreiz; atjaunojas automātiski.": "Apskaičiuota pagal aktyvius skelbimus, dublikatai skaičiuojami vieną kartą; atnaujinama automatiškai.",
   "Cik vērts ir tavs auto?": "Kiek vertas jūsų automobilis?",
   "Uzzini sava auto tirgus cenu pēc tūkstošiem līdzīgu sludinājumu.": "Sužinokite automobilio rinkos kainą pagal tūkstančius panašių skelbimų.",
   "Cik vērts ir tavs dzīvoklis?": "Kiek vertas jūsų butas?",
