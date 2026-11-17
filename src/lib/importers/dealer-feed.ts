@@ -6,7 +6,7 @@
 // viens sīktēls un saite uz oriģinālu ar UTM.
 import { indexNow, listingPaths } from "../indexnow";
 import { lookup } from "node:dns/promises";
-import { isIP } from "node:net";
+import { BlockList, isIP } from "node:net";
 import { XMLParser } from "fast-xml-parser";
 import { and, eq, inArray, notInArray, sql, isNull } from "drizzle-orm";
 import { db, schema } from "@/db";
@@ -21,15 +21,23 @@ import { linkDuplicate } from "../dedupe";
 const { listings, priceHistory, dealerFeeds, users } = schema;
 
 // ---------- droša lejupielāde (tikai publiski serveri) ----------
+// Nepubliskie tīkli. BlockList IPv4 noteikumus piemēro arī IPv4-mapped IPv6 adresēm (::ffff:7f00:1 = 127.0.0.1),
+// ko URL parsētājs no "[::ffff:127.0.0.1]" izveido heksadecimālā formā.
+const BLOCKED = new BlockList();
+for (const [net, bits] of [
+  ["0.0.0.0", 8], ["10.0.0.0", 8], ["100.64.0.0", 10], ["127.0.0.0", 8], ["169.254.0.0", 16], ["172.16.0.0", 12],
+  ["192.0.0.0", 24], ["192.0.2.0", 24], ["192.168.0.0", 16], ["198.18.0.0", 15], ["198.51.100.0", 24], ["203.0.113.0", 24], ["224.0.0.0", 3],
+] as const) BLOCKED.addSubnet(net, bits, "ipv4");
+for (const [net, bits] of [
+  ["::", 96], // ::, ::1 un novecojušās IPv4-compatible adreses
+  ["64:ff9b::", 96], ["64:ff9b:1::", 48], ["100::", 64], ["2001:db8::", 32], ["2002::", 16],
+  ["fc00::", 7], ["fe80::", 10], ["fec0::", 10], ["ff00::", 8],
+] as const) BLOCKED.addSubnet(net, bits, "ipv6");
+
 function privateIp(ip: string): boolean {
-  if (isIP(ip) === 6) {
-    const v = ip.toLowerCase();
-    if (v === "::1" || v === "::" || v.startsWith("fc") || v.startsWith("fd") || v.startsWith("fe80")) return true;
-    const m = v.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
-    return m ? privateIp(m[1]) : false;
-  }
-  const [a, b] = ip.split(".").map(Number);
-  return a === 10 || a === 127 || a === 0 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127) || a >= 224;
+  const v = isIP(ip);
+  if (!v) return true;
+  return BLOCKED.check(ip, v === 6 ? "ipv6" : "ipv4");
 }
 
 /** Pārbauda, vai adrese ir publisks http(s) serveris (nevis mūsu iekšējais tīkls). */
