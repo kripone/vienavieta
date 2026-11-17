@@ -1,11 +1,12 @@
 "use client";
 import { useT } from "@/i18n/client";
+import { SERIES_DOC, seriesAnchor } from "@/content/series";
 import { vcIcon } from "@/lib/illustrations";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AMENITIES, BODY_TYPES, COLORS, CONDITIONS, DEAL_LABEL, DEALS, DRIVES, FUELS, GEARBOXES, HEATING, MATERIALS, PROPERTY_FIELDS,
-  PROPERTY_GROUPS, PURPOSES, SERIES, SOURCE_LABEL, VEHICLE_CLASS_LABEL, VEHICLE_CLASSES, type PropertyType, type VehicleClass,
+  PROPERTY_GROUPS, PURPOSES, SERIES, SERIES_GROUPS, SOURCE_LABEL, VEHICLE_CLASS_LABEL, VEHICLE_CLASSES, type PropertyType, type VehicleClass,
 } from "@/lib/constants";
 import type { RegionOption } from "./listing-form";
 
@@ -27,7 +28,7 @@ function propertyKeys(ptype: string): readonly string[] {
 }
 
 export function SearchFilters({ initial, regions, sources = [] }: { initial: FilterValues; regions: RegionOption[]; sources?: { source: string; n: number }[] }) {
-  const { t } = useT();
+  const { t, locale, lp } = useT();
   const router = useRouter();
   const [v, setV] = useState<FilterValues>(initial);
   const [makes, setMakes] = useState<Make[]>([]);
@@ -232,11 +233,31 @@ export function SearchFilters({ initial, regions, sources = [] }: { initial: Fil
             <details className="more" open={Boolean(v.series || v.material || v.heating || v.condition || v.builtmin || v.amen)}>
               <summary>{t("Vairāk filtru")}</summary>
               <div className="grid2">
-                {pkeys.includes("series") && sel("series", "Sērija", SERIES)}
+                {pkeys.includes("series") && (
+                  <label className="field" key="series">
+                    {t("Sērija")}
+                    <select value={v.series ?? ""} onChange={(e) => update({ series: e.target.value })}>
+                      <option value="">{t("Jebkurš")}</option>
+                      {(Object.keys(SERIES_GROUPS) as (keyof typeof SERIES_GROUPS)[]).map((g) => (
+                        <optgroup key={g} label={SERIES_DOC[locale].groups[g]}>
+                          {SERIES_GROUPS[g].map((o) => <option key={o} value={o}>{t(o)}</option>)}
+                        </optgroup>
+                      ))}
+                    </select>
+                  </label>
+                )}
                 {pkeys.includes("material") && sel("material", "Mājas tips", MATERIALS)}
                 {pkeys.includes("heating") && sel("heating", "Apkure", HEATING, "Jebkura")}
                 {pkeys.includes("condition") && sel("condition", "Stāvoklis", CONDITIONS)}
                 {pkeys.includes("builtYear") && numIn("builtmin", "Būvēts no gada")}
+                {pkeys.includes("series") && (
+                  <p className="series-hint full">
+                    {v.series && (SERIES as readonly string[]).includes(v.series)
+                      ? <>{SERIES_DOC[locale].items[v.series as (typeof SERIES)[number]].era} · {SERIES_DOC[locale].items[v.series as (typeof SERIES)[number]].text} </>
+                      : null}
+                    <a href={lp(v.series ? `/serijas#${seriesAnchor(v.series)}` : "/serijas")} target="_blank" rel="noopener">{t("Kas ir sērijas?")}</a>
+                  </p>
+                )}
               </div>
             </details>
           )}

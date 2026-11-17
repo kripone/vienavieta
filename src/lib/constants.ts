@@ -120,6 +120,12 @@ export const DEAL_LABEL: Record<(typeof DEALS)[number], string> = {
 };
 
 export const SERIES = ["Lietuviešu", "103. sērija", "104. sērija", "119. sērija", "467. sērija", "602. sērija", "Hruščova laika", "Staļina laika", "Pirmskara", "Mazģimeņu", "Specprojekts", "Jaunais projekts", "Renovēta ēka"] as const;
+/** Sērijas filtrā un /serijas grupētas pēc laika (apraksti `src/content/series.ts`). */
+export const SERIES_GROUPS = {
+  pre: ["Pirmskara"],
+  soviet: ["Staļina laika", "Hruščova laika", "103. sērija", "104. sērija", "119. sērija", "467. sērija", "602. sērija", "Lietuviešu", "Mazģimeņu", "Specprojekts"],
+  new: ["Jaunais projekts", "Renovēta ēka"],
+} as const satisfies Record<string, readonly (typeof SERIES)[number][]>;
 export const MATERIALS = ["Ķieģeļu", "Paneļu", "Ķieģeļu-paneļu", "Monolīts", "Koka", "Gāzbetona", "Karkasa"] as const;
 export const HEATING = ["Centrālā", "Gāzes", "Siltumsūknis", "Malkas", "Granulu", "Elektriskā", "Kombinētā"] as const;
 export const CONDITIONS = ["Jauns projekts", "Pēc kapitālā remonta", "Labs", "Apmierinošs", "Nepieciešams remonts", "Nepabeigta būvniecība"] as const;

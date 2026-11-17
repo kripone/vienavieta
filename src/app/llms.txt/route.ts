@@ -16,6 +16,7 @@ Skaitļi lapās tiek pārrēķināti katru dienu; citējot norādi avotu „Vien
 - [Dati un metodoloģija](${b}/dati): datu avoti, kā rēķinām mediānu, kvadrātmetra cenu, cenu kritumus un dublikātus
 - [Mēneša tirgus pārskats](${b}/parskati): dzīvokļu €/m² Rīgas apkaimēs un pilsētās, populārākie lietotie auto, cenu kritumi
 - [Dzīvokļu cenu karte](${b}/cenu-karte): kvadrātmetra cenas mediāna pa apkaimēm un pilsētām (pārdošana un īre)
+- [Dzīvokļu māju sērijas](${b}/serijas): ko nozīmē 103., 104., 119., 602. sērija, hruščovka, pirmskara u.c.; €/m² mediāna un biežākais stāvu skaits katrā sērijā
 - [Dzīvokļu darījumu cenas](${b}/darijumi): reālie darījumi pēc adreses (VZD, CC BY 4.0)
 - [Cenu kritumi](${b}/cenu-kritumi): sludinājumi, kuru cena nesen samazināta
 - [Cik vērts?](${b}/novertejums): auto vai dzīvokļa aptuvenā tirgus cena pēc līdzīgiem sludinājumiem

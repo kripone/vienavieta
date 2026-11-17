@@ -1,0 +1,21 @@
+// /serijas: cik dzīvokļu pārdošanā katrā sērijā, €/m² mediāna un biežākais stāvu skaits (aktīvie sludinājumi LV, dublikāti vienreiz).
+import { sql } from "drizzle-orm";
+import { db } from "@/db";
+import { cached } from "@/lib/search";
+
+const primary = sql.raw(`(l.group_key is null or not exists (select 1 from listings g where g.group_key = l.group_key and g.status = 'active' and g.id <> l.id and (g.source = 'own' and l.source <> 'own' or (g.source <> 'own' and l.source <> 'own' and g.created_at < l.created_at))))`);
+
+export type SeriesStat = { n: number; m2: number | null; floors: number | null };
+
+export function seriesStats(): Promise<Record<string, SeriesStat>> {
+  return cached("series-stats", async () => {
+    const r = await db.execute<{ series: string; n: string; m2: string | null; floors: number | null }>(sql`
+      select l.series, count(*) n,
+        (percentile_cont(0.5) within group (order by l.price / l.area_m2) filter (where l.area_m2 > 10 and l.price > 1000))::int m2,
+        mode() within group (order by l.floors) filter (where l.floors between 1 and 40) floors
+      from listings l
+      where l.status = 'active' and l.kind = 'property' and l.property_type = 'Dzīvoklis' and l.deal = 'sell' and l.series is not null and ${primary}
+      group by l.series`);
+    return Object.fromEntries(r.rows.map((x) => [x.series, { n: Number(x.n), m2: x.m2 == null ? null : Number(x.m2), floors: x.floors == null ? null : Number(x.floors) }]));
+  });
+}

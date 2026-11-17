@@ -2,6 +2,8 @@
 import type { Dict } from "./core";
 
 export const en: Dict = {
+  "Kas ir sērijas?": "What do the series mean?",
+  "Māju sērijas": "Building series",
   "Aizpildi ar AI": "Fill in with AI",
   "Uzraksti dažos vārdos, ko pārdod — AI aizpildīs laukus, sakārtos aprakstu un parādīs, cik maksā līdzīgi sludinājumi.": "Describe what you're selling in a few words — AI will fill in the fields, tidy up the description and show what similar listings cost.",
   "Piem.: Pārdodu VW Golf 2014, 1.6 dīzelis, 230 000 km, automāts, melns, Rīga, 6500 €": "E.g.: Selling VW Golf 2014, 1.6 diesel, 230,000 km, automatic, black, Riga, €6500",

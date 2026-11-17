@@ -94,6 +94,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <a href={lp("/novertejums")}>{t("Cik vērts?")}</a>
               <a href={lp("/parskati")}>{t("Tirgus pārskats")}</a>
               <a href={lp("/cenu-karte")}>{t("Dzīvokļu cenu karte")}</a>
+              <a href={lp("/serijas")}>{t("Māju sērijas")}</a>
             </nav>
             <nav aria-label={LEGAL[locale].footer.about}>
               <a href={lp("/par-mums")}>{LEGAL[locale].footer.about}</a>

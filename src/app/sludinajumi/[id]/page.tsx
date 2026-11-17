@@ -1,3 +1,4 @@
+import { seriesAnchor } from "@/content/series";
 import { trTitle } from "@/i18n/content";
 import { getT } from "@/i18n/server";
 import type { Metadata } from "next";
@@ -60,7 +61,7 @@ export default async function ListingPage(props: Props) {
   const isMod = isModerator(user);
   if (l.status === "deleted" || ((l.status === "hidden" || l.status === "pending") && !isOwner && !isMod)) notFound();
 
-  const rows: [string, string | number | null | undefined][] =
+  const rows: [string, string | number | React.ReactElement | null | undefined][] =
     l.kind === "vehicle"
       ? [
           ["Transporta veids", l.vehicleClass ? VEHICLE_CLASS_LABEL[l.vehicleClass as VehicleClass] : null],
@@ -86,7 +87,7 @@ export default async function ListingPage(props: Props) {
           ["Istabas", l.rooms],
           ["Stāvs", l.floor != null ? `${l.floor}${l.floors ? " / " + l.floors : ""}` : l.floors ? t("{n} stāvi", { n: l.floors }) : null],
           ["Zeme", l.landM2 ? landLabel(l.landM2) : null],
-          ["Sērija", l.series],
+          ["Sērija", l.series ? <a href={lp(`/serijas#${seriesAnchor(l.series)}`)}>{t(l.series)}</a> : null],
           ["Mājas tips", l.material],
           ["Apkure", l.heating],
           ["Stāvoklis", l.condition],

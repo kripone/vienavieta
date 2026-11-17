@@ -967,3 +967,13 @@ body:has(.det-bar) .ai-pill { bottom: 90px; }
 .ai-fill-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .ai-fill-row .ok { color: var(--fg); font-weight: 600; }
 .ai-fill-price { padding: 8px 10px; border-radius: 8px; background: var(--surface-2); font-weight: 600; }
+
+/* /serijas */
+.series-page .series-group th { text-align: left; background: var(--surface-2); font-weight: 700; }
+.series-page .series-tip { margin: 20px 0; padding: 14px 16px; border-radius: 10px; background: var(--surface-2); }
+.series-page .series-tip h2 { margin-top: 0; }
+.series-page .series-item { padding: 10px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 80px; }
+.series-page .series-item h3 { margin: 0 0 4px; }
+.series-page .series-item small { color: var(--muted); font-weight: 400; }
+.series-page .series-item p { margin: 0 0 6px; }
+.series-hint { display: block; margin-top: 4px; font-size: 13px; color: var(--muted); line-height: 1.4; font-weight: 400; }
