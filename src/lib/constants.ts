@@ -209,7 +209,7 @@ export const SS_SECTIONS = [
 export const SS_REQUEST_DELAY_MS = 2000;
 export const SS_QUICK_PAGES = 3;
 /** Cik bieži ātrā kārta (jaunie sludinājumi) un pilnā kārta (visas lapas, izdzēsto paslēpšana). */
-export const SS_QUICK_EVERY_MIN = 30;
+export const SS_QUICK_EVERY_MIN = 15;
 export const SS_FULL_EVERY_HOURS = 24;
 /** Ārējie sludinājumi tiek paslēpti, ja nav redzēti tik dienas (drošībai, ja pilnā kārta ilgi neizdodas). */
 export const EXTERNAL_TTL_DAYS = 21;
