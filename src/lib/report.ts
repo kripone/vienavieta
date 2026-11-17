@@ -2,6 +2,7 @@
 // cenu izmaiņām (price_history) un dienas momentuzņēmumiem (market_stats). Viens objekts vairākos portālos skaitās vienreiz.
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
+import { cached } from "./search";
 
 type Row = Record<string, unknown>;
 const rows = async <T extends Row>(q: ReturnType<typeof sql>) => (await db.execute<T>(q)).rows;
@@ -17,6 +18,9 @@ export function monthRange(ym: string) {
 
 /** Mēneši, kuros ir pietiekami daudz datu (vismaz 500 jaunu sludinājumu), jaunākie vispirms. */
 export async function reportMonths() {
+  return cached(`reportMonths:${JSON.stringify([])}`, () => reportMonthsFresh());
+}
+async function reportMonthsFresh() {
   const r = await rows<{ ym: string; n: string }>(sql`
     select to_char(m, 'YYYY-MM') ym, (select count(*) from listings where created_at < m + interval '1 month') n
     from generate_series(date_trunc('month', (select min(created_at) from listings)), date_trunc('month', now()), interval '1 month') m
@@ -25,6 +29,9 @@ export async function reportMonths() {
 }
 
 export async function monthReport(ym: string) {
+  return cached(`monthReport:${JSON.stringify([ym])}`, () => monthReportFresh(ym));
+}
+async function monthReportFresh(ym: string) {
   const { from, to } = monthRange(ym);
   // mēneša piedāvājums: sludinājumi, kas tajā mēnesī bija pieejami (parādījās pirms mēneša beigām un toreiz vēl nebija noņemti)
   const inMonth = sql`l.created_at < ${to.toISOString()}::timestamptz and (l.status = 'active' or l.updated_at >= ${from.toISOString()}::timestamptz) and l.status <> 'deleted'`;

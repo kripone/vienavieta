@@ -1,6 +1,7 @@
 // Tirgus tendences: kopsavilkumi no aktīvajiem sludinājumiem (visi avoti) un dienas momentuzņēmumi (market_stats).
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
+import { cached } from "./search";
 
 type Row = Record<string, unknown>;
 const rows = async <T extends Row>(q: ReturnType<typeof sql>) => (await db.execute<T>(q)).rows;
@@ -37,6 +38,9 @@ export async function snapshotMarket(day = new Date()) {
 }
 
 export async function marketTotals() {
+  return cached(`marketTotals:${JSON.stringify([])}`, () => marketTotalsFresh());
+}
+async function marketTotalsFresh() {
   const r = await rows<{ kind: string; own: string; ext: string }>(sql`
     select kind, count(*) filter (where source = 'own') own, count(*) filter (where source <> 'own') ext
     from listings l where status = 'active' and ${primary} group by kind`);
@@ -45,6 +49,9 @@ export async function marketTotals() {
 
 /** Populārākās markas ar sludinājumu skaitu un mediānas cenu. */
 export async function topMakes(vehicleClass: string, limit = 15) {
+  return cached(`topMakes:${JSON.stringify([vehicleClass, limit])}`, () => topMakesFresh(vehicleClass, limit));
+}
+async function topMakesFresh(vehicleClass: string, limit = 15) {
   const r = await rows<{ id: number; name: string; n: string; median: number }>(sql`
     select m.id, m.name, count(*) n, percentile_cont(0.5) within group (order by l.price)::int median
     from listings l join makes m on m.id = l.make_id
@@ -54,6 +61,9 @@ export async function topMakes(vehicleClass: string, limit = 15) {
 }
 
 export async function makesWithListings(vehicleClass: string) {
+  return cached(`makesWithListings:${JSON.stringify([vehicleClass])}`, () => makesWithListingsFresh(vehicleClass));
+}
+async function makesWithListingsFresh(vehicleClass: string) {
   const r = await rows<{ id: number; name: string; n: string }>(sql`
     select m.id, m.name, count(*) n from listings l join makes m on m.id = l.make_id
     where l.status = 'active' and l.kind = 'vehicle' and l.vehicle_class = ${vehicleClass} and ${primary}
@@ -62,6 +72,9 @@ export async function makesWithListings(vehicleClass: string) {
 }
 
 export async function modelsWithListings(makeId: number) {
+  return cached(`modelsWithListings:${JSON.stringify([makeId])}`, () => modelsWithListingsFresh(makeId));
+}
+async function modelsWithListingsFresh(makeId: number) {
   const r = await rows<{ id: number; name: string; n: string; median: number }>(sql`
     select mo.id, mo.name, count(*) n, percentile_cont(0.5) within group (order by l.price)::int median from listings l join models mo on mo.id = l.model_id
     where l.status = 'active' and l.make_id = ${makeId} and ${primary}
@@ -71,6 +84,9 @@ export async function modelsWithListings(makeId: number) {
 
 /** Mediānas cena pa izlaiduma gadiem (gadi ar vismaz 2 sludinājumiem). */
 export async function priceByYear(makeId: number, modelId: number) {
+  return cached(`priceByYear:${JSON.stringify([makeId, modelId])}`, () => priceByYearFresh(makeId, modelId));
+}
+async function priceByYearFresh(makeId: number, modelId: number) {
   const r = await rows<{ year: number; median: number; n: string }>(sql`
     select l.year, percentile_cont(0.5) within group (order by l.price)::int median, count(*) n
     from listings l
@@ -81,6 +97,9 @@ export async function priceByYear(makeId: number, modelId: number) {
 
 /** Cena pret nobraukumu (punkti; līdz 400). */
 export async function priceVsMileage(makeId: number, modelId: number) {
+  return cached(`priceVsMileage:${JSON.stringify([makeId, modelId])}`, () => priceVsMileageFresh(makeId, modelId));
+}
+async function priceVsMileageFresh(makeId: number, modelId: number) {
   const r = await rows<{ id: string; price: number; km: number; year: number | null }>(sql`
     select l.id, l.price, l.mileage_km km, l.year from listings l
     where l.status = 'active' and l.make_id = ${makeId} and l.model_id = ${modelId} and l.mileage_km between 1 and 1500000 and l.price > 100 and ${primary}
@@ -90,6 +109,9 @@ export async function priceVsMileage(makeId: number, modelId: number) {
 
 /** Segmenta mediāna laikā no momentuzņēmumiem. */
 export async function segmentTrend(segment: string) {
+  return cached(`segmentTrend:${JSON.stringify([segment])}`, () => segmentTrendFresh(segment));
+}
+async function segmentTrendFresh(segment: string) {
   const r = await rows<{ day: string; median: number; p25: number; p75: number; n: number }>(sql`
     select to_char(m.day, 'YYYY-MM-DD') as "day", m.median, m.p25, m.p75, m.n from market_stats m where m.segment = ${segment} order by m.day`);
   return r;
@@ -97,6 +119,9 @@ export async function segmentTrend(segment: string) {
 
 /** Īpašuma cena par m² pa reģioniem (pašreizējā). */
 export async function propertyByRegion(propertyType: string, deal: string) {
+  return cached(`propertyByRegion:${JSON.stringify([propertyType, deal])}`, () => propertyByRegionFresh(propertyType, deal));
+}
+async function propertyByRegionFresh(propertyType: string, deal: string) {
   const r = await rows<{ region_id: number; region: string; median: number; n: string }>(sql`
     select r.id region_id, r.name region, percentile_cont(0.5) within group (order by l.price / l.u)::int median, count(*) n
     from (select l.*, (case when l.property_type = 'Zeme' then l.land_m2::numeric else l.area_m2 end) u from listings l
@@ -109,6 +134,9 @@ export async function propertyByRegion(propertyType: string, deal: string) {
 
 /** Rīgas (vai cita reģiona) apkaimes: cena par m². */
 export async function propertyByPlace(regionId: number, propertyType: string, deal: string) {
+  return cached(`propertyByPlace:${JSON.stringify([regionId, propertyType, deal])}`, () => propertyByPlaceFresh(regionId, propertyType, deal));
+}
+async function propertyByPlaceFresh(regionId: number, propertyType: string, deal: string) {
   const r = await rows<{ place: string; median: number; n: string }>(sql`
     select p.name place, percentile_cont(0.5) within group (order by l.price / l.u)::int median, count(*) n
     from (select l.*, (case when l.property_type = 'Zeme' then l.land_m2::numeric else l.area_m2 end) u from listings l
