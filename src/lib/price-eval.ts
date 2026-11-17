@@ -44,28 +44,76 @@ export async function priceEvals(ids: string[]): Promise<Map<string, PriceEval |
     ) e
     where l.id in (${idList}) and l.kind = 'vehicle' and l.make_id is not null and l.model_id is not null and l.year is not null`);
 
+  // Īpašumi: agrāk mediānu rēķināja SQL katram sludinājumam atsevišķi (lateral), un lapā ar 24 dzīvokļiem
+  // tas pašu reģionu pārlasīja 24 reizes (~1 s datubāzē). Tagad vienā vaicājumā nolasām grupas (veids, darījums, reģions)
+  // €/m² vērtības un mediānu katram sludinājumam rēķinām šeit, izslēdzot to pašu un tā dublikātus (rezultāts tāds pats).
   const unit = (t: string) => sql.raw(`(case when ${t}.property_type = 'Zeme' then ${t}.land_m2::numeric else ${t}.area_m2 end)`);
-  const props = await db.execute<{ id: string; price: number; u: number; med: number | null; n: number }>(sql`
-    select l.id, l.price, ${unit("l")} as u, e.med, e.n
+  const props = await db.execute<{ id: string; price: number; u: number; group_key: string | null; property_type: string; deal: string | null; region_id: number }>(sql`
+    select l.id, l.price, ${unit("l")}::float8 as u, l.group_key, l.property_type, l.deal::text as deal, p.region_id
     from listings l
     join places p on p.id = l.place_id
-    cross join lateral (
-      select percentile_cont(0.5) within group (order by x.price / ${unit("x")}) as med, count(*)::int as n
-      from listings x join places px on px.id = x.place_id
-      where x.status = 'active' and x.kind = 'property' and x.property_type = l.property_type
-        and x.deal is not distinct from l.deal and px.region_id = p.region_id
-        and ${unit("x")} > 0 and x.id <> l.id and (l.group_key is null or x.group_key is distinct from l.group_key)
-    ) e
-    where l.id in (${idList}) and l.kind = 'property' and ${unit("l")} > 0`);
+    where l.id in (${idList}) and l.kind = 'property' and l.property_type is not null and ${unit("l")} > 0`);
+  const groups = await propertyGroups(props.rows.map((r) => groupKeyOf(r.property_type, r.deal, r.region_id)));
 
   for (const id of need) out.set(id, null);
   for (const r of vehicles.rows) {
     if (r.med && r.n >= PRICE_EVAL.MIN) out.set(r.id, verdict(r.price / r.med, r.med, r.n, false));
   }
   for (const r of props.rows) {
-    if (r.med && r.n >= PRICE_EVAL.MIN && Number(r.u) > 0) out.set(r.id, verdict(r.price / Number(r.u) / r.med, r.med, r.n, true));
+    const vals = groups.get(groupKeyOf(r.property_type, r.deal, r.region_id)) ?? [];
+    const own = vals.filter((x) => x.id !== r.id && (r.group_key == null || x.g !== r.group_key)).map((x) => x.v);
+    const med = medianCont(own);
+    const u = Number(r.u);
+    if (med && own.length >= PRICE_EVAL.MIN && u > 0) out.set(r.id, verdict(r.price / u / med, med, own.length, true));
   }
   for (const id of need) cache.set(id, { at: now, v: out.get(id) ?? null });
   return out;
+}
+
+const groupKeyOf = (type: string, deal: string | null, region: number) => `${type}|${deal ?? ""}|${region}`;
+
+/** Grupas (veids|darījums|reģions) aktīvo īpašumu cena par m², kešota tikpat ilgi kā novērtējumi. */
+type GroupVal = { id: string; g: string | null; v: number };
+const groupCache = new Map<string, { at: number; v: GroupVal[] }>();
+async function propertyGroups(keys: string[]): Promise<Map<string, GroupVal[]>> {
+  const out = new Map<string, GroupVal[]>();
+  const now = Date.now();
+  const need = [...new Set(keys)].filter((k) => {
+    const c = groupCache.get(k);
+    if (c && now - c.at < TTL) {
+      out.set(k, c.v);
+      return false;
+    }
+    return true;
+  });
+  if (!need.length) return out;
+  const tuples = sql.join(
+    need.map((k) => {
+      const [type, deal, region] = k.split("|");
+      return sql`(${type}, ${deal}, ${Number(region)})`;
+    }),
+    sql`, `,
+  );
+  const unit = sql.raw(`(case when x.property_type = 'Zeme' then x.land_m2::numeric else x.area_m2 end)`);
+  const rows = await db.execute<{ id: string; group_key: string | null; property_type: string; deal: string; region_id: number; v: number }>(sql`
+    select x.id, x.group_key, x.property_type, coalesce(x.deal::text, '') as deal, px.region_id, (x.price / ${unit})::float8 as v
+    from listings x join places px on px.id = x.place_id
+    where x.status = 'active' and x.kind = 'property' and ${unit} > 0
+      and (x.property_type, coalesce(x.deal::text, ''), px.region_id) in (${tuples})`);
+  for (const k of need) out.set(k, []);
+  for (const r of rows.rows) out.get(groupKeyOf(r.property_type, r.deal || null, Number(r.region_id)))?.push({ id: r.id, g: r.group_key, v: Number(r.v) });
+  for (const k of need) {
+    groupCache.set(k, { at: now, v: out.get(k)! });
+    if (groupCache.size > 500) groupCache.delete(groupCache.keys().next().value!);
+  }
+  return out;
+}
+
+/** Mediāna kā Postgres percentile_cont(0.5): pāra skaitam vidējais no abām vidējām vērtībām. */
+function medianCont(vals: number[]): number | null {
+  if (!vals.length) return null;
+  const s = [...vals].sort((a, b) => a - b);
+  const m = (s.length - 1) / 2;
+  return (s[Math.floor(m)] + s[Math.ceil(m)]) / 2;
 }
 
