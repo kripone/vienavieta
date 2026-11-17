@@ -38,7 +38,8 @@ export const auth = betterAuth({
     updateAge: 60 * 60 * 24, // atjauno reizi dienā
   },
   account: {
-    accountLinking: { enabled: true, trustedProviders: ["google", "apple", "facebook"] },
+    // Facebook nav uzticams: tas var atdot neapstiprinātu e-pastu, un automātiska sasaiste ļautu pārņemt svešu kontu.
+    accountLinking: { enabled: true, trustedProviders: ["google", "apple"] },
   },
   socialProviders: {
     ...(enabledSocial.google && {
