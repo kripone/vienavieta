@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { runAssistant, type ChatMsg } from "@/lib/ai-chat";
 import { trackAiUsage } from "@/lib/ai-usage";
+import { clientIp } from "@/lib/client-ip";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,7 @@ function limited(ip: string): boolean {
 
 export async function POST(req: Request) {
   if (!process.env.GEMINI_API_KEY) return NextResponse.json({ error: "AI palīgs pagaidām nav pieejams." }, { status: 503 });
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "local";
+  const ip = clientIp(req.headers, "local");
   if (limited(ip)) return NextResponse.json({ error: "Šodienas sarunu limits izsmelts (20/dienā). Pamēģini rīt!" }, { status: 429 });
 
   let body: { message?: string; history?: ChatMsg[]; lang?: string };

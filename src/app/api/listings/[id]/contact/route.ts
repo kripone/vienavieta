@@ -1,12 +1,13 @@
 import { and, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { clientIp } from "@/lib/client-ip";
 
 // Pret kontaktu masveida savākšanu: ne vairāk kā 30 pieprasījumu minūtē no vienas adreses (atmiņā).
 const hits = new Map<string, { n: number; at: number }>();
 
 /** Pārdevēja kontakti. Netiek iekļauti lapas HTML, lai tos nevarētu viegli savākt automātiski. */
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "?";
+  const ip = clientIp(req.headers);
   const now = Date.now();
   const h = hits.get(ip);
   if (h && now - h.at < 60_000) {

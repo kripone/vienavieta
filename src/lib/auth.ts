@@ -53,8 +53,8 @@ export const auth = betterAuth({
       apple: { clientId: process.env.APPLE_CLIENT_ID!, clientSecret: process.env.APPLE_CLIENT_SECRET! },
     }),
   },
-  // Render (un citi starpniekserveri) klienta IP nodod x-forwarded-for galvenē.
-  advanced: { ipAddress: { ipAddressHeaders: ["x-forwarded-for"] } },
+  // Render priekšā ir Cloudflare: cf-connecting-ip klients viltot nevar; x-forwarded-for tikai rezervei (skat. client-ip.ts).
+  advanced: { ipAddress: { ipAddressHeaders: ["cf-connecting-ip", "x-forwarded-for"] } },
   rateLimit: {
     enabled: true,
     window: 60,

@@ -1,11 +1,12 @@
 // Pārlūka kļūdas (src/components/error-reporter.tsx). Ierobežots apjoms: max 20 ziņas minūtē no vienas adreses.
 import { NextResponse, type NextRequest } from "next/server";
 import { recordError } from "@/lib/errors";
+import { clientIp } from "@/lib/client-ip";
 
 const hits = new Map<string, { n: number; at: number }>();
 
 export async function POST(req: NextRequest) {
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "?";
+  const ip = clientIp(req.headers);
   const now = Date.now();
   const h = hits.get(ip);
   if (h && now - h.at < 60_000) {

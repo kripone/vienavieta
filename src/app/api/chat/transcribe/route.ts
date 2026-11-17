@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { trackAiUsage } from "@/lib/ai-usage";
+import { clientIp } from "@/lib/client-ip";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,7 @@ function limited(ip: string): boolean {
 export async function POST(req: Request) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return NextResponse.json({ error: "AI palīgs pagaidām nav pieejams." }, { status: 503 });
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "local";
+  const ip = clientIp(req.headers, "local");
   if (limited(ip)) return NextResponse.json({ error: "Limits izsmelts. Pamēģini rīt!" }, { status: 429 });
 
   let body: { audio?: string; mimeType?: string };

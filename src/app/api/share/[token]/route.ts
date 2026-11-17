@@ -4,12 +4,13 @@ import { and, eq, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { SHARE_COMMENT_MAX } from "@/lib/constants";
 import { sharedList } from "@/lib/favorites";
+import { clientIp } from "@/lib/client-ip";
 
 const hits = new Map<string, { n: number; at: number }>();
 const { shareReactions } = schema;
 
 export async function POST(req: NextRequest, ctx: { params: Promise<{ token: string }> }) {
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "?";
+  const ip = clientIp(req.headers);
   const now = Date.now();
   const h = hits.get(ip);
   if (h && now - h.at < 60_000) { if (++h.n > 30) return NextResponse.json({ error: "limit" }, { status: 429 }); } else hits.set(ip, { n: 1, at: now });

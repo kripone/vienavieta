@@ -2,6 +2,7 @@
 // Brauciena laiks: openrouteservice izohrona (ORS_API_KEY); bez atslēgas aptuvens aplis (vid. ~33 km/h taisnā līnijā).
 // Adresi ģeokodē Google Geocoding (GOOGLE_GEOCODING_KEY). Neko neglabājam; ierobežots pieprasījumu skaits.
 import { NextResponse, type NextRequest } from "next/server";
+import { clientIp } from "@/lib/client-ip";
 
 const hits = new Map<string, { n: number; at: number }>();
 const cache = new Map<string, unknown>();
@@ -46,7 +47,7 @@ async function isochrone(lat: number, lon: number, minutes: number): Promise<[nu
 }
 
 export async function GET(req: NextRequest) {
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "?";
+  const ip = clientIp(req.headers);
   const now = Date.now();
   const h = hits.get(ip);
   if (h && now - h.at < 60_000) { if (++h.n > 15) return NextResponse.json({ error: "limit" }, { status: 429 }); } else hits.set(ip, { n: 1, at: now });
