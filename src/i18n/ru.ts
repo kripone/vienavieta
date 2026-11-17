@@ -2,6 +2,8 @@
 import type { Dict } from "./core";
 
 export const ru: Dict = {
+  "Runāt": "Говорить",
+  "Apturēt ierakstu": "Остановить запись",
   "Tirgus šobrīd: {x}": "Рынок сейчас: {x}",
   "Tipiskais sludinājums ir {y}. gada auto ar aptuveni {km} km nobraukumu.": "Типичное объявление — автомобиль {y} года с пробегом около {km} км.",
   "{p}% piedāvājuma ir ar automātisko ātrumkārbu.": "{p}% предложений — с автоматической коробкой передач.",

@@ -2,6 +2,8 @@
 import type { Dict } from "./core";
 
 export const en: Dict = {
+  "Runāt": "Speak",
+  "Apturēt ierakstu": "Stop recording",
   "Tirgus šobrīd: {x}": "Market now: {x}",
   "Tipiskais sludinājums ir {y}. gada auto ar aptuveni {km} km nobraukumu.": "A typical listing is a {y} car with about {km} km on the clock.",
   "{p}% piedāvājuma ir ar automātisko ātrumkārbu.": "{p}% of the offer has an automatic gearbox.",

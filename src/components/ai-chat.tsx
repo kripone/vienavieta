@@ -6,6 +6,11 @@ import type { AssistantAnswer } from "@/lib/ai-chat";
 
 type Msg = { role: "user" | "model"; text: string; results?: AssistantAnswer["results"]; total?: number; moreUrl?: string | null; appraisalUrl?: string | null };
 
+/** Mikrofona ikona (čats un kartīte „Jautā AI asistentam”). */
+export const MicIcon = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" /></svg>
+);
+
 /** Jautājumu piemēri (čatā un kartītē „Jautā AI asistentam”). */
 export const AI_EXAMPLES = [
   "Labs ģimenes auto līdz 8000 €",
@@ -27,6 +32,7 @@ export function AiChat() {
   const recRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const toggleMicRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     setMicOk(typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== "undefined");
@@ -40,8 +46,11 @@ export function AiChat() {
       setOpen(true);
       if (q) pending.current = q;
     };
+    // „vv-ai-mic”: atver čatu un uzreiz sāk klausīties (mikrofona poga kartītē)
+    const onMic = () => { setOpen(true); setTimeout(() => toggleMicRef.current?.(), 150); };
     window.addEventListener("vv-ai", onOpen);
-    return () => window.removeEventListener("vv-ai", onOpen);
+    window.addEventListener("vv-ai-mic", onMic);
+    return () => { window.removeEventListener("vv-ai", onOpen); window.removeEventListener("vv-ai-mic", onMic); };
   }, []);
   useEffect(() => {
     if (open && pending.current) {
@@ -154,6 +163,7 @@ export function AiChat() {
     setListening(true);
     try { rec.start(250); } catch { setListening(false); recRef.current = null; }
   };
+  toggleMicRef.current = () => { if (!listening) toggleMic(); };
 
   if (!open) {
     return (
@@ -240,7 +250,7 @@ export function AiChat() {
             aria-label={t(listening ? "Apturēt ierakstu" : "Runāt")}
             title={t(listening ? "Apturēt ierakstu" : "Runāt")}
           >
-            🎤
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" /></svg>
           </button>
         )}
         <button onClick={() => send()} disabled={busy || !input.trim()} aria-label={t("Sūtīt")}>➤</button>

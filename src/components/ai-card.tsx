@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useT } from "@/i18n/client";
-import { AI_EXAMPLES } from "./ai-chat";
+import { AI_EXAMPLES, MicIcon } from "./ai-chat";
 
 /** Kartīte „Jautā AI asistentam” sānu kolonnā: atver čatu un uzreiz nosūta jautājumu. */
 export function AiCard() {
@@ -23,6 +23,9 @@ export function AiCard() {
       <p>{t("Jautā brīvi, tāpat kā cilvēkam. Asistents pārzina visus sludinājumus, cenas un reālos darījumus.")}</p>
       <form className="ai-card-in" onSubmit={(e) => { e.preventDefault(); ask(q); }}>
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("Piem.: labs ģimenes auto līdz 8000 €")} aria-label={t("Tavs jautājums")} maxLength={500} />
+        <button type="button" className="ai-card-mic" onClick={() => window.dispatchEvent(new Event("vv-ai-mic"))} aria-label={t("Runāt")} title={t("Runāt")}>
+          <MicIcon />
+        </button>
         <button type="submit" aria-label={t("Sūtīt")}>➤</button>
       </form>
       <div className="ai-card-ex">

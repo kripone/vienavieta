@@ -2,6 +2,8 @@
 import type { Dict } from "./core";
 
 export const lt: Dict = {
+  "Runāt": "Kalbėti",
+  "Apturēt ierakstu": "Sustabdyti įrašą",
   "Tirgus šobrīd: {x}": "Rinka dabar: {x}",
   "Tipiskais sludinājums ir {y}. gada auto ar aptuveni {km} km nobraukumu.": "Tipinis skelbimas — {y} m. automobilis su maždaug {km} km rida.",
   "{p}% piedāvājuma ir ar automātisko ātrumkārbu.": "{p}% pasiūlos — su automatine pavarų dėže.",
