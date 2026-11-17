@@ -3,14 +3,14 @@ import { and, desc, eq, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import type { PropertyType, VehicleClass } from "@/lib/constants";
 import { appBase, langAlternates, propertyHref, RIGA_DISTRICT, vehicleHref } from "@/lib/seo";
-import { REGION_GROUPS_LOC, SEO_COMBO_MIN, SEO_PRICE_STEPS, SEO_ROOMS } from "@/lib/constants";
+import { REGION_GROUPS_LOC, SEO_COMBO_MIN, SEO_INDEX_MIN, SEO_PRICE_STEPS, SEO_ROOMS } from "@/lib/constants";
 import { bodySlug, fuelSlug, getCatalog, priceSlug, roomsSlug, seoSlug } from "@/lib/seo";
 import { LOCALES } from "@/i18n/core";
 
 export const dynamic = "force-dynamic";
 let memo: { at: number; v: MetadataRoute.Sitemap } | null = null;
 /** SEO lapa sitemap iekļauta tikai, ja tajā ir vismaz tik sludinājumu (tukšas lapas meklētājiem nevajag). */
-const MIN = 3;
+const MIN = SEO_INDEX_MIN;
 
 /** Galvenās lapas, SEO lapas (markas, modeļi, īpašumu veidi pa reģioniem) un pašu aktīvie sludinājumi. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -78,7 +78,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 /**
  * Kombinētās SEO lapas: auto pēc cenas/degvielas/virsbūves/pilsētas (visiem un markām), modeļi pēc degvielas,
  * dzīvokļi pēc istabām (visā Latvijā un pa reģioniem) un īpašumi pa valstspilsētu apkaimēm.
- * Visu auto līmenī pietiek ar 3 sludinājumiem, markas/modeļa kombinācijām vajag SEO_COMBO_MIN.
+ * Visu auto līmenī pietiek ar SEO_INDEX_MIN sludinājumiem, markas/modeļa kombinācijām vajag SEO_COMBO_MIN.
  */
 async function comboPages(add: (path: string) => void) {
   const cat = await getCatalog();
@@ -103,7 +103,7 @@ async function comboPages(add: (path: string) => void) {
   const priceN = new Map<string, number>();
   for (const r of veh.rows) if (r.dim === "price") priceN.set(`${r.vc}|${r.make}|${r.val}`, Number(r.n));
   for (const r of veh.rows) {
-    const min = r.make ? SEO_COMBO_MIN : 3;
+    const min = r.make ? SEO_COMBO_MIN : SEO_INDEX_MIN;
     if (Number(r.n) < min) continue;
     if (r.dim === "price") {
       const i = SEO_PRICE_STEPS.indexOf(Number(r.val) as (typeof SEO_PRICE_STEPS)[number]);
@@ -125,7 +125,7 @@ async function comboPages(add: (path: string) => void) {
       from listings l join places p on p.id = l.place_id join regions r on r.id = p.region_id and r.kind = 'city' and r.country = 'LV'
       where l.status = 'active' and l.kind = 'property' and l.deal in ('sell', 'rent') and l.property_type is not null and p.kind is null group by 1, 2, 3, 4`);
   for (const r of prop.rows) {
-    if (Number(r.n) < 3) continue;
+    if (Number(r.n) < SEO_INDEX_MIN) continue;
     const typePath = propertyHref(r.ptype as PropertyType, r.deal);
     const region = r.rid != null ? regionSlug.get(Number(r.rid)) : null;
     if (r.rid != null && !region) continue;

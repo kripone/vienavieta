@@ -171,7 +171,7 @@ export async function resolveVehicle(vc: VehicleClass, parts: string[], { t, loc
   const cat = await getCatalog();
   const crumbs: Crumb[] = [{ name: t(vc === "car" ? "Auto" : "Moto"), href: `/${root}` }];
   const of = (name: string) => (vc === "car" ? t("{name} pārdošanā", { name }) : t("{name} motocikli pārdošanā", { name }));
-  const about = (name: string) => t("{name} sludinājumi no visiem portāliem vienā vietā.", { name });
+  const about = (name: string) => t("{name}: sludinājumi no visiem portāliem vienā vietā.", { name });
 
   // marka un modelis (ja ir), pārējais — filtrs
   let i = 0;
@@ -207,7 +207,7 @@ export async function resolveVehicle(vc: VehicleClass, parts: string[], { t, loc
   const more = { kind: "vehicle" as const, vc, base, level, raw: { ...raw }, current: facet?.slug };
   if (!facet) {
     if (!make) return { raw, path: base, h1: baseH1, title: baseH1, about: t(vc === "car" ? "Lietoti un jauni auto no ss.com, autoplius.lt un citiem portāliem vienā meklētājā." : "Motocikli no visiem portāliem vienā meklētājā."), crumbs, facet: "make", more };
-    return { raw, path: base, h1: baseH1, title: baseH1, about: about(name!), crumbs, facet: model ? null : "model", more };
+    return { raw, path: base, h1: baseH1, title: vc === "car" ? t("Lietoti {name} pārdošanā Latvijā", { name: name! }) : t("{name} motocikli pārdošanā Latvijā", { name: name! }), about: about(name!), crumbs, facet: model ? null : "model", more };
   }
 
   let h1: string;
@@ -254,7 +254,7 @@ export async function resolveProperty(parts: string[], { t, locale }: Tr): Promi
   const whatOf = (r: boolean) => t(r ? "{what} īrei" : "{what} pārdošanā", { what: plural });
   const what = whatOf(rent);
   const typePath = propertyHref(type, deal);
-  const about = (x: string) => t("{name} sludinājumi no visiem portāliem vienā vietā.", { name: x });
+  const about = (x: string) => t("{name}: sludinājumi no visiem portāliem vienā vietā.", { name: x });
   const flats = type === "Dzīvoklis";
   const roomsWhat = (n: number) => t(rent ? "{r} dzīvokļi īrei" : "{r} dzīvokļi pārdošanā", { r: roomsLabel(n, t) });
   crumbs.push({ name: plural, href: propertyHref(type, "sell") });

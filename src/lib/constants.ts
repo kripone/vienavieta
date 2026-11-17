@@ -429,6 +429,8 @@ export const SEO_PRICE_STEPS = [1000, 2000, 3000, 5000, 7000, 10000, 15000, 2000
 export const SEO_ROOMS = [1, 2, 3, 4, 5] as const;
 /** Cik sludinājumu vajag, lai kombinētā SEO lapa (marka + filtrs, apkaime u.c.) nonāktu sitemap. */
 export const SEO_COMBO_MIN = 10;
+/** SEO lapa tiek indeksēta un iekļauta sitemap tikai ar vismaz tik sludinājumiem (plānas lapas Google neindeksē un tās velk vietni uz leju). */
+export const SEO_INDEX_MIN = 8;
 /** Kopsavilkuma frāzes visu auto lapām pēc degvielas un virsbūves (/auto/dizelis, /auto/universals). */
 export const SEO_FUEL_ROOT: Record<string, string> = {
   "Benzīns": "Benzīna auto", "Dīzelis": "Dīzeļa auto", "Hibrīds": "Hibrīdauto", "Elektro": "Elektroauto", "Benzīns/gāze": "Auto ar gāzes iekārtu",

@@ -1,3 +1,4 @@
+import { SEO_INDEX_MIN } from "@/lib/constants";
 // Kopīgā SEO lapu loģika (/auto, /moto, /ipasumi): filtri no adreses + metadati.
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -32,8 +33,10 @@ export function landingRoute(resolve: (parts: string[], tr: { t: T; locale: Loca
     const { t, tp, locale } = await getT();
     const sum = await priceSummary(parseSearch(landing.raw)).catch(() => null);
     const stats = sum && sum.n ? ` ${tp(sum.n, "sludinājums", "sludinājumi")}${sum.median ? `, ${t("cenas mediāna {p}", { p: formatPrice(sum.median) })}` : ""}.` : "";
-    const title = `${landing.title}${page > 1 ? ` – ${t("{n}. lapa", { n: page })}` : ""}`;
-    const description = `${landing.about}${stats} ${t("Salīdzini cenas, skaties cenu vēsturi un saņem paziņojumus par jauniem sludinājumiem.")}`;
+    // virsrakstā skaits: tā mēs izceļamies pret ss.com u.c. meklēšanas rezultātos
+    const count = sum && sum.n >= SEO_INDEX_MIN ? ` – ${tp(sum.n, "sludinājums", "sludinājumi")}` : "";
+    const title = `${landing.title}${count}${page > 1 ? ` – ${t("{n}. lapa", { n: page })}` : ""}`;
+    const description = `${landing.about}${stats} ${t("Salīdzini cenas un cenu vēsturi.")}`;
     return {
       title,
       description,
@@ -41,8 +44,8 @@ export function landingRoute(resolve: (parts: string[], tr: { t: T; locale: Loca
         const a = langAlternates(landing.path, locale);
         return page > 1 ? { canonical: `${a.canonical}?page=${page}` } : a;
       })(),
-      // tukšas un gandrīz tukšas lapas meklētājiem nerādām (sitemap arī tikai ar ≥3)
-      robots: sum && sum.n < 3 ? { index: false, follow: true } : undefined,
+      // tukšas un plānas lapas meklētājiem nerādām (sitemap arī tikai ar ≥ SEO_INDEX_MIN)
+      robots: sum && sum.n < SEO_INDEX_MIN ? { index: false, follow: true } : undefined,
       openGraph: { title, description, url: langAlternates(landing.path, locale).canonical, images: [{ url: "/og.png", width: 1200, height: 630 }] },
     };
   }

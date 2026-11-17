@@ -2,6 +2,12 @@
 import type { Dict } from "./core";
 
 export const lt: Dict = {
+  "Lietoti {name} pārdošanā Latvijā": "Naudoti {name} parduodami Latvijoje",
+  "{name} motocikli pārdošanā Latvijā": "{name} motociklai parduodami Latvijoje",
+  "Salīdzini cenas un cenu vēsturi.": "Palyginkite kainas ir kainų istoriją.",
+  "Pēdējās 30 dienās cena samazināta {n}": "Per paskutines 30 dienų kaina sumažinta {n}",
+  "Auto un nekustamā īpašuma sludinājumi Latvijā": "Automobilių ir nekilnojamojo turto skelbimai Latvijoje",
+  "sludinājumam": {"one": "skelbimui", "few": "skelbimams", "many": "skelbimų", "other": "skelbimų"},
   "Runāt": "Kalbėti",
   "Apturēt ierakstu": "Sustabdyti įrašą",
   "Tirgus šobrīd: {x}": "Rinka dabar: {x}",
@@ -279,7 +285,7 @@ export const lt: Dict = {
   "Rīgas rajons (Pierīga)": "Rygos rajonas (Pierīga)",
   "{name} pārdošanā": "{name} – pardavimas",
   "{name} motocikli pārdošanā": "{name} motociklai – pardavimas",
-  "{name} sludinājumi no visiem portāliem vienā vietā.": "{name}: skelbimai iš visų portalų vienoje vietoje.",
+  "{name}: sludinājumi no visiem portāliem vienā vietā.": "{name}: skelbimai iš visų portalų vienoje vietoje.",
   "{what} pārdošanā": "{what} pardavimui",
   "{what} īrei": "{what} nuomai",
   "Auto, moto, dzīvokļi, mājas un zeme no ss.com, autoplius.lt un citiem portāliem vienā meklētājā. Cenu vēsture, cenu kritumi un reālās darījumu cenas.": "Automobiliai, motociklai, butai, namai ir žemė iš ss.com, autoplius.lt ir kitų portalų vienoje paieškoje. Kainų istorija, kainų kritimai ir realios sandorių kainos.",

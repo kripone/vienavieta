@@ -2,6 +2,12 @@
 import type { Dict } from "./core";
 
 export const ru: Dict = {
+  "Lietoti {name} pārdošanā Latvijā": "Подержанные {name} в продаже в Латвии",
+  "{name} motocikli pārdošanā Latvijā": "Мотоциклы {name} в продаже в Латвии",
+  "Salīdzini cenas un cenu vēsturi.": "Сравнивайте цены и историю цен.",
+  "Pēdējās 30 dienās cena samazināta {n}": "За последние 30 дней цена снижена у {n}",
+  "Auto un nekustamā īpašuma sludinājumi Latvijā": "Объявления авто и недвижимости в Латвии",
+  "sludinājumam": {"one": "объявления", "few": "объявлений", "many": "объявлений", "other": "объявлений"},
   "Runāt": "Говорить",
   "Apturēt ierakstu": "Остановить запись",
   "Tirgus šobrīd: {x}": "Рынок сейчас: {x}",
@@ -279,7 +285,7 @@ export const ru: Dict = {
   "Rīgas rajons (Pierīga)": "Рижский район (Пририга)",
   "{name} pārdošanā": "Продажа {name}",
   "{name} motocikli pārdošanā": "Мотоциклы {name} на продажу",
-  "{name} sludinājumi no visiem portāliem vienā vietā.": "{name}: объявления со всех порталов в одном месте.",
+  "{name}: sludinājumi no visiem portāliem vienā vietā.": "{name}: объявления со всех порталов в одном месте.",
   "{what} pārdošanā": "{what} на продажу",
   "{what} īrei": "{what} в аренду",
   "Auto, moto, dzīvokļi, mājas un zeme no ss.com, autoplius.lt un citiem portāliem vienā meklētājā. Cenu vēsture, cenu kritumi un reālās darījumu cenas.": "Авто, мото, квартиры, дома и земля с ss.com, autoplius.lt и других порталов в одном поиске. История цен, снижения цен и реальные цены сделок.",

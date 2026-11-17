@@ -78,7 +78,7 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
       ])
     : [new Map(), new Map(), new Map(), new Set<string>()];
 
-  const heading = s.cat === "vehicle" ? t(VEHICLE_CLASS_LABEL[(s.vc ?? "car") as VehicleClass]) : s.cat === "property" ? t("Nekustamais īpašums") : t("Visi sludinājumi");
+  const heading = s.cat === "vehicle" ? t(VEHICLE_CLASS_LABEL[(s.vc ?? "car") as VehicleClass]) : s.cat === "property" ? t("Nekustamais īpašums") : Object.keys(flat).length === 0 && !landing ? t("Auto un nekustamā īpašuma sludinājumi Latvijā") : t("Visi sludinājumi");
   const pointsQuery = new URLSearchParams(Object.entries(flat).filter(([k]) => !["page", "sort", "zone"].includes(k))).toString();
   const pageHref = (n: number) => {
     if (landing) return n > 1 ? `${lp(landing.path)}?page=${n}` : lp(landing.path);
@@ -166,7 +166,7 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
             {summary.median ? `, ${t("cenas mediāna {p}", { p: formatPrice(summary.median) })}` : ""}
             {summary.sqm && s.deal === "sell" ? `, ${t("kvadrātmetra cenas mediāna {p} €/m²", { p: formatNumber(summary.sqm) })}` : ""}
             {summary.sqm && s.deal === "rent" ? `, ${t("īres mediāna {p} €/m² mēnesī", { p: String(summary.sqm).replace(".", ",") })}` : ""}
-            {insights && insights.drops > 0 ? `. ${t("Pēdējās 30 dienās cena samazināta {n} sludinājumiem", { n: formatNumber(insights.drops) })}${insights.dropPct != null ? ` (${t("vidēji −{p}%", { p: String(insights.dropPct).replace(".", ",") })})` : ""}` : ""}
+            {insights && insights.drops > 0 ? `. ${t("Pēdējās 30 dienās cena samazināta {n}", { n: tp(insights.drops, "sludinājumam", "sludinājumiem") })}${insights.dropPct != null ? ` (${t("vidēji −{p}%", { p: String(insights.dropPct).replace(".", ",") })})` : ""}` : ""}
             {". "}
             <a href={lp("/dati")}>{t("Kā skaitām")}</a>
           </p>

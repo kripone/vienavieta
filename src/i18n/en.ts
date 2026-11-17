@@ -2,6 +2,12 @@
 import type { Dict } from "./core";
 
 export const en: Dict = {
+  "Lietoti {name} pārdošanā Latvijā": "Used {name} for sale in Latvia",
+  "{name} motocikli pārdošanā Latvijā": "{name} motorcycles for sale in Latvia",
+  "Salīdzini cenas un cenu vēsturi.": "Compare prices and price history.",
+  "Pēdējās 30 dienās cena samazināta {n}": "In the last 30 days the price was cut on {n}",
+  "Auto un nekustamā īpašuma sludinājumi Latvijā": "Car and real estate listings in Latvia",
+  "sludinājumam": {"one": "listing", "other": "listings"},
   "Runāt": "Speak",
   "Apturēt ierakstu": "Stop recording",
   "Tirgus šobrīd: {x}": "Market now: {x}",
@@ -279,7 +285,7 @@ export const en: Dict = {
   "Rīgas rajons (Pierīga)": "Riga district (Pierīga)",
   "{name} pārdošanā": "{name} for sale",
   "{name} motocikli pārdošanā": "{name} motorcycles for sale",
-  "{name} sludinājumi no visiem portāliem vienā vietā.": "{name}: listings from all sites in one place.",
+  "{name}: sludinājumi no visiem portāliem vienā vietā.": "{name}: listings from all sites in one place.",
   "{what} pārdošanā": "{what} for sale",
   "{what} īrei": "{what} for rent",
   "Auto, moto, dzīvokļi, mājas un zeme no ss.com, autoplius.lt un citiem portāliem vienā meklētājā. Cenu vēsture, cenu kritumi un reālās darījumu cenas.": "Cars, motorcycles, apartments, houses and land from ss.com, autoplius.lt and other sites in one search. Price history, price drops and real transaction prices.",
