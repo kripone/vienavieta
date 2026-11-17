@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from "node:crypto";
 import { importSsRss } from "@/lib/importers/ss-rss";
 import { ssCrawlerEnabled } from "@/lib/importers/ss-scheduler";
 import { ensureDailySnapshot } from "@/lib/market";
@@ -5,6 +6,12 @@ import { runNotifications } from "@/lib/notify";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
+
+/** Salīdzina noslēpumu nemainīgā laikā (pēc SHA-256, lai garums neko neatklātu). */
+function sameSecret(a: string, b: string) {
+  const h = (s: string) => createHash("sha256").update(s).digest();
+  return timingSafeEqual(h(a), h(b));
+}
 
 // Vienā procesā: neļaujam divām kārtām iet vienlaikus un biežāk kā reizi 5 minūtēs.
 let running = false;
@@ -17,7 +24,7 @@ let lastRun = 0;
  */
 async function handle(req: Request) {
   const secret = process.env.CRON_SECRET;
-  if (secret && req.headers.get("authorization") !== `Bearer ${secret}`) {
+  if (secret && !sameSecret(req.headers.get("authorization") ?? "", `Bearer ${secret}`)) {
     return Response.json({ error: "unauthorized" }, { status: 401 });
   }
   if (running) return Response.json({ skipped: "running" }, { status: 409 });
