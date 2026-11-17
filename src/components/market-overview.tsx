@@ -1,11 +1,12 @@
 import { getT } from "@/i18n/server";
+import { trTitle } from "@/i18n/content";
 import { formatNumber, formatPrice } from "@/lib/format";
 import type { MarketOverview as MO } from "@/lib/search";
 
 /** SEO lapu bloks „Tirgus šobrīd”: īss, no aktīvajiem sludinājumiem ģenerēts teksts un tabula (katrai lapai savs saturs). */
 export async function MarketOverview({ mo, title }: { mo: MO; title: string }) {
   const { t } = await getT();
-  const sqmTxt = (x: number) => `${formatNumber(x)} €/m²`;
+  const sqmTxt = (x: number) => `${x < 50 ? String(x).replace(".", ",") : formatNumber(x)} €/m²`;
   return (
     <section className="market-ov">
       <h2>{t("Tirgus šobrīd: {x}", { x: title })}</h2>
@@ -22,7 +23,7 @@ export async function MarketOverview({ mo, title }: { mo: MO; title: string }) {
                 <tr><th>{t(mo.topBy === "make" ? "Marka" : "Modelis")}</th><th>{t("Sludinājumi")}</th><th>{t("Cenas mediāna")}</th></tr>
               </thead>
               <tbody>
-                {mo.top.map((r) => <tr key={r.name}><td>{r.name}</td><td>{formatNumber(r.n)}</td><td>{r.median != null ? formatPrice(r.median) : "–"}</td></tr>)}
+                {mo.top.map((r) => <tr key={r.name}><td>{mo.topBy === "model" ? trTitle(r.name, t) : r.name}</td><td>{formatNumber(r.n)}</td><td>{r.median != null ? formatPrice(r.median) : "–"}</td></tr>)}
               </tbody>
             </table>
           )}

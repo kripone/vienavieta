@@ -737,7 +737,7 @@ export function marketOverview(s: SearchParams): Promise<MarketOverview | null> 
             .leftJoin(makes, eq(listings.makeId, makes.id)).leftJoin(models, eq(listings.modelId, models.id)).leftJoin(users, eq(listings.userId, users.id))
             .where(and(where, isNotNull(listings.rooms), gte(listings.rooms, 1)))
             .groupBy(roomKey)
-            .orderBy(roomKey)).map((r) => ({ rooms: String(r.rooms), n: Number(r.n), median: r.median != null ? Math.round(Number(r.median)) : null, sqm: r.sqm != null ? Math.round(Number(r.sqm)) : null })).filter((r) => r.n >= 3)
+            .orderBy(roomKey)).map((r) => ({ rooms: String(r.rooms), n: Number(r.n), median: r.median != null ? Math.round(Number(r.median)) : null, sqm: r.sqm != null ? (Number(r.sqm) < 50 ? Math.round(Number(r.sqm) * 10) / 10 : Math.round(Number(r.sqm))) : null })).filter((r) => r.n >= 3)
         : [];
       const byPlace = (s.deal === "sell" || s.deal === "rent")
         ? (await db
