@@ -49,6 +49,10 @@ export async function fetchListPage(p: number): Promise<string> {
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     return await r.text();
   } catch (e) {
+    // WESS_BROWSER=off: avārijas slēdzis — ja pārlūka rezerves ceļš rada resursu problēmas
+    // (OOM restarti 512 MB instancē), to var izslēgt bez koda izmaiņām; wess tad vienkārši
+    // neizdodas, līdz Cloudflare atkal laiž cauri parasto HTTP.
+    if (process.env.WESS_BROWSER === "off") throw e;
     console.warn(`cars.bmwwess.lv HTTP neizdevās (${e instanceof Error ? e.message : e}), mēģinu ar pārlūku: ${url}`);
     return browserFetch(url, "li.product-item-wrapper");
   }
@@ -319,7 +323,8 @@ async function getBrowser() {
       const { chromium } = await import("playwright");
       // headless shell (vieglāks par pilno chromium: Render starter ir tikai 512 MB, pilnais deva OOM).
       // --disable-dev-shm-usage: konteineru /dev/shm ir mazs, citādi pārlūks krīt ar atmiņas kļūdām.
-      return chromium.launch({ headless: true, timeout: 30_000, args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"] });
+      // Pārējie karodziņi kropļo nevajadzīgu funkcionalitāti, lai ietilptu 512 MB instancē.
+      return chromium.launch({ headless: true, timeout: 30_000, args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled", "--disable-gpu", "--disable-extensions", "--disable-background-networking", "--mute-audio", "--no-first-run"] });
     })().catch((e) => {
       browserPromise = null;
       throw e;
@@ -340,6 +345,7 @@ export async function closeBrowser() {
 
 /** Atver lapu chromium pārlūkā (apiet Cloudflare pārbaudi) un atgriež HTML. Tikai cars.bmwwess.lv adreses. */
 export async function browserFetch(url: string, waitSelector: string): Promise<string> {
+  if (process.env.WESS_BROWSER === "off") throw new Error("WESS_BROWSER=off: pārlūka rezerves ceļš atspējots");
   if (!/(^|\.)bmwwess\.lv$/.test(new URL(url).host)) throw new Error(`Nav cars.bmwwess.lv adrese: ${url}`);
   // viena kopīga konteksta "sesija": kad Cloudflare pārbaude reiz izieta, cf_clearance sīkdatne
   // darbojas arī nākamajām lapām (citādi katra lapa no jauna dabūtu pārbaudi)
@@ -369,10 +375,19 @@ async function getContext() {
   if (!contextPromise) {
     contextPromise = (async () => {
       const browser = await getBrowser();
-      return browser.newContext({
+      const context = await browser.newContext({
         locale: "lv-LV",
         userAgent: UA["User-Agent"],
       });
+      // Skreipim vajadzīgs tikai DOM — bildes (auto foto), fontus un video nelādējam.
+      // Tas būtiski samazina atmiņas/CPU pieprasījumu 512 MB (Render starter) instancē:
+      // kopš pārlūka rezerves ceļa ieviešanas instances restarti sakrita ar wess kārtām.
+      await context.route("**/*", (route) => {
+        const type = route.request().resourceType();
+        if (type === "image" || type === "media" || type === "font") return route.abort();
+        return route.continue();
+      });
+      return context;
     })().catch((e) => {
       contextPromise = null;
       throw e;
