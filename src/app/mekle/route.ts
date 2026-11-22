@@ -4,6 +4,25 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { parseTextQuery, textQueryCatalog } from "@/lib/text-query";
 import { aiTextToQuery } from "@/lib/ai-chat";
+import { MEKLE_AI_DAILY_MAX, MEKLE_AI_PER_IP_DAY } from "@/lib/constants";
+
+// Gemini izsaukumi maksā/izsmeļ kvotu: limits atmiņā (uz adresi un kopā dienā). Virs limita — lokālais parsētājs.
+const DAY = 86_400_000;
+const hits = new Map<string, { at: number; n: number }>();
+let total = { at: Date.now(), n: 0 };
+
+function aiAllowed(ip: string): boolean {
+  const now = Date.now();
+  if (now - total.at > DAY) total = { at: now, n: 0 };
+  if (total.n >= MEKLE_AI_DAILY_MAX) return false;
+  const h = hits.get(ip);
+  if (!h || now - h.at > DAY) {
+    hits.set(ip, { at: now, n: 1 });
+    if (hits.size > 5000) hits.delete(hits.keys().next().value!);
+  } else if (++h.n > MEKLE_AI_PER_IP_DAY) return false;
+  total.n++;
+  return true;
+}
 
 export async function GET(req: NextRequest) {
   const q = (req.nextUrl.searchParams.get("q") ?? "").trim().slice(0, 200);
@@ -12,7 +31,8 @@ export async function GET(req: NextRequest) {
   if (!q) return NextResponse.redirect(`${base}${prefix || "/"}`, 303);
 
   // 1) AI (Gemini): saprot dabisko valodu, rādiusus, ērtības, arī cenu kritumus/tirgu/darījumus/novērtējumu
-  if (process.env.GEMINI_API_KEY) {
+  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "?";
+  if (process.env.GEMINI_API_KEY && aiAllowed(ip)) {
     try {
       const ai = await aiTextToQuery(q);
       if (ai?.redirect) return NextResponse.redirect(`${base}${prefix}${ai.redirect}`, 303);

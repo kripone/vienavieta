@@ -492,3 +492,7 @@ export const WARMUP_PATHS = [
 
 /** „Aizpildi ar AI” sludinājuma formā: cik reizes stundā viens lietotājs (`/api/listing-assist`). */
 export const LISTING_ASSIST_PER_HOUR = 15;
+
+/** Brīvā teksta meklēšana `/mekle` ar Gemini: cik AI pieprasījumu dienā no vienas adreses un kopā; virs limita strādā lokālais parsētājs. */
+export const MEKLE_AI_PER_IP_DAY = 60;
+export const MEKLE_AI_DAILY_MAX = 3000;
