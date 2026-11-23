@@ -259,7 +259,9 @@ export async function crawlCity24Section(section: City24Section, mode: "quick" |
   }
   res.ms = Date.now() - started.getTime();
 
-  const set = mode === "full" ? { lastFullAt: started, lastResult: res as unknown as Record<string, unknown> } : { lastQuickAt: started };
+  // Pilnā kārta ietver arī ātrās kārtas darbu — atzīmējam lastQuickAt, lai sadaļa neizskatītos
+  // novecojusi uzraudzībai, kamēr tā faktiski tikusi izsūknēta pilnajā režīmā.
+  const set = mode === "full" ? { lastFullAt: started, lastQuickAt: started, lastResult: res as unknown as Record<string, unknown> } : { lastQuickAt: started };
   await db.insert(crawlState).values({ name: section.key, ...set }).onConflictDoUpdate({ target: crawlState.name, set });
   return res;
 }

@@ -327,9 +327,11 @@ export async function crawlAutoplius(mode: "quick" | "full", target: ApTarget = 
   // Pilnā kārta, kas neieguva NE VIENAS rindas (tipiski Cloudflare rate-limit), neatzīmējas kā pabeigta:
   // lastFullAt paliek vecs, tāpēc nākamā plānotā kārta to mēģinās no jauna (līdz 5 atkārtojumiem lapai).
   const fullFailed = mode === "full" && res.rows === 0 && res.errors.length > 0;
+  // Pilnā kārta ietver arī ātrās kārtas darbu — atzīmējam lastQuickAt, lai josla neizskatītos
+  // novecojusi uzraudzībai, kamēr tā faktiski tikusi izsūknēta pilnajā režīmā.
   const set =
     mode === "full"
-      ? { ...(fullFailed ? {} : { lastFullAt: started }), lastResult: res as unknown as Record<string, unknown> }
+      ? { ...(fullFailed ? {} : { lastFullAt: started, lastQuickAt: started }), lastResult: res as unknown as Record<string, unknown> }
       : { lastQuickAt: started };
   await db.insert(crawlState).values({ name: target.key, ...set }).onConflictDoUpdate({ target: crawlState.name, set });
   return res;
