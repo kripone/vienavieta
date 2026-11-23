@@ -269,7 +269,15 @@ export async function crawlPorsche(mode: "quick" | "full", fetchHtml: (url: stri
   }
   res.ms = Date.now() - started.getTime();
 
-  const set = mode === "full" ? { lastFullAt: started, lastResult: res as unknown as Record<string, unknown> } : { lastQuickAt: started };
+  // Pilnā kārta, kas neieguva NE VIENAS rindas (tipiski Vercel bot aizsardzība), neatzīmējas kā pabeigta:
+  // lastFullAt paliek vecs, tāpēc nākamā plānotā kārta to mēģinās no jauna.
+  const fullFailed = mode === "full" && res.rows === 0 && res.errors.length > 0;
+  // Pilnā kārta ietver arī ātrās kārtas darbu — atzīmējam lastQuickAt, lai plūsma neizskatītos
+  // novecojusi uzraudzībai, kamēr tā faktiski tikusi izsūknēta pilnajā režīmā (tas pats kas #111).
+  const set =
+    mode === "full"
+      ? { ...(fullFailed ? {} : { lastFullAt: started, lastQuickAt: started }), lastResult: res as unknown as Record<string, unknown> }
+      : { lastQuickAt: started };
   await db.insert(crawlState).values({ name: PORSCHE.key, ...set }).onConflictDoUpdate({ target: crawlState.name, set });
   return res;
 }
