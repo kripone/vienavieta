@@ -14,7 +14,7 @@ export async function generateMetadata(props: { searchParams: Promise<SP> }): Pr
   const { t, locale } = await getT();
   return {
     title: { absolute: `VienāVietā – ${t("Visi Latvijas sludinājumi vienā meklētājā")}` },
-    description: t("Auto, moto, dzīvokļi, mājas un zeme no ss.com, autoplius.lt un citiem portāliem vienā meklētājā. Cenu vēsture, cenu kritumi un reālās darījumu cenas."),
+    description: t("Auto, moto, dzīvokļi, mājas, viensētas un zeme no ss.com, autoplius.lt un citiem portāliem vienā meklētājā. Cenu vēsture, cenu kritumi un reālās darījumu cenas."),
     alternates: langAlternates("/", locale),
   };
 }

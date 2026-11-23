@@ -80,6 +80,7 @@ Prototips ar visām idejām: claude.ai artefakts "VienāVietā". Šeit veidojam 
 - [x] ss.com īpašumu ielas → precīza vieta kartē (Google Geocoding, kešs; ieslēdzas ar GOOGLE_GEOCODING_KEY)
 - [x] Dublikātu apvienošana starp portāliem (marka/modelis/gads/cena/nobraukums vai veids/istabas/platība/vieta): viena kartīte, "Arī: ss.com ↗"
 - [x] ss.com meži, biroji, tirdzniecības telpas, noliktavas, garāžas (SS_SECTIONS ss2:wood/offices/shops/storage/garages)
+- [x] ss.com lauku mājas un viensētas (SS_SECTIONS ss2:farms → „Lauku īpašums”, SEO lapa /ipasumi/lauku-ipasumi, sākumlapas kategorija; pakalpojumu sludinājumi bez platībām izlaisti)
 - [x] Sludinājuma vēsture (kā tirgusdati.lv): dienas tirgū, sākuma cena, cenu izmaiņas ar grafiku; /vesture pēc ss.com saites
 - [x] /cenu-kritumi (24 h / 7 / 30 dienas) un kārtošana "Lielākais cenu kritums", "Visilgāk tirgū"; kartītē sākuma cena nosvītrota
 - [x] ss.com auto no sludinājuma lapas (katra lapa vienreiz, ~24 minūtē): pilsēta, ātrumkārba, krāsa, virsbūve, vietu skaits, tehniskā apskate, aprīkojums

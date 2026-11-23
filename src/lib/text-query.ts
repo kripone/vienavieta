@@ -66,6 +66,7 @@ const RULES: Rule[] = [
   [/\b(dzivokl|apartment|flat\b|квартир)/, { ptype: "Dzīvoklis" }, "property"],
   [/\b(studij|studio|студи)/, { ptype: "Dzīvoklis", rmax: "1" }, "property"],
   [/\b(vasarnic|darza maj|дач)/, { ptype: "Vasarnīca" }, "property"],
+  [/\b(vienset|lauku (maj|ipasum|set)|farmstead|farm\b|хутор|усадьб)/, { ptype: "Lauku īpašums" }, "property"],
   [/\b(privatmaj|maj[aues]|house|дом\b|дома\b)/, { ptype: "Māja" }, "property"],
   [/\b(zemes gabal|zemi|zeme\b|land\b|участок|земл)/, { ptype: "Zeme" }, "property"],
   [/\b(mez[su]|forest|лес\b)/, { ptype: "Mežs" }, "property"],

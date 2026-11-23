@@ -80,7 +80,8 @@ const mileage = (v?: string) => {
 /** "1453 m²" → 1453; "2 ha." → 20000 */
 export function parseLand(v?: string) {
   if (!v) return null;
-  const n = Number(v.replace(/[^\d.,]/g, "").replace(",", "."));
+  // "0.67 ha." — beigu punkts nav daļa no skaitļa (agrāk "0.67." → NaN un zeme pazuda)
+  const n = Number(v.replace(/\s/g, "").match(/\d+(?:[.,]\d+)?/)?.[0].replace(",", ".") ?? NaN);
   if (!Number.isFinite(n) || n <= 0) return null;
   const m2 = /ha/.test(v) ? Math.round(n * 10_000) : Math.round(n);
   // virs 10 000 ha (100M m²) ir acīmredzama mērvienības/parse kļūda; land_m2 kolonna ir
@@ -443,12 +444,15 @@ export function mapItem(
   const areaRaw = first(f, "m²") ?? first(f, "Platība");
   const area = isLand ? null : int(areaRaw);
   const land = isLand ? parseLand(areaRaw ?? first(f, "ha")) : parseLand(first(f, "Zem. pl."));
+  // lauku viensētu sadaļā ir arī pakalpojumu sludinājumi (zemes darbi u.c.) bez platībām — tie nav īpašumi
+  if (feed.propertyType === "Lauku īpašums" && !area && !land) return null;
   const floorRaw = first(f, "Stāvs")?.match(/^(-?\d+)\/(\d+)/);
   const where = place ? `, ${slug(place.name) === "centrs" ? place.region : place.name}` : "";
   const title =
     feed.propertyType === "Dzīvoklis" ? `${rooms ?? 1}-istabu dzīvoklis${area ? `, ${area} m²` : ""}${where}`
     : ptype === "Vasarnīca" ? `Vasarnīca${area ? ` ${area} m²` : ""}${land ? `, zeme ${landLabel(land)}` : ""}${where}`
     : feed.propertyType === "Māja" ? `Privātmāja${area ? ` ${area} m²` : ""}${land ? `, zeme ${landLabel(land)}` : ""}${where}`
+    : feed.propertyType === "Lauku īpašums" ? `Lauku īpašums${area ? ` ${area} m²` : ""}${land ? `, zeme ${landLabel(land)}` : ""}${where}`
     : feed.propertyType === "Zeme" ? `Zemes gabals${land ? ` ${landLabel(land)}` : ""}${where}`
     : feed.propertyType === "Mežs" ? `Meža īpašums${land ? ` ${landLabel(land)}` : ""}${where}`
     : `${feed.propertyType}${area ? ` ${area} m²` : ""}${where}`;

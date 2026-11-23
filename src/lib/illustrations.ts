@@ -114,6 +114,7 @@ const KAT_ICON: Record<string, string> = {
   flat: '<rect x="15" y="3" width="18" height="23" rx="1"/><path d="M19 8h3M26 8h3M19 13h3M26 13h3M19 18h3M26 18h3M22 26v-4h4v4"/>',
   "flat-rent": '<rect x="15" y="3" width="18" height="23" rx="1"/><path d="M19 8h3M26 8h3M19 13h3M26 13h3M22 26v-4h4v4"/><circle cx="38" cy="19" r="3"/><path d="M38 22v5M38 25h2"/>',
   house: '<path d="M10 14 24 3l14 11"/><path d="M13 12v14h22V12"/><path d="M21 26v-7h6v7"/>',
+  farm: '<path d="M6 15 17 6l11 9"/><path d="M9 13v13h16V13"/><path d="M15 26v-6h4v6"/><path d="M38 6l-6 12h12z"/><path d="M38 18v8"/><path d="M3 26h42"/>',
   land: '<path d="M4 24 18 16l12 4 14-6"/><path d="M4 24h40"/><path d="M30 12c0-4 3-7 3-7s3 3 3 7a3 3 0 0 1-6 0z"/>',
   forest: '<path d="M12 4 5 18h14z"/><path d="M12 18v6"/><path d="M27 2l-8 16h16z"/><path d="M27 18v6"/><path d="M39 8l-5 10h10z"/><path d="M39 18v6"/><path d="M3 24h42"/>',
   office: '<rect x="12" y="4" width="16" height="22" rx="1"/><rect x="28" y="12" width="9" height="14"/><path d="M16 9h8M16 14h8M16 19h8"/>',

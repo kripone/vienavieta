@@ -643,6 +643,7 @@ export async function homeCategoryCounts(): Promise<Record<string, number>> {
           when property_type = 'Dzīvoklis' and deal = 'sell' then 'flat'
           when property_type = 'Dzīvoklis' and deal = 'rent' then 'flat-rent'
           when property_type = 'Māja' and deal = 'sell' then 'house'
+          when property_type = 'Lauku īpašums' and deal = 'sell' then 'farm'
           when property_type = 'Zeme' and deal = 'sell' then 'land'
           when property_type = 'Mežs' and deal = 'sell' then 'forest'
           when property_type = 'Birojs' then 'office'

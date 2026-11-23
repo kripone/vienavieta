@@ -86,7 +86,7 @@ export const PROPERTY_SLUG: Record<PropertyType, string> = {
   "Ražošanas telpas": "razosanas-telpas", "Komercēka": "komercekas", "Garāža": "garazas", "Stāvvieta": "stavvietas",
 };
 export const PROPERTY_PLURAL: Record<PropertyType, string> = {
-  "Dzīvoklis": "Dzīvokļi", "Istaba": "Istabas", "Māja": "Mājas", "Vasarnīca": "Vasarnīcas un dārza mājas", "Lauku īpašums": "Lauku īpašumi",
+  "Dzīvoklis": "Dzīvokļi", "Istaba": "Istabas", "Māja": "Mājas", "Vasarnīca": "Vasarnīcas un dārza mājas", "Lauku īpašums": "Lauku mājas un viensētas",
   "Zeme": "Zemes gabali", "Mežs": "Meža īpašumi", "Birojs": "Biroji", "Tirdzniecības telpas": "Tirdzniecības telpas", "Noliktava": "Noliktavas",
   "Ražošanas telpas": "Ražošanas telpas", "Komercēka": "Komercēkas", "Garāža": "Garāžas", "Stāvvieta": "Stāvvietas",
 };
@@ -198,6 +198,8 @@ export const SS_SECTIONS = [
   { key: "ss2:flats", url: "https://www.ss.com/lv/real-estate/flats/", kind: "property", propertyType: "Dzīvoklis" },
   { key: "ss2:homes", url: "https://www.ss.com/lv/real-estate/homes-summer-residences/", kind: "property", propertyType: "Māja" },
   { key: "ss2:land", url: "https://www.ss.com/lv/real-estate/plots-and-lands/", kind: "property", propertyType: "Zeme" },
+  // lauku mājas un viensētas (2026-11-23; ss.com "Lauku viensētas", kolonnas kā mājām: Rajons, Stāvi, m², Zem. pl., Cena)
+  { key: "ss2:farms", url: "https://www.ss.com/lv/real-estate/farms-estates/", kind: "property", propertyType: "Lauku īpašums" },
   // komercīpašumi, meži, garāžas (2026-11-08). alt = rezerves adreses, ja pirmā nerāda sarakstu
   { key: "ss2:wood", url: "https://www.ss.com/lv/real-estate/wood/all/", alt: ["https://www.ss.com/lv/real-estate/wood/all-regions/", "https://www.ss.com/lv/real-estate/wood/"], kind: "property", propertyType: "Mežs" },
   { key: "ss2:offices", url: "https://www.ss.com/lv/real-estate/offices/all/", alt: ["https://www.ss.com/lv/real-estate/offices/", "https://www.ss.com/lv/real-estate/premises/offices/all/"], kind: "property", propertyType: "Birojs" },
@@ -478,6 +480,7 @@ export const HOME_CATEGORIES = [
   { key: "flat", label: "Dzīvokļi", href: "/ipasumi/dzivokli", group: "property" },
   { key: "flat-rent", label: "Dzīvokļu īre", href: "/ipasumi/dzivokli-ire", group: "property" },
   { key: "house", label: "Mājas", href: "/ipasumi/majas", group: "property" },
+  { key: "farm", label: "Lauku mājas", href: "/ipasumi/lauku-ipasumi", group: "property" },
   { key: "land", label: "Zeme", href: "/ipasumi/zeme", group: "property" },
   { key: "forest", label: "Meži", href: "/ipasumi/mezi", group: "property" },
   { key: "office", label: "Biroji", href: "/?cat=property&ptype=Birojs", group: "property" },
