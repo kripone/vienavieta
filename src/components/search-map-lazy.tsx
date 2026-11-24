@@ -31,8 +31,15 @@ export function SearchMapLazy(props: ComponentProps<typeof SearchMap>) {
   return (
     <div className={`map-gate${open ? " open" : ""}`}>
       {!open && (
-        <button type="button" className="btn map-open" onClick={() => setOpen(true)}>
-          🗺️ {t("Rādīt karti")}
+        <button type="button" className="map-open" onClick={() => setOpen(true)}>
+          <span className="mo-ico" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z" /><path d="M9 4v14M15 6v14" /></svg>
+          </span>
+          <span className="mo-txt">
+            <b>{t("Rādīt karti")}</b>
+            <small>{t("Sludinājumi kartē")}</small>
+          </span>
+          <span className="mo-go" aria-hidden="true">→</span>
         </button>
       )}
       <div className="map-slot">{show ? <SearchMap {...props} /> : <MapLoading />}</div>

@@ -270,6 +270,7 @@ export const lt: Dict = {
   "Mēģināt vēlreiz": "Bandyti dar kartą",
   "Uz sākumlapu": "Į pradžią",
   "Līdzīgi sludinājumi": "Panašūs skelbimai",
+  "Sludinājumi kartē": "Skelbimai žemėlapyje",
   "Rādīt karti": "Rodyti žemėlapį",
   "Karte": "Žemėlapis",
   "Ielu skats": "Gatvės vaizdas",

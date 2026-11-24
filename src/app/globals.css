@@ -270,7 +270,19 @@ main .fine { margin-top: 14px; }
 }
 @media (max-width: 560px) { .filters .grid2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .mapwrap .map { height: 260px; } }
 /* Telefonā karte ielādējas tikai pēc pogas (src/components/search-map-lazy.tsx) */
-.map-open { display: none; width: 100%; }
+.map-open { display: none; width: 100%; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px; border: 1.5px solid var(--accent); border-radius: 12px; font: inherit; color: var(--fg); text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  /* „kartes” fons bez bildes: viegls tonis un režģis */
+  background:
+    repeating-linear-gradient(0deg, transparent 0 17px, color-mix(in srgb, var(--accent) 9%, transparent) 17px 18px),
+    repeating-linear-gradient(90deg, transparent 0 17px, color-mix(in srgb, var(--accent) 9%, transparent) 17px 18px),
+    linear-gradient(120deg, var(--accent-soft), var(--surface) 75%); }
+.map-open:active { filter: brightness(0.96); }
+.map-open .mo-ico { display: grid; place-items: center; width: 42px; height: 42px; flex: none; border-radius: 50%; background: var(--accent); color: var(--accent-fg); box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 35%, transparent); }
+.map-open .mo-ico svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
+.map-open .mo-txt { display: flex; flex-direction: column; flex: 1; min-width: 0; line-height: 1.25; }
+.map-open .mo-txt b { font-family: var(--f-display); font-size: 17px; }
+.map-open .mo-txt small { color: var(--muted); font-size: 13px; }
+.map-open .mo-go { font-size: 20px; font-weight: 700; color: var(--accent); }
 @media (max-width: 560px) { .map-open { display: flex; } .map-gate:not(.open) .map-slot { display: none; } }
 .seg-sm button { padding: 6px 10px; font-size: 13px; }
 

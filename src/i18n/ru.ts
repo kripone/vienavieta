@@ -270,6 +270,7 @@ export const ru: Dict = {
   "Mēģināt vēlreiz": "Попробовать ещё раз",
   "Uz sākumlapu": "На главную",
   "Līdzīgi sludinājumi": "Похожие объявления",
+  "Sludinājumi kartē": "Объявления на карте",
   "Rādīt karti": "Показать карту",
   "Karte": "Карта",
   "Ielu skats": "Просмотр улиц",

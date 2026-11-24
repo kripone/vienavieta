@@ -270,6 +270,7 @@ export const en: Dict = {
   "Mēģināt vēlreiz": "Try again",
   "Uz sākumlapu": "Home page",
   "Līdzīgi sludinājumi": "Similar listings",
+  "Sludinājumi kartē": "Listings on the map",
   "Rādīt karti": "Show map",
   "Karte": "Map",
   "Ielu skats": "Street view",
