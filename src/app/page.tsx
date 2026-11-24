@@ -28,8 +28,8 @@ export default async function SearchPage(props: { searchParams: Promise<SP> }) {
         <JsonLd data={{
           "@context": "https://schema.org",
           "@graph": [
-            { "@type": "WebSite", name: "VienāVietā", url: `${appBase()}/`, potentialAction: { "@type": "SearchAction", target: `${appBase()}/?q={search_term_string}`, "query-input": "required name=search_term_string" } },
-            { "@type": "Organization", name: "VienāVietā", url: `${appBase()}/`, logo: `${appBase()}/icons/icon-512.png`, email: "info@vienavieta.lv" },
+            { "@type": "WebSite", name: "VienāVietā", url: `${appBase()}/`, inLanguage: ["lv", "en", "ru", "lt"], potentialAction: { "@type": "SearchAction", target: `${appBase()}/?q={search_term_string}`, "query-input": "required name=search_term_string" } },
+            { "@type": "Organization", name: "VienāVietā", url: `${appBase()}/`, logo: `${appBase()}/icons/icon-512.png`, email: "info@vienavieta.lv", description: "Latvijas auto un nekustamā īpašuma sludinājumu meklētājs: apkopo sludinājumus no vairākiem portāliem, rāda cenu vēsturi un Valsts zemes dienesta darījumu datus.", knowsAbout: ["lietoti auto Latvijā", "nekustamais īpašums Latvijā", "dzīvokļu cenas Latvijā", "sludinājumu tirgus dati"] },
           ],
         }} />
       )}
