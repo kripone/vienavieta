@@ -53,6 +53,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={locale} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        {/* lielākā daļa kartīšu sīktēlu nāk no ss.com (pārlūks tos ielādē tieši) — savienojumu atveram laikus */}
+        <link rel="preconnect" href="https://i.ss.com" />
       </head>
       <body>
         <I18nProvider locale={locale} dict={DICTS[locale]} prefix={prefix}>

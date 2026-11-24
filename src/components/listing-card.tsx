@@ -36,9 +36,11 @@ type CardProps = {
   compare?: boolean;
   /** VZD darījumu €/m² mediāna šajā mājā (src/lib/vzd.ts). */
   vzd?: { median: number; n: number } | null;
+  /** Pirmā kartīte sarakstā: bildi ielādē uzreiz (LCP), nevis slinki. */
+  priority?: boolean;
 };
 
-export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, also, evaluation, compare, vzd }: CardProps) {
+export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, also, evaluation, compare, vzd, priority }: CardProps) {
   const { t, lp } = await getT();
   const meta =
     l.kind === "vehicle"
@@ -55,11 +57,11 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
       <a href={lp(`/sludinajumi/${l.id}`)} className="thumb" aria-hidden="true" tabIndex={-1}>
         {l.thumbKey ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={mediaUrl(l.thumbKey)} alt={trTitle(l.title, t)} loading="lazy" />
+          <img src={mediaUrl(l.thumbKey)} alt={trTitle(l.title, t)} loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : undefined} />
         ) : ext && l.externalThumbUrl && process.env.EXTERNAL_THUMBS !== "off" ? (
-          <ExtThumb src={ssBigThumb(l.externalThumbUrl) ?? l.externalThumbUrl} fallbackSrc={l.externalThumbUrl} source={src} fallback={listingIll(l)} alt={trTitle(l.title, t)} />
+          <ExtThumb src={ssBigThumb(l.externalThumbUrl) ?? l.externalThumbUrl} fallbackSrc={l.externalThumbUrl} source={src} fallback={listingIll(l)} alt={trTitle(l.title, t)} priority={priority} />
         ) : !ext && l.externalThumbUrl ? (
-          <ExtThumb src={ssBigThumb(l.externalThumbUrl) ?? l.externalThumbUrl} fallbackSrc={l.externalThumbUrl} source="" fallback={listingIll(l)} alt={trTitle(l.title, t)} />
+          <ExtThumb src={ssBigThumb(l.externalThumbUrl) ?? l.externalThumbUrl} fallbackSrc={l.externalThumbUrl} source="" fallback={listingIll(l)} alt={trTitle(l.title, t)} priority={priority} />
         ) : (
           <Ill svg={listingIll(l)} />
         )}

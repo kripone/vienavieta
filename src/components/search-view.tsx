@@ -193,8 +193,8 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
         ) : (
           <>
             <div className={`list results-list${view === "grid" ? " grid" : ""}`}>
-              {result.rows.map((l) => (
-                <ListingCard key={l.id} l={l} favorite={{ on: favs.has(l.id), loggedIn: Boolean(user) }} also={also.get(l.id)} evaluation={evals.get(l.id)} oldPrice={l.firstPrice} vzd={vzd.get(l.id)} compare />
+              {result.rows.map((l, i) => (
+                <ListingCard key={l.id} l={l} priority={i === 0} favorite={{ on: favs.has(l.id), loggedIn: Boolean(user) }} also={also.get(l.id)} evaluation={evals.get(l.id)} oldPrice={l.firstPrice} vzd={vzd.get(l.id)} compare />
               ))}
             </div>
             {result.pages > 1 && (
