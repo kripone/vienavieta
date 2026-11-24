@@ -184,18 +184,31 @@ main .fine { margin-top: 14px; }
 /* ---------- mobilā ☰ izvēlne ---------- */
 /* datorā: bērni ir inline navigācijā, poga paslēpta */
 .mm { display: contents; }
-@media (min-width: 561px) { .mm-panel { display: contents; } }
-.mm-burger, .mm-close, .mm-drawer { display: none; }
+@media (min-width: 561px) { .mm-panel, .mm-group { display: contents; } }
+.mm-burger, .mm-close, .mm-drawer, .mm-head, .theme-label { display: none; }
 @media (max-width: 560px) {
   .mm { display: block; order: 99; }
   .mm-burger { display: inline-flex; align-items: center; justify-content: center; padding: 0 9px; line-height: 1; }
-  .mm-panel { display: none; position: fixed; inset: 0; z-index: 90; background: var(--bg); padding: 16px; padding-top: max(16px, env(safe-area-inset-top)); flex-direction: column; gap: 8px; overflow-y: auto; }
+  .mm-panel { display: none; position: fixed; inset: 0; z-index: 90; background: var(--bg); padding: 12px 16px 24px; padding-top: max(12px, env(safe-area-inset-top)); flex-direction: column; gap: 14px; overflow-y: auto; }
   .mm-panel[data-open="true"] { display: flex; }
-  .mm-panel .btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 13px 14px; font-size: 16px; }
+  .mm-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+  .mm-head .logo { font-size: 24px; }
+  .mm-close { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+  /* saišu grupas: viena kartīte ar atdalītām rindām */
+  .mm-group { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .mm-panel .mm-group .btn { display: flex; align-items: center; justify-content: flex-start; gap: 12px; width: 100%; min-height: 56px; padding: 10px 14px; border: 0; border-radius: 0; background: transparent; font-size: 16px; font-weight: 600; }
+  .mm-panel .mm-group .btn + .btn { border-top: 1px solid var(--line); }
+  .mm-panel .mm-group .btn::after { content: "›"; margin-left: auto; color: var(--muted); font-size: 22px; font-weight: 400; line-height: 1; }
+  .mm-panel .mm-group .btn:active { background: var(--surface-2); }
+  .mm-ico { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); font-size: 17px; line-height: 1; }
   .mm-panel .hide-sm { display: inline; }
   .mm-panel .mm-drawer { display: flex; }
-  .mm-panel .lang { align-self: flex-start; }
-  .mm-close { display: inline-flex; align-self: flex-end; font-size: 16px; margin-bottom: 6px; }
+  /* valoda un tēma blakus */
+  .mm-group.mm-settings { flex-direction: row; gap: 10px; background: none; border: 0; border-radius: 0; overflow: visible; }
+  .mm-panel .mm-settings .lang, .mm-panel .mm-settings .theme-btn { flex: 1; box-sizing: border-box; height: 50px; border-radius: 12px; font-size: 15px; }
+  .mm-panel .mm-settings .theme-btn { display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--line); background: var(--surface); }
+  .mm-panel .mm-settings .theme-btn::after { content: none; }
+  .mm-settings .theme-label { display: inline; }
 }
 
 /* ---------- cena pret tirgu (mediānas josla) ---------- */

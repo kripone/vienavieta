@@ -34,9 +34,12 @@ export function MobileMenu({ children }: { children: React.ReactNode }) {
           if ((e.target as HTMLElement).closest("a")) setOpen(false);
         }}
       >
-        <button type="button" className="btn mm-close" aria-label="Aizvērt izvēlni" onClick={() => setOpen(false)}>
-          ✕
-        </button>
+        <div className="mm-head">
+          <span className="logo">Vienā<b>Vietā</b></span>
+          <button type="button" className="mm-close" aria-label="Aizvērt izvēlni" onClick={() => setOpen(false)}>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+          </button>
+        </div>
         {children}
       </div>
     </div>

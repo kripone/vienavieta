@@ -41,6 +41,7 @@ export function ThemeToggle() {
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         {ICON[theme]}
       </svg>
+      <span className="theme-label">{tr(LABEL[theme])}</span>
     </button>
   );
 }
