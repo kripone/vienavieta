@@ -9,7 +9,7 @@ export async function TodayStats() {
   const fmt = new Intl.NumberFormat("lv-LV");
   return (
     <section className="today">
-      <h3>{t("Šodien tirgū")}</h3>
+      <p className="today-h">{t("Šodien tirgū")}</p>
       <a href={lp("/")}><span>{t("Jauni sludinājumi")}</span><b>{fmt.format(s.fresh)}</b></a>
       <a href={lp("/cenu-kritumi")}><span>{t("Cenu kritumi")}</span><b>{fmt.format(s.drops)}</b></a>
       {s.rigaM2 != null && <a href={lp("/cenu-karte")}><span>{t("Dzīvokļi Rīgā, mediāna")}</span><b>{fmt.format(s.rigaM2)} €/m²</b></a>}

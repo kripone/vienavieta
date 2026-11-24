@@ -865,7 +865,7 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 
 /* sākumlapas rinda „Ko meklē?” */
 .kat { margin: 4px 0 18px; }
-.kat h2 { font-family: var(--f-display); font-size: 19px; margin: 0 0 10px; }
+.kat .kat-h { font-family: var(--f-display); font-size: 19px; font-weight: 700; margin: 0 0 10px; }
 .kat-row { display: flex; gap: 10px; }
 .kat-row > .kat-card { flex: 1 1 0; min-width: 0; }
 .kat-card { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 6px 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--fg); text-decoration: none; text-align: center; transition: border-color .15s, transform .15s; }
@@ -897,7 +897,7 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
   box-shadow: 0 0 16px rgba(165, 107, 255, .2), 0 0 5px rgba(63, 169, 245, .22);
 }
 @media (prefers-reduced-motion: reduce) { .ai-card { animation: none; } }
-.ai-card h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-family: var(--f-display); font-size: 17px; }
+.ai-card .ai-card-h { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-weight: 700; font-family: var(--f-display); font-size: 17px; }
 .ai-card p { margin: 0 0 12px; font-size: 13.5px; color: var(--muted); line-height: 1.45; }
 .ai-card-in { display: flex; gap: 6px; }
 .ai-card-in input { flex: 1; min-width: 0; height: 42px; border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; font: inherit; font-size: 14px; background: var(--bg); color: var(--fg); }
@@ -905,7 +905,7 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .ai-card-ex { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
 .ai-card-ex button { text-align: left; font: inherit; font-size: 13px; color: var(--fg); padding: 8px 10px; border-radius: 8px; border: 0; background: var(--surface-2); cursor: pointer; }
 .ai-card-ex button:hover { background: var(--accent-soft); }
-.today h3 { margin: 0 0 8px; font-family: var(--f-display); font-size: 17px; }
+.today .today-h { font-weight: 700; margin: 0 0 8px; font-family: var(--f-display); font-size: 17px; }
 .today a { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 9px 0; border-top: 1px solid var(--line); text-decoration: none; color: var(--fg); font-size: 14px; }
 .today a:first-of-type { border-top: 0; }
 .today a b { font-family: var(--f-display); font-size: 18px; white-space: nowrap; }

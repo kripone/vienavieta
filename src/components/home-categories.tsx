@@ -12,7 +12,7 @@ export async function HomeCategories() {
   const fmt = new Intl.NumberFormat("lv-LV");
   return (
     <section className="kat" aria-label={t("Ko meklē?")}>
-      <h2>{t("Ko meklē?")}</h2>
+      <p className="kat-h">{t("Ko meklē?")}</p>
       <div className="kat-row">
         {items.map((c) => (
           <a key={c.key} className={`kat-card ${c.group === "vehicle" ? "v" : "p"}`} href={c.href.startsWith("/?") ? c.href : lp(c.href)}>
