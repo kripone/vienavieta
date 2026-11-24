@@ -205,7 +205,7 @@ main .fine { margin-top: 14px; }
   .mm-panel .mm-drawer { display: flex; }
   /* valoda un tēma blakus */
   .mm-group.mm-settings { flex-direction: row; gap: 10px; background: none; border: 0; border-radius: 0; overflow: visible; }
-  .mm-panel .mm-settings .lang, .mm-panel .mm-settings .theme-btn { flex: 1; box-sizing: border-box; height: 50px; border-radius: 12px; font-size: 15px; }
+  .mm-panel .mm-settings .lang, .mm-panel .mm-settings .theme-btn { flex: 1; box-sizing: border-box; height: 50px; min-height: 0; border-radius: 12px; font-size: 15px; }
   .mm-panel .mm-settings .theme-btn { display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--line); background: var(--surface); }
   .mm-panel .mm-settings .theme-btn::after { content: none; }
   .mm-settings .theme-label { display: inline; }
