@@ -589,3 +589,13 @@ export const indexnowSent = pgTable("indexnow_sent", {
   url: text("url").primaryKey(),
   sentAt: timestamp("sent_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * Lapu skaitu kešs (`cached()` `src/lib/search.ts`), lai pēc restarta vai izvietošanas pirmais apmeklētājs
+ * vai meklētāja robots saņemtu pēdējo vērtību uzreiz, nevis gaidītu uz smagiem skaitiem.
+ */
+export const pageCache = pgTable("page_cache", {
+  key: text("key").primaryKey(),
+  value: jsonb("value").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});

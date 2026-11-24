@@ -1,4 +1,5 @@
-import { and, asc, count, desc, eq, gte, ilike, inArray, isNotNull, isNull, lte, ne, or, sql, type SQL } from "drizzle-orm";
+import { createHash } from "node:crypto";
+import { and, asc, count, desc, eq, gte, ilike, inArray, isNotNull, isNull, lt, lte, ne, or, sql, type SQL } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { groupPrimaryOnly } from "./dedupe";
 import {
@@ -476,15 +477,59 @@ export async function cached<T>(key: string, fn: () => Promise<T>): Promise<T> {
   if (hit && age < 6 * 3600_000) {
     if (!hit.refreshing) {
       hit.refreshing = true;
-      fn().then((v) => facetCache.set(key, { at: Date.now(), v })).catch(() => { hit.refreshing = false; });
+      compute(key, fn).catch(() => { hit.refreshing = false; });
     }
     return hit.v as T;
   }
-  const v = await fn();
+  // Atmiņā nav (piem. pēc restarta): ņemam pēdējo vērtību no datubāzes un, ja tā veca, pārrēķinām fonā
+  const stored = await loadStored(key);
+  if (stored) {
+    const fresh = Date.now() - stored.at < 10 * 60_000;
+    facetCache.set(key, { at: stored.at, v: stored.v, refreshing: !fresh });
+    if (!fresh) compute(key, fn).catch(() => {});
+    return stored.v as T;
+  }
+  return compute(key, fn);
+}
+
+/** Viens aprēķins vienai atslēgai vienlaikus (iesildīšana un robots var pieprasīt to pašu). */
+function compute<T>(key: string, fn: () => Promise<T>): Promise<T> {
+  const running = inflight.get(key);
+  if (running) return running as Promise<T>;
+  const p = fn().then((v) => { remember(key, v); return v; }).finally(() => inflight.delete(key));
+  inflight.set(key, p);
+  return p;
+}
+
+const inflight = new Map<string, Promise<unknown>>();
+const STORED_MAX_AGE = 7 * 24 * 3600_000;
+/** Datubāzē glabājam tikai meklēšanas skaitus bez lietotāja brīvā teksta vai zonas (citādi tabula augtu bez gala). */
+const persistable = (key: string) =>
+  /^(type|facet|src|sum2|ins|seo|mo):|^home-cats$|^today-stats$/.test(key) && !/"zone":\[/.test(key) && !/"q":"[^"]/.test(key);
+const storeKey = (key: string) => createHash("sha256").update(key).digest("hex");
+
+function remember(key: string, v: unknown) {
   facetCache.delete(key);
   facetCache.set(key, { at: Date.now(), v });
   if (facetCache.size > 5000) facetCache.delete(facetCache.keys().next().value!);
-  return v;
+  if (!persistable(key)) return;
+  const { pageCache } = schema;
+  db.insert(pageCache)
+    .values({ key: storeKey(key), value: v as object, updatedAt: new Date() })
+    .onConflictDoUpdate({ target: pageCache.key, set: { value: v as object, updatedAt: new Date() } })
+    .then(() => {
+      if (Math.random() < 0.002) return db.delete(pageCache).where(lt(pageCache.updatedAt, new Date(Date.now() - STORED_MAX_AGE)));
+    })
+    .catch(() => {});
+}
+
+async function loadStored(key: string): Promise<{ at: number; v: unknown } | null> {
+  if (!persistable(key)) return null;
+  const { pageCache } = schema;
+  const [row] = await db.select().from(pageCache).where(eq(pageCache.key, storeKey(key))).limit(1).catch(() => []);
+  if (!row || row.value == null) return null;
+  const at = row.updatedAt.getTime();
+  return Date.now() - at < STORED_MAX_AGE ? { at, v: row.value } : null;
 }
 
 export type Facet = { id: number; name: string; n: number };

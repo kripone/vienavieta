@@ -270,6 +270,7 @@ export const ru: Dict = {
   "Mēģināt vēlreiz": "Попробовать ещё раз",
   "Uz sākumlapu": "На главную",
   "Līdzīgi sludinājumi": "Похожие объявления",
+  "Rādīt karti": "Показать карту",
   "Karte": "Карта",
   "Ielu skats": "Просмотр улиц",
   "Ielādē visus savus sludinājumus uzreiz: failā (XML, CSV, JSON) vai ar plūsmas saiti, ko atjaunojam automātiski.": "Загрузите все объявления сразу: файлом (XML, CSV, JSON) или ссылкой на фид, который мы обновляем автоматически.",

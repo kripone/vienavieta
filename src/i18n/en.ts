@@ -270,6 +270,7 @@ export const en: Dict = {
   "Mēģināt vēlreiz": "Try again",
   "Uz sākumlapu": "Home page",
   "Līdzīgi sludinājumi": "Similar listings",
+  "Rādīt karti": "Show map",
   "Karte": "Map",
   "Ielu skats": "Street view",
   "Ielādē visus savus sludinājumus uzreiz: failā (XML, CSV, JSON) vai ar plūsmas saiti, ko atjaunojam automātiski.": "Upload all your listings at once: as a file (XML, CSV, JSON) or a feed link that we refresh automatically.",

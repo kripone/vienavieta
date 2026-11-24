@@ -270,6 +270,7 @@ export const lt: Dict = {
   "Mēģināt vēlreiz": "Bandyti dar kartą",
   "Uz sākumlapu": "Į pradžią",
   "Līdzīgi sludinājumi": "Panašūs skelbimai",
+  "Rādīt karti": "Rodyti žemėlapį",
   "Karte": "Žemėlapis",
   "Ielu skats": "Gatvės vaizdas",
   "Ielādē visus savus sludinājumus uzreiz: failā (XML, CSV, JSON) vai ar plūsmas saiti, ko atjaunojam automātiski.": "Įkelkite visus skelbimus iš karto: failu (XML, CSV, JSON) arba srauto nuoroda, kurią atnaujiname automatiškai.",
