@@ -308,7 +308,8 @@ export const WESS = { key: "wess:cars", url: "https://cars.bmwwess.lv/", quickEv
 export const PORSCHE = { key: "porsche:used", url: "https://finder.porsche.com/lv/lv-LV/search?condition=used&dealership=15000002587", delayMs: 2500, quickPages: 2, maxPages: 10, quickEveryMin: 30, fullEveryHours: 24 } as const;
 
 /** Cenas novērtējums pret līdzīgiem: zem GOOD — "Laba cena", virs HIGH — "Virs tirgus"; vajag vismaz MIN līdzīgus. */
-export const PRICE_EVAL = { GOOD: 0.88, HIGH: 1.15, MIN: 3, YEARS: 2 } as const;
+/** PLACE_MIN: īpašumu salīdzina ar to pašu vietu (apkaimi/pilsētu/pagastu), ja tur ir vismaz tik citu sludinājumu; citādi ar reģionu. */
+export const PRICE_EVAL = { GOOD: 0.88, HIGH: 1.15, MIN: 3, YEARS: 2, PLACE_MIN: 12 } as const;
 /** Cik sludinājumus var salīdzināt vienlaikus. */
 export const MAX_COMPARE = 4;
 

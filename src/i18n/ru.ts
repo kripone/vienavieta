@@ -1097,4 +1097,9 @@ export const ru: Dict = {
   "Cena par m² atbilst reģiona mediānai ({m}, {n}).": "Цена за м² соответствует медиане региона ({m}, {n}).",
   "Cena par m² ir par {p}% zemāka nekā reģiona mediāna ({m}, {n}).": "Цена за м² на {p}% ниже медианы региона ({m}, {n}).",
   "Cena par m² ir par {p}% augstāka nekā reģiona mediāna ({m}, {n}).": "Цена за м² на {p}% выше медианы региона ({m}, {n}).",
+  "Cena par m² atbilst vietas „{w}” mediānai ({m}, {n}).": "Цена за м² соответствует медиане в «{w}» ({m}, {n}).",
+  "Cena par m² ir par {p}% zemāka nekā mediāna vietā „{w}” ({m}, {n}).": "Цена за м² на {p}% ниже медианы в «{w}» ({m}, {n}).",
+  "Cena par m² ir par {p}% augstāka nekā mediāna vietā „{w}” ({m}, {n}).": "Цена за м² на {p}% выше медианы в «{w}» ({m}, {n}).",
+  "Salīdzināts ar {n} sludinājumiem tajā pašā vietā (€/m²).": "Сравнено с {n} объявлениями в том же месте (€/м²).",
+  "Salīdzināts ar {n} sludinājumiem reģionā (€/m²).": "Сравнено с {n} объявлениями в регионе (€/м²).",
 };

@@ -1098,4 +1098,9 @@ export const lt: Dict = {
   "Cena par m² atbilst reģiona mediānai ({m}, {n}).": "Kaina už m² atitinka regiono medianą ({m}, {n}).",
   "Cena par m² ir par {p}% zemāka nekā reģiona mediāna ({m}, {n}).": "Kaina už m² {p}% mažesnė už regiono medianą ({m}, {n}).",
   "Cena par m² ir par {p}% augstāka nekā reģiona mediāna ({m}, {n}).": "Kaina už m² {p}% didesnė už regiono medianą ({m}, {n}).",
+  "Cena par m² atbilst vietas „{w}” mediānai ({m}, {n}).": "Kaina už m² atitinka medianą vietovėje „{w}“ ({m}, {n}).",
+  "Cena par m² ir par {p}% zemāka nekā mediāna vietā „{w}” ({m}, {n}).": "Kaina už m² {p}% mažesnė už medianą vietovėje „{w}“ ({m}, {n}).",
+  "Cena par m² ir par {p}% augstāka nekā mediāna vietā „{w}” ({m}, {n}).": "Kaina už m² {p}% didesnė už medianą vietovėje „{w}“ ({m}, {n}).",
+  "Salīdzināts ar {n} sludinājumiem tajā pašā vietā (€/m²).": "Palyginta su {n} skelbimais toje pačioje vietovėje (€/m²).",
+  "Salīdzināts ar {n} sludinājumiem reģionā (€/m²).": "Palyginta su {n} skelbimais regione (€/m²).",
 };

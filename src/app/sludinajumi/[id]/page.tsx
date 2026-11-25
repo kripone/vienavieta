@@ -105,7 +105,7 @@ export default async function ListingPage(props: Props) {
   const isFav = user && !isOwner ? (await favoriteIds(user.id, [l.id])).has(l.id) : false;
   const similar = l.status === "active" ? await similarListings(l).catch(() => []) : [];
   const simEvals = similar.length ? await priceEvals(similar.map((x) => x.id)).catch(() => new Map()) : new Map();
-  const summary = listingSummary(l, { make: d.make ?? null, model: d.model ?? null }, evaluation, vzd, t, tp);
+  const summary = listingSummary(l, { make: d.make ?? null, model: d.model ?? null, place: d.place ?? null }, evaluation, vzd, t, tp);
   const seller = (d.sellerType === "dealer" || d.sellerType === "agency") && d.companyName ? d.companyName : d.sellerName || t("Privātpersona");
   const unit = priceUnit(l.deal, t);
   const ext = l.source !== "own" && l.externalUrl ? l.externalUrl : null;

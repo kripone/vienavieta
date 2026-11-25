@@ -5,14 +5,15 @@ import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { PRICE_EVAL } from "./constants";
 
-export type PriceEval = { label: "Laba cena" | "Tirgus cena" | "Virs tirgus"; cls: "good" | "fair" | "high"; ratio: number; median: number; n: number; perM2: boolean };
+/** scope: ar ko salīdzināts – tas pats modelis (auto), tā pati vieta (apkaime/pilsēta) vai viss reģions (īpašumi) */
+export type PriceEval = { label: "Laba cena" | "Tirgus cena" | "Virs tirgus"; cls: "good" | "fair" | "high"; ratio: number; median: number; n: number; perM2: boolean; scope: "model" | "place" | "region" };
 
 const cache = new Map<string, { at: number; v: PriceEval | null }>();
 const TTL = 10 * 60_000;
 
-function verdict(ratio: number, median: number, n: number, perM2: boolean): PriceEval {
+function verdict(ratio: number, median: number, n: number, perM2: boolean, scope: PriceEval["scope"]): PriceEval {
   const [label, cls] = ratio < PRICE_EVAL.GOOD ? (["Laba cena", "good"] as const) : ratio > PRICE_EVAL.HIGH ? (["Virs tirgus", "high"] as const) : (["Tirgus cena", "fair"] as const);
-  return { label, cls, ratio, median: Math.round(median), n, perM2 };
+  return { label, cls, ratio, median: Math.round(median), n, perM2, scope };
 }
 
 /** Novērtējums dotajiem sludinājumiem (līdz ~50); null, ja līdzīgu par maz. */
@@ -48,8 +49,8 @@ export async function priceEvals(ids: string[]): Promise<Map<string, PriceEval |
   // tas pašu reģionu pārlasīja 24 reizes (~1 s datubāzē). Tagad vienā vaicājumā nolasām grupas (veids, darījums, reģions)
   // €/m² vērtības un mediānu katram sludinājumam rēķinām šeit, izslēdzot to pašu un tā dublikātus (rezultāts tāds pats).
   const unit = (t: string) => sql.raw(`(case when ${t}.property_type = 'Zeme' then ${t}.land_m2::numeric else ${t}.area_m2 end)`);
-  const props = await db.execute<{ id: string; price: number; u: number; group_key: string | null; property_type: string; deal: string | null; region_id: number }>(sql`
-    select l.id, l.price, ${unit("l")}::float8 as u, l.group_key, l.property_type, l.deal::text as deal, p.region_id
+  const props = await db.execute<{ id: string; price: number; u: number; group_key: string | null; property_type: string; deal: string | null; region_id: number; place_id: number }>(sql`
+    select l.id, l.price, ${unit("l")}::float8 as u, l.group_key, l.property_type, l.deal::text as deal, p.region_id, l.place_id
     from listings l
     join places p on p.id = l.place_id
     where l.id in (${idList}) and l.kind = 'property' and l.property_type is not null and ${unit("l")} > 0`);
@@ -57,14 +58,17 @@ export async function priceEvals(ids: string[]): Promise<Map<string, PriceEval |
 
   for (const id of need) out.set(id, null);
   for (const r of vehicles.rows) {
-    if (r.med && r.n >= PRICE_EVAL.MIN) out.set(r.id, verdict(r.price / r.med, r.med, r.n, false));
+    if (r.med && r.n >= PRICE_EVAL.MIN) out.set(r.id, verdict(r.price / r.med, r.med, r.n, false, "model"));
   }
   for (const r of props.rows) {
     const vals = groups.get(groupKeyOf(r.property_type, r.deal, r.region_id)) ?? [];
-    const own = vals.filter((x) => x.id !== r.id && (r.group_key == null || x.g !== r.group_key)).map((x) => x.v);
+    const others = vals.filter((x) => x.id !== r.id && (r.group_key == null || x.g !== r.group_key));
+    // vispirms tā pati vieta (apkaime, pilsēta, pagasts): tur cenas līdzīgākas nekā visā reģionā
+    const near = others.filter((x) => x.p === Number(r.place_id));
+    const [own, scope] = near.length >= PRICE_EVAL.PLACE_MIN ? [near.map((x) => x.v), "place" as const] : [others.map((x) => x.v), "region" as const];
     const med = medianCont(own);
     const u = Number(r.u);
-    if (med && own.length >= PRICE_EVAL.MIN && u > 0) out.set(r.id, verdict(r.price / u / med, med, own.length, true));
+    if (med && own.length >= PRICE_EVAL.MIN && u > 0) out.set(r.id, verdict(r.price / u / med, med, own.length, true, scope));
   }
   for (const id of need) cache.set(id, { at: now, v: out.get(id) ?? null });
   return out;
@@ -73,7 +77,7 @@ export async function priceEvals(ids: string[]): Promise<Map<string, PriceEval |
 const groupKeyOf = (type: string, deal: string | null, region: number) => `${type}|${deal ?? ""}|${region}`;
 
 /** Grupas (veids|darījums|reģions) aktīvo īpašumu cena par m², kešota tikpat ilgi kā novērtējumi. */
-type GroupVal = { id: string; g: string | null; v: number };
+type GroupVal = { id: string; g: string | null; p: number; v: number };
 const groupCache = new Map<string, { at: number; v: GroupVal[] }>();
 async function propertyGroups(keys: string[]): Promise<Map<string, GroupVal[]>> {
   const out = new Map<string, GroupVal[]>();
@@ -95,13 +99,13 @@ async function propertyGroups(keys: string[]): Promise<Map<string, GroupVal[]>> 
     sql`, `,
   );
   const unit = sql.raw(`(case when x.property_type = 'Zeme' then x.land_m2::numeric else x.area_m2 end)`);
-  const rows = await db.execute<{ id: string; group_key: string | null; property_type: string; deal: string; region_id: number; v: number }>(sql`
-    select x.id, x.group_key, x.property_type, coalesce(x.deal::text, '') as deal, px.region_id, (x.price / ${unit})::float8 as v
+  const rows = await db.execute<{ id: string; group_key: string | null; property_type: string; deal: string; region_id: number; place_id: number; v: number }>(sql`
+    select x.id, x.group_key, x.property_type, coalesce(x.deal::text, '') as deal, px.region_id, x.place_id, (x.price / ${unit})::float8 as v
     from listings x join places px on px.id = x.place_id
     where x.status = 'active' and x.kind = 'property' and ${unit} > 0
       and (x.property_type, coalesce(x.deal::text, ''), px.region_id) in (${tuples})`);
   for (const k of need) out.set(k, []);
-  for (const r of rows.rows) out.get(groupKeyOf(r.property_type, r.deal || null, Number(r.region_id)))?.push({ id: r.id, g: r.group_key, v: Number(r.v) });
+  for (const r of rows.rows) out.get(groupKeyOf(r.property_type, r.deal || null, Number(r.region_id)))?.push({ id: r.id, g: r.group_key, p: Number(r.place_id), v: Number(r.v) });
   for (const k of need) {
     groupCache.set(k, { at: now, v: out.get(k)! });
     if (groupCache.size > 500) groupCache.delete(groupCache.keys().next().value!);

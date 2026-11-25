@@ -369,6 +369,186 @@ export const MODEL_INFO: Record<string, ModelInfo> = {
       lt: ["Pirmoji Zafira įvedė Flex7 sėdynes – trečios eilės sėdynės visiškai paslepiamos grindyse.", "Zafira Tourer siūlyta ir su gamykline CNG (dujų) versija."],
     },
   },
+  "Volkswagen|Caddy": {
+    gens: [["Mk2", 1995, 2004], ["Mk3 (2K)", 2003, 2015, 2010], ["Mk4", 2015, 2020], ["Mk5", 2020, null]],
+    facts: {
+      lv: ["Caddy Mk4 (2015) patiesībā bija dziļi modernizēts trešās paaudzes Caddy.", "Piektā paaudze (2020) pārgāja uz MQB platformu, tāpat kā Golf 8."],
+      en: ["The Caddy Mk4 (2015) was really a heavily updated third-generation Caddy.", "The fifth generation (2020) moved to the MQB platform, like the Golf 8."],
+      ru: ["Caddy Mk4 (2015) — по сути глубоко обновлённый Caddy третьего поколения.", "Пятое поколение (2020) перешло на платформу MQB, как Golf 8."],
+      lt: ["Caddy Mk4 (2015) iš esmės buvo smarkiai atnaujintas trečiosios kartos Caddy.", "Penktoji karta (2020) perėjo prie MQB platformos, kaip ir Golf 8."],
+    },
+  },
+  "Honda|CR-V": {
+    gens: [["2. paaudze", 2001, 2006, 2004], ["3. paaudze", 2006, 2012, 2009], ["4. paaudze", 2012, 2018, 2015], ["5. paaudze", 2018, 2023], ["6. paaudze", 2023, null]],
+    facts: {
+      lv: ["Honda nosaukumu skaidro kā „Comfortable Runabout Vehicle”.", "Kopš 5. paaudzes Eiropā CR-V vairs nav ar dīzeli – tā vietā hibrīds."],
+      en: ["Honda explains the name as “Comfortable Runabout Vehicle”.", "Since the 5th generation the European CR-V has no diesel – a hybrid instead."],
+      ru: ["Honda расшифровывает название как «Comfortable Runabout Vehicle».", "С 5-го поколения в Европе CR-V без дизеля — вместо него гибрид."],
+      lt: ["Honda pavadinimą aiškina kaip „Comfortable Runabout Vehicle“.", "Nuo 5-osios kartos Europoje CR-V nebeturi dyzelio – vietoj jo hibridas."],
+    },
+  },
+  "Toyota|Auris": {
+    gens: [["E150", 2006, 2012, 2010], ["E180", 2012, 2018, 2015]],
+    facts: {
+      lv: ["Auris bija Corolla hečbeka nosaukums Eiropā; 2019. gadā atgriezās vārds Corolla.", "Auris Hybrid (2010) bija pirmais Eiropā masveidā ražotais pilnhibrīds (Lielbritānijā)."],
+      en: ["Auris was the European name of the Corolla hatchback; in 2019 the Corolla name returned.", "The Auris Hybrid (2010) was the first full hybrid mass-produced in Europe (in the UK)."],
+      ru: ["Auris — европейское название хэтчбека Corolla; в 2019 году вернулось имя Corolla.", "Auris Hybrid (2010) — первый полный гибрид массового производства в Европе (Великобритания)."],
+      lt: ["Auris buvo Corolla hečbeko pavadinimas Europoje; 2019 m. grįžo Corolla vardas.", "Auris Hybrid (2010) – pirmasis masiškai Europoje gamintas pilnasis hibridas (JK)."],
+    },
+  },
+  "Peugeot|308": {
+    gens: [["T7", 2007, 2013, 2011], ["T9", 2013, 2021, 2017], ["P5", 2021, null]],
+    facts: {
+      lv: ["Otrā paaudze (T9) ieguva titulu „Eiropas gada auto 2014”.", "Trešā paaudze bija pirmais modelis ar jauno 2021. gada Peugeot logotipu."],
+      en: ["The second generation (T9) won European Car of the Year 2014.", "The third generation was the first model with Peugeot's new 2021 logo."],
+      ru: ["Второе поколение (T9) стало «Европейским автомобилем года 2014».", "Третье поколение — первая модель с новым логотипом Peugeot 2021 года."],
+      lt: ["Antroji karta (T9) laimėjo „Europos metų automobilio 2014“ titulą.", "Trečioji karta – pirmasis modelis su naujuoju 2021 m. Peugeot logotipu."],
+    },
+  },
+  "Lexus|RX": {
+    gens: [["XU30", 2003, 2008], ["AL10", 2008, 2015, 2012], ["AL20", 2015, 2022, 2019], ["5. paaudze", 2022, null]],
+    facts: {
+      lv: ["RX 400h (2005) bija pirmais luksusa klases hibrīda apvidus auto.", "Pirmo RX (1998) uzskata par vienu no pirmajiem luksusa krosoveriem."],
+      en: ["The RX 400h (2005) was the first luxury hybrid SUV.", "The first RX (1998) is considered one of the first luxury crossovers."],
+      ru: ["RX 400h (2005) — первый люксовый гибридный кроссовер.", "Первый RX (1998) считается одним из первых люксовых кроссоверов."],
+      lt: ["RX 400h (2005) buvo pirmasis prabangus hibridinis visureigis.", "Pirmasis RX (1998) laikomas vienu pirmųjų prabangių krosoverių."],
+    },
+  },
+  "Porsche|Cayenne": {
+    gens: [["9PA (E1)", 2002, 2010, 2007], ["92A (E2)", 2010, 2017, 2014], ["9Y0 (E3)", 2017, null, 2023]],
+    facts: {
+      lv: ["Pirmā Cayenne dalīja platformu ar VW Touareg.", "Cayenne Coupé versija parādījās 2019. gadā."],
+      en: ["The first Cayenne shared its platform with the VW Touareg.", "The Cayenne Coupé arrived in 2019."],
+      ru: ["Первый Cayenne делил платформу с VW Touareg.", "Версия Cayenne Coupé появилась в 2019 году."],
+      lt: ["Pirmasis Cayenne dalijosi platforma su VW Touareg.", "Cayenne Coupé versija pasirodė 2019 m."],
+    },
+  },
+  "Ford|Transit": {
+    gens: [["Mk6", 2000, 2006], ["Mk7", 2006, 2013], ["Mk8", 2013, null, 2019]],
+    facts: {
+      lv: ["Pirmais Ford Transit tika ražots 1965. gadā.", "Transit ir viens no Eiropā visvairāk pārdotajiem furgoniem."],
+      en: ["The first Ford Transit was built in 1965.", "The Transit is one of Europe's best-selling vans."],
+      ru: ["Первый Ford Transit выпущен в 1965 году.", "Transit — один из самых продаваемых фургонов в Европе."],
+      lt: ["Pirmasis Ford Transit pagamintas 1965 m.", "Transit – vienas perkamiausių furgonų Europoje."],
+    },
+  },
+  "Jeep|Grand Cherokee": {
+    gens: [["WJ", 1999, 2004], ["WK", 2004, 2010], ["WK2", 2010, 2021, 2013], ["WL", 2021, null]],
+    facts: {
+      lv: ["WK2 paaudzei ir kopīga platforma ar Mercedes-Benz M klasi (W166).", "Trackhawk versijai (2017) bija 707 ZS kompresora V8."],
+      en: ["The WK2 shares its platform with the Mercedes-Benz M-Class (W166).", "The Trackhawk version (2017) had a 707 hp supercharged V8."],
+      ru: ["WK2 делит платформу с Mercedes-Benz M-класса (W166).", "У версии Trackhawk (2017) был V8 с компрессором на 707 л. с."],
+      lt: ["WK2 dalijasi platforma su Mercedes-Benz M klase (W166).", "Trackhawk versija (2017) turėjo 707 AG kompresorinį V8."],
+    },
+  },
+  "Mercedes-Benz|S klase": {
+    gens: [["W140", 1991, 1998, 1994], ["W220", 1998, 2005, 2002], ["W221", 2005, 2013, 2009], ["W222", 2013, 2020, 2017], ["W223", 2020, null]],
+    facts: {
+      lv: ["S klase W116 (1978) bija pirmais sērijveida auto ar elektronisko ABS.", "W222 bija pirmais auto, kurā nav nevienas kvēlspuldzes – visas gaismas ir LED."],
+      en: ["The W116 S-Class (1978) was the first production car with electronic ABS.", "The W222 was the first car with no light bulbs at all – every light is LED."],
+      ru: ["S-класс W116 (1978) — первый серийный автомобиль с электронной ABS.", "W222 — первый автомобиль без единой лампы накаливания: все огни светодиодные."],
+      lt: ["S klasė W116 (1978) – pirmasis serijinis automobilis su elektronine ABS.", "W222 – pirmasis automobilis be jokių kaitrinių lempučių: visos šviesos LED."],
+    },
+  },
+  "Hyundai|Tucson": {
+    gens: [["JM", 2004, 2009], ["LM (ix35)", 2009, 2015], ["TL", 2015, 2020, 2018], ["NX4", 2020, null, 2024]],
+    facts: {
+      lv: ["2009.–2015. gadā Eiropā šis modelis saucās ix35.", "Eiropas Tucson ražo Nošovicē, Čehijā."],
+      en: ["In 2009–2015 this model was sold in Europe as the ix35.", "The European Tucson is built in Nošovice, Czech Republic."],
+      ru: ["В 2009–2015 годах в Европе модель называлась ix35.", "Европейский Tucson выпускают в Ношовице (Чехия)."],
+      lt: ["2009–2015 m. Europoje šis modelis vadinosi ix35.", "Europinis Tucson gaminamas Nošovicėje, Čekijoje."],
+    },
+  },
+  "Volvo|XC70": {
+    gens: [["V70 XC", 1997, 2000], ["P2", 2000, 2007, 2004], ["P3", 2007, 2016, 2013]],
+    facts: {
+      lv: ["XC70 ir paaugstināts V70 universālis ar pilnpiedziņu.", "Ražošana beidzās 2016. gadā; pēctecis ir V90 Cross Country."],
+      en: ["The XC70 is a raised, all-wheel-drive version of the V70 estate.", "Production ended in 2016; its successor is the V90 Cross Country."],
+      ru: ["XC70 — приподнятый полноприводный вариант универсала V70.", "Производство завершено в 2016 году; преемник — V90 Cross Country."],
+      lt: ["XC70 – paaukštinta visų ratų pavaros V70 universalo versija.", "Gamyba baigta 2016 m.; įpėdinis – V90 Cross Country."],
+    },
+  },
+  "Volvo|S60": {
+    gens: [["1. paaudze", 2000, 2009, 2004], ["2. paaudze", 2010, 2018, 2013], ["3. paaudze", 2018, 2024]],
+    facts: {
+      lv: ["S60 R (2003) bija ar 300 ZS un pilnpiedziņu.", "Trešā paaudze bija pirmais Volvo, kas ražots ASV (Dienvidkarolīnā)."],
+      en: ["The S60 R (2003) had 300 hp and all-wheel drive.", "The third generation was the first Volvo built in the USA (South Carolina)."],
+      ru: ["S60 R (2003) имел 300 л. с. и полный привод.", "Третье поколение — первый Volvo, выпускавшийся в США (Южная Каролина)."],
+      lt: ["S60 R (2003) turėjo 300 AG ir visų ratų pavarą.", "Trečioji karta – pirmasis Volvo, gamintas JAV (Pietų Karolinoje)."],
+    },
+  },
+  "Nissan|X-Trail": {
+    gens: [["T30", 2001, 2007, 2003], ["T31", 2007, 2013, 2010], ["T32", 2013, 2022, 2017], ["T33", 2022, null]],
+    facts: {
+      lv: ["Trešā paaudze (T32) dalīja platformu ar Qashqai un bija pieejama ar 7 vietām.", "Ceturtajai paaudzei Eiropā ir e-Power hibrīds: benzīna dzinējs tikai ražo strāvu, riteņus griež elektromotors."],
+      en: ["The third generation (T32) shared its platform with the Qashqai and was offered with seven seats.", "The fourth generation offers the e-Power hybrid in Europe: the petrol engine only generates electricity and an electric motor drives the wheels."],
+      ru: ["Третье поколение (T32) делило платформу с Qashqai и предлагалось с 7 местами.", "У четвёртого поколения в Европе есть гибрид e-Power: бензиновый мотор только вырабатывает ток, колёса крутит электромотор."],
+      lt: ["Trečioji karta (T32) dalijosi platforma su Qashqai ir buvo siūloma su 7 vietomis.", "Ketvirtoji karta Europoje turi e-Power hibridą: benzininis variklis tik gamina elektrą, ratus suka elektros variklis."],
+    },
+  },
+  "BMW|X6": {
+    gens: [["E71", 2008, 2014, 2012], ["F16", 2014, 2019], ["G06", 2019, null, 2023]],
+    facts: {
+      lv: ["X6 (2008) aizsāka „apvidus kupejas” klasi; BMW to sauc par SAC (Sports Activity Coupé).", "ActiveHybrid X6 (2009) bija BMW pirmais pilnhibrīds."],
+      en: ["The X6 (2008) started the “SUV coupé” class; BMW calls it an SAC (Sports Activity Coupé).", "The ActiveHybrid X6 (2009) was BMW's first full hybrid."],
+      ru: ["X6 (2008) открыл класс «купе-кроссоверов»; BMW называет его SAC (Sports Activity Coupé).", "ActiveHybrid X6 (2009) — первый полный гибрид BMW."],
+      lt: ["X6 (2008) pradėjo „visureigio kupė“ klasę; BMW jį vadina SAC (Sports Activity Coupé).", "ActiveHybrid X6 (2009) – pirmasis BMW pilnasis hibridas."],
+    },
+  },
+  "Ford|S-Max": {
+    gens: [["1. paaudze", 2006, 2015, 2010], ["2. paaudze", 2015, 2023, 2019]],
+    facts: {
+      lv: ["Pirmā S-Max ieguva titulu „Eiropas gada auto 2007”.", "S-Max ražošana beidzās 2023. gadā."],
+      en: ["The first S-Max won European Car of the Year 2007.", "S-Max production ended in 2023."],
+      ru: ["Первый S-Max стал «Европейским автомобилем года 2007».", "Производство S-Max завершилось в 2023 году."],
+      lt: ["Pirmasis S-Max laimėjo „Europos metų automobilio 2007“ titulą.", "S-Max gamyba baigėsi 2023 m."],
+    },
+  },
+  "Ford|Kuga": {
+    gens: [["1. paaudze", 2008, 2012], ["2. paaudze", 2012, 2019, 2016], ["3. paaudze", 2019, null, 2024]],
+    facts: {
+      lv: ["ASV otrā un trešā paaudze tiek pārdota kā Ford Escape.", "Trešajai paaudzei ir arī plug-in hibrīda versija."],
+      en: ["In the USA the second and third generations are sold as the Ford Escape.", "The third generation is also offered as a plug-in hybrid."],
+      ru: ["В США второе и третье поколения продаются как Ford Escape.", "У третьего поколения есть и подключаемый гибрид."],
+      lt: ["JAV antroji ir trečioji kartos parduodamos kaip Ford Escape.", "Trečioji karta siūloma ir kaip įkraunamas hibridas."],
+    },
+  },
+  "Subaru|Outback": {
+    gens: [["BH", 1998, 2003], ["BP", 2003, 2009, 2006], ["BR", 2009, 2014, 2012], ["BS", 2014, 2019, 2017], ["BT", 2019, null]],
+    facts: {
+      lv: ["Visām paaudzēm ir pastāvīgā pilnpiedziņa un oponētais (boxer) dzinējs.", "Outback sākotnēji (1994) bija paaugstināta Legacy universāļa versija."],
+      en: ["Every generation has permanent all-wheel drive and a horizontally opposed (boxer) engine.", "The Outback started out (1994) as a raised version of the Legacy estate."],
+      ru: ["У всех поколений постоянный полный привод и оппозитный (boxer) двигатель.", "Изначально (1994) Outback был приподнятой версией универсала Legacy."],
+      lt: ["Visos kartos turi nuolatinę visų ratų pavarą ir priešpriešinį (boxer) variklį.", "Iš pradžių (1994) Outback buvo paaukštinta Legacy universalo versija."],
+    },
+  },
+  "Peugeot|5008": {
+    gens: [["1. paaudze", 2009, 2017, 2013], ["2. paaudze", 2017, 2024, 2020], ["3. paaudze", 2024, null]],
+    facts: {
+      lv: ["Pirmā 5008 bija minivens, otrā – 7 vietu apvidus auto.", "Otrā paaudze būtībā ir pagarināts Peugeot 3008."],
+      en: ["The first 5008 was an MPV, the second a seven-seat SUV.", "The second generation is essentially a stretched Peugeot 3008."],
+      ru: ["Первый 5008 был минивэном, второй — 7-местным кроссовером.", "Второе поколение — по сути удлинённый Peugeot 3008."],
+      lt: ["Pirmasis 5008 buvo vienatūris, antrasis – 7 vietų visureigis.", "Antroji karta iš esmės yra pailgintas Peugeot 3008."],
+    },
+  },
+  "Renault|Trafic": {
+    gens: [["X83", 2001, 2014, 2006], ["X82", 2014, null, 2021]],
+    facts: {
+      lv: ["Trafic dvīņi: Opel Vivaro, Nissan Primastar/NV300 un (X82) Fiat Talento.", "Pirmais Renault Trafic parādījās 1980. gadā."],
+      en: ["Trafic twins include the Opel Vivaro, Nissan Primastar/NV300 and (X82) Fiat Talento.", "The first Renault Trafic appeared in 1980."],
+      ru: ["Близнецы Trafic: Opel Vivaro, Nissan Primastar/NV300 и (X82) Fiat Talento.", "Первый Renault Trafic появился в 1980 году."],
+      lt: ["Trafic dvyniai: Opel Vivaro, Nissan Primastar/NV300 ir (X82) Fiat Talento.", "Pirmasis Renault Trafic pasirodė 1980 m."],
+    },
+  },
+  "Mazda|CX-5": {
+    gens: [["KE", 2012, 2017, 2015], ["KF", 2017, 2025, 2021], ["3. paaudze", 2025, null]],
+    facts: {
+      lv: ["CX-5 bija pirmā Mazda ar pilnu SKYACTIV tehnoloģiju un „Kodo” dizainu.", "CX-5 ir Mazda visvairāk pārdotais modelis pasaulē."],
+      en: ["The CX-5 was the first Mazda with full SKYACTIV technology and “Kodo” design.", "The CX-5 is Mazda's best-selling model worldwide."],
+      ru: ["CX-5 — первая Mazda с полной технологией SKYACTIV и дизайном «Kodo».", "CX-5 — самая продаваемая модель Mazda в мире."],
+      lt: ["CX-5 – pirmoji Mazda su visa SKYACTIV technologija ir „Kodo“ dizainu.", "CX-5 – perkamiausias Mazda modelis pasaulyje."],
+    },
+  },
 };
 
 export const modelInfo = (make: string | null | undefined, model: string | null | undefined): ModelInfo | null =>

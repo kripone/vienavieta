@@ -33,7 +33,7 @@ const lower = (s: string) => (/^\p{Lu}{2}/u.test(s) ? s : s.charAt(0).toLowerCas
 
 export function listingSummary(
   l: L,
-  names: { make: string | null; model: string | null },
+  names: { make: string | null; model: string | null; place?: string | null },
   ev: PriceEval | null | undefined,
   vzd: { median: number | null; medianN: number } | null | undefined,
   t: T,
@@ -68,7 +68,11 @@ export function listingSummary(
     const pct = Math.round((1 - ev.ratio) * 100);
     // īpašumiem salīdzinām €/m² ar visu reģionu (price-eval.ts), auto – ar to pašu modeli ±gadi
     out.push(
-      ev.perM2
+      ev.perM2 && ev.scope === "place" && names.place
+        ? Math.abs(pct) < 3
+          ? t("Cena par m² atbilst vietas „{w}” mediānai ({m}, {n}).", { w: names.place, m, n: tp(ev.n, "sludinājums", "sludinājumi") })
+          : t(pct > 0 ? "Cena par m² ir par {p}% zemāka nekā mediāna vietā „{w}” ({m}, {n})." : "Cena par m² ir par {p}% augstāka nekā mediāna vietā „{w}” ({m}, {n}).", { p: Math.abs(pct), w: names.place, m, n: tp(ev.n, "sludinājums", "sludinājumi") })
+      : ev.perM2
         ? Math.abs(pct) < 3
           ? t("Cena par m² atbilst reģiona mediānai ({m}, {n}).", { m, n: tp(ev.n, "sludinājums", "sludinājumi") })
           : t(pct > 0 ? "Cena par m² ir par {p}% zemāka nekā reģiona mediāna ({m}, {n})." : "Cena par m² ir par {p}% augstāka nekā reģiona mediāna ({m}, {n}).", { p: Math.abs(pct), m, n: tp(ev.n, "sludinājums", "sludinājumi") })

@@ -24,7 +24,9 @@ export async function EvalBadge({ e, long }: { e: PriceEval; long?: boolean }) {
         <span className="pv-dot" style={{ left: `${pos}%` }} />
       </div>
       <div className="pv-scale"><span>{t("lētāk")}</span><span>{t("dārgāk")}</span></div>
-      <div className="pv-note">{t("Salīdzināts ar {n} līdzīgiem sludinājumiem.", { n: e.n })}</div>
+      <div className="pv-note">
+        {e.scope === "place" ? t("Salīdzināts ar {n} sludinājumiem tajā pašā vietā (€/m²).", { n: e.n }) : e.scope === "region" ? t("Salīdzināts ar {n} sludinājumiem reģionā (€/m²).", { n: e.n }) : t("Salīdzināts ar {n} līdzīgiem sludinājumiem.", { n: e.n })}
+      </div>
     </div>
   );
 }
