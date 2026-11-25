@@ -1016,3 +1016,4 @@ body:has(.det-bar) .ai-pill { bottom: 90px; }
 .model-info td { padding: 8px 4px; border-bottom: 1px solid var(--surface-2); font-variant-numeric: tabular-nums; }
 .model-info ul { margin: 10px 0 0; padding-left: 18px; line-height: 1.5; }
 .model-info .fine { margin-top: 8px; }
+.model-info h3 { margin: 14px 0 0; font-size: 15px; }

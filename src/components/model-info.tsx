@@ -2,6 +2,7 @@
 import { getT } from "@/i18n/server";
 import { trTitle } from "@/i18n/content";
 import { gensForYear, modelInfo, type Gen } from "@/content/models";
+import { MODEL_CHECKS } from "@/content/model-checks";
 
 export async function ModelInfo({ make, model, year }: { make: string; model: string; year?: number | null }) {
   const info = modelInfo(make, model);
@@ -14,6 +15,14 @@ export async function ModelInfo({ make, model, year }: { make: string; model: st
   };
   const years = (g: Gen) => `${g[1]}–${g[2] ?? t("šobrīd")}`;
   const facts = info.facts[locale] ?? info.facts.lv;
+  const checks = MODEL_CHECKS[`${make}|${model}`]?.[locale] ?? [];
+  const checkBlock = checks.length > 0 && (
+    <>
+      <h3>{t("Uz ko pievērst uzmanību, pērkot lietotu")}</h3>
+      <ul>{checks.map((c) => <li key={c}>{c}</li>)}</ul>
+      <p className="fine">{t("Tās ir biežāk zināmās vājās vietas, nevis konkrētā auto diagnoze – pirms pirkuma pārbaudi auto servisā.")}</p>
+    </>
+  );
 
   if (year) {
     const gens = gensForYear(info, year);
@@ -36,6 +45,7 @@ export async function ModelInfo({ make, model, year }: { make: string; model: st
             : `${t("Paaudze: {g} ({y})", { g: label(g[0]), y: years(g) })}${flNote ? `, ${flNote}` : ""}.`}
         </p>
         <ul>{facts.map((f) => <li key={f}>{f}</li>)}</ul>
+        {checkBlock}
       </section>
     );
   }
@@ -56,6 +66,7 @@ export async function ModelInfo({ make, model, year }: { make: string; model: st
         </table>
       </div>
       <ul>{facts.map((f) => <li key={f}>{f}</li>)}</ul>
+      {checkBlock}
       <p className="fine">{t("Gadi ir aptuveni: ražošanas sākums un facelift dažādos tirgos var atšķirties par gadu.")}</p>
     </section>
   );

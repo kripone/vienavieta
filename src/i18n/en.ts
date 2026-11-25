@@ -1094,4 +1094,6 @@ export const en: Dict = {
   "Cena par m² ir par {p}% augstāka nekā mediāna vietā „{w}” ({m}, {n}).": "The price per m² is {p}% above the median in {w} ({m}, {n}).",
   "Salīdzināts ar {n} sludinājumiem tajā pašā vietā (€/m²).": "Compared with {n} listings in the same area (€/m²).",
   "Salīdzināts ar {n} sludinājumiem reģionā (€/m²).": "Compared with {n} listings in the region (€/m²).",
+  "Uz ko pievērst uzmanību, pērkot lietotu": "What to check when buying used",
+  "Tās ir biežāk zināmās vājās vietas, nevis konkrētā auto diagnoze – pirms pirkuma pārbaudi auto servisā.": "These are commonly known weak points, not a diagnosis of this car – have it inspected at a garage before buying.",
 };
