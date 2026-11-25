@@ -12,6 +12,7 @@ import { inferBody } from "../illustrations";
 import { findMake, matchModel, slug, vehicleTitle, type ImportRow, type MakeRow, type ModelRow, type PlaceRow } from "./ss-rss";
 import { withCrawlLock } from "./crawl-lock";
 import { loadCtx } from "./ss-pages";
+import { detectTrim } from "../trims";
 
 const { listings, priceHistory, crawlState } = schema;
 
@@ -192,6 +193,7 @@ export function mapRow(r: ApRow, ctx: Ctx, createdAt: Date, vc: "car" | "moto" |
     modelId: model?.id ?? null,
     makeText: make ? null : makeName || null,
     modelText: model ? null : modelRaw || null,
+    trim: vc === "car" ? detectTrim(make?.name, r.titleRaw) : null,
     year: r.year,
     mileageKm: r.mileageKm,
     engineL: r.engineL,
@@ -220,7 +222,7 @@ async function saveRows(apRows: ApRow[], ctx: Ctx, res: CrawlResult, mode: "quic
   const byId = new Map(mapped.map((m) => [m.externalId!, m]));
   if (!byId.size) return;
   const existing = await db
-    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl, makeId: listings.makeId, modelId: listings.modelId, placeId: listings.placeId, fuel: listings.fuel, powerKw: listings.powerKw })
+    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl, makeId: listings.makeId, modelId: listings.modelId, placeId: listings.placeId, fuel: listings.fuel, powerKw: listings.powerKw, trim: listings.trim })
     .from(listings)
     .where(and(eq(listings.source, "autoplius.lt"), inArray(listings.externalId, [...byId.keys()])));
   const seen = new Set<string>();
@@ -232,7 +234,8 @@ async function saveRows(apRows: ApRow[], ctx: Ctx, res: CrawlResult, mode: "quic
     const better = (row.makeId && !e.makeId) || (row.modelId && !e.modelId);
     const newPlace = row.placeId && !e.placeId;
     const newSpecs = (!e.fuel && row.fuel) || (!e.powerKw && row.powerKw); // piem., EV degviela/jauda, ko vecais parsētājs laida garām
-    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl || better || newPlace || newSpecs) {
+    const newTrim = row.trim && row.trim !== e.trim;
+    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl || better || newPlace || newSpecs || newTrim) {
       await db
         .update(listings)
         .set({
@@ -244,6 +247,7 @@ async function saveRows(apRows: ApRow[], ctx: Ctx, res: CrawlResult, mode: "quic
           ...(newPlace ? { placeId: row.placeId, lat: row.lat, lon: row.lon, geoPrecision: "place" } : {}),
           ...(better ? { makeId: row.makeId, modelId: row.modelId, makeText: row.makeText, modelText: row.modelText, title: row.title, body: row.body } : {}),
           ...(newSpecs ? { fuel: row.fuel, powerKw: row.powerKw, title: row.title } : {}),
+          ...(newTrim ? { trim: row.trim } : {}),
         })
         .where(eq(listings.id, e.id));
       if (e.price !== row.price) {

@@ -37,6 +37,7 @@ export default async function EditPage(props: { params: Promise<{ id: string }> 
     mileageKm: str(l.mileageKm),
     fuel: str(l.fuel),
     gearbox: str(l.gearbox),
+    trim: str(l.trim),
     body: str(l.body),
     engineL: l.engineL ? String(Number(l.engineL)) : "",
     powerKw: str(l.powerKw),

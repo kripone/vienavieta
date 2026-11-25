@@ -17,6 +17,7 @@ import { landLabel } from "../listing-input";
 import { findMake, matchModel, vehicleTitle } from "./ss-rss";
 import { loadCtx } from "./ss-pages";
 import { linkDuplicate } from "../dedupe";
+import { detectTrim } from "../trims";
 
 const { listings, priceHistory, dealerFeeds, users } = schema;
 
@@ -353,6 +354,7 @@ export async function runFeed(feedId: number): Promise<FeedResult> {
           modelId: model?.id ?? null,
           makeText: make ? null : makeRaw.slice(0, 60),
           modelText: model ? null : modelRaw.slice(0, 60) || null,
+          trim: detectTrim(make?.name, modelRaw),
           year,
           mileageKm: km != null ? Math.round(km) : null,
           fuel,

@@ -246,6 +246,13 @@
       "when": 1795527336122,
       "tag": "0034_legal_madame_masque",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1795644059518,
+      "tag": "0035_messy_madripoor",
+      "breakpoints": true
     }
   ]
 }

@@ -1096,4 +1096,7 @@ export const en: Dict = {
   "Salīdzināts ar {n} sludinājumiem reģionā (€/m²).": "Compared with {n} listings in the region (€/m²).",
   "Uz ko pievērst uzmanību, pērkot lietotu": "What to check when buying used",
   "Tās ir biežāk zināmās vājās vietas, nevis konkrētā auto diagnoze – pirms pirkuma pārbaudi auto servisā.": "These are commonly known weak points, not a diagnosis of this car – have it inspected at a garage before buying.",
+  "Komplektācija": "Trim",
+  "Komplektācija: {t}": "Trim: {t}",
+  "{make} komplektācijas": "{make} trim levels",
 };

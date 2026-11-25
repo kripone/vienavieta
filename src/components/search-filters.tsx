@@ -9,6 +9,7 @@ import {
   PROPERTY_GROUPS, PURPOSES, SERIES, SERIES_GROUPS, SOURCE_LABEL, VEHICLE_CLASS_LABEL, VEHICLE_CLASSES, type PropertyType, type VehicleClass,
 } from "@/lib/constants";
 import type { RegionOption } from "./listing-form";
+import { TRIMS } from "@/lib/trims";
 
 type Make = { id: number; name: string; popular: boolean; models: { id: number; name: string }[] };
 export type FilterValues = Record<string, string>;
@@ -167,7 +168,7 @@ export function SearchFilters({ initial, regions, sources = [] }: { initial: Fil
           <div className="grid2">
             <label className="field">
               {t("Marka")}
-              <select value={v.make ?? ""} onChange={(e) => update({ make: e.target.value, model: "" })}>
+              <select value={v.make ?? ""} onChange={(e) => update({ make: e.target.value, model: "", trim: "" })}>
                 <option value="">{t("Visas markas")}</option>
                 <optgroup label={t("Populārākās")}>{makes.filter((m) => m.popular).map((m) => <option key={"p" + m.id} value={m.id}>{m.name}</option>)}</optgroup>
                 <optgroup label={t("Visas markas")}>{makes.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}</optgroup>
@@ -180,6 +181,7 @@ export function SearchFilters({ initial, regions, sources = [] }: { initial: Fil
                 {make?.models.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
               </select>
             </label>
+            {make && TRIMS[make.name] && sel("trim", "Komplektācija", TRIMS[make.name].map((x) => x.name), "Jebkura")}
             {sel("ymin", "Gads no", YEARS)}
             {sel("ymax", "Gads līdz", YEARS)}
             {sel("kmmax", "Nobraukums līdz", KM.map((k) => [k, `${Number(k).toLocaleString("lv-LV")} km`] as const), "Jebkāds")}

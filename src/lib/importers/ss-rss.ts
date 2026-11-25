@@ -7,6 +7,7 @@ import { EXTERNAL_TTL_DAYS, normalizeSeries, SS_FEEDS, type PropertyType } from 
 import { linkDuplicate } from "../dedupe";
 import { inferBody } from "../illustrations";
 import { landLabel } from "../listing-input";
+import { detectTrim } from "../trims";
 
 const { listings, places, regions, makes, models, priceHistory } = schema;
 
@@ -424,6 +425,7 @@ export function mapItem(
       modelId: model?.id ?? null,
       makeText: make ? null : makeName || null,
       modelText: model ? null : modelRaw || null,
+      trim: feed.vehicleClass === "car" ? detectTrim(make?.name, modelRaw0, item.snippet) : null,
       year: year && year > 1900 && year < 2100 ? year : null,
       mileageKm: mileage(first(f, "Nobraukums")),
       engineL,

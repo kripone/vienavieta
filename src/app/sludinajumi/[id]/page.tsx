@@ -70,6 +70,7 @@ export default async function ListingPage(props: Props) {
           ["Transporta veids", l.vehicleClass ? VEHICLE_CLASS_LABEL[l.vehicleClass as VehicleClass] : null],
           ["Marka", d.make ?? l.makeText],
           ["Modelis", d.model ?? l.modelText],
+          ["Komplektācija", l.trim],
           ["Gads", l.year],
           ["Nobraukums", l.mileageKm != null ? `${formatNumber(l.mileageKm)} km` : null],
           ["Degviela", l.fuel],
@@ -258,7 +259,7 @@ export default async function ListingPage(props: Props) {
             {l.source !== "own" && <p className="fine">{t("Aprīkojums pēc pārdevēja norādītā {src}.", { src: SOURCE_LABEL[l.source] ?? l.source })}</p>}
           </details>
         )}
-        {l.kind === "vehicle" && l.vehicleClass === "car" && d.make && d.model && <ModelInfo make={d.make} model={d.model} year={l.year} />}
+        {l.kind === "vehicle" && l.vehicleClass === "car" && d.make && d.model && <ModelInfo make={d.make} model={d.model} year={l.year} trim={l.trim} />}
         {l.kind === "property" && areaInfo(d.region, d.place, locale) && (
           <section className="model-info">
             <h2>{t("Par apkaimi: {name}", { name: d.place! })}</h2>

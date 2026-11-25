@@ -7,6 +7,7 @@ import {
   AMENITIES, BODY_TYPES, COLORS, CONDITIONS, DEAL_LABEL, DEALS, DRIVES, FUELS, GEARBOXES, HEATING, MATERIALS, MAX_PHOTOS,
   PROPERTY_FIELDS, PROPERTY_GROUPS, PURPOSES, SERIES, VEHICLE_CLASS_LABEL, VEHICLE_CLASSES, type PropertyType, type VehicleClass,
 } from "@/lib/constants";
+import { TRIMS } from "@/lib/trims";
 
 export type RegionOption = { regionId: number; region: string; kind: "city" | "municipality"; country: "LV" | "LT"; places: { id: number; name: string }[] };
 export type PhotoItem = { id: string; thumbUrl: string };
@@ -16,7 +17,7 @@ type Make = { id: number; name: string; popular: boolean; models: { id: number; 
 export type FormValues = Record<string, string> & { kind: "vehicle" | "property" };
 
 const blank: FormValues = {
-  kind: "vehicle", vehicleClass: "car", makeId: "", modelId: "", makeText: "", modelText: "", year: "", mileageKm: "", fuel: "", gearbox: "",
+  kind: "vehicle", vehicleClass: "car", makeId: "", modelId: "", makeText: "", modelText: "", year: "", mileageKm: "", fuel: "", gearbox: "", trim: "",
   body: "", engineL: "", powerKw: "", drive: "", color: "", vin: "",
   propertyType: "Dzīvoklis", deal: "sell", rooms: "", areaM2: "", landM2: "", floor: "", floors: "", series: "", material: "", heating: "",
   condition: "", builtYear: "", purpose: "",
@@ -207,6 +208,7 @@ export function ListingForm(props: {
           {num({ k: "mileageKm", label: "Nobraukums, km" })}
           {sel({ k: "fuel", label: "Degviela", list: FUELS, required: true })}
           {sel({ k: "gearbox", label: "Ātrumkārba", list: GEARBOXES, required: true })}
+          {make && TRIMS[make.name] && sel({ k: "trim", label: "Komplektācija", list: TRIMS[make.name].map((x) => x.name), any: "Nav norādīts" })}
           {sel({ k: "body", label: "Virsbūve / tips", list: BODY_TYPES[vc] ?? [], required: true })}
           {num({ k: "engineL", label: "Motora tilpums, L", step: "0.1" })}
           {num({ k: "powerKw", label: "Jauda, kW" })}

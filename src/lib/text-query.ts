@@ -36,6 +36,15 @@ const RULES: Rule[] = [
   [/\b(elektr|electric|электр)/, { fuel: "Elektro" }, "vehicle"],
   [/\b(hibrid|hybrid|гибрид)/, { fuel: "Hibrīds" }, "vehicle"],
   [/\b(gaze|gazes|lpg|газ)\b/, { fuel: "Benzīns/gāze" }, "vehicle"],
+  // komplektācija (src/lib/trims.ts; filtrs strādā kopā ar marku)
+  [/\bm[\s-]?sport/, { trim: "M Sport" }, "vehicle"],
+  [/\bamg[\s-]?line/, { trim: "AMG Line" }, "vehicle"],
+  [/\bs[\s-]?line\b/, { trim: "S line" }, "vehicle"],
+  [/\br[\s-]?line\b/, { trim: "R-Line" }, "vehicle"],
+  [/\bgt[\s-]?line[\s-]?s\b/, { trim: "GT Line S" }, "vehicle"],
+  [/\bgt[\s-]?line\b/, { trim: "GT Line" }, "vehicle"],
+  [/\bst[\s-]?line\b/, { trim: "ST-Line" }, "vehicle"],
+  [/\br[\s-]?design\b/, { trim: "R-Design" }, "vehicle"],
   // ātrumkārba
   [/\b(automat|автомат)/, { gear: "Automāts" }, "vehicle"],
   [/\b(manual|mehanik|rokas karb|механик|ручн)/, { gear: "Manuāla" }, "vehicle"],
@@ -210,7 +219,7 @@ export function parseTextQuery(text: string, cat: TqCatalog): TqResult {
     if (!p.deal && p.pmax && (p.ptype === "Dzīvoklis" || p.ptype === "Māja" || p.ptype === "Istaba")) p.deal = Number(p.pmax) <= 3000 ? "rent" : "sell";
   }
   // transporta filtri bez jēgas īpašumiem un otrādi
-  if (p.cat !== "vehicle") for (const k of ["fuel", "gear", "body", "drive", "color", "ccmax", "kmmax", "ymin", "ymax", "vc", "make", "model"]) delete p[k];
+  if (p.cat !== "vehicle") for (const k of ["fuel", "gear", "trim", "body", "drive", "color", "ccmax", "kmmax", "ymin", "ymax", "vc", "make", "model"]) delete p[k];
   if (p.cat !== "property") for (const k of ["ptype", "rmin", "rmax", "amin", "amax", "fmin", "fmax", "series"]) delete p[k];
   if (p.cat !== "property" && p.deal) delete p.deal;
   if (p.body && p.vc && p.vc !== "car") delete p.body;

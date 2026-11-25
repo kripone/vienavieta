@@ -38,6 +38,7 @@ export const VehicleInput = z
     mileageKm: opt(int(0, 5_000_000, "Nobraukumam jābūt skaitlim kilometros.")),
     fuel: oneOf(FUELS, "Izvēlies degvielu."),
     gearbox: oneOf(GEARBOXES, "Izvēlies ātrumkārbu."),
+    trim: z.string().trim().max(40).default(""),
     body: z.string().trim().min(1, "Izvēlies virsbūvi vai tipu."),
     engineL: opt(num(0.05, 30, "Tilpumam jābūt litros, piem. 2.0.")),
     powerKw: opt(int(1, 2000, "Jaudai jābūt kilovatos.")),

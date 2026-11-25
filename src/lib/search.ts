@@ -79,6 +79,8 @@ export function parseSearch(raw: Raw) {
     fuel: pick(raw.fuel, FUELS),
     el: one(raw.el) === "1",
     gear: pick(raw.gear, GEARBOXES),
+    /** komplektācija (src/lib/trims.ts), piem. "M Sport" */
+    trim: ((x) => (x && x.length <= 40 ? x : undefined))(one(raw.trim)),
     body: vc ? pick(raw.body, BODY_TYPES[vc as VehicleClass]) : undefined,
     drive: pick(raw.drive, DRIVES),
     kwmin: int(raw.kwmin, 1),
@@ -170,6 +172,7 @@ function conditions(s: SearchParams): SQL[] {
     if (s.el) add(eq(listings.fuel, "Elektro"));
     else if (s.fuel) add(eq(listings.fuel, s.fuel));
     if (s.gear) add(eq(listings.gearbox, s.gear));
+    if (s.trim) add(eq(listings.trim, s.trim));
     if (s.body) add(eq(listings.body, s.body));
     if (s.drive) add(eq(listings.drive, s.drive));
     if (s.kwmin) add(gte(listings.powerKw, s.kwmin));
@@ -413,7 +416,7 @@ export async function describeSearch(s: SearchParams) {
     if (s.ymax) parts.push(`līdz ${s.ymax}. g.`);
   }
   if (s.cat === "vehicle") {
-    for (const x of [s.el ? "Elektro" : s.fuel, s.gear, s.body, s.drive, s.color]) if (x) parts.push(x);
+    for (const x of [s.trim, s.el ? "Elektro" : s.fuel, s.gear, s.body, s.drive, s.color]) if (x) parts.push(x);
     if (s.ccmax != null) parts.push(`dzinējs līdz ${String(s.ccmax).replace(".", ",")} l`);
     if (s.kmmax != null) parts.push(`līdz ${nf.format(s.kmmax)} km`);
   }

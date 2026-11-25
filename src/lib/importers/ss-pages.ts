@@ -99,7 +99,7 @@ async function saveRows(section: Section, pageRows: PageRow[], ctx: Ctx, res: Cr
   const byId = new Map(mapped.map((m) => [m.externalId!, m]));
   if (!byId.size) return;
   const existing = await db
-    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl, address: listings.address, makeId: listings.makeId, modelId: listings.modelId, body: listings.body, placeId: listings.placeId, propertyType: listings.propertyType, deal: listings.deal })
+    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl, address: listings.address, makeId: listings.makeId, modelId: listings.modelId, body: listings.body, placeId: listings.placeId, propertyType: listings.propertyType, deal: listings.deal, trim: listings.trim })
     .from(listings)
     .where(and(eq(listings.source, "ss.com"), inArray(listings.externalId, [...byId.keys()])));
   const seen = new Set<string>();
@@ -118,7 +118,8 @@ async function saveRows(section: Section, pageRows: PageRow[], ctx: Ctx, res: Cr
     const newType = row.kind === "property" && row.propertyType && row.propertyType !== e.propertyType;
     // pārdevējs pārvērtis sludinājumu no pārdošanas uz īri (vai otrādi): tā nav cenas maiņa — vēsturi sākam no jauna
     const newDeal = row.kind === "property" && row.deal && row.deal !== e.deal;
-    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl || newAddress || better || newPlace || newType || movedPlace || newDeal) {
+    const newTrim = row.trim && row.trim !== e.trim;
+    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl || newAddress || better || newPlace || newType || movedPlace || newDeal || newTrim) {
       await db
         .update(listings)
         .set({
@@ -130,6 +131,7 @@ async function saveRows(section: Section, pageRows: PageRow[], ctx: Ctx, res: Cr
           ...(movedPlace ? { placeId: row.placeId, lat: row.lat, lon: row.lon, geoPrecision: "place", title: row.title, address: row.address } : {}),
           ...(better ? { makeId: row.makeId, modelId: row.modelId, makeText: row.makeText, modelText: row.modelText, title: row.title, ...(e.body ? {} : { body: row.body }) } : {}),
           ...(newDeal ? { deal: row.deal, firstPrice: null } : {}),
+          ...(newTrim ? { trim: row.trim } : {}),
         })
         .where(eq(listings.id, e.id));
       if (newDeal) {

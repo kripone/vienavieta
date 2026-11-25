@@ -223,6 +223,8 @@ export const listings = pgTable(
     /** Ja markas vai modeļa nav katalogā */
     makeText: text("make_text"),
     modelText: text("model_text"),
+    /** komplektācija (BMW M Sport, Mercedes AMG Line, Kia GT Line…), src/lib/trims.ts */
+    trim: text("trim"),
     year: smallint("year"),
     mileageKm: integer("mileage_km"),
     fuel: text("fuel"),
@@ -263,6 +265,7 @@ export const listings = pgTable(
     index("listings_price_idx").on(t.price),
     index("listings_place_idx").on(t.placeId),
     index("listings_vehicle_idx").on(t.vehicleClass, t.makeId, t.modelId, t.year),
+    index("listings_trim_idx").on(t.makeId, t.trim).where(sql`${t.trim} is not null`),
     index("listings_property_idx").on(t.propertyType, t.deal),
     index("listings_user_idx").on(t.userId),
     index("listings_group_idx").on(t.groupKey),

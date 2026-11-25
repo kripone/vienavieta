@@ -1105,4 +1105,7 @@ export const lt: Dict = {
   "Salīdzināts ar {n} sludinājumiem reģionā (€/m²).": "Palyginta su {n} skelbimais regione (€/m²).",
   "Uz ko pievērst uzmanību, pērkot lietotu": "Į ką atkreipti dėmesį perkant naudotą",
   "Tās ir biežāk zināmās vājās vietas, nevis konkrētā auto diagnoze – pirms pirkuma pārbaudi auto servisā.": "Tai dažniausiai žinomos silpnosios vietos, o ne šio automobilio diagnozė – prieš pirkdami patikrinkite servise.",
+  "Komplektācija": "Komplektacija",
+  "Komplektācija: {t}": "Komplektacija: {t}",
+  "{make} komplektācijas": "{make} komplektacijos",
 };

@@ -17,6 +17,7 @@ type L = {
   body: string | null;
   makeText: string | null;
   modelText: string | null;
+  trim: string | null;
   propertyType: string | null;
   areaM2: string | null;
   rooms: number | null;
@@ -41,7 +42,7 @@ export function listingSummary(
 ): string[] {
   const out: string[] = [];
   if (l.kind === "vehicle") {
-    const name = [names.make ?? l.makeText, names.model ? trTitle(names.model, t) : l.modelText].filter(Boolean).join(" ");
+    const name = [names.make ?? l.makeText, names.model ? trTitle(names.model, t) : l.modelText, l.trim].filter(Boolean).join(" ");
     if (!name) return out;
     const engine = l.engineL ? `${Number(l.engineL).toFixed(1)} L${l.fuel ? ` ${lower(t(l.fuel))}` : ""}` : l.fuel ? lower(t(l.fuel)) : null;
     const specs = [

@@ -15,6 +15,7 @@ import { landLabel } from "../listing-input";
 import { mapFuel, mapGearbox } from "./autoplius-pages";
 import { findMake, matchModel, slug, vehicleTitle, type ImportRow, type MakeRow, type ModelRow, type PlaceRow } from "./ss-rss";
 import { loadCtx } from "./ss-pages";
+import { detectTrim } from "../trims";
 
 const { listings, priceHistory, crawlState } = schema;
 
@@ -165,6 +166,7 @@ export function mapVehicle(lot: PpLot, vc: VehicleClass, ctx: Ctx, now: Date): I
     modelId: model?.id ?? null,
     makeText: make ? null : makeName || null,
     modelText: model ? null : modelRaw || null,
+    trim: detectTrim(make?.name, lot.title),
     year: year != null ? Math.round(year) : null,
     mileageKm,
     engineL,
