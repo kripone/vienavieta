@@ -231,12 +231,16 @@ async function saveRows(items: ZipItem[], section: ZipSection, ctx: Ctx, res: Cr
           externalThumbUrl: row.externalThumbUrl,
           updatedAt: now,
           ...(e.price !== row.price ? { firstPrice: sql`coalesce(${listings.firstPrice}, ${e.price})` } : {}),
-          ...(newDeal ? { deal: row.deal } : {}),
+          ...(newDeal ? { deal: row.deal, firstPrice: null } : {}),
           ...(newPlace ? { placeId: row.placeId, lat: row.lat, lon: row.lon, geoPrecision: "place" } : {}),
           ...(better ? { makeId: row.makeId, modelId: row.modelId, makeText: row.makeText, modelText: row.modelText, title: row.title, body: row.body } : {}),
         })
         .where(eq(listings.id, e.id));
-      if (e.price !== row.price) {
+      if (newDeal) {
+        // darījums mainīts (pārdod → izīrē): tā nav cenas maiņa — vēsturi sākam no jauna
+        await db.delete(priceHistory).where(eq(priceHistory.listingId, e.id));
+        await db.insert(priceHistory).values({ listingId: e.id, price: row.price });
+      } else if (e.price !== row.price) {
         await db.insert(priceHistory).values({ listingId: e.id, price: row.price });
         res.priceChanged++;
       }
