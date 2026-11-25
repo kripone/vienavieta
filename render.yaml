@@ -1,5 +1,5 @@
 # Render Blueprint: portāls + PostgreSQL datubāze vienā klikšķī.
-# Maksas plāni (kopā ap 13 $/mēn.): portāls starter (neaizmieg), datubāze basic-256mb (netiek dzēsta).
+# Maksas plāni: portāls standard (1 CPU, 2 GB, 25 $/mēn.), datubāze basic-1gb.
 # Testam var likt "free", bet bezmaksas datubāzi Render izdzēš pēc 30 dienām.
 # Render → New → Blueprint → izvēlies repozitoriju kripone/vienavieta.
 services:
@@ -7,7 +7,7 @@ services:
     name: vienavieta
     runtime: node
     region: frankfurt
-    plan: starter # 7 $/mēn., neaizmieg
+    plan: standard # 25 $/mēn.: 1 CPU, 2 GB (512 MB nepietika — JS atmiņas avārijas, 2026-11-25)
     # npm ci (precīzi no package-lock.json); chromium vajadzīgs autoplius.lt/city24.lv ievākšanai.
     # BEZ --with-deps: Render build nav root tiesību (su neizdodas → exit 1); sistēmas bibliotēkas Render vidē jau ir.
     buildCommand: npm ci && npx playwright install chromium && npm run build
