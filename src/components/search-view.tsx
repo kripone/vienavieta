@@ -12,6 +12,8 @@ import { HomeCategories } from "./home-categories";
 import { AiCard } from "./ai-card";
 import { TodayStats } from "./today-stats";
 import { MarketOverview } from "./market-overview";
+import { ModelInfo } from "./model-info";
+import { areaInfo } from "@/content/areas";
 import { VIEW_COOKIE, type ListView } from "@/lib/constants";
 import { cookies } from "next/headers";
 import { SmartSearch } from "./smart-search";
@@ -220,6 +222,13 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
               )}{" "}
               {t("Salīdzini cenas, skaties cenu vēsturi un saņem paziņojumus par jauniem sludinājumiem.")}
             </p>
+            {landing.model && s.page === 1 && <ModelInfo make={landing.model.make} model={landing.model.model} />}
+            {landing.area && s.page === 1 && areaInfo(landing.area.city, landing.area.name, locale) && (
+              <section className="model-info">
+                <h2>{t("Par apkaimi: {name}", { name: landing.area.name })}</h2>
+                <p>{areaInfo(landing.area.city, landing.area.name, locale)}</p>
+              </section>
+            )}
             {overview && <MarketOverview mo={overview} title={landing.h1} />}
             {landing.dealSwitch && <p><a href={lp(landing.dealSwitch.href)}>{landing.dealSwitch.label} →</a></p>}
             {landing.facet === "ptype" && (

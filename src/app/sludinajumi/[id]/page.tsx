@@ -1,4 +1,7 @@
 import { seriesAnchor } from "@/content/series";
+import { listingSummary } from "@/lib/listing-summary";
+import { ModelInfo } from "@/components/model-info";
+import { areaInfo } from "@/content/areas";
 import { trTitle } from "@/i18n/content";
 import { getT } from "@/i18n/server";
 import type { Metadata } from "next";
@@ -51,7 +54,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 }
 
 export default async function ListingPage(props: Props) {
-  const { t, lp, locale } = await getT();
+  const { t, tp, lp, locale } = await getT();
   const { id } = await props.params;
   const { saglabats } = await props.searchParams;
   const [d, user] = await Promise.all([getListing(id), getCurrentUser()]);
@@ -102,6 +105,7 @@ export default async function ListingPage(props: Props) {
   const isFav = user && !isOwner ? (await favoriteIds(user.id, [l.id])).has(l.id) : false;
   const similar = l.status === "active" ? await similarListings(l).catch(() => []) : [];
   const simEvals = similar.length ? await priceEvals(similar.map((x) => x.id)).catch(() => new Map()) : new Map();
+  const summary = listingSummary(l, { make: d.make ?? null, model: d.model ?? null }, evaluation, vzd, t, tp);
   const seller = (d.sellerType === "dealer" || d.sellerType === "agency") && d.companyName ? d.companyName : d.sellerName || t("Privātpersona");
   const unit = priceUnit(l.deal, t);
   const ext = l.source !== "own" && l.externalUrl ? l.externalUrl : null;
@@ -217,6 +221,12 @@ export default async function ListingPage(props: Props) {
           )}
         </div>
       <div className="det-body">
+        {summary.length > 0 && (
+          <section>
+            <h2>{t("Īsumā")}</h2>
+            <p className="desc">{summary.join(" ")}</p>
+          </section>
+        )}
         <section>
           <h2>{t("Parametri")}</h2>
           <dl className="params">
@@ -247,6 +257,13 @@ export default async function ListingPage(props: Props) {
             </div>
             {l.source !== "own" && <p className="fine">{t("Aprīkojums pēc pārdevēja norādītā {src}.", { src: SOURCE_LABEL[l.source] ?? l.source })}</p>}
           </details>
+        )}
+        {l.kind === "vehicle" && l.vehicleClass === "car" && d.make && d.model && <ModelInfo make={d.make} model={d.model} year={l.year} />}
+        {l.kind === "property" && areaInfo(d.region, d.place, locale) && (
+          <section className="model-info">
+            <h2>{t("Par apkaimi: {name}", { name: d.place! })}</h2>
+            <p>{areaInfo(d.region, d.place, locale)}</p>
+          </section>
         )}
         {l.description && (
           <section>

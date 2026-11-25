@@ -1005,3 +1005,14 @@ body:has(.det-bar) .ai-pill { bottom: 90px; }
 .series-page .series-item small { color: var(--muted); font-weight: 400; }
 .series-page .series-item p { margin: 0 0 6px; }
 .series-hint { display: block; margin-top: 4px; font-size: 13px; color: var(--muted); line-height: 1.4; font-weight: 400; }
+
+/* Modeļa paaudzes un fakti (src/components/model-info.tsx) */
+.model-info { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin: 16px 0; }
+.model-info h2 { margin: 0 0 8px; font-size: 18px; }
+.model-info p { margin: 0; line-height: 1.5; }
+.model-info .table-scroll { overflow-x: auto; }
+.model-info table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.model-info th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 6px 4px; border-bottom: 1px solid var(--line); }
+.model-info td { padding: 8px 4px; border-bottom: 1px solid var(--surface-2); font-variant-numeric: tabular-nums; }
+.model-info ul { margin: 10px 0 0; padding-left: 18px; line-height: 1.5; }
+.model-info .fine { margin-top: 8px; }

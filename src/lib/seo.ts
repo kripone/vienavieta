@@ -123,6 +123,10 @@ export type Landing = {
   crumbs: Crumb[];
   /** kādas iekšējās saites rādīt: markas, modeļi vai reģioni */
   facet: "make" | "model" | "region" | "ptype" | null;
+  /** auto modeļa lapa: marka un modelis kataloga nosaukumos (paaudzes un fakti, src/content/models.ts) */
+  model?: { make: string; model: string };
+  /** valstspilsētas apkaimes lapa (apraksts, src/content/areas.ts) */
+  area?: { city: string; name: string };
   /** pāreja uz īri/pirkšanu */
   dealSwitch?: { href: string; label: string };
   /** papildu saišu grupas (cenas, degviela, virsbūve, pilsētas, istabas, apkaimes): no kuras lapas tās veidot */
@@ -207,7 +211,7 @@ export async function resolveVehicle(vc: VehicleClass, parts: string[], { t, loc
   const more = { kind: "vehicle" as const, vc, base, level, raw: { ...raw }, current: facet?.slug };
   if (!facet) {
     if (!make) return { raw, path: base, h1: baseH1, title: baseH1, about: t(vc === "car" ? "Lietoti un jauni auto no ss.com, autoplius.lt un citiem portāliem vienā meklētājā." : "Motocikli no visiem portāliem vienā meklētājā."), crumbs, facet: "make", more };
-    return { raw, path: base, h1: baseH1, title: vc === "car" ? t("Lietoti {name} pārdošanā Latvijā", { name: name! }) : t("{name} motocikli pārdošanā Latvijā", { name: name! }), about: about(name!), crumbs, facet: model ? null : "model", more };
+    return { raw, path: base, h1: baseH1, title: vc === "car" ? t("Lietoti {name} pārdošanā Latvijā", { name: name! }) : t("{name} motocikli pārdošanā Latvijā", { name: name! }), about: about(name!), crumbs, facet: model ? null : "model", more, ...(make && model ? { model: { make: make.name, model: model.name } } : {}) };
   }
 
   let h1: string;
@@ -303,5 +307,5 @@ export async function resolveProperty(parts: string[], { t, locale }: Tr): Promi
   const h1 = loc ? `${what} ${loc}` : `${what}: ${area.name}, ${regionName(region.name, locale)}`;
   const path = `${regionPath}/${area.slug}`;
   crumbs.push({ name: area.name, href: path });
-  return { raw: { ...raw, loc: `p:${area.id}` }, path, h1, title: locale === "lv" ? `${h1}, ${region.name}` : h1, about: about(h1), crumbs, facet: null, dealSwitch: switchTo(`/${area.slug}`), more };
+  return { raw: { ...raw, loc: `p:${area.id}` }, path, h1, title: locale === "lv" ? `${h1}, ${region.name}` : h1, about: about(h1), crumbs, facet: null, dealSwitch: switchTo(`/${area.slug}`), more, area: { city: region.name, name: area.name } };
 }
