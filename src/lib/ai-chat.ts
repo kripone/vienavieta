@@ -6,6 +6,9 @@ import { parseSearch, searchListings, toQuery } from "./search";
 import { recentDrops } from "./history";
 import { marketTotals, propertyByRegion, segmentTrend, topMakes } from "./market";
 import { dealsByAddress } from "./vzd";
+import { TRIMS } from "./trims";
+
+const TRIM_NAMES = [...new Set(Object.values(TRIMS).flatMap((l) => l.map((x) => x.name)))];
 
 const { places, regions, makes, models } = schema;
 
@@ -62,6 +65,7 @@ search lauki (visi neobligāti, liec tikai tos, ko lietotājs minēja):
 - kmmax: maksimālais nobraukums km
 - fuel: "Benzīns" | "Dīzelis" | "Hibrīds" | "Elektro" | "Benzīns/gāze"
 - gear: "Manuāla" | "Automāts"
+- trim: komplektācija (tikai kopā ar marku), tieši viens no: ${TRIM_NAMES.join(", ")} ("m sport", "m paka" → "M Sport"; "amg pakete" → "AMG Line")
 - body: virsbūves tips: "Sedans" | "Universāls" | "Hečbeks" | "Apvidus" | "Minivens" | "Kupeja" | "Kabriolets" | "Pikaps" | "Mikroautobuss" (vārdus "kombi/universālis/karavāns" tulko kā "Universāls", "suv/džips/krosovers" kā "Apvidus")
 - ptype: "Dzīvoklis" | "Istaba" | "Māja" | "Vasarnīca" | "Lauku īpašums" | "Zeme" | "Mežs" | "Birojs" | "Tirdzniecības telpas" | "Noliktava" | "Ražošanas telpas" | "Garāža" | "Stāvvieta"
 - deal: "sell" (pārdod) | "rent" (izīrē) — tikai īpašumiem
@@ -106,6 +110,7 @@ type SearchFilters = {
   kmmax?: number;
   fuel?: string;
   gear?: string;
+  trim?: string;
   body?: string;
   ptype?: string;
   deal?: string;
@@ -367,6 +372,7 @@ async function filtersToRaw(f: SearchFilters): Promise<Record<string, string>> {
   for (const [k, v] of ranges) if (v != null) raw[k] = String(v);
   if (f.fuel && ["Benzīns", "Dīzelis", "Hibrīds", "Elektro", "Benzīns/gāze"].includes(f.fuel)) raw.fuel = f.fuel;
   if (f.gear && ["Manuāla", "Automāts"].includes(f.gear)) raw.gear = f.gear;
+  if (f.trim && TRIM_NAMES.includes(f.trim)) raw.trim = f.trim;
   if (f.body && ["Sedans", "Universāls", "Hečbeks", "Apvidus", "Minivens", "Kupeja", "Kabriolets", "Pikaps", "Mikroautobuss"].includes(f.body)) raw.body = f.body;
   if (f.ptype) raw.ptype = String(f.ptype);
   if (f.deal === "sell" || f.deal === "rent") raw.deal = f.deal;
