@@ -66,12 +66,17 @@ export function listingSummary(
   if (ev && ev.median > 0) {
     const m = ev.perM2 ? `${formatNumber(ev.median)} €/m²` : formatPrice(ev.median);
     const pct = Math.round((1 - ev.ratio) * 100);
+    // īpašumiem salīdzinām €/m² ar visu reģionu (price-eval.ts), auto – ar to pašu modeli ±gadi
     out.push(
-      Math.abs(pct) < 3
-        ? t("Cena atbilst tirgum: līdzīgu sludinājumu mediāna ir {m} (salīdzināti {n}).", { m, n: ev.n })
-        : pct > 0
-          ? t("Cena ir par {p}% zemāka nekā līdzīgiem sludinājumiem (mediāna {m}, salīdzināti {n}).", { p: pct, m, n: ev.n })
-          : t("Cena ir par {p}% augstāka nekā līdzīgiem sludinājumiem (mediāna {m}, salīdzināti {n}).", { p: -pct, m, n: ev.n }),
+      ev.perM2
+        ? Math.abs(pct) < 3
+          ? t("Cena par m² atbilst reģiona mediānai ({m}, {n}).", { m, n: tp(ev.n, "sludinājums", "sludinājumi") })
+          : t(pct > 0 ? "Cena par m² ir par {p}% zemāka nekā reģiona mediāna ({m}, {n})." : "Cena par m² ir par {p}% augstāka nekā reģiona mediāna ({m}, {n}).", { p: Math.abs(pct), m, n: tp(ev.n, "sludinājums", "sludinājumi") })
+        : Math.abs(pct) < 3
+          ? t("Cena atbilst tirgum: līdzīgu sludinājumu mediāna ir {m} (salīdzināti {n}).", { m, n: ev.n })
+          : pct > 0
+            ? t("Cena ir par {p}% zemāka nekā līdzīgiem sludinājumiem (mediāna {m}, salīdzināti {n}).", { p: pct, m, n: ev.n })
+            : t("Cena ir par {p}% augstāka nekā līdzīgiem sludinājumiem (mediāna {m}, salīdzināti {n}).", { p: -pct, m, n: ev.n }),
     );
   }
   if (vzd?.median && vzd.medianN > 0) {

@@ -1095,4 +1095,7 @@ export const lt: Dict = {
   "Gadi ir aptuveni: ražošanas sākums un facelift dažādos tirgos var atšķirties par gadu.": "Metai apytiksliai: gamybos pradžia ir atnaujinimas skirtingose rinkose gali skirtis metais.",
   "istaba": {"one": "kambarys", "few": "kambariai", "many": "kambario", "other": "kambarių"},
   "Par apkaimi: {name}": "Apie rajoną: {name}",
+  "Cena par m² atbilst reģiona mediānai ({m}, {n}).": "Kaina už m² atitinka regiono medianą ({m}, {n}).",
+  "Cena par m² ir par {p}% zemāka nekā reģiona mediāna ({m}, {n}).": "Kaina už m² {p}% mažesnė už regiono medianą ({m}, {n}).",
+  "Cena par m² ir par {p}% augstāka nekā reģiona mediāna ({m}, {n}).": "Kaina už m² {p}% didesnė už regiono medianą ({m}, {n}).",
 };

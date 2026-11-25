@@ -1094,4 +1094,7 @@ export const ru: Dict = {
   "Gadi ir aptuveni: ražošanas sākums un facelift dažādos tirgos var atšķirties par gadu.": "Годы приблизительные: начало выпуска и рестайлинг на разных рынках могут отличаться на год.",
   "istaba": {"one": "комната", "few": "комнаты", "many": "комнат", "other": "комнаты"},
   "Par apkaimi: {name}": "О районе: {name}",
+  "Cena par m² atbilst reģiona mediānai ({m}, {n}).": "Цена за м² соответствует медиане региона ({m}, {n}).",
+  "Cena par m² ir par {p}% zemāka nekā reģiona mediāna ({m}, {n}).": "Цена за м² на {p}% ниже медианы региона ({m}, {n}).",
+  "Cena par m² ir par {p}% augstāka nekā reģiona mediāna ({m}, {n}).": "Цена за м² на {p}% выше медианы региона ({m}, {n}).",
 };

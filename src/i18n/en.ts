@@ -1086,4 +1086,7 @@ export const en: Dict = {
   "Gadi ir aptuveni: ražošanas sākums un facelift dažādos tirgos var atšķirties par gadu.": "Years are approximate: production start and facelift can differ by a year between markets.",
   "istaba": {"one": "room", "other": "rooms"},
   "Par apkaimi: {name}": "About the area: {name}",
+  "Cena par m² atbilst reģiona mediānai ({m}, {n}).": "The price per m² matches the regional median ({m}, {n}).",
+  "Cena par m² ir par {p}% zemāka nekā reģiona mediāna ({m}, {n}).": "The price per m² is {p}% below the regional median ({m}, {n}).",
+  "Cena par m² ir par {p}% augstāka nekā reģiona mediāna ({m}, {n}).": "The price per m² is {p}% above the regional median ({m}, {n}).",
 };

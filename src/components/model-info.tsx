@@ -33,8 +33,7 @@ export async function ModelInfo({ make, model, year }: { make: string; model: st
         <p>
           {gens.length > 1
             ? t("Šī gada auto var būt {a} vai {b} paaudze – pārbaudi pēc izskata vai VIN.", { a: `${label(gens[0][0])} (${years(gens[0])})`, b: `${label(g[0])} (${years(g)})` })
-            : t("Paaudze: {g} ({y})", { g: label(g[0]), y: years(g) })}
-          {flNote ? `, ${flNote}.` : gens.length > 1 ? "" : "."}
+            : `${t("Paaudze: {g} ({y})", { g: label(g[0]), y: years(g) })}${flNote ? `, ${flNote}` : ""}.`}
         </p>
         <ul>{facts.map((f) => <li key={f}>{f}</li>)}</ul>
       </section>
