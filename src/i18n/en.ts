@@ -49,7 +49,6 @@ export const en: Dict = {
   "Kas šonedēļ kļuvis lētāks?": "What got cheaper this week?",
   "Raksti savu jautājumu…": "Type your question…",
   "Jautā AI asistentam": "Ask the AI assistant",
-  "Jautā brīvi, tāpat kā cilvēkam. Asistents pārzina visus sludinājumus, cenas un reālos darījumus.": "Ask freely, just like a person. The assistant knows all listings, prices and real transactions.",
   "Piem.: labs ģimenes auto līdz 8000 €": "E.g. a good family car up to €8000",
   "Tavs jautājums": "Your question",
   "Šodien tirgū": "Market today",
@@ -1099,4 +1098,5 @@ export const en: Dict = {
   "Komplektācija": "Trim",
   "Komplektācija: {t}": "Trim: {t}",
   "{make} komplektācijas": "{make} trim levels",
+  "Jautā brīvi, tāpat kā cilvēkam: piemēram, kāds dīzeļa universālis pieejams līdz 8000 € vai cik maksā 2 istabu dzīvoklis Purvciemā. Asistents pārzina visus sludinājumus, cenu kritumus un reālos darījumus.": "Ask freely, just like a person: for example, which diesel estate is available under €8,000 or what a 2-room flat in Purvciems costs. The assistant knows all listings, price drops and real transactions.",
 };

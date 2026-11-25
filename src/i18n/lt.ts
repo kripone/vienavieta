@@ -49,7 +49,6 @@ export const lt: Dict = {
   "Kas šonedēļ kļuvis lētāks?": "Kas šią savaitę atpigo?",
   "Raksti savu jautājumu…": "Parašykite savo klausimą…",
   "Jautā AI asistentam": "Klauskite AI asistento",
-  "Jautā brīvi, tāpat kā cilvēkam. Asistents pārzina visus sludinājumus, cenas un reālos darījumus.": "Klauskite laisvai, kaip žmogaus. Asistentas žino visus skelbimus, kainas ir tikrus sandorius.",
   "Piem.: labs ģimenes auto līdz 8000 €": "Pvz.: šeimos automobilis iki 8000 €",
   "Tavs jautājums": "Jūsų klausimas",
   "Šodien tirgū": "Rinka šiandien",
@@ -1108,4 +1107,5 @@ export const lt: Dict = {
   "Komplektācija": "Komplektacija",
   "Komplektācija: {t}": "Komplektacija: {t}",
   "{make} komplektācijas": "{make} komplektacijos",
+  "Jautā brīvi, tāpat kā cilvēkam: piemēram, kāds dīzeļa universālis pieejams līdz 8000 € vai cik maksā 2 istabu dzīvoklis Purvciemā. Asistents pārzina visus sludinājumus, cenu kritumus un reālos darījumus.": "Klauskite laisvai, kaip žmogaus: pavyzdžiui, koks dyzelinis universalas yra iki 8000 € ar kiek kainuoja 2 kambarių butas Purvciemyje. Asistentas žino visus skelbimus, kainų sumažinimus ir realius sandorius.",
 };

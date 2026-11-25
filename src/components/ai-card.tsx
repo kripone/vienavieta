@@ -20,7 +20,7 @@ export function AiCard() {
         </span>
         {t("Jautā AI asistentam")}
       </p>
-      <p>{t("Jautā brīvi, tāpat kā cilvēkam. Asistents pārzina visus sludinājumus, cenas un reālos darījumus.")}</p>
+      <p>{t("Jautā brīvi, tāpat kā cilvēkam: piemēram, kāds dīzeļa universālis pieejams līdz 8000 € vai cik maksā 2 istabu dzīvoklis Purvciemā. Asistents pārzina visus sludinājumus, cenu kritumus un reālos darījumus.")}</p>
       <form className="ai-card-in" onSubmit={(e) => { e.preventDefault(); ask(q); }}>
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("Piem.: labs ģimenes auto līdz 8000 €")} aria-label={t("Tavs jautājums")} maxLength={500} />
         <button type="button" className="ai-card-mic" onClick={() => window.dispatchEvent(new Event("vv-ai-mic"))} aria-label={t("Runāt")} title={t("Runāt")}>
