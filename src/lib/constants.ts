@@ -380,6 +380,8 @@ export const ZIP_SECTIONS: readonly {
   { key: "zip:houses-sale", catId: 65, kind: "property", propertyType: "Māja", deal: "sell" },
   { key: "zip:land-sale", catId: 68, kind: "property", propertyType: "Zeme", deal: "sell" },
 ];
+/** zip.lv sludinājuma `type_id` → darījums (kategorijās sajaukti; 2 un 6 ir pirkšanas/īres pieprasījumi — neņemam). */
+export const ZIP_DEAL_TYPES: Readonly<Record<number, "sell" | "rent">> = { 1: "sell", 5: "rent" };
 /** Pauze starp API pieprasījumiem, ātrās kārtas lapu skaits, pilnās kārtas maksimums un biežums. */
 export const ZIP_CRAWL = { delayMs: 1000, quickPages: 1, maxPages: 40, quickEveryMin: 30, fullEveryHours: 24 } as const;
 

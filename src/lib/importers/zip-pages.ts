@@ -6,7 +6,7 @@
 // nolasām no sludinājuma lapas tikai jaunajiem ierakstiem. Virsrakstus veidojam paši no faktiem.
 import { and, eq, inArray, lt, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { BODY_TYPES, COLORS, EXTERNAL_TTL_DAYS, FUELS, ZIP_CRAWL, ZIP_SECTIONS, type PropertyType, type VehicleClass } from "../constants";
+import { BODY_TYPES, COLORS, EXTERNAL_TTL_DAYS, FUELS, ZIP_CRAWL, ZIP_DEAL_TYPES, ZIP_SECTIONS, type PropertyType, type VehicleClass } from "../constants";
 import { linkDuplicate } from "../dedupe";
 import { inferBody } from "../illustrations";
 import { landLabel } from "../listing-input";
@@ -29,6 +29,8 @@ export type ZipItem = {
   id: number;
   price: number;
   price_type: string;
+  /** 1 pārdod, 5 izīrē, 2 pērk, 6 īrē */
+  type_id?: number;
   f_title: string;
   subtitle_data: string[];
   descr: string;
@@ -135,6 +137,9 @@ export function mapVehicle(item: ZipItem, vc: VehicleClass, ctx: Ctx, createdAt:
 /** "Stabu 57, Centrs" + ["Rīga", "2 istabu", "1/5 stāvs", "49m²"] → īpašuma sludinājums. */
 export function mapProperty(item: ZipItem, section: ZipSection, ctx: Ctx, createdAt: Date): ImportRow | null {
   const ptype = section.propertyType!;
+  // kategorijā mēdz būt gan pārdodamie, gan izīrējamie: darījumu ņemam no paša sludinājuma
+  const deal = item.type_id != null ? ZIP_DEAL_TYPES[item.type_id] : section.deal;
+  if (!deal) return null;
   const sub = item.subtitle_data;
   // vieta: f_title pēdējā daļa (apkaime/pilsēta/pagasts), rezervē parametru rindas pirmā šūna
   const fParts = item.f_title.split(",").map((p) => p.trim()).filter(Boolean);
@@ -174,7 +179,7 @@ export function mapProperty(item: ZipItem, section: ZipSection, ctx: Ctx, create
     address: street && place ? `${street}, ${slug(place.name) === "centrs" ? place.region : `${place.name}, ${place.region}`}` : null,
     geoPrecision: place ? "place" : null,
     propertyType: ptype,
-    deal: section.deal,
+    deal,
     rooms: ptype === "Zeme" ? null : rooms,
     areaM2: areaM2 != null ? String(areaM2) : null,
     landM2,
@@ -205,7 +210,7 @@ async function saveRows(items: ZipItem[], section: ZipSection, ctx: Ctx, res: Cr
   const byId = new Map(mapped.map((m) => [m.externalId!, m]));
   if (!byId.size) return;
   const existing = await db
-    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl, makeId: listings.makeId, modelId: listings.modelId, placeId: listings.placeId })
+    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, deal: listings.deal, status: listings.status, thumb: listings.externalThumbUrl, makeId: listings.makeId, modelId: listings.modelId, placeId: listings.placeId })
     .from(listings)
     .where(and(eq(listings.source, "zip.lv"), inArray(listings.externalId, [...byId.keys()])));
   const seen = new Set<string>();
@@ -216,7 +221,8 @@ async function saveRows(items: ZipItem[], section: ZipSection, ctx: Ctx, res: Cr
     if (e.status === "hidden") continue; // paslēpis moderators: neaiztiekam
     const better = (row.makeId && !e.makeId) || (row.modelId && !e.modelId);
     const newPlace = row.placeId && !e.placeId;
-    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl || better || newPlace) {
+    const newDeal = row.deal && e.deal !== row.deal;
+    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl || better || newPlace || newDeal) {
       await db
         .update(listings)
         .set({
@@ -225,6 +231,7 @@ async function saveRows(items: ZipItem[], section: ZipSection, ctx: Ctx, res: Cr
           externalThumbUrl: row.externalThumbUrl,
           updatedAt: now,
           ...(e.price !== row.price ? { firstPrice: sql`coalesce(${listings.firstPrice}, ${e.price})` } : {}),
+          ...(newDeal ? { deal: row.deal } : {}),
           ...(newPlace ? { placeId: row.placeId, lat: row.lat, lon: row.lon, geoPrecision: "place" } : {}),
           ...(better ? { makeId: row.makeId, modelId: row.modelId, makeText: row.makeText, modelText: row.modelText, title: row.title, body: row.body } : {}),
         })
@@ -309,7 +316,6 @@ export async function crawlZipSection(section: ZipSection, mode: "quick" | "full
           eq(listings.source, "zip.lv"),
           eq(listings.kind, section.kind),
           section.kind === "vehicle" ? eq(listings.vehicleClass, section.vehicleClass ?? "car") : eq(listings.propertyType, section.propertyType ?? "Dzīvoklis"),
-          section.deal ? eq(listings.deal, section.deal) : undefined,
           eq(listings.status, "active"),
           lt(listings.updatedAt, cutoff),
         ),
