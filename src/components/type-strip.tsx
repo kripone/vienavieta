@@ -18,7 +18,8 @@ export async function TypeStrip({ mode, flat, counts }: { mode: "car" | "home"; 
   return (
     <section className="strip" aria-label={mode === "car" ? tr("Virsbūves tips") : tr("Īpašuma veids")}>
       <div className="strip-head">
-        <h2>{mode === "car" ? tr("Virsbūves tips") : tr("Īpašuma veids")}</h2>
+        {/* nav virsraksts: šis bloks ir virs lapas h1, tāpēc tikai teksts (virsrakstu hierarhija) */}
+        <p className="strip-h">{mode === "car" ? tr("Virsbūves tips") : tr("Īpašuma veids")}</p>
       </div>
       <div className="strip-row">
         {items.map((t) => (

@@ -38,9 +38,12 @@ type CardProps = {
   vzd?: { median: number; n: number } | null;
   /** Pirmā kartīte sarakstā: bildi ielādē uzreiz (LCP), nevis slinki. */
   priority?: boolean;
+  /** virsraksta līmenis: h3, ja kartītes ir zem sadaļas h2 (piem. „Līdzīgi sludinājumi”) */
+  heading?: "h2" | "h3";
 };
 
-export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, also, evaluation, compare, vzd, priority }: CardProps) {
+export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, also, evaluation, compare, vzd, priority, heading = "h2" }: CardProps) {
+  const H = heading;
   const { t, lp } = await getT();
   const meta =
     l.kind === "vehicle"
@@ -70,9 +73,9 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
       <div className="body">
         <span className={`kind ${l.kind}`}>{l.kind === "vehicle" ? t("Transports") : t("Īpašums")}</span>
         {showStatus && l.status !== "active" && <span className="status">{t(STATUS[l.status])}</span>}
-        <h2>
+        <H>
           <a href={lp(`/sludinajumi/${l.id}`)}>{trTitle(l.title, t)}</a>
-        </h2>
+        </H>
         <div className="meta">
           {meta.filter(Boolean).map((m, i) => (
             <span key={i}>{m}</span>

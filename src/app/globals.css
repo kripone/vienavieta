@@ -54,7 +54,7 @@ h1 { font-family: var(--f-display); font-weight: 800; font-size: 28px; letter-sp
 
 .list { display: flex; flex-direction: column; gap: 10px; }
 .card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, .04), 0 0 26px var(--orb); }
-.card h2 { font-size: 16px; margin: 0 0 3px; overflow-wrap: anywhere; }
+.card :is(h2, h3) { font-size: 16px; margin: 0 0 3px; overflow-wrap: anywhere; }
 .meta { font-size: 13px; color: var(--muted); display: flex; gap: 4px 12px; flex-wrap: wrap; }
 .price { font-family: var(--f-display); font-weight: 800; font-size: 20px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .price small { font-family: var(--f-body); font-weight: 500; font-size: 12px; color: var(--muted); }
@@ -103,8 +103,8 @@ main .fine { margin-top: 14px; }
 .lcard .thumb img { width: 100%; height: 100%; object-fit: cover; }
 .noimg { font-size: 30px; opacity: 0.5; }
 .pc { position: absolute; right: 4px; bottom: 4px; background: rgba(0,0,0,.62); color: #fff; font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 4px; }
-.lcard h2 a { color: var(--fg); text-decoration: none; }
-.lcard h2 a:hover { text-decoration: underline; }
+.lcard :is(h2, h3) a { color: var(--fg); text-decoration: none; }
+.lcard :is(h2, h3) a:hover { text-decoration: underline; }
 .lcard .body { min-width: 0; }
 .status { display: inline-block; margin-left: 8px; font-size: 11px; font-weight: 700; background: var(--surface-2); color: var(--muted); padding: 1px 7px; border-radius: 5px; }
 .owner { margin: 8px 0 12px; }
@@ -370,7 +370,7 @@ main .fine { margin-top: 14px; }
 /* Veidu josla (virsbūves / īpašumu veidi) */
 .strip { margin: 0; }
 .strip-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.strip-head h2 { font-family: var(--f-display); font-size: 18px; font-weight: 600; margin: 0; }
+.strip-head .strip-h { font-family: var(--f-display); font-size: 18px; font-weight: 600; margin: 0; }
 .strip-row { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; scrollbar-width: thin; }
 .tcard { flex: 0 0 150px; scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; gap: 2px; background: var(--tcard); border: 1.5px solid transparent; border-radius: 12px; padding: 10px 8px 12px; color: var(--fg); text-decoration: none; }
 .tcard .ill-wrap { height: 70px; }
@@ -804,7 +804,7 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
   .list.grid > .lcard { position: relative; display: flex; flex-direction: column; gap: 0; padding: 0; overflow: hidden; align-items: stretch; }
   .list.grid .lcard .thumb { width: 100%; height: 175px; border-radius: 0; flex: none; }
   .list.grid .lcard .body { padding: 12px 14px 0; display: flex; flex-direction: column; flex: 1; }
-  .list.grid .lcard h2 { font-size: 16px; line-height: 1.3; margin: 2px 0 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.6em; }
+  .list.grid .lcard :is(h2, h3) { font-size: 16px; line-height: 1.3; margin: 2px 0 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.6em; }
   .list.grid .lcard .meta { font-size: 13px; line-height: 1.45; max-height: 2.9em; overflow: hidden; }
   .list.grid .lcard .vzd-badge { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; box-sizing: border-box; }
   .list.grid .lcard .ext-row.also { flex-wrap: nowrap; overflow: hidden; white-space: nowrap; }
@@ -822,7 +822,7 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
   .list.results-list > .lcard { position: relative; display: flex; flex-direction: column; gap: 0; padding: 0; overflow: hidden; align-items: stretch; }
   .list.results-list .lcard .thumb { width: 100%; height: 210px; border-radius: 0; flex: none; }
   .list.results-list .lcard .body { padding: 12px 14px 0; display: flex; flex-direction: column; flex: 1; }
-  .list.results-list .lcard h2 { font-size: 16px; line-height: 1.3; margin: 2px 0 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 0; }
+  .list.results-list .lcard :is(h2, h3) { font-size: 16px; line-height: 1.3; margin: 2px 0 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 0; }
   .list.results-list .lcard .meta { font-size: 13px; line-height: 1.45; max-height: 2.9em; overflow: hidden; }
   .list.results-list .lcard .vzd-badge { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; box-sizing: border-box; }
   .list.results-list .lcard .ext-row.also { flex-wrap: nowrap; overflow: hidden; white-space: nowrap; }
