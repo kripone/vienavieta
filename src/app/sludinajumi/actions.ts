@@ -9,7 +9,7 @@ import { linkDuplicate } from "@/lib/dedupe";
 import { autoTitle, ListingInput, pickPropertyFields } from "@/lib/listing-input";
 import { getCurrentUser } from "@/lib/session";
 import { deleteObject } from "@/lib/storage";
-import { TRIMS } from "@/lib/trims";
+import { allTrimNames } from "@/lib/trims";
 
 const { listings, listingPhotos, makes, models, places, priceHistory } = schema;
 
@@ -116,7 +116,7 @@ export async function saveListing(raw: unknown): Promise<SaveResult> {
           mileageKm: v.mileageKm ?? null,
           fuel: v.fuel,
           gearbox: v.gearbox,
-          trim: v.trim && Object.values(TRIMS).some((l) => l.some((x) => x.name === v.trim)) ? v.trim : null,
+          trim: v.trim && allTrimNames().has(v.trim) ? v.trim : null,
           body: v.body,
           engineL: v.engineL != null ? String(v.engineL) : null,
           powerKw: v.powerKw ?? null,

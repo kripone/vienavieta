@@ -11,7 +11,7 @@ import { TRIMS } from "@/lib/trims";
 
 export type RegionOption = { regionId: number; region: string; kind: "city" | "municipality"; country: "LV" | "LT"; places: { id: number; name: string }[] };
 export type PhotoItem = { id: string; thumbUrl: string };
-type Make = { id: number; name: string; popular: boolean; models: { id: number; name: string }[] };
+type Make = { id: number; name: string; popular: boolean; models: { id: number; name: string }[]; trims?: string[] };
 
 /** Formas vērtības ir teksts; serveris tās pārbauda un pārveido. */
 export type FormValues = Record<string, string> & { kind: "vehicle" | "property" };
@@ -208,7 +208,7 @@ export function ListingForm(props: {
           {num({ k: "mileageKm", label: "Nobraukums, km" })}
           {sel({ k: "fuel", label: "Degviela", list: FUELS, required: true })}
           {sel({ k: "gearbox", label: "Ātrumkārba", list: GEARBOXES, required: true })}
-          {make && TRIMS[make.name] && sel({ k: "trim", label: "Komplektācija", list: TRIMS[make.name].map((x) => x.name), any: "Nav norādīts" })}
+          {make && (make.trims ?? TRIMS[make.name]?.map((x) => x.name) ?? []).length > 0 && sel({ k: "trim", label: "Komplektācija", list: make.trims ?? TRIMS[make.name].map((x) => x.name), any: "Nav norādīts" })}
           {sel({ k: "body", label: "Virsbūve / tips", list: BODY_TYPES[vc] ?? [], required: true })}
           {num({ k: "engineL", label: "Motora tilpums, L", step: "0.1" })}
           {num({ k: "powerKw", label: "Jauda, kW" })}

@@ -6,6 +6,9 @@ export async function register() {
   // ss.com sarakstu ievākšana fonā (izslēdzama ar SS_CRAWL=off; izstrādē ieslēdz ar SS_CRAWL=on)
   const { startSsCrawler } = await import("./lib/importers/ss-scheduler");
   startSsCrawler();
+  // jaunas komplektācijas no portāliem: saglabā un aktivizē automātiski (src/lib/trims-db.ts)
+  const { startTrimSync } = await import("./lib/trims-db");
+  startTrimSync();
   // IndexNow: reizi dienā paziņo Bing par jaunām sitemap lapām (izslēdzams ar INDEXNOW=off)
   const { startIndexNowDaily } = await import("./lib/indexnow");
   startIndexNowDaily();

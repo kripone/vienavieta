@@ -602,3 +602,21 @@ export const pageCache = pgTable("page_cache", {
   value: jsonb("value").notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * Automātiski atrastās komplektācijas, kuru nav `TRIMS` katalogā (src/lib/trims.ts): ievācēji tās pamana
+ * portālu virsrakstos ("Black Line", "XY Sport"), un pēc `TRIM_AUTO_MIN` dažādiem sludinājumiem tās kļūst aktīvas
+ * (atpazīšana, filtrs, pārdevēja forma). `make` = markas nosaukums kā `makes.name`.
+ */
+export const trimNames = pgTable(
+  "trim_names",
+  {
+    id: serial("id").primaryKey(),
+    make: text("make").notNull(),
+    name: text("name").notNull(),
+    seen: integer("seen").notNull().default(0),
+    active: boolean("active").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("trim_names_make_name_uq").on(t.make, t.name)],
+);

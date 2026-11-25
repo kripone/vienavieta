@@ -1,6 +1,7 @@
 import { asc, eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { VEHICLE_CLASSES, type VehicleClass } from "@/lib/constants";
+import { trimNamesFor } from "@/lib/trims";
 
 /** Markas un modeļi vienam transporta veidam: /api/catalog?class=car */
 export async function GET(req: Request) {
@@ -13,7 +14,7 @@ export async function GET(req: Request) {
   const byMake = new Map<number, { id: number; name: string }[]>();
   for (const m of models) (byMake.get(m.makeId) ?? byMake.set(m.makeId, []).get(m.makeId)!).push({ id: m.id, name: m.name });
   return Response.json(
-    makes.map((m) => ({ id: m.id, name: m.name, popular: m.popular, models: byMake.get(m.id) ?? [] })),
+    makes.map((m) => ({ id: m.id, name: m.name, popular: m.popular, models: byMake.get(m.id) ?? [], trims: cls === "car" ? trimNamesFor(m.name) : [] })),
     { headers: { "Cache-Control": "public, max-age=3600" } },
   );
 }

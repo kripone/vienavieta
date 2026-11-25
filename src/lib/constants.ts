@@ -309,6 +309,8 @@ export const PORSCHE = { key: "porsche:used", url: "https://finder.porsche.com/l
 
 /** Cenas novērtējums pret līdzīgiem: zem GOOD — "Laba cena", virs HIGH — "Virs tirgus"; vajag vismaz MIN līdzīgus. */
 /** PLACE_MIN: īpašumu salīdzina ar to pašu vietu (apkaimi/pilsētu/pagastu), ja tur ir vismaz tik citu sludinājumu; citādi ar reģionu. */
+/** Jauna komplektācija (src/lib/trims.ts) kļūst aktīva, kad redzēta tik dažādos sludinājumos. */
+export const TRIM_AUTO_MIN = 5;
 export const PRICE_EVAL = { GOOD: 0.88, HIGH: 1.15, MIN: 3, YEARS: 2, PLACE_MIN: 12 } as const;
 /** Cik sludinājumus var salīdzināt vienlaikus. */
 export const MAX_COMPARE = 4;

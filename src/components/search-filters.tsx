@@ -11,7 +11,7 @@ import {
 import type { RegionOption } from "./listing-form";
 import { TRIMS } from "@/lib/trims";
 
-type Make = { id: number; name: string; popular: boolean; models: { id: number; name: string }[] };
+type Make = { id: number; name: string; popular: boolean; models: { id: number; name: string }[]; trims?: string[] };
 export type FilterValues = Record<string, string>;
 
 const YEARS = Array.from({ length: new Date().getFullYear() + 2 - 1980 }, (_, i) => String(new Date().getFullYear() + 1 - i));
@@ -181,7 +181,7 @@ export function SearchFilters({ initial, regions, sources = [] }: { initial: Fil
                 {make?.models.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
               </select>
             </label>
-            {make && TRIMS[make.name] && sel("trim", "Komplektācija", TRIMS[make.name].map((x) => x.name), "Jebkura")}
+            {make && (make.trims ?? TRIMS[make.name]?.map((x) => x.name) ?? []).length > 0 && sel("trim", "Komplektācija", make.trims ?? TRIMS[make.name].map((x) => x.name), "Jebkura")}
             {sel("ymin", "Gads no", YEARS)}
             {sel("ymax", "Gads līdz", YEARS)}
             {sel("kmmax", "Nobraukums līdz", KM.map((k) => [k, `${Number(k).toLocaleString("lv-LV")} km`] as const), "Jebkāds")}

@@ -90,14 +90,56 @@ export const TRIMS: Record<string, Trim[]> = {
   ],
 };
 
-/** Komplektācija no portāla virsraksta / teksta sākuma (pirmā atrastā pēc TRIMS secības) vai null. */
-export function detectTrim(make: string | null | undefined, ...texts: (string | null | undefined)[]): string | null {
-  const list = make ? TRIMS[make] : undefined;
-  if (!list) return null;
-  const text = texts.filter(Boolean).join(" ").slice(0, 400);
-  if (!text) return null;
-  return list.find((t) => t.re.test(text))?.name ?? null;
+// --- jaunas komplektācijas, kuru nav katalogā (src/lib/trims-db.ts tās saglabā un aktivizē) ---
+
+/** Aktīvās automātiski atrastās komplektācijas pa markām (ielādē trims-db.ts no tabulas trim_names). */
+const DYNAMIC = new Map<string, Trim[]>();
+/** Regex no nosaukuma: "Black Line" → black[\s-]?line */
+const nameRe = (name: string) => r(name.toLowerCase().split(/[\s-]+/).map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("[\\s-]?"));
+export function setDynamicTrims(rows: { make: string; name: string }[]) {
+  DYNAMIC.clear();
+  for (const x of rows) {
+    if (TRIMS[x.make]?.some((t) => t.name === x.name)) continue;
+    (DYNAMIC.get(x.make) ?? DYNAMIC.set(x.make, []).get(x.make)!).push({ name: x.name, re: nameRe(x.name) });
+  }
 }
 
-/** Derīga komplektācija šai markai (filtram un pārdevēja formai). */
-export const isTrim = (make: string | null | undefined, v: string | null | undefined) => Boolean(make && v && TRIMS[make]?.some((t) => t.name === v));
+// Kandidāti: "<vārds> Line" ("Black Line", "Design Line") un "<saīsinājums> Sport" ("GR Sport").
+// Skaitām dažādus tekstus (lai viens sludinājums, ko redzam katrā kārtā, nepiepūš skaitu).
+const LINE_RE = /(?<![\p{L}\p{N}])([\p{L}]{2,12}|[A-Z0-9]{1,4})[\s-]line(?![\p{L}\p{N}])/giu;
+const SPORT_RE = /(?<![\p{L}\p{N}])([A-Z]{1,3})[\s-]?Sport(?![\p{L}\p{N}])/gu;
+const STOP = new Set(["on", "off", "online", "time", "head", "main", "first", "base", "full", "new", "top", "hot", "the", "all", "no", "dead", "fine", "bottom", "pipe", "fuel", "air", "oil", "hard", "soft", "spare", "dash", "roof", "side", "door", "waist", "belt", "gas", "finish", "tan", "brake", "service", "life", "product", "model", "and", "with", "un", "ar", "ir", "su"]);
+const CANDIDATES = new Map<string, { make: string; name: string; texts: Set<string> }>();
+const cap = (w: string) => (/^[A-Z0-9]{1,4}$/.test(w) ? w : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+function collect(make: string, text: string) {
+  const found: string[] = [];
+  for (const m of text.matchAll(LINE_RE)) if (!STOP.has(m[1].toLowerCase())) found.push(`${cap(m[1])} Line`);
+  for (const m of text.matchAll(SPORT_RE)) found.push(`${m[1]} Sport`);
+  for (const name of found) {
+    const key = `${make}|${name}`;
+    const c = CANDIDATES.get(key) ?? CANDIDATES.set(key, { make, name, texts: new Set() }).get(key)!;
+    if (c.texts.size < 50) c.texts.add(text.slice(0, 120));
+  }
+  if (CANDIDATES.size > 5000) CANDIDATES.clear();
+}
+/** Savāktie kandidāti ar dažādo tekstu skaitu (trims-db.ts saglabā lielāko skaitu datubāzē). */
+export function trimCandidates(): { make: string; name: string; n: number }[] {
+  return [...CANDIDATES.values()].map((c) => ({ make: c.make, name: c.name, n: c.texts.size }));
+}
+
+/** Komplektācija no portāla virsraksta / teksta sākuma (katalogs, tad automātiski atrastās) vai null. */
+export function detectTrim(make: string | null | undefined, ...texts: (string | null | undefined)[]): string | null {
+  if (!make) return null;
+  const text = texts.filter(Boolean).join(" ").slice(0, 400);
+  if (!text) return null;
+  const hit = TRIMS[make]?.find((t) => t.re.test(text)) ?? DYNAMIC.get(make)?.find((t) => t.re.test(text));
+  if (hit) return hit.name;
+  collect(make, text);
+  return null;
+}
+
+/** Visas zināmās komplektācijas markai: katalogs + aktīvās automātiski atrastās. */
+export const trimNamesFor = (make: string) => [...(TRIMS[make] ?? []).map((t) => t.name), ...(DYNAMIC.get(make) ?? []).map((t) => t.name)];
+
+/** Visu marku zināmās komplektācijas (pārdevēja formas pārbaudei). */
+export const allTrimNames = () => new Set([...Object.values(TRIMS).flat(), ...[...DYNAMIC.values()].flat()].map((t) => t.name));
