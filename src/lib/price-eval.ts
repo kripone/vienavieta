@@ -4,6 +4,7 @@
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { PRICE_EVAL } from "./constants";
+import { plausibleVehicle } from "./plausible";
 
 /** scope: ar ko salīdzināts – tas pats modelis (auto), tā pati vieta (apkaime/pilsēta) vai viss reģions (īpašumi) */
 export type PriceEval = { label: "Laba cena" | "Tirgus cena" | "Virs tirgus"; cls: "good" | "fair" | "high"; ratio: number; median: number; n: number; perM2: boolean; scope: "model" | "place" | "region" };
@@ -41,9 +42,9 @@ export async function priceEvals(ids: string[]): Promise<Map<string, PriceEval |
         and x.make_id = l.make_id and x.model_id = l.model_id
         and x.year between l.year - ${PRICE_EVAL.YEARS} and l.year + ${PRICE_EVAL.YEARS}
         and x.id <> l.id and (l.group_key is null or x.group_key is distinct from l.group_key)
-        and x.price > 100
+        and x.price > 100 and ${plausibleVehicle("x")}
     ) e
-    where l.id in (${idList}) and l.kind = 'vehicle' and l.make_id is not null and l.model_id is not null and l.year is not null`);
+    where l.id in (${idList}) and l.kind = 'vehicle' and l.make_id is not null and l.model_id is not null and l.year is not null and ${plausibleVehicle("l")}`);
 
   // Īpašumi: agrāk mediānu rēķināja SQL katram sludinājumam atsevišķi (lateral), un lapā ar 24 dzīvokļiem
   // tas pašu reģionu pārlasīja 24 reizes (~1 s datubāzē). Tagad vienā vaicājumā nolasām grupas (veids, darījums, reģions)

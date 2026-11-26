@@ -645,7 +645,7 @@ export function priceInsights(s: SearchParams): Promise<PriceInsights | null> {
     const bins = Array.from({ length: N }, (_, i) => [Math.round(lo + i * step), Math.round(lo + (i + 1) * step), Number(rows.find((r) => Number(r.b) === i + 1)?.c ?? 0)] as [number, number, number]);
     const cheap = Number(seg?.cheap ?? 0), dear = Number(seg?.dear ?? 0);
     return {
-      n, median: rnd(median), p25: rnd(Number(st.p25)), p75: rnd(Number(st.p75)), lo, hi, bins,
+      n, median, p25: rnd(Number(st.p25)), p75: rnd(Number(st.p75)), lo, hi, bins,
       cheap, dear, mid: n - cheap - dear, cheapMax, dearMin,
       drops: Number(st.drops ?? 0), dropPct: st.dropPct != null ? Math.round(Number(st.dropPct) * 10) / 10 : null,
     };

@@ -1,6 +1,7 @@
 // Rīks „Cik vērts?” (/novertejums): aptuvena cena no aktīvajiem sludinājumiem (visi avoti, dublikāti vienreiz)
 // un dzīvokļiem arī no VZD reālajiem darījumiem tajā pašā mājā. Tikai orientējošs novērtējums.
 import { sql } from "drizzle-orm";
+import { plausibleVehicle } from "./plausible";
 import { db } from "@/db";
 import { dealsByAddress } from "./vzd";
 
@@ -16,7 +17,7 @@ export type VehicleValue = Stats & { yearFrom: number; yearTo: number; kmFiltere
 /** Auto: tas pats modelis, gads ±1 (ja par maz, ±2, ±3); ja norādīts nobraukums un pietiek datu, līdzīgs nobraukums (±35%). */
 export async function valueVehicle(modelId: number, year: number, km?: number | null): Promise<VehicleValue | null> {
   for (const span of [1, 2, 3]) {
-    const base = sql`from listings l where l.status = 'active' and l.kind = 'vehicle' and l.model_id = ${modelId} and l.year between ${year - span} and ${year + span} and l.price > 300 and ${primary}`;
+    const base = sql`from listings l where l.status = 'active' and l.kind = 'vehicle' and l.model_id = ${modelId} and l.year between ${year - span} and ${year + span} and l.price > 300 and ${primary} and ${plausibleVehicle("l")}`;
     const q = (extra: ReturnType<typeof sql>) => sql`select count(*) n,
       percentile_cont(0.5) within group (order by l.price)::int median,
       percentile_cont(0.25) within group (order by l.price)::int p25,
