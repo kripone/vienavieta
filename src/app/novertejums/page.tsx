@@ -8,6 +8,7 @@ import { valueFlat, valueVehicle } from "@/lib/valuation";
 import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { VehiclePicker } from "./vehicle-picker";
+import { soft } from "@/lib/errors";
 
 export const dynamic = "force-dynamic";
 
@@ -37,12 +38,12 @@ export default async function ValuationPage(props: { searchParams: Promise<SP> }
 
   // auto
   const make = int(sp.make, 1, 1e7), model = int(sp.model, 1, 1e7), y = int(sp.gads, 1950, year + 1), km = int(sp.km, 0, 2_000_000);
-  const car = kind === "car" && model && y ? await valueVehicle(model, y, km).catch(() => null) : undefined;
+  const car = kind === "car" && model && y ? await valueVehicle(model, y, km).catch(soft("novertejums", null)) : undefined;
   const modelName = kind === "car" && model ? (await db.select({ m: schema.models.name, mk: schema.makes.name }).from(schema.models).innerJoin(schema.makes, eq(schema.makes.id, schema.models.makeId)).where(eq(schema.models.id, model)))[0] : null;
 
   // dzīvoklis
   const place = int(sp.vieta, 1, 1e7), area = int(sp.platiba, 8, 1000), rooms = int(sp.istabas, 1, 10), address = (sp.adrese ?? "").trim().slice(0, 120);
-  const flat = kind === "flat" && place && area ? await valueFlat(place, area, rooms, address || null).catch(() => null) : undefined;
+  const flat = kind === "flat" && place && area ? await valueFlat(place, area, rooms, address || null).catch(soft("novertejums", null)) : undefined;
   const regions = kind === "flat" ? (await regionOptions()).filter((r) => r.country === "LV") : [];
 
   const carSearch = car && make && model ? lp(`/?cat=vehicle&vc=car&make=${make}&model=${model}&ymin=${car.yearFrom}&ymax=${car.yearTo}`) : null;

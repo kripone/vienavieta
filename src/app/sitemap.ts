@@ -6,6 +6,7 @@ import { appBase, langAlternates, propertyHref, RIGA_DISTRICT, vehicleHref } fro
 import { REGION_GROUPS_LOC, SEO_COMBO_MIN, SEO_INDEX_MIN, SEO_PRICE_STEPS, SEO_ROOMS } from "@/lib/constants";
 import { bodySlug, fuelSlug, getCatalog, priceSlug, roomsSlug, seoSlug } from "@/lib/seo";
 import { LOCALES } from "@/i18n/core";
+import { soft } from "@/lib/errors";
 
 export const dynamic = "force-dynamic";
 let memo: { at: number; v: MetadataRoute.Sitemap } | null = null;
@@ -63,7 +64,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .where(and(eq(schema.listings.source, "own"), eq(schema.listings.status, "active")))
     .orderBy(desc(schema.listings.updatedAt))
     .limit(10000)
-    .catch(() => []);
+    .catch(soft("sitemap", []));
   for (const l of own) urls.push({ path: `/sludinajumi/${l.id}`, lastModified: l.updatedAt });
   // katra lapa visās valodās ar hreflang norādēm
   const v: MetadataRoute.Sitemap = urls.flatMap(({ path, lastModified }) => {

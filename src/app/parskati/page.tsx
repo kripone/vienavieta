@@ -2,12 +2,13 @@
 import { permanentRedirect } from "next/navigation";
 import { getT } from "@/i18n/server";
 import { reportMonths } from "@/lib/report";
+import { soft } from "@/lib/errors";
 
 export const dynamic = "force-dynamic";
 
 export default async function ReportsIndex() {
   const { lp } = await getT();
-  const months = await reportMonths().catch(() => []);
+  const months = await reportMonths().catch(soft("parskati", []));
   const ym = months[0]?.ym ?? new Date().toISOString().slice(0, 7);
   permanentRedirect(lp(`/parskati/${ym}`));
 }

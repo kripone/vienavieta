@@ -31,3 +31,18 @@ export async function recordError(e: ErrorInput) {
 export async function recentErrors(limit = 100) {
   return db.select().from(schema.errorEvents).orderBy(sql`${schema.errorEvents.resolved}, ${schema.errorEvents.lastAt} desc`).limit(limit);
 }
+
+/**
+ * „Mīkstā” kļūda lapas datiem: lapa turpina ar rezerves vērtību (tukšs saraksts, null), bet kļūda nonāk žurnālā
+ * (/moderacija?tab=kludas), nevis pazūd klusi. Piem. `recentDrops(...).catch(soft("cenu-kritumi", []))`.
+ */
+export function soft<T>(where: string, fallback: T) {
+  return (err: unknown): T => {
+    // Next dinamiskās renderēšanas signālus nedrīkst norīt
+    if (err && typeof err === "object" && "digest" in err && typeof (err as { digest: unknown }).digest === "string" && /^(DYNAMIC_SERVER_USAGE|NEXT_)/.test((err as { digest: string }).digest)) throw err;
+    const e = err instanceof Error ? err : new Error(String(err));
+    console.error(`[${where}]`, e);
+    void recordError({ source: "server", message: `${where}: ${e.message}${e.cause instanceof Error ? ` (${e.cause.message})` : ""}`, stack: e.stack ?? null });
+    return fallback;
+  };
+}

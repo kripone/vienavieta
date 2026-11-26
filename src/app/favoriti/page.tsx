@@ -8,6 +8,7 @@ import { appBase } from "@/lib/seo";
 import { createShare, deleteReaction, revokeShare } from "./actions";
 import { priceEvals } from "@/lib/price-eval";
 import { requireUser } from "@/lib/session";
+import { soft } from "@/lib/errors";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
@@ -18,10 +19,10 @@ export default async function FavoritesPage() {
   const { t, tp } = await getT();
   const user = await requireUser("/favoriti");
   const rows = await favoriteListings(user.id);
-  const evals = await priceEvals(rows.map((r) => r.id)).catch(() => new Map());
+  const evals = await priceEvals(rows.map((r) => r.id)).catch(soft("favoriti", new Map()));
   const drops = rows.filter((r) => r.priceWhenSaved != null && r.priceWhenSaved > r.price).length;
-  const share = await activeShare(user.id).catch(() => null);
-  const reactions = share ? await shareReactionRows(share.id).catch(() => []) : [];
+  const share = await activeShare(user.id).catch(soft("favoriti", null));
+  const reactions = share ? await shareReactionRows(share.id).catch(soft("favoriti", [])) : [];
   return (
     <main className="wrap">
       <div className="row between">

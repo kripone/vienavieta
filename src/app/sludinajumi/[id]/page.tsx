@@ -35,12 +35,13 @@ import { favoriteIds } from "@/lib/favorites";
 import { fullLocation, getListing, locationLabel, similarListings } from "@/lib/listings";
 import { ListingCard } from "@/components/listing-card";
 import { getCurrentUser, isModerator } from "@/lib/session";
+import { soft } from "@/lib/errors";
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ saglabats?: string }> };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { id } = await props.params;
-  const d = await getListing(id).catch(() => null);
+  const d = await getListing(id).catch(() => null); // nederīgs id (roboti, vecas saites) ir gaidīts – nežurnālējam
   if (!d || d.l.status === "deleted") return { title: (await getT()).t("Sludinājums nav atrasts") };
   const external = d.l.source !== "own";
   return {
@@ -99,13 +100,13 @@ export default async function ListingPage(props: Props) {
           ["Lietošanas mērķis", l.purpose],
           ["Ērtības", l.amenities.length ? l.amenities.map((a) => t(a)).join(", ") : null],
         ];
-  const evaluation = (await priceEvals([l.id]).catch(() => new Map())).get(l.id);
-  const elsewhere = (await alsoAt([{ id: l.id, groupKey: l.groupKey }]).catch(() => new Map())).get(l.id) ?? [];
-  const history = await listingHistory({ id: l.id, price: l.price, createdAt: l.createdAt }).catch(() => null);
-  const vzd = l.kind === "property" && l.propertyType === "Dzīvoklis" && l.deal === "sell" ? await dealsForListing(l).catch(() => null) : null;
+  const evaluation = (await priceEvals([l.id]).catch(soft("sludinajumi/[id]", new Map()))).get(l.id);
+  const elsewhere = (await alsoAt([{ id: l.id, groupKey: l.groupKey }]).catch(soft("sludinajumi/[id]", new Map()))).get(l.id) ?? [];
+  const history = await listingHistory({ id: l.id, price: l.price, createdAt: l.createdAt }).catch(soft("sludinajumi/[id]", null));
+  const vzd = l.kind === "property" && l.propertyType === "Dzīvoklis" && l.deal === "sell" ? await dealsForListing(l).catch(soft("sludinajumi/[id]", null)) : null;
   const isFav = user && !isOwner ? (await favoriteIds(user.id, [l.id])).has(l.id) : false;
-  const similar = l.status === "active" ? await similarListings(l).catch(() => []) : [];
-  const simEvals = similar.length ? await priceEvals(similar.map((x) => x.id)).catch(() => new Map()) : new Map();
+  const similar = l.status === "active" ? await similarListings(l).catch(soft("sludinajumi/[id]", [])) : [];
+  const simEvals = similar.length ? await priceEvals(similar.map((x) => x.id)).catch(soft("sludinajumi/[id]", new Map())) : new Map();
   const summary = listingSummary(l, { make: d.make ?? null, model: d.model ?? null, place: d.place ?? null }, evaluation, vzd, t, tp);
   const seller = (d.sellerType === "dealer" || d.sellerType === "agency") && d.companyName ? d.companyName : d.sellerName || t("Privātpersona");
   const unit = priceUnit(l.deal, t);

@@ -6,6 +6,7 @@ import { ListingCard } from "@/components/listing-card";
 import { ShareReact } from "@/components/share-react";
 import { sharedList, shareReactionRows } from "@/lib/favorites";
 import { priceEvals } from "@/lib/price-eval";
+import { soft } from "@/lib/errors";
 
 export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ token: string }> };
@@ -21,8 +22,8 @@ export default async function SharedListPage(props: Props) {
   const list = await sharedList(token);
   if (!list) notFound();
   const [reactions, evals] = await Promise.all([
-    shareReactionRows(list.share.id).catch(() => []),
-    priceEvals(list.rows.map((r) => r.id)).catch(() => new Map()),
+    shareReactionRows(list.share.id).catch(soft("saraksts/[token]", [])),
+    priceEvals(list.rows.map((r) => r.id)).catch(soft("saraksts/[token]", new Map())),
   ]);
   const owner = list.share.owner.trim().split(" ")[0];
   return (

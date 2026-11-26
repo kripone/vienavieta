@@ -1,10 +1,11 @@
 import { getT } from "@/i18n/server";
 import { todayStats } from "@/lib/search";
+import { soft } from "@/lib/errors";
 
 /** Sānu kolonnas bloks „Šodien tirgū” (sākumlapā). */
 export async function TodayStats() {
   const { t, lp } = await getT();
-  const s = await todayStats().catch(() => null);
+  const s = await todayStats().catch(soft("today-stats", null));
   if (!s) return null;
   const fmt = new Intl.NumberFormat("lv-LV");
   return (

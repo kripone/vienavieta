@@ -5,6 +5,7 @@ import { BODY_TYPES, FUELS, SEO_COMBO_MIN, SEO_PRICE_STEPS, SEO_ROOMS } from "@/
 import { formatPrice } from "@/lib/format";
 import { parseSearch, seoLinkCounts } from "@/lib/search";
 import { bodySlug, fuelSlug, getCatalog, priceSlug, regionName, roomsLabel, roomsSlug, type Landing } from "@/lib/seo";
+import { soft } from "@/lib/errors";
 
 type Item = { slug: string; label: string; n: number };
 type Group = { title: string; items: Item[] };
@@ -13,7 +14,7 @@ export async function SeoMoreLinks({ more }: { more: NonNullable<Landing["more"]
   const { t, lp, locale } = await getT();
   const s = parseSearch(more.raw);
   const groups: Group[] = [];
-  const counts = (by: Parameters<typeof seoLinkCounts>[1], steps?: readonly number[]) => seoLinkCounts(s, by, steps).catch(() => []);
+  const counts = (by: Parameters<typeof seoLinkCounts>[1], steps?: readonly number[]) => seoLinkCounts(s, by, steps).catch(soft("seo-more-links", []));
   // kombinētām lapām (marka + filtrs, pilsēta + istabas) vajag vairāk sludinājumu, lai lapa nebūtu tukša
   const min = more.kind === "vehicle" && more.level !== "root" ? SEO_COMBO_MIN : 3;
 

@@ -7,6 +7,7 @@ import { alsoAt } from "@/lib/dedupe";
 import { priceEvals } from "@/lib/price-eval";
 import { vzdBadges } from "@/lib/vzd";
 import { formatPrice, timeAgo } from "@/lib/format";
+import { soft } from "@/lib/errors";
 
 export async function generateMetadata(props: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
   const { t, locale } = await getT();
@@ -22,11 +23,11 @@ export default async function DropsPage(props: { searchParams: Promise<Record<st
   const sp = await props.searchParams;
   const kind = sp.k === "auto" ? "vehicle" : sp.k === "ipasumi" ? "property" : undefined;
   const days = sp.d === "1" || sp.d === "30" ? sp.d : "7";
-  const rows = await recentDrops({ kind, days: Number(days), limit: 60 }).catch(() => []);
+  const rows = await recentDrops({ kind, days: Number(days), limit: 60 }).catch(soft("cenu-kritumi", []));
   const [also, evals, vzd] = await Promise.all([
-    alsoAt(rows.map((r) => r.card)).catch(() => new Map()),
-    priceEvals(rows.map((r) => r.card.id)).catch(() => new Map()),
-    vzdBadges(rows.filter((r) => r.card.kind === "property").map((r) => r.card.id)).catch(() => new Map()),
+    alsoAt(rows.map((r) => r.card)).catch(soft("cenu-kritumi", new Map())),
+    priceEvals(rows.map((r) => r.card.id)).catch(soft("cenu-kritumi", new Map())),
+    vzdBadges(rows.filter((r) => r.card.kind === "property").map((r) => r.card.id)).catch(soft("cenu-kritumi", new Map())),
   ]);
   const q = (k?: string, d?: string) => {
     const p = new URLSearchParams();

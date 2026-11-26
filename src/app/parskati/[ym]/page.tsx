@@ -8,6 +8,7 @@ import { formatNumber, formatPrice } from "@/lib/format";
 import { langAlternates, regionName } from "@/lib/seo";
 import { trTitle } from "@/i18n/content";
 import { MONTH_RE, monthRange, monthReport, reportMonths } from "@/lib/report";
+import { soft } from "@/lib/errors";
 
 export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ ym: string }> };
@@ -31,7 +32,7 @@ export default async function ReportPage(props: Props) {
   const { ym } = await props.params;
   if (!MONTH_RE.test(ym)) notFound();
   const { t, tp, lp, locale } = await getT();
-  const months = (await reportMonths().catch(() => [])).filter((m) => m.n >= 500);
+  const months = (await reportMonths().catch(soft("parskati/[ym]", []))).filter((m) => m.n >= 500);
   if (!months.some((m) => m.ym === ym)) notFound();
   const r = await monthReport(ym);
   const { to } = monthRange(ym);

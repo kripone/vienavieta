@@ -8,6 +8,7 @@ import { formatNumber } from "@/lib/format";
 import {
   makesWithListings, marketTotals, modelsWithListings, priceByYear, priceVsMileage, propertyByPlace, propertyByRegion, segmentTrend, topMakes,
 } from "@/lib/market";
+import { soft } from "@/lib/errors";
 
 export async function generateMetadata(props: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
   const { t, locale } = await getT();
@@ -99,7 +100,7 @@ async function TopMakes({ vc, params }: { vc: string; params: Record<string, str
 
 async function ModelView({ vc, make, model }: { vc: string; make: { id: number; name: string }; model: { id: number; name: string; n: number; median: number } }) {
   const { t } = await getT();
-  const [years, dots, trend] = await Promise.all([priceByYear(make.id, model.id), priceVsMileage(make.id, model.id), segmentTrend(`${vc}:${make.id}:${model.id}`).catch(() => [])]);
+  const [years, dots, trend] = await Promise.all([priceByYear(make.id, model.id), priceVsMileage(make.id, model.id), segmentTrend(`${vc}:${make.id}:${model.id}`).catch(soft("tirgus", []))]);
   const name = `${make.name} ${model.name}`;
   return (
     <>
@@ -127,7 +128,7 @@ async function Property({ sp, params }: { sp: SP; params: Record<string, string>
   const unit = ptype === "Zeme" ? t("€/m² zemes") : "€/m²";
   const color = "var(--home)";
   const [places, trend] = region
-    ? await Promise.all([propertyByPlace(region.regionId, ptype, deal), segmentTrend(`prop:${ptype}:${region.regionId}:${deal}`).catch(() => [])])
+    ? await Promise.all([propertyByPlace(region.regionId, ptype, deal), segmentTrend(`prop:${ptype}:${region.regionId}:${deal}`).catch(soft("tirgus", []))])
     : [[], []];
   return (
     <>

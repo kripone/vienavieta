@@ -8,6 +8,7 @@ import { db } from "@/db";
 import { sql } from "drizzle-orm";
 import { langAlternates } from "@/lib/seo";
 import { cached } from "@/lib/search";
+import { soft } from "@/lib/errors";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,7 @@ const sourceTable = () =>
 export default async function DataPage() {
   const { locale, lp } = await getT();
   const d = DATA_METHOD[locale];
-  const rows = await sourceTable().catch(() => []);
+  const rows = await sourceTable().catch(soft("dati", []));
   return (
     <main className="wrap legal">
       <h1>{d.title}</h1>

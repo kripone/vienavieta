@@ -7,6 +7,7 @@ import { findUsers, hiddenListings, moderationCounts, reportedListings } from "@
 import { isModerator, requireModerator } from "@/lib/session";
 import { recentErrors } from "@/lib/errors";
 import { resolveErrors } from "./actions";
+import { soft } from "@/lib/errors";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
@@ -29,7 +30,7 @@ export default async function ModerationPage(props: { searchParams: Promise<SP> 
   const tab = TABS.some(([t]) => t === sp.tab) ? sp.tab! : "sudzibas";
   await requireModerator(`/moderacija?tab=${tab}`);
   const counts = await moderationCounts();
-  const errors = await recentErrors().catch(() => []);
+  const errors = await recentErrors().catch(soft("moderacija", []));
   const badge: Record<string, number> = { sudzibas: counts.open, paslepti: counts.hidden, lietotaji: counts.blocked, kludas: errors.filter((e) => !e.resolved).length };
 
   return (

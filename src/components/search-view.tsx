@@ -35,6 +35,7 @@ import { facetCounts, priceSummary, marketOverview } from "@/lib/search";
 import { appBase, propertyHref, regionName, RIGA_DISTRICT, vehicleHref, seoSlug, type Landing } from "@/lib/seo";
 import { trTitle } from "@/i18n/content";
 import { PROPERTY_PLURAL, PROPERTY_TYPES, type PropertyType } from "@/lib/constants";
+import { soft } from "@/lib/errors";
 
 export type SP = Record<string, string | string[] | undefined>;
 
@@ -60,11 +61,11 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
       return null;
     }),
     stripMode ? typeCounts(s).catch(() => ({}) as Record<string, number>) : Promise.resolve({} as Record<string, number>),
-    sourceCounts(s).catch(() => []),
-    wantInsights ? priceInsights(s).catch(() => null) : Promise.resolve(null),
-    landing ? priceSummary(s).catch(() => null) : Promise.resolve(null),
-    facetBy ? facetCounts(s, facetBy).catch(() => []) : Promise.resolve([]),
-    landing && s.page === 1 ? marketOverview(s).catch(() => null) : Promise.resolve(null),
+    sourceCounts(s).catch(soft("search-view", [])),
+    wantInsights ? priceInsights(s).catch(soft("search-view", null)) : Promise.resolve(null),
+    landing ? priceSummary(s).catch(soft("search-view", null)) : Promise.resolve(null),
+    facetBy ? facetCounts(s, facetBy).catch(soft("search-view", [])) : Promise.resolve([]),
+    landing && s.page === 1 ? marketOverview(s).catch(soft("search-view", null)) : Promise.resolve(null),
   ]);
   const result: Awaited<ReturnType<typeof searchListings>> | null = searched ? searched[0] : null;
   const regions: Awaited<ReturnType<typeof regionOptions>> = searched ? searched[1] : [];
@@ -73,9 +74,9 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
   const ids = result ? result.rows.map((r) => r.id) : [];
   const [also, evals, vzd, favs] = result
     ? await Promise.all([
-        alsoAt(result.rows).catch(() => new Map()),
-        priceEvals(ids).catch(() => new Map()),
-        vzdBadges(result.rows.filter((r) => r.kind === "property").map((r) => r.id)).catch(() => new Map()),
+        alsoAt(result.rows).catch(soft("search-view", new Map())),
+        priceEvals(ids).catch(soft("search-view", new Map())),
+        vzdBadges(result.rows.filter((r) => r.kind === "property").map((r) => r.id)).catch(soft("search-view", new Map())),
         user ? favoriteIds(user.id, ids).catch(() => new Set<string>()) : Promise.resolve(new Set<string>()),
       ])
     : [new Map(), new Map(), new Map(), new Set<string>()];

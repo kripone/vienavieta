@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { langAlternates } from "@/lib/seo";
 import { redirect } from "next/navigation";
 import { findByUrl } from "@/lib/history";
+import { soft } from "@/lib/errors";
 
 export async function generateMetadata(props: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
   const { t, locale } = await getT();
@@ -15,7 +16,7 @@ export default async function HistoryLookup(props: { searchParams: Promise<Recor
   const { t } = await getT();
   const { u } = await props.searchParams;
   const url = (u ?? "").slice(0, 500);
-  const id = url ? await findByUrl(url).catch(() => null) : null;
+  const id = url ? await findByUrl(url).catch(soft("vesture", null)) : null;
   if (id) redirect(`/sludinajumi/${id}#vesture`);
   return (
     <main className="wrap narrow">

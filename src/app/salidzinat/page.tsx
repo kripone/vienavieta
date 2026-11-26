@@ -9,6 +9,7 @@ import { listingIll } from "@/lib/illustrations";
 import { landLabel } from "@/lib/listing-input";
 import { getListing, locationLabel } from "@/lib/listings";
 import { priceEvals } from "@/lib/price-eval";
+import { soft } from "@/lib/errors";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
@@ -36,7 +37,7 @@ export default async function ComparePage(props: { searchParams: Promise<{ ids?:
   }
   const kind = found[0].l.kind;
   const items = found.filter((d) => d.l.kind === kind);
-  const evals = await priceEvals(items.map((d) => d.l.id)).catch(() => new Map());
+  const evals = await priceEvals(items.map((d) => d.l.id)).catch(soft("salidzinat", new Map()));
 
   const common: Row[] = [
     { label: "Cena", value: (d) => <b>{formatPrice(d.l.price)}</b>, best: (d) => d.l.price, better: "min" },
