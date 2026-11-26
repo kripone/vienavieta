@@ -9,7 +9,7 @@ import { db, schema } from "@/db";
 import { AUTOPLIUS_CAMPER, AUTOPLIUS_CAR_BANDS, AUTOPLIUS_DELAY_MS, AUTOPLIUS_MOTO_BANDS, EXTERNAL_TTL_DAYS } from "../constants";
 import { linkDuplicate } from "../dedupe";
 import { inferBody } from "../illustrations";
-import { findMake, matchModel, slug, vehicleTitle, type ImportRow, type MakeRow, type ModelRow, type PlaceRow } from "./ss-rss";
+import { findMake, matchModel, realName, slug, vehicleTitle, type ImportRow, type MakeRow, type ModelRow, type PlaceRow } from "./ss-rss";
 import { withCrawlLock } from "./crawl-lock";
 import { loadCtx } from "./ss-pages";
 import { detectTrim } from "../trims";
@@ -177,7 +177,7 @@ export function mapRow(r: ApRow, ctx: Ctx, createdAt: Date, vc: "car" | "moto" |
   const makeName = make?.name ?? r.titleRaw.trim().split(/\s+/)[0] ?? "";
   const modelName = model?.name ?? modelRaw;
   const fuel = mapFuel(r.fuelRaw);
-  const title = vehicleTitle(makeName, modelName, r.engineL, fuel, r.year);
+  const title = vehicleTitle(makeName, modelName, r.engineL, fuel, r.year, vc);
   if (!title) return null;
   const city = r.city ? ctx.findCity(r.city) : null;
   return {
@@ -191,8 +191,8 @@ export function mapRow(r: ApRow, ctx: Ctx, createdAt: Date, vc: "car" | "moto" |
     vehicleClass: vc,
     makeId: make?.id ?? null,
     modelId: model?.id ?? null,
-    makeText: make ? null : makeName || null,
-    modelText: model ? null : modelRaw || null,
+    makeText: make ? null : realName(makeName) || null,
+    modelText: model ? null : realName(modelRaw) || null,
     trim: vc === "car" ? detectTrim(make?.name, r.titleRaw) : null,
     year: r.year,
     mileageKm: r.mileageKm,

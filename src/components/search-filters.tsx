@@ -14,7 +14,7 @@ import { TRIMS } from "@/lib/trims";
 type Make = { id: number; name: string; popular: boolean; models: { id: number; name: string }[]; trims?: string[] };
 export type FilterValues = Record<string, string>;
 
-const YEARS = Array.from({ length: new Date().getFullYear() + 2 - 1980 }, (_, i) => String(new Date().getFullYear() + 1 - i));
+const YEARS = Array.from({ length: new Date().getFullYear() + 1 - 1980 }, (_, i) => String(new Date().getFullYear() - i));
 const KM = ["25000", "50000", "100000", "150000", "200000", "250000", "300000"];
 const KW = [["55", "75 ZS"], ["75", "102 ZS"], ["100", "136 ZS"], ["130", "177 ZS"], ["160", "218 ZS"], ["200", "272 ZS"], ["250", "340 ZS"]];
 

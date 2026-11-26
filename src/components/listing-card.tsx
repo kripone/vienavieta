@@ -4,7 +4,7 @@ import { EvalBadge } from "@/components/eval-badge";
 import { ExtThumb } from "@/components/ext-thumb";
 import type { PriceEval } from "@/lib/price-eval";
 import { Ill } from "@/components/ill";
-import { DEAL_LABEL, SOURCE_LABEL } from "@/lib/constants";
+import { DEAL_LABEL, DROP_MAX, SOURCE_LABEL } from "@/lib/constants";
 import { listingIll } from "@/lib/illustrations";
 import { ssBigThumb } from "@/lib/ext-img";
 import { formatNumber, formatPrice, timeAgo } from "@/lib/format";
@@ -114,7 +114,7 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
         <div className="price">
           {formatPrice(l.price)} {unit && <small>{unit}</small>}
         </div>
-        {oldPrice != null && oldPrice > l.price && (
+        {oldPrice != null && oldPrice > l.price && l.price >= oldPrice * (1 - DROP_MAX) && (
           <div className="drop">
             <s>{formatPrice(oldPrice)}</s> −{formatPrice(oldPrice - l.price)}
           </div>

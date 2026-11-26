@@ -2,7 +2,7 @@
 import { and, eq, inArray, isNotNull, isNull, or } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { inferBody } from "../illustrations";
-import { findMake, matchModel, vehicleTitle } from "./ss-rss";
+import { findMake, matchModel, realName, vehicleTitle } from "./ss-rss";
 import { houseTail } from "../vzd-key";
 import { sql } from "drizzle-orm";
 
@@ -11,6 +11,26 @@ const BODY_KEY = "backfill:body:v3";
 const MODEL_KEY = "backfill:makemodel:v2"; // v2: modeļu aizstājvārdi (Allroad, Mazda6, T5, "21" → 21 Volga)
 const RECRAWL_KEY = "recrawl:models:v1";
 const PLACES_RECRAWL_KEY = "recrawl:places:v1";
+const PLACEHOLDER_KEY = "backfill:placeholder-titles:v1";
+
+/** Vienreiz: ārējie transporta sludinājumi ar portāla aizstājēju markas vietā ("- 6.0 2005", "-Kita- -kita-") → pareizs virsraksts. */
+export async function backfillPlaceholderTitles() {
+  const done = await db.query.crawlState.findFirst({ where: eq(crawlState.name, PLACEHOLDER_KEY) });
+  if (done?.lastFullAt) return null;
+  const rows = await db
+    .select({ id: listings.id, vc: listings.vehicleClass, makeText: listings.makeText, modelText: listings.modelText, engineL: listings.engineL, fuel: listings.fuel, year: listings.year })
+    .from(listings)
+    .where(and(eq(listings.kind, "vehicle"), isNull(listings.makeId), sql`(${listings.title} ~ '^\\s*[-–]' or ${listings.makeText} ~ '^\\s*[-–]')`));
+  for (const r of rows) {
+    await db
+      .update(listings)
+      .set({ makeText: realName(r.makeText) || null, modelText: realName(r.modelText) || null, title: vehicleTitle(r.makeText ?? "", r.modelText ?? "", r.engineL, r.fuel, r.year, r.vc ?? "car").slice(0, 120) })
+      .where(eq(listings.id, r.id));
+  }
+  const result = { updated: rows.length };
+  await db.insert(crawlState).values({ name: PLACEHOLDER_KEY, lastFullAt: new Date(), lastResult: result }).onConflictDoUpdate({ target: crawlState.name, set: { lastFullAt: new Date(), lastResult: result } });
+  return result;
+}
 
 /**
  * Marka/modelis ss.com transportam, kas ievākts pirms aizstājvārdiem ("Mercedes" → Mercedes-Benz, BMW "320" → 3. sērija,

@@ -58,7 +58,7 @@ export default async function DropsPage(props: { searchParams: Promise<Record<st
               <p className="fine">
                 {timeAgo(at, t)}: {formatPrice(prev)} → <b>{formatPrice(card.price)}</b> (−{Math.round(((prev - card.price) / prev) * 100)}%)
               </p>
-              <ListingCard l={card} oldPrice={card.firstPrice ?? prev} also={also.get(card.id)} evaluation={evals.get(card.id)} vzd={vzd.get(card.id)} compare />
+              <ListingCard l={card} oldPrice={prev} also={also.get(card.id)} evaluation={evals.get(card.id)} vzd={vzd.get(card.id)} compare />
             </div>
           ))}
         </div>

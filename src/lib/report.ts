@@ -1,5 +1,6 @@
 // Ikmēneša tirgus pārskats (/parskati/<gads-mēnesis>): aprēķināts no sludinājumiem, kas tajā mēnesī bija pieejami,
 // cenu izmaiņām (price_history) un dienas momentuzņēmumiem (market_stats). Viens objekts vairākos portālos skaitās vienreiz.
+import { TOP_PLACE_MIN } from "./constants";
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { cached } from "./search";
@@ -47,7 +48,7 @@ async function monthReportFresh(ym: string) {
       select p.name place, count(*) n, percentile_cont(0.5) within group (order by l.price / l.area_m2)::int median
       from listings l join places p on p.id = l.place_id join regions r on r.id = p.region_id
       where ${inMonth} and l.property_type = 'Dzīvoklis' and l.deal = 'sell' and l.area_m2 > 0 and l.price > 1000 and r.name = 'Rīga' and ${primary}
-      group by p.name having count(*) >= 5 order by median desc`),
+      group by p.name having count(*) >= ${TOP_PLACE_MIN} order by median desc`),
     rows<{ region: string; n: string; median: number; rent: number | null }>(sql`
       select r.name region, count(*) filter (where l.deal = 'sell') n,
         (percentile_cont(0.5) within group (order by l.price / l.area_m2) filter (where l.deal = 'sell'))::int median,

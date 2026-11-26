@@ -4,6 +4,7 @@ import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { cardFields } from "@/lib/listings";
 import { groupPrimaryOnly } from "@/lib/dedupe";
+import { DROP_MAX } from "@/lib/constants";
 
 const { listings, priceHistory, places, regions } = schema;
 
@@ -42,7 +43,7 @@ export async function recentDrops(opts: { kind?: "vehicle" | "property"; days?: 
       from price_history ph
       where ph.listing_id in (select listing_id from price_history group by listing_id having count(*) > 1 and max(changed_at) >= ${since})
     ) x
-    where rn = 1 and prev is not null and price < prev and changed_at >= ${since}
+    where rn = 1 and prev is not null and price < prev and price >= prev * ${1 - DROP_MAX} and changed_at >= ${since}
     order by changed_at desc
     limit ${limit * 3}
   `);

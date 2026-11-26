@@ -5,6 +5,7 @@ import type { T } from "./core";
 const PATTERNS: [RegExp, (t: T, m: RegExpMatchArray) => string][] = [
   [/^(\d+)-istabu dzīvoklis/, (t, m) => t("{n}-istabu dzīvoklis", { n: m[1] })],
   [/^Istaba(?= |$)/, (t) => t("Istaba")],
+  [/^(Automašīna|Motocikls|Kemperis)(?= |$)/, (t, m) => t(m[1])],
   [/ dzīvoklī$/, (t) => " " + t("dzīvoklī")],
   [/^Privātmāja/, (t) => t("Privātmāja")],
   [/^Vasarnīca/, (t) => t("Vasarnīca")],

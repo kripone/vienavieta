@@ -1,6 +1,7 @@
 import { and, asc, desc, eq, ne, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { mediaUrl } from "./storage";
+import { groupPrimaryOnly } from "./dedupe";
 
 const { listings, places, regions, makes, models, listingPhotos, users } = schema;
 
@@ -147,6 +148,7 @@ export async function similarListings(l: SimilarSource, limit = 6) {
     eq(listings.kind, l.kind as "vehicle" | "property"),
     sql`${listings.price} between ${Math.floor(l.price * 0.6)} and ${Math.ceil(l.price * 1.5)}`,
     ...(l.groupKey ? [sql`${listings.groupKey} is distinct from ${l.groupKey}`] : []),
+    groupPrimaryOnly, // viens ieraksts no dublikātu grupas
   ];
   const run = (extra: ReturnType<typeof sql>[]) =>
     db
@@ -177,9 +179,11 @@ export async function similarListings(l: SimilarSource, limit = 6) {
   }
   const seen = new Set<string>();
   const out: Awaited<ReturnType<typeof run>> = [];
+  // arī nesagrupēti dublikāti (tas pats virsraksts, cena un platība) – tikai vienreiz
+  const same = (r: { title: string; price: number; areaM2: string | null }) => `${r.title}|${r.price}|${r.areaM2 ?? ""}`;
   for (const extra of tries) {
     if (out.length >= limit) break;
-    for (const r of await run(extra)) if (!seen.has(r.id) && out.length < limit) { seen.add(r.id); out.push(r); }
+    for (const r of await run(extra)) if (!seen.has(r.id) && !seen.has(same(r)) && out.length < limit) { seen.add(r.id); seen.add(same(r)); out.push(r); }
   }
   return out;
 }

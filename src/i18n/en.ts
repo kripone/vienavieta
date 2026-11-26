@@ -1099,4 +1099,11 @@ export const en: Dict = {
   "Komplektācija: {t}": "Trim: {t}",
   "{make} komplektācijas": "{make} trim levels",
   "Jautā brīvi, tāpat kā cilvēkam: piemēram, kāds dīzeļa universālis pieejams līdz 8000 € vai cik maksā 2 istabu dzīvoklis Purvciemā. Asistents pārzina visus sludinājumus, cenu kritumus un reālos darījumus.": "Ask freely, just like a person: for example, which diesel estate is available under €8,000 or what a 2-room flat in Purvciems costs. The assistant knows all listings, price drops and real transactions.",
+  "Automašīna": "Car",
+  "Motocikls": "Motorcycle",
+  "Kemperis": "Camper",
+  "Turpināt ar {p}": "Continue with {p}",
+  "Mainīt": "Change",
+  "Virsbūves tips": "Body type",
+  "Avoti": "Sources",
 };

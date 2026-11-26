@@ -1107,4 +1107,11 @@ export const ru: Dict = {
   "Komplektācija: {t}": "Комплектация: {t}",
   "{make} komplektācijas": "Комплектации {make}",
   "Jautā brīvi, tāpat kā cilvēkam: piemēram, kāds dīzeļa universālis pieejams līdz 8000 € vai cik maksā 2 istabu dzīvoklis Purvciemā. Asistents pārzina visus sludinājumus, cenu kritumus un reālos darījumus.": "Спрашивайте свободно, как человека: например, какой дизельный универсал есть до 8000 € или сколько стоит 2-комнатная квартира в Пурвциемсе. Ассистент знает все объявления, снижения цен и реальные сделки.",
+  "Automašīna": "Автомобиль",
+  "Motocikls": "Мотоцикл",
+  "Kemperis": "Кемпер",
+  "Turpināt ar {p}": "Продолжить через {p}",
+  "Mainīt": "Изменить",
+  "Virsbūves tips": "Тип кузова",
+  "Avoti": "Источники",
 };

@@ -8,6 +8,8 @@ import {
   REGION_GROUPS_LOC,
   REGION_GROUP_LABEL,
   SOURCE_LABEL,
+  DROP_MAX,
+  TOP_PLACE_MIN,
 } from "./constants";
 
 const { listings, places, regions, makes, models, users, listingPhotos } = schema;
@@ -255,7 +257,7 @@ async function searchListingsFresh(s: SearchParams) {
   const top = sql`case when ${listings.topUntil} > ${now} then 0 else 1 end`;
   const fresh = sql`greatest(${listings.createdAt}, coalesce(${listings.bumpedAt}, ${listings.createdAt}))`;
   // "drop": lielākais kritums % no sākuma cenas; "old": visilgāk tirgū
-  const dropPct = sql`coalesce((${listings.firstPrice} - ${listings.price})::float / nullif(${listings.firstPrice}, 0), 0)`;
+  const dropPct = sql`case when ${listings.price} >= ${listings.firstPrice} * ${1 - DROP_MAX} then coalesce((${listings.firstPrice} - ${listings.price})::float / nullif(${listings.firstPrice}, 0), 0) else 0 end`;
   const order =
     s.sort === "cheap" ? [asc(listings.price)]
     : s.sort === "dear" ? [desc(listings.price)]
@@ -620,7 +622,7 @@ export function priceInsights(s: SearchParams): Promise<PriceInsights | null> {
         .leftJoin(users, eq(listings.userId, users.id));
     const where = and(...conditions(base), sql`${listings.price} > 0`);
     const pc = (f: number) => sql<number>`percentile_cont(${f}::float8) within group (order by ${listings.price})`;
-    const dropped = sql`${listings.firstPrice} > ${listings.price} and exists (select 1 from price_history h where h.listing_id = ${listings.id} and h.changed_at > now() - interval '30 days')`;
+    const dropped = sql`${listings.firstPrice} > ${listings.price} and ${listings.price} >= ${listings.firstPrice} * ${1 - DROP_MAX} and exists (select 1 from price_history h where h.listing_id = ${listings.id} and h.changed_at > now() - interval '30 days')`;
     const [st] = (await from({
       n: count(), p5: pc(0.05), p25: pc(0.25), median: pc(0.5), p75: pc(0.75), p95: pc(0.95),
       drops: sql<number>`count(*) filter (where ${dropped})`,
@@ -795,7 +797,7 @@ export function marketOverview(s: SearchParams): Promise<MarketOverview | null> 
             .leftJoin(makes, eq(listings.makeId, makes.id)).leftJoin(models, eq(listings.modelId, models.id)).leftJoin(users, eq(listings.userId, users.id))
             .where(and(where, isNotNull(listings.placeId), sql`${listings.areaM2} > 10`))
             .groupBy(places.name)
-            .having(sql`count(*) >= 5`)).map((r) => ({ name: String(r.name), n: Number(r.n), sqm: r.sqm != null ? Math.round(Number(r.sqm) * (s.deal === "rent" ? 10 : 1)) / (s.deal === "rent" ? 10 : 1) : null })).filter((r): r is { name: string; n: number; sqm: number } => r.sqm != null)
+            .having(sql`count(*) >= ${TOP_PLACE_MIN}`)).map((r) => ({ name: String(r.name), n: Number(r.n), sqm: r.sqm != null ? Math.round(Number(r.sqm) * (s.deal === "rent" ? 10 : 1)) / (s.deal === "rent" ? 10 : 1) : null })).filter((r): r is { name: string; n: number; sqm: number } => r.sqm != null)
         : [];
       byPlace.sort((x, y) => x.sqm - y.sqm);
       const cheap = byPlace.length >= 6 ? byPlace.slice(0, 3) : [];

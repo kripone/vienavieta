@@ -340,9 +340,16 @@ export function modelFromText(list: ModelRow[], makeId: number, text?: string) {
   return compact ? null : null;
 }
 
-/** Virsraksts ārējam transportam no faktiem, piem. "Kia EV6 2022", "BMW 3. sērija 2.0 dīzelis 2016". */
-export function vehicleTitle(make: string, model: string, engineL: string | null, fuel: string | null, year: number | null) {
-  return [make, model, engineL ? Number(engineL).toFixed(1) : "", fuel === "Dīzelis" ? "dīzelis" : fuel === "Hibrīds" ? "hibrīds" : "", year ?? ""]
+/** Portālu aizstājēji nezināmai markai/modelim ("-", "-Kita-", "Citi") → tukšs. */
+const PLACEHOLDER = /^[\s\-–—.]*(kita|kitas|kiti|citi|cits|cita|other|others|другие|другое|прочие)?[\s\-–—.]*$/i;
+export const realName = (s: string | null | undefined) => (s && !PLACEHOLDER.test(s) ? s.trim() : "");
+const FALLBACK: Record<string, string> = { car: "Automašīna", moto: "Motocikls", camper: "Kemperis" };
+
+/** Virsraksts ārējam transportam no faktiem, piem. "Kia EV6 2022", "BMW 3. sērija 2.0 dīzelis 2016".
+ *  Bez markas un modeļa: "Automašīna 6.0 2005" (nevis "- 6.0 2005"). */
+export function vehicleTitle(make: string, model: string, engineL: string | null, fuel: string | null, year: number | null, vc = "car") {
+  const mk = realName(make), md = realName(model);
+  return [mk || md ? "" : FALLBACK[vc] ?? FALLBACK.car, mk, md, engineL ? Number(engineL).toFixed(1) : "", fuel === "Dīzelis" ? "dīzelis" : fuel === "Hibrīds" ? "hibrīds" : "", year ?? ""]
     .filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
 }
 
@@ -415,7 +422,7 @@ export function mapItem(
     const { engineL, fuel } = engine(first(f, "Tilpums"));
     const makeName = make?.name ?? (makeRaw ? makeRaw[0].toUpperCase() + makeRaw.slice(1) : "");
     const modelName = model?.name ?? modelRaw;
-    const title = vehicleTitle(makeName, modelName, engineL, fuel, year);
+    const title = vehicleTitle(makeName, modelName, engineL, fuel, year, feed.vehicleClass);
     if (!title) return null;
     return {
       ...base,
@@ -423,8 +430,8 @@ export function mapItem(
       vehicleClass: feed.vehicleClass,
       makeId: make?.id ?? null,
       modelId: model?.id ?? null,
-      makeText: make ? null : makeName || null,
-      modelText: model ? null : modelRaw || null,
+      makeText: make ? null : realName(makeName) || null,
+      modelText: model ? null : realName(modelRaw) || null,
       trim: feed.vehicleClass === "car" ? detectTrim(make?.name, modelRaw0, item.snippet) : null,
       year: year && year > 1900 && year < 2100 ? year : null,
       mileageKm: mileage(first(f, "Nobraukums")),

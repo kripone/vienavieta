@@ -311,6 +311,10 @@ export const PORSCHE = { key: "porsche:used", url: "https://finder.porsche.com/l
 /** PLACE_MIN: īpašumu salīdzina ar to pašu vietu (apkaimi/pilsētu/pagastu), ja tur ir vismaz tik citu sludinājumu; citādi ar reģionu. */
 /** Jauna komplektācija (src/lib/trims.ts) kļūst aktīva, kad redzēta tik dažādos sludinājumos. */
 export const TRIM_AUTO_MIN = 5;
+/** Cenu kritums virs šīs daļas (50%) ir aizdomīgs (bieži 10× drukas kļūda: 129 000 → 12 900): netiek rādīts topos, kārtošanā un kartītēs. */
+export const DROP_MAX = 0.5;
+/** Lētāko/dārgāko vietu topos (€/m²) vietai vajag vismaz tik sludinājumu, lai 5–7 objekti nekļūtu par „dārgāko”. */
+export const TOP_PLACE_MIN = 20;
 export const PRICE_EVAL = { GOOD: 0.88, HIGH: 1.15, MIN: 3, YEARS: 2, PLACE_MIN: 12 } as const;
 /** Cik sludinājumus var salīdzināt vienlaikus. */
 export const MAX_COMPARE = 4;

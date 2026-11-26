@@ -7,7 +7,7 @@ type Social = { google: boolean; facebook: boolean; apple: boolean; telegram: bo
 const SOCIAL_LABEL = { google: "Google", facebook: "Facebook", apple: "Apple" } as const;
 
 /** Oficiālais Telegram Login Widget (poga nāk no telegram.org skripta). */
-function TelegramLogin({ bot, next }: { bot: string; next: string }) {
+function TelegramLogin({ bot, next, lang }: { bot: string; next: string; lang: string }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!ref.current) return;
@@ -16,18 +16,19 @@ function TelegramLogin({ bot, next }: { bot: string; next: string }) {
     s.async = true;
     s.setAttribute("data-telegram-login", bot);
     s.setAttribute("data-size", "large");
+    s.setAttribute("data-lang", lang); // pogas teksts lapas valodā
     s.setAttribute("data-radius", "8");
     s.setAttribute("data-userpic", "false");
     s.setAttribute("data-request-access", "write");
     s.setAttribute("data-auth-url", `${window.location.origin}/api/auth/telegram?next=${encodeURIComponent(next)}`);
     ref.current.innerHTML = "";
     ref.current.appendChild(s);
-  }, [bot, next]);
+  }, [bot, next, lang]);
   return <div ref={ref} className="tg-login" />;
 }
 
 export function LoginForm({ next, social, telegramBot }: { next: string; social: Social; telegramBot?: string }) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -78,10 +79,10 @@ export function LoginForm({ next, social, telegramBot }: { next: string; social:
           <div className="sso">
             {providers.map((p) => (
               <button key={p} type="button" className="btn" onClick={() => authClient.signIn.social({ provider: p, callbackURL: next, errorCallbackURL: "/ielogoties" })}>
-                Turpināt ar {SOCIAL_LABEL[p]}
+                {t("Turpināt ar {p}", { p: SOCIAL_LABEL[p] })}
               </button>
             ))}
-            {social.telegram && telegramBot && <TelegramLogin bot={telegramBot} next={next} />}
+            {social.telegram && telegramBot && <TelegramLogin bot={telegramBot} next={next} lang={locale} />}
           </div>
           <div className="or">
             <span>{t("vai ar e-pastu")}</span>

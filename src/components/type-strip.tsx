@@ -22,7 +22,8 @@ export async function TypeStrip({ mode, flat, counts }: { mode: "car" | "home"; 
         <p className="strip-h">{mode === "car" ? tr("Virsbūves tips") : tr("Īpašuma veids")}</p>
       </div>
       <div className="strip-row">
-        {items.map((t) => (
+        {/* tukšas kategorijas nerādām (izņemot ieslēgto filtru) */}
+        {items.filter((t) => (counts[t] ?? 0) > 0 || active === t).map((t) => (
           <a key={t} className="tcard" href={href(t)} aria-current={active === t ? "true" : undefined}>
             <Ill svg={mode === "car" ? carIll(t) : homeIll(t)} />
             <b>{tr(t)}</b>

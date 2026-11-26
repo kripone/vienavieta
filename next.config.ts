@@ -6,6 +6,13 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // importa faili līdz 15 MB (DEALER_FEED.MAX_BYTES)
   experimental: { serverActions: { bodySizeLimit: "16mb" }, proxyClientMaxBodySize: "16mb" },
+  // biežas kļūdainas adreses → pareizā lapa
+  async redirects() {
+    return ["", "/en", "/ru", "/lt"].flatMap((p) => [
+      { source: `${p}/kritumi`, destination: `${p}/cenu-kritumi`, permanent: true },
+      { source: `${p}/cenu-kritums`, destination: `${p}/cenu-kritumi`, permanent: true },
+    ]);
+  },
   async headers() {
     return [
       {

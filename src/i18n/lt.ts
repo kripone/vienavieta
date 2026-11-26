@@ -1108,4 +1108,10 @@ export const lt: Dict = {
   "Komplektācija: {t}": "Komplektacija: {t}",
   "{make} komplektācijas": "{make} komplektacijos",
   "Jautā brīvi, tāpat kā cilvēkam: piemēram, kāds dīzeļa universālis pieejams līdz 8000 € vai cik maksā 2 istabu dzīvoklis Purvciemā. Asistents pārzina visus sludinājumus, cenu kritumus un reālos darījumus.": "Klauskite laisvai, kaip žmogaus: pavyzdžiui, koks dyzelinis universalas yra iki 8000 € ar kiek kainuoja 2 kambarių butas Purvciemyje. Asistentas žino visus skelbimus, kainų sumažinimus ir realius sandorius.",
+  "Automašīna": "Automobilis",
+  "Motocikls": "Motociklas",
+  "Kemperis": "Kemperis",
+  "Turpināt ar {p}": "Tęsti su {p}",
+  "Mainīt": "Keisti",
+  "Virsbūves tips": "Kėbulo tipas",
 };
