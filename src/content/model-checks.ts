@@ -199,7 +199,7 @@ export const MODEL_CHECKS: Record<string, Rule[]> = {
     r(x("D5 dīzeļiem pārbaudi DPF, EGR un sprauslas; pajautā par apkopju vēsturi.", "On the D5 diesels check the DPF, EGR and injectors, and ask for the service history.", "У дизелей D5 проверьте сажевый фильтр, EGR и форсунки; спросите историю обслуживания.", "D5 dyzeliuose patikrinkite DPF, EGR ir purkštukus; paprašykite techninės priežiūros istorijos."), { g: ["1. paaudze"], f: "Dīzelis" }),
     r(x("T8 plug-in hibrīdam pārbaudi akumulatora stāvokli un to, vai lādēšana strādā.", "On the T8 plug-in hybrid check the battery condition and that charging works.", "У plug-in гибрида T8 проверьте состояние батареи и работу зарядки.", "T8 plug-in hibridui patikrinkite baterijos būklę ir ar veikia įkrovimas."), { g: ["2. paaudze"], f: "Hibrīds" }),
     r(ELEC, { g: ["2. paaudze"] }),
-    r(x("Pārbaudi eļļas līmeni un dzesēšanas sistēmu; D4/D5 dīzeļiem klausies sadales ķēdes troksni.", "Check the oil level and cooling system; on the D4/D5 diesels listen for timing chain noise.", "Проверьте уровень масла и систему охлаждения; у дизелей D4/D5 прислушайтесь к цепи ГРМ.", "Patikrinkite alyvos lygį ir aušinimo sistemą; D4/D5 dyzeliuose klausykitės grandinės triukšmo."), { g: ["2. paaudze"], f: "Dīzelis" }),
+    r(x("Pārbaudi eļļas līmeni un dzesēšanas sistēmu; D4/D5 dīzeļiem pajautā, kad mainīta zobsiksna.", "Check the oil level and cooling system; on the D4/D5 diesels ask when the timing belt was replaced.", "Проверьте уровень масла и систему охлаждения; у дизелей D4/D5 спросите, когда менялся ремень ГРМ.", "Patikrinkite alyvos lygį ir aušinimo sistemą; D4/D5 dyzeliuose paklauskite, kada keistas paskirstymo diržas."), { g: ["2. paaudze"], f: "Dīzelis" }),
   ],
   "BMW|X5": [
     r(x("Pārbaudi sadales kārbu: raustīšanās vai klikšķi lēnos pagriezienos liecina par problēmu.", "Check the transfer case: jerking or clicking in slow turns signals a problem.", "Проверьте раздаточную коробку: рывки или щелчки в медленных поворотах — признак проблемы.", "Patikrinkite skirstymo dėžę: trūkčiojimas ar spragsėjimas lėtai sukant rodo problemą.")),
@@ -248,7 +248,7 @@ export const MODEL_CHECKS: Record<string, Rule[]> = {
   ],
   "Audi|Q5": [
     r(TFSI20, { g: ["8R"], f: "Benzīns", y: [2008, 2012] }),
-    r(x("2.0 TDI (agrīnajām versijām): pārbaudi sadales ķēdes un eļļas patēriņu; dīzeļiem arī DPF.", "On the early 2.0 TDI check the timing chain and oil consumption; on diesels also the DPF.", "У ранних 2.0 TDI проверьте цепь ГРМ и расход масла; у дизелей — и сажевый фильтр.", "Ankstyvuose 2.0 TDI patikrinkite grandinę ir alyvos sąnaudas; dyzeliuose ir DPF."), { g: ["8R"], f: "Dīzelis" }),
+    r(x("2.0 TDI: pārbaudi DPF un EGR, un pajautā, kad mainīta zobsiksna.", "On the 2.0 TDI check the DPF and EGR, and ask when the timing belt was replaced.", "У 2.0 TDI проверьте сажевый фильтр и EGR и спросите, когда менялся ремень ГРМ.", "2.0 TDI: patikrinkite DPF ir EGR, paklauskite, kada keistas paskirstymo diržas."), { g: ["8R"], f: "Dīzelis" }),
     r(x("7 pakāpju S tronic kārbai pārbaudi pārslēgšanos un pajautā par eļļas maiņu.", "On the 7-speed S tronic check the shifts and ask about oil changes.", "У 7-ступенчатой S tronic проверьте переключения и спросите о замене масла.", "7 pavarų S tronic patikrinkite perjungimą ir paklauskite apie alyvos keitimą."), { a: "Automāts" }),
     r(PHEV, { g: ["FY", "3. paaudze"], f: "Hibrīds" }),
     r(DIESEL, { g: ["FY"], f: "Dīzelis" }),
@@ -297,7 +297,7 @@ export const MODEL_CHECKS: Record<string, Rule[]> = {
   "Opel|Insignia": [
     r(M32, { g: ["A"], a: "Manuāla" }),
     r(DMF, { g: ["A"] }),
-    r(x("2.0 CDTI: pārbaudi DPF, EGR un sadales ķēdi; benzīna turbo versijām – eļļas patēriņu.", "On the 2.0 CDTI check the DPF, EGR and timing chain; on the turbo petrol the oil consumption.", "У 2.0 CDTI проверьте сажевый фильтр, EGR и цепь ГРМ; у бензинового турбо — расход масла.", "2.0 CDTI: patikrinkite DPF, EGR ir grandinę; turbo benzininėse – alyvos sąnaudas."), { g: ["A", "B"] }),
+    r(x("2.0 CDTI: pārbaudi DPF un EGR, pajautā par zobsiksnas maiņu; benzīna turbo versijām – eļļas patēriņu.", "On the 2.0 CDTI check the DPF and EGR and ask about the timing belt; on the turbo petrol the oil consumption.", "У 2.0 CDTI проверьте сажевый фильтр и EGR, спросите о замене ремня ГРМ; у бензинового турбо — расход масла.", "2.0 CDTI: patikrinkite DPF ir EGR, paklauskite apie paskirstymo diržo keitimą; turbo benzininėse – alyvos sąnaudas."), { g: ["A", "B"] }),
     r(x("Pārbaudi pilnpiedziņas (Haldex) sajūga eļļu un priekšējos gaismas elementus (AFL) – tie var būt dārgi.", "On AWD check the Haldex clutch oil; adaptive front lights (AFL) can be costly to repair.", "У полного привода проверьте масло муфты Haldex; адаптивные фары (AFL) могут быть дорогими в ремонте.", "Visų ratų pavarai patikrinkite Haldex sankabos alyvą; adaptyvūs žibintai (AFL) gali būti brangūs taisyti."), { g: ["A", "B"] }),
   ],
   "Škoda|Superb": [
@@ -347,7 +347,7 @@ export const MODEL_CHECKS: Record<string, Rule[]> = {
   ],
   "Toyota|Avensis": [
     r(x("2.2 D-4D dīzeļiem (T25/T27) zināmas galvas blīves problēmas.", "The 2.2 D-4D diesel (T25/T27) has known head gasket issues.", "У дизеля 2.2 D-4D (T25/T27) известны проблемы с прокладкой ГБЦ.", "2.2 D-4D dyzelis (T25/T27) turi žinomų galvutės tarpinės problemų."), { g: ["T25", "T27"], f: "Dīzelis" }),
-    r(x("1.8/2.0 benzīna dzinējiem pārbaudi eļļas patēriņu un sadales ķēdi (2.0 D-4D – turbīnu).", "On the 1.8/2.0 petrol engines check oil consumption and the timing chain (on the 2.0 D-4D the turbo).", "У бензиновых 1.8/2.0 проверьте расход масла и цепь ГРМ (у 2.0 D-4D — турбину).", "1.8/2.0 benzininiuose patikrinkite alyvos sąnaudas ir grandinę (2.0 D-4D – turbiną)."), { g: ["T25", "T27"], f: "Benzīns" }),
+    r(x("1.8/2.0 benzīna dzinējiem pārbaudi eļļas patēriņu un sadales ķēdi.", "On the 1.8/2.0 petrol engines check oil consumption and the timing chain.", "У бензиновых 1.8/2.0 проверьте расход масла и цепь ГРМ.", "1.8/2.0 benzininiuose patikrinkite alyvos sąnaudas ir grandinę."), { g: ["T25", "T27"], f: "Benzīns" }),
     r(RUST, { g: ["T22"] }),
     r(x("Multidrive S (CVT) kārbai pārbaudi, vai nav kaukšanas un raustīšanās.", "On the Multidrive S (CVT) check for whining or judder.", "У Multidrive S (CVT) проверьте, нет ли воя и рывков.", "Multidrive S (CVT) patikrinkite, ar nėra kaukimo ir trūkčiojimo."), { g: ["T27"], a: "Automāts" }),
   ],
@@ -421,7 +421,7 @@ export const MODEL_CHECKS: Record<string, Rule[]> = {
     r(x("Zafira B: pārbaudi, vai izpildīts atsaukums par salona ventilatora rezistoru (aizdegšanās risks).", "Zafira B: check that the recall for the heater blower resistor (fire risk) was done.", "Zafira B: проверьте, выполнен ли отзыв по резистору вентилятора печки (риск возгорания).", "Zafira B: patikrinkite, ar atliktas atšaukimas dėl salono ventiliatoriaus rezistoriaus (gaisro rizika)."), { g: ["B"] }),
     r(M32, { g: ["B", "C (Tourer)"], a: "Manuāla" }),
     r(x("1.9 CDTI dīzeļiem pārbaudi virpuļvārstus un EGR.", "On the 1.9 CDTI diesels check the swirl flaps and EGR.", "У дизелей 1.9 CDTI проверьте вихревые заслонки и EGR.", "1.9 CDTI dyzeliuose patikrinkite sūkurines sklendes ir EGR."), { g: ["B"], f: "Dīzelis" }),
-    r(x("1.4 turbo benzīnam pārbaudi dzesēšanas sistēmu un eļļas patēriņu; 2.0 CDTI – sadales ķēdi.", "On the 1.4 turbo petrol check the cooling system and oil consumption; on the 2.0 CDTI the timing chain.", "У бензинового 1.4 турбо проверьте систему охлаждения и расход масла; у 2.0 CDTI — цепь ГРМ.", "1.4 turbo benzininiame patikrinkite aušinimo sistemą ir alyvos sąnaudas; 2.0 CDTI – grandinę."), { g: ["C (Tourer)"] }),
+    r(x("1.4 turbo benzīnam pārbaudi dzesēšanas sistēmu un eļļas patēriņu; 2.0 CDTI – DPF un zobsiksnas maiņu.", "On the 1.4 turbo petrol check the cooling system and oil consumption; on the 2.0 CDTI the DPF and timing belt.", "У бензинового 1.4 турбо проверьте систему охлаждения и расход масла; у 2.0 CDTI — сажевый фильтр и ремень ГРМ.", "1.4 turbo benzininiame patikrinkite aušinimo sistemą ir alyvos sąnaudas; 2.0 CDTI – DPF ir paskirstymo diržą."), { g: ["C (Tourer)"] }),
     r(RUST, { g: ["A"] }),
   ],
   "Volkswagen|Caddy": [
@@ -548,7 +548,6 @@ export const MODEL_CHECKS: Record<string, Rule[]> = {
   "Mazda|CX-5": [
     r(x("2.2 Skyactiv-D: pilsētas braukšanā degviela var nonākt eļļā – pārbaudi eļļas līmeni un apkopes.", "2.2 Skyactiv-D: in town driving fuel can dilute the oil – check the oil level and servicing.", "2.2 Skyactiv-D: при городской езде топливо может попадать в масло — проверьте уровень масла и ТО.", "2.2 Skyactiv-D: važinėjant mieste kuras gali patekti į alyvą – patikrinkite alyvos lygį ir priežiūrą."), { f: "Dīzelis" }),
     r(RUST, {}),
-    r(x("2.5 Skyactiv-G benzīnam pārbaudi eļļas patēriņu un apkopju vēsturi.", "On the 2.5 Skyactiv-G petrol check oil consumption and the service history.", "У бензинового 2.5 Skyactiv-G проверьте расход масла и историю обслуживания.", "2.5 Skyactiv-G benzininiame patikrinkite alyvos sąnaudas ir priežiūros istoriją."), { g: ["KF"], f: "Benzīns" }),
     r(x("Pārbaudi, vai izpildīti atsaukumi un programmatūras atjauninājumi.", "Check that recalls and software updates have been done.", "Проверьте, выполнены ли отзывные кампании и обновления ПО.", "Patikrinkite, ar atlikti atšaukimai ir programinės įrangos atnaujinimai."), { g: ["3. paaudze"] }),
   ],
   // --- modeļi bez paaudžu tabulas (MODEL_INFO): noteikumi pēc gadiem ---
@@ -683,7 +682,6 @@ export const MODEL_CHECKS: Record<string, Rule[]> = {
   "Lexus|NX": [
     r(HYBRID, { f: "Hibrīds" }),
     r(x("Pārbaudi, vai izpildīti atsaukumi un programmatūras atjauninājumi.", "Check that recalls and software updates have been done.", "Проверьте, выполнены ли отзывные кампании и обновления ПО.", "Patikrinkite, ar atlikti atšaukimai ir programinės įrangos atnaujinimai."), {}),
-    r(x("2.0 turbo benzīnam pārbaudi eļļas patēriņu un apkopju vēsturi.", "On the 2.0 turbo petrol check the oil consumption and service history.", "У бензинового 2.0 турбо проверьте расход масла и историю обслуживания.", "2.0 turbo benzininiame patikrinkite alyvos sąnaudas ir priežiūros istoriją."), { f: "Benzīns" }),
   ],
   "Audi|A5": [
     r(TFSI20, { y: [2008, 2012], f: "Benzīns" }),
