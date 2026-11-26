@@ -43,7 +43,7 @@ export async function recentDrops(opts: { kind?: "vehicle" | "property"; days?: 
       from price_history ph
       where ph.listing_id in (select listing_id from price_history group by listing_id having count(*) > 1 and max(changed_at) >= ${since})
     ) x
-    where rn = 1 and prev is not null and price < prev and price >= prev * ${1 - DROP_MAX} and changed_at >= ${since}
+    where rn = 1 and prev is not null and price < prev and price >= prev * ${1 - DROP_MAX}::float8 and changed_at >= ${since}
     order by changed_at desc
     limit ${limit * 3}
   `);
