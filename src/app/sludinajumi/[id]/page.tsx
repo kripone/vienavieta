@@ -259,7 +259,7 @@ export default async function ListingPage(props: Props) {
             {l.source !== "own" && <p className="fine">{t("Aprīkojums pēc pārdevēja norādītā {src}.", { src: SOURCE_LABEL[l.source] ?? l.source })}</p>}
           </details>
         )}
-        {l.kind === "vehicle" && l.vehicleClass === "car" && d.make && d.model && <ModelInfo make={d.make} model={d.model} year={l.year} trim={l.trim} />}
+        {l.kind === "vehicle" && l.vehicleClass === "car" && d.make && d.model && <ModelInfo make={d.make} model={d.model} year={l.year} trim={l.trim} fuel={l.fuel} gearbox={l.gearbox} />}
         {l.kind === "property" && areaInfo(d.region, d.place, locale) && (
           <section className="model-info">
             <h2>{t("Par apkaimi: {name}", { name: d.place! })}</h2>

@@ -3,13 +3,13 @@
 import { getT } from "@/i18n/server";
 import { trTitle } from "@/i18n/content";
 import { gensForYear, modelInfo, type Gen } from "@/content/models";
-import { MODEL_CHECKS } from "@/content/model-checks";
+import { checkGroups, checksFor, hasChecks } from "@/content/model-checks";
 import { TRIM_INFO } from "@/content/trims";
 
-export async function ModelInfo({ make, model, year, trim }: { make: string; model: string; year?: number | null; trim?: string | null }) {
+export async function ModelInfo({ make, model, year, trim, fuel, gearbox }: { make: string; model: string; year?: number | null; trim?: string | null; fuel?: string | null; gearbox?: string | null }) {
   const info = modelInfo(make, model);
   const trims = TRIM_INFO[make];
-  if (!info && !trims) return null;
+  if (!info && !trims && !hasChecks(make, model)) return null;
   const { t, locale } = await getT();
   const name = `${make} ${trTitle(model, t)}`;
   const label = (code: string) => {
@@ -18,14 +18,31 @@ export async function ModelInfo({ make, model, year, trim }: { make: string; mod
   };
   const years = (g: Gen) => `${g[1]}–${g[2] ?? t("šobrīd")}`;
   const facts = info ? info.facts[locale] ?? info.facts.lv : [];
-  const checks = MODEL_CHECKS[`${make}|${model}`]?.[locale] ?? [];
-  const checkBlock = checks.length > 0 && (
-    <>
-      <h3>{t("Uz ko pievērst uzmanību, pērkot lietotu")}</h3>
-      <ul>{checks.map((c) => <li key={c}>{c}</li>)}</ul>
-      <p className="fine">{t("Tās ir biežāk zināmās vājās vietas, nevis konkrētā auto diagnoze – pirms pirkuma pārbaudi auto servisā.")}</p>
-    </>
-  );
+  const disclaimer = <p className="fine">{t("Tās ir biežāk zināmās vājās vietas, nevis konkrētā auto diagnoze – pirms pirkuma pārbaudi auto servisā.")}</p>;
+  // sludinājumā: tikai šim auto (paaudze, degviela, kārba) atbilstošais; modeļa lapā: visi, pa paaudzēm
+  const listingChecks = year !== undefined
+    ? checksFor(make, model, { year, fuel, gearbox, gens: info && year ? gensForYear(info, year).map((g) => g[0]) : [] }, locale)
+    : [];
+  const checkBlock = year !== undefined
+    ? listingChecks.length > 0 && (
+        <>
+          <h3>{t("Uz ko pievērst uzmanību, pērkot lietotu")}</h3>
+          <ul>{listingChecks.map((c) => <li key={c}>{c}</li>)}</ul>
+          {disclaimer}
+        </>
+      )
+    : (() => {
+        const groups = checkGroups(make, model, locale, t);
+        return groups.length > 0 && (
+          <>
+            <h3>{t("Uz ko pievērst uzmanību, pērkot lietotu")}</h3>
+            <ul>
+              {groups.flatMap((gr) => gr.lines.map((c) => <li key={`${gr.label}|${c}`}>{gr.label && <b>{gr.label}: </b>}{c}</li>))}
+            </ul>
+            {disclaimer}
+          </>
+        );
+      })();
   // sludinājumā: tikai šī auto komplektācija; modeļa lapā: visas markas komplektācijas
   const trimRows = trims ? Object.entries(trims).filter(([n]) => (year !== undefined ? n === trim : true)) : [];
   const trimBlock = trimRows.length > 0 && (
@@ -41,7 +58,7 @@ export async function ModelInfo({ make, model, year, trim }: { make: string; mod
 
   if (year !== undefined) {
     const gens = info && year ? gensForYear(info, year) : [];
-    if (!gens.length && !trimBlock) return null;
+    if (!gens.length && !trimBlock && !checkBlock) return null;
     const g = gens[gens.length - 1];
     const fl = g?.[3];
     const flNote = g && fl && gens.length === 1
@@ -65,7 +82,7 @@ export async function ModelInfo({ make, model, year, trim }: { make: string; mod
           </>
         )}
         {trimBlock}
-        {g && checkBlock}
+        {checkBlock}
       </section>
     );
   }
