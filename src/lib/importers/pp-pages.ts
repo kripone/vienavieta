@@ -322,7 +322,7 @@ export async function crawlPpSection(section: PpSection, mode: "quick" | "full")
     const cutoff = new Date(Date.now() - EXTERNAL_TTL_DAYS * 86_400_000);
     const stale = await db
       .update(listings)
-      .set({ status: "hidden" })
+      .set({ status: "deleted" })
       .where(
         and(
           eq(listings.source, "pp.lv"),

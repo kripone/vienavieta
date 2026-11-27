@@ -128,7 +128,7 @@ export async function fillPropertyDetails(limit = SS_DETAIL_PER_MIN, fetchHtml =
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       if (/\b404\b/.test(msg)) {
-        await db.update(listings).set({ detailCheckedAt: new Date() }).where(eq(listings.id, t.id));
+        await db.update(listings).set({ detailCheckedAt: new Date(), status: "deleted", updatedAt: new Date() }).where(eq(listings.id, t.id)); // 404 – avotā dzēsts
       } else {
         res.errors++;
         if ((e as { retryAfter?: number }).retryAfter) break;
@@ -180,7 +180,7 @@ export async function fillVehicleCities(limit = SS_DETAIL_PER_MIN, fetchHtml = d
       // 404 = sludinājums dzēsts; atzīmējam kā pārbaudītu, lai neatgrieztos
       if (/\b404\b/.test(msg)) {
         res.gone++;
-        await db.update(listings).set({ detailCheckedAt: new Date() }).where(eq(listings.id, t.id));
+        await db.update(listings).set({ detailCheckedAt: new Date(), status: "deleted", updatedAt: new Date() }).where(eq(listings.id, t.id)); // 404 – avotā dzēsts
       } else {
         res.errors++;
         if ((e as { retryAfter?: number }).retryAfter) break; // portāls lūdz pagaidīt

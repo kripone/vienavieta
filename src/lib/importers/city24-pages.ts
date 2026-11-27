@@ -252,7 +252,7 @@ export async function crawlCity24Section(section: City24Section, mode: "quick" |
     const cutoff = new Date(Date.now() - EXTERNAL_TTL_DAYS * 86_400_000);
     const stale = await db
       .update(listings)
-      .set({ status: "hidden" })
+      .set({ status: "deleted" })
       .where(and(eq(listings.source, "city24.lv"), eq(listings.propertyType, section.propertyType), eq(listings.deal, section.deal), eq(listings.status, "active"), lt(listings.updatedAt, cutoff)))
       .returning({ id: listings.id });
     res.removed = stale.length;

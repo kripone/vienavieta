@@ -152,7 +152,8 @@ export async function fillAutopliusDetails(limit = AP_DETAILS_PER_TICK, fetchHtm
       // citādi rindas galva ar mirušām lapām mūžīgi bloķē visu nolasīšanu.
       if (e instanceof Error && /^HTTP (404|410)$/.test(e.message)) {
         res.gone++;
-        await db.update(listings).set({ detailCheckedAt: new Date() }).where(eq(listings.id, t.id));
+        // avots apstiprina, ka sludinājuma vairs nav – noņemam uzreiz (ja atkal parādīsies sarakstā, ievākšana to atjaunos)
+        await db.update(listings).set({ detailCheckedAt: new Date(), status: "deleted", updatedAt: new Date() }).where(eq(listings.id, t.id));
         continue;
       }
       res.errors++;

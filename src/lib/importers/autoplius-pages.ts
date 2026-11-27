@@ -325,7 +325,7 @@ export async function crawlAutoplius(mode: "quick" | "full", target: ApTarget = 
     const cutoff = new Date(Date.now() - EXTERNAL_TTL_DAYS * 86_400_000);
     const stale = await db
       .update(listings)
-      .set({ status: "hidden" })
+      .set({ status: "deleted" })
       .where(and(eq(listings.source, "autoplius.lt"), eq(listings.kind, "vehicle"), eq(listings.vehicleClass, target.vc), eq(listings.status, "active"), lt(listings.updatedAt, cutoff)))
       .returning({ id: listings.id });
     res.removed = stale.length;

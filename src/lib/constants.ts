@@ -212,7 +212,7 @@ export const SS_QUICK_PAGES = 3;
 export const SS_QUICK_EVERY_MIN = 15;
 export const SS_FULL_EVERY_HOURS = 24;
 /** Ārējie sludinājumi tiek paslēpti, ja nav redzēti tik dienas (drošībai, ja pilnā kārta ilgi neizdodas). */
-export const EXTERNAL_TTL_DAYS = 21;
+export const EXTERNAL_TTL_DAYS = 7;
 /**
  * autoplius.lt ievākšana (lietotājs 2026-11-11, sk. CLAUDE.md; imports src/lib/importers/autoplius-pages.ts).
  * Lapas atver ar reālu pārlūku (Playwright), jo parasto HTTP bloķē Cloudflare.

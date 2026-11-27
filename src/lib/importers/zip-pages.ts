@@ -318,7 +318,7 @@ export async function crawlZipSection(section: ZipSection, mode: "quick" | "full
     const cutoff = new Date(Date.now() - EXTERNAL_TTL_DAYS * 86_400_000);
     const stale = await db
       .update(listings)
-      .set({ status: "hidden" })
+      .set({ status: "deleted" })
       .where(
         and(
           eq(listings.source, "zip.lv"),

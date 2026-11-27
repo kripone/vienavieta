@@ -249,7 +249,7 @@ export async function crawlBravo(mode: "quick" | "full"): Promise<CrawlResult> {
     const cutoff = new Date(Date.now() - EXTERNAL_TTL_DAYS * 86_400_000);
     const stale = await db
       .update(listings)
-      .set({ status: "hidden" })
+      .set({ status: "deleted" })
       .where(and(eq(listings.source, "bravo-auto.lv"), eq(listings.status, "active"), lt(listings.updatedAt, cutoff)))
       .returning({ id: listings.id });
     res.removed = stale.length;
