@@ -9,6 +9,7 @@ import { createShare, deleteReaction, revokeShare } from "./actions";
 import { priceEvals } from "@/lib/price-eval";
 import { requireUser } from "@/lib/session";
 import { soft } from "@/lib/errors";
+import { Tip } from "@/components/tip";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
@@ -29,6 +30,11 @@ export default async function FavoritesPage() {
         <h1>{t("Favorīti")}</h1>
         <a className="btn small" href="/pazinojumi">{t("🔔 Cenu krituma paziņojumi")}</a>
       </div>
+      {rows.length > 0 && (
+        <Tip id="favorites-v1" steps={[
+          { icon: "📝", title: "Piezīme un statuss", text: "Katram sludinājumam vari pierakstīt piezīmi un atzīmēt statusu, piem. „Sazinājos” vai „Sarunāta apskate”. Ja piezīmē ieraksti dienu un laiku, piedāvāsim to ielikt kalendārā." },
+        ]} />
+      )}
       {rows.length === 0 ? (
         <div className="notice">
           {t("Tev vēl nav saglabātu sludinājumu. Spied sirsniņu pie sludinājuma, lai to saglabātu šeit.")}

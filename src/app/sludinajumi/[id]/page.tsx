@@ -36,6 +36,7 @@ import { fullLocation, getListing, locationLabel, similarListings } from "@/lib/
 import { ListingCard } from "@/components/listing-card";
 import { getCurrentUser, isModerator } from "@/lib/session";
 import { soft } from "@/lib/errors";
+import { Tip } from "@/components/tip";
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ saglabats?: string }> };
 
@@ -180,6 +181,13 @@ export default async function ListingPage(props: Props) {
           {!isOwner && <div className="det-fav"><FavButton id={l.id} on={isFav} loggedIn={Boolean(user)} /></div>}
         </div>
         <div className="det-side">
+          {!isOwner && (
+            <Tip id="listing-v1" steps={[
+              { icon: "♡", title: "Saglabā favorītos", text: "Spied sirsniņu – sludinājums saglabāsies sadaļā „Favorīti”, un varēsi saņemt ziņu, ja cena kritīsies." },
+              { icon: "📝", title: "Piezīme un statuss", text: "Favorītos katram sludinājumam vari pierakstīt piezīmi un atzīmēt statusu, piem. „Sazinājos” vai „Sarunāta apskate”. Ja piezīmē ieraksti dienu un laiku, piedāvāsim to ielikt kalendārā." },
+              { icon: "👨‍👩‍👧", title: "Dalies ar ģimeni", text: "Favorītu sarakstu var nosūtīt ar saiti – citi var atzīmēt „patīk / nepatīk” un komentēt bez reģistrācijas." },
+            ]} />
+          )}
           <div className="det-title">
             <h1>{trTitle(l.title, t)}</h1>
             <div className="card-tools">

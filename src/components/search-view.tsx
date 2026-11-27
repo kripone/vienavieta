@@ -36,6 +36,7 @@ import { appBase, propertyHref, regionName, RIGA_DISTRICT, vehicleHref, seoSlug,
 import { trTitle } from "@/i18n/content";
 import { PROPERTY_PLURAL, PROPERTY_TYPES, type PropertyType } from "@/lib/constants";
 import { soft } from "@/lib/errors";
+import { Tip } from "@/components/tip";
 
 export type SP = Record<string, string | string[] | undefined>;
 
@@ -177,6 +178,10 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
         <Suspense>
           <SaveSearchButton loggedIn={Boolean(user)} filters={flat} />
         </Suspense>
+        <Tip id="search-v1" steps={[
+          { icon: "🔔", title: "Saglabā meklēšanu", text: "Paziņosim par jauniem sludinājumiem ar šiem filtriem – e-pastā vai telefonā." },
+          { icon: "⇄", title: "Salīdzini blakus", text: "Atzīmē ⇄ pie līdz 4 sludinājumiem un salīdzini tos vienā tabulā." },
+        ]} />
         {s.zone && (() => {
           const [unit, value, approx, label] = (flat.zl ?? "").split("|");
           if (!label) return <p className="zone-note">{t("Rāda tikai sludinājumus iezīmētajā zonā.")}</p>;

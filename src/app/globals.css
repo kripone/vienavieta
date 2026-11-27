@@ -1018,3 +1018,17 @@ body:has(.det-bar) .ai-pill { bottom: 90px; }
 .model-info ul { margin: 10px 0 0; padding-left: 18px; line-height: 1.5; }
 .model-info .fine { margin-top: 8px; }
 .model-info h3 { margin: 14px 0 0; font-size: 15px; }
+
+/* īsas pamācības (src/components/tip.tsx) */
+.tip { position: relative; display: flex; gap: 12px; align-items: flex-start; margin: 10px 0 14px; padding: 12px 36px 12px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--accent-soft); color: var(--fg); animation: tip-in .35s ease-out; }
+.tip-ico { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.12); animation: tip-pulse 1.6s ease-in-out 3; }
+.tip-body b { display: block; margin-bottom: 2px; }
+.tip-body p { margin: 0 0 8px; font-size: 14px; line-height: 1.45; }
+.tip-nav { display: flex; align-items: center; gap: 10px; }
+.tip-dots { display: inline-flex; gap: 5px; }
+.tip-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); opacity: .4; }
+.tip-dots i.on { opacity: 1; background: var(--accent); }
+.tip-x { position: absolute; top: 6px; right: 8px; border: 0; background: none; font-size: 20px; line-height: 1; color: var(--muted); cursor: pointer; padding: 4px; }
+@keyframes tip-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@keyframes tip-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+@media (prefers-reduced-motion: reduce) { .tip, .tip-ico { animation: none; } }
