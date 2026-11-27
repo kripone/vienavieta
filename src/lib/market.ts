@@ -144,7 +144,7 @@ async function propertyByPlaceFresh(regionId: number, propertyType: string, deal
     from (select l.*, (case when l.property_type = 'Zeme' then l.land_m2::numeric else l.area_m2 end) u from listings l
           where l.status = 'active' and l.kind = 'property' and l.property_type = ${propertyType} and l.deal = ${deal}::deal_type and ${primary}) l
     join places p on p.id = l.place_id
-    where l.u > 0 and p.region_id = ${regionId}
+    where l.u > 0 and p.region_id = ${regionId} and coalesce(p.kind, '') <> 'city'
     group by p.name having count(*) >= ${TOP_PLACE_MIN} order by median desc`);
   return r.map((x) => ({ place: x.place, median: x.median, n: Number(x.n) }));
 }

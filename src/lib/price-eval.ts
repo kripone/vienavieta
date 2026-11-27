@@ -53,8 +53,8 @@ export async function priceEvals(ids: string[]): Promise<Map<string, PriceEval |
   // €/m² vērtības un mediānu katram sludinājumam rēķinām šeit, izslēdzot to pašu un tā dublikātus (rezultāts tāds pats).
   // platība: zemei zemes m² (≥ LAND_MIN), pārējam telpu m² (≥ AREA_MIN); mazāka = trūkstoša (portālos „1 m²”) → €/m² nerēķinām
   const unit = (t: string) => sql.raw(`(case when ${t}.property_type = 'Zeme' then nullif(greatest(${t}.land_m2::numeric, 0), 0) * (${t}.land_m2 >= ${PRICE_EVAL.LAND_MIN})::int else ${t}.area_m2 * (${t}.area_m2 >= ${PRICE_EVAL.AREA_MIN})::int end)`);
-  const props = await db.execute<{ id: string; price: number; u: number; group_key: string | null; property_type: string; deal: string | null; region_id: number; place_id: number }>(sql`
-    select l.id, l.price, ${unit("l")}::float8 as u, l.group_key, l.property_type, l.deal::text as deal, p.region_id, l.place_id
+  const props = await db.execute<{ id: string; price: number; u: number; group_key: string | null; property_type: string; deal: string | null; region_id: number; place_id: number; place_kind: string | null }>(sql`
+    select l.id, l.price, ${unit("l")}::float8 as u, l.group_key, l.property_type, l.deal::text as deal, p.region_id, l.place_id, p.kind as place_kind
     from listings l
     join places p on p.id = l.place_id
     where l.id in (${idList}) and l.kind = 'property' and l.property_type is not null and ${unit("l")} > 0`);
@@ -69,7 +69,8 @@ export async function priceEvals(ids: string[]): Promise<Map<string, PriceEval |
     const vals = groups.get(groupKeyOf(r.property_type, r.deal, r.region_id)) ?? [];
     const others = vals.filter((x) => x.id !== r.id && (r.group_key == null || x.g !== r.group_key));
     // vispirms tā pati vieta (apkaime, pilsēta, pagasts): tur cenas līdzīgākas nekā visā reģionā
-    const near = others.filter((x) => x.p === Number(r.place_id));
+    // „tikai pilsēta” (bez apkaimes) salīdzina ar visu pilsētu
+    const near = r.place_kind === "city" ? [] : others.filter((x) => x.p === Number(r.place_id));
     const [own, scope] = near.length >= PRICE_EVAL.PLACE_MIN ? [near.map((x) => x.v), "place" as const] : [others.map((x) => x.v), "region" as const];
     const med = medianCont(own);
     const u = Number(r.u);

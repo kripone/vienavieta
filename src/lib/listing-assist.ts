@@ -71,11 +71,11 @@ export async function assistListing(text: string, lang: string): Promise<AssistR
   v.price = numStr(g.price, 50_000_000);
 
   // vieta: precīza sakritība ar mūsu vietu nosaukumiem
-  const regions = await regionOptions();
+  const regions = await regionOptions({ withCity: true });
   const placeWant = norm(str(g.place));
   if (placeWant) {
     const all = regions.filter((r) => kind === "vehicle" || r.country === "LV").flatMap((r) => r.places.map((p) => ({ ...p, region: r.region })));
-    const hit = all.find((p) => norm(p.name) === placeWant) ?? all.find((p) => norm(p.region) === placeWant && norm(p.name) === norm("Centrs")) ?? all.find((p) => norm(p.region) === placeWant);
+    const hit = all.find((p) => norm(p.name) === placeWant) ?? all.find((p) => norm(p.region) === placeWant && norm(p.name) === norm(p.region)) ?? all.find((p) => norm(p.region) === placeWant);
     if (hit) v.placeId = String(hit.id);
   }
 

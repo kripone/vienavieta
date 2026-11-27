@@ -127,7 +127,19 @@ export function slug(s: string) {
 // novads → pilsēta / pagasts → ciems. Pēc prefiksa nemin: labāk bez vietas nekā nepareiza vieta.
 type PlaceRow = { id: number; name: string; lat: number; lon: number; region: string; kind?: string | null; parentId?: number | null };
 const SEGMENT_SKIP = new Set(["other", "all", "today", "sell", "hand_over"]);
-const ALIASES: Record<string, string> = { centre: "centrs", "maskavas-priekspilseta": "maskavas-forstate", vecriga: "vecriga" };
+/**
+ * ss.com apkaimju adreses (savs transliterācijas veids: ž→zh, š→sh, č→ch, ļ/ņ→lj/nj) → mūsu apkaimes (norm forma).
+ * Vēsturiskās vietas, kas ir daļa no oficiālās apkaimes: Dzegužkalns → Dzirciems, VEF → Teika, Aplokciems → Jugla,
+ * Klīversala → Torņakalns, Lucavsala/Zaķusala/Bieķensala → Salas. Neviennozīmīgās (Krasta ielas rajons, Mangaļi) – bez apkaimes.
+ */
+const ALIASES: Record<string, string> = {
+  centre: "centrs", "maskavas-priekspilseta": "maskavas-forstate", "maskavas-priekshpilseta": "maskavas-forstate", vecriga: "vecriga",
+  plyavnieki: "plavnieki", yugla: "jugla", "shampeteris-pleskodale": "sampeteris", mezhapark: "mezaparks", mezhciems: "mezciems",
+  tornjakalns: "tornakalns", chiekurkalns: "ciekurkalns", dzeguzhkalns: "dzirciems", vef: "teika", aplokciems: "jugla",
+  kliversala: "tornakalns", lucavsala: "salas", zakusala: "salas", biekensala: "salas", daugavgriva: "daugavgriva",
+  shkirotava: "skirotava", darzini: "darzini", beberbeki: "beberbeki", trisciems: "trisciems", vecdaugava: "vecdaugava",
+  mangalsala: "mangalsala", breksi: "breksi", bukulti: "bukulti", kundzinsala: "kundzinsala", kleisti: "kleisti", bulli: "bulli", voleri: "voleri",
+};
 const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 /** "Salas pagasts" → "salas" (ss.com raksta "salas-pag") */
 const parishStem = (name: string) => norm(name.replace(/ pagasts$/, ""));
@@ -173,7 +185,7 @@ export function makePlaceFinder(rows: PlaceRow[]) {
   const parishes = rows.filter((p) => p.kind === "parish");
   const villages = rows.filter((p) => p.kind === "village");
 
-  /** valstspilsētas apkaime: precīzi, tad pēc prefiksa tikai šīs pilsētas robežās; citādi centrs */
+  /** valstspilsētas apkaime: precīzi, tad pēc prefiksa tikai šīs pilsētas robežās; citādi tikai pilsēta */
   function inCity(city: string, rest: string[]): PlaceRow | null {
     const list = byRegion.get(city) ?? [];
     const segs = rest.filter((s) => !SEGMENT_SKIP.has(s)).map((s) => ALIASES[norm(s)] ?? norm(s));
@@ -186,7 +198,8 @@ export function makePlaceFinder(rows: PlaceRow[]) {
         if (pre) return pre;
       }
     }
-    return list.find((p) => norm(p.name) === "centrs") ?? (list.length === 1 ? list[0] : list.find((p) => norm(p.name) === norm(city)) ?? list[0] ?? null);
+    // apkaime nav zināma: tikai pilsēta (nevis „Centrs” vai pirmā apkaime sarakstā)
+    return list.find((p) => p.kind === "city") ?? null;
   }
 
   return (url: string, categoryDepth: number): PlaceRow | null => {
@@ -226,13 +239,14 @@ export function makePlaceFinder(rows: PlaceRow[]) {
   };
 }
 
-/** "Ogre un raj." / "Rīga" / "Jūrmala" → pilsētas vieta (pilsētām: centrs). "Rīgas rajons" u.c. bez pilsētas → null. */
+/** "Ogre un raj." / "Rīga" / "Jūrmala" → pilsētas vieta (valstspilsētām: „tikai pilsēta”, kind = city). "Rīgas rajons" u.c. bez pilsētas → null. */
 export function makeCityFinder(rows: PlaceRow[]) {
   return (t: string): PlaceRow | null => {
     const s = slug(t.replace(/\s+un\s+raj\.?$/i, ""));
     if (!s || /rajons$/.test(s)) return null;
     const city = rows.filter((p) => slug(p.region) === s);
-    if (city.length) return city.find((p) => slug(p.name) === "centrs" || slug(p.name) === "centras") ?? city[0];
+    // valstspilsēta bez apkaimes → „tikai pilsēta” (nevis „Centrs”, lietotājs 2026-11-27)
+    if (city.length) return city.find((p) => p.kind === "city") ?? null;
     return rows.find((p) => slug(p.name) === s) ?? null;
   };
 }

@@ -11,7 +11,10 @@ export async function register() {
   startTrimSync();
   // acīmredzamie dublikāti (atkārtoti ielikti sludinājumi) – 2 min pēc starta, tad ik stundu
   const { groupExactDuplicates, normalizeBodies } = await import("./lib/dedupe");
+  const { fixCityPlaces } = await import("./lib/city-places");
   const dedupe = async () => {
+    // apkaimes pēc koordinātām / „tikai pilsēta” (nevis „Centrs”) – pirms dublikātiem, jo tie grupē pēc pilsētas
+    await fixCityPlaces().then((r) => r.moved && console.log("Vietas precizētas:", r)).catch((e) => console.error("Vietu kārta:", e));
     await groupExactDuplicates().then((r) => (r.vehicles || r.properties) && console.log("Dublikāti sagrupēti:", r)).catch((e) => console.error("Dublikātu kārta:", e));
     await normalizeBodies().then((n) => n && console.log("Virsbūves tips no modeļa:", n)).catch((e) => console.error("Virsbūvju kārta:", e));
   };

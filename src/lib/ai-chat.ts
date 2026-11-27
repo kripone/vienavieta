@@ -161,7 +161,7 @@ async function resolveCity(city: string): Promise<{ loc: string; lat: number | n
   const rows = await db
     .select({ id: places.id, name: places.name, kind: places.kind, lat: places.lat, lon: places.lon })
     .from(places)
-    .where(ilike(places.name, like))
+    .where(and(ilike(places.name, like), sql`coalesce(${places.kind}, '') <> 'city'`))
     .limit(10);
   if (!rows.length) return undefined;
   const hit = rows.find((r) => r.name.toLowerCase() === city.toLowerCase()) ?? rows.find((r) => r.kind === "town") ?? rows[0];
@@ -225,7 +225,7 @@ async function appraisalUrl(a: AppraisalFilters): Promise<string | null> {
     let vieta: number | undefined;
     if (a.city) {
       const like = `%${String(a.city).replace(/[%_\\]/g, (m) => "\\" + m)}%`;
-      const rows = await db.select({ id: places.id, name: places.name, kind: places.kind }).from(places).where(ilike(places.name, like)).limit(10);
+      const rows = await db.select({ id: places.id, name: places.name, kind: places.kind }).from(places).where(and(ilike(places.name, like), sql`coalesce(${places.kind}, '') <> 'city'`)).limit(10);
       const exact = rows.find((r) => r.name.toLowerCase() === String(a.city).toLowerCase());
       vieta = (exact ?? rows.find((r) => r.kind === "town") ?? rows[0])?.id;
     }

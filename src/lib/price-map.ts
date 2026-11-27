@@ -23,7 +23,7 @@ export async function flatPriceMap(deal: PriceMapDeal) {
       (percentile_cont(0.5) within group (order by l.price / l.area_m2))::numeric(8,1) median
     from listings l join places p on p.id = l.place_id join regions r on r.id = p.region_id
     where l.status = 'active' and l.property_type = 'Dzīvoklis' and l.deal = ${deal} and l.area_m2 > 10
-      and l.price > ${deal === "sell" ? 1000 : 50} and r.country = 'LV' and ${primary}
+      and l.price > ${deal === "sell" ? 1000 : 50} and r.country = 'LV' and coalesce(p.kind, '') <> 'city' and ${primary}
     group by p.id, p.name, r.name, p.lat, p.lon having count(*) >= ${PRICE_MAP_MIN}`);
   const round = (v: number) => (deal === "sell" ? Math.round(v) : Math.round(v * 10) / 10);
   const raw = r.rows.map((x) => ({ id: x.id, name: x.name, region: x.region, lat: Number(x.lat), lon: Number(x.lon), n: Number(x.n), median: round(Number(x.median)) }));

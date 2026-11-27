@@ -166,6 +166,8 @@ function conditions(s: SearchParams): SQL[] {
   if (s.zone) {
     const poly = s.zone.map(([la, lo]) => `(${lo},${la})`).join(",");
     add(sql`point(${listings.lon}, ${listings.lat}) <@ ${`(${poly})`}::polygon`);
+    // „tikai pilsēta” (bez apkaimes): koordinātas ir aptuvens pilsētas viduspunkts, zonā tās neņemam
+    add(sql`coalesce(${places.kind}, '') <> 'city'`);
   }
 
   if (s.cat === "vehicle") {
@@ -344,7 +346,7 @@ export const MAP_POINTS_MAX = 2000;
  * Skaiti ir īsti: vai nu visi punkti (≤ MAP_POINTS_MAX; tālāk tos klasterē pārlūks), vai rūtiņas ar sludinājumu skaitu.
  */
 export async function searchMapView(s: SearchParams, v: MapView): Promise<{ total: number; points?: MapPoint[]; cells?: MapCell[] }> {
-  const where = and(...conditions({ ...s, zone: undefined }), isNotNull(listings.lat),
+  const where = and(...conditions({ ...s, zone: undefined }), isNotNull(listings.lat), sql`coalesce(${places.kind}, '') <> 'city'`,
     sql`${listings.lat} between ${v.south} and ${v.north}`, sql`${listings.lon} between ${v.west} and ${v.east}`) ?? sql`true`;
   const from = sql`
       from ${listings}
@@ -541,7 +543,7 @@ const STORED_MAX_AGE = 7 * 24 * 3600_000;
 const persistable = (key: string) =>
   /^(type|facet|src|sum2|ins|seo|mo):|^home-cats$|^today-stats$/.test(key) && !/"zone":\[/.test(key) && !/"q":"[^"]/.test(key);
 /** Palielini, ja mainās skaitīšanas loģika (dublikāti, sliekšņi), lai `page_cache` vecās vērtības netiek rādītas. */
-const CACHE_VER = "2";
+const CACHE_VER = "3"; // 3: „tikai pilsēta” un apkaimes pēc robežām
 const storeKey = (key: string) => createHash("sha256").update(`${CACHE_VER}|${key}`).digest("hex");
 
 function remember(key: string, v: unknown) {
@@ -826,7 +828,7 @@ export function marketOverview(s: SearchParams): Promise<MarketOverview | null> 
             .from(listings)
             .leftJoin(places, eq(listings.placeId, places.id)).leftJoin(regions, eq(places.regionId, regions.id))
             .leftJoin(makes, eq(listings.makeId, makes.id)).leftJoin(models, eq(listings.modelId, models.id)).leftJoin(users, eq(listings.userId, users.id))
-            .where(and(where, isNotNull(listings.placeId), sql`${listings.areaM2} > 10`))
+            .where(and(where, isNotNull(listings.placeId), sql`${listings.areaM2} > 10`, sql`coalesce(${places.kind}, '') <> 'city'`))
             .groupBy(places.name)
             .having(sql`count(*) >= ${TOP_PLACE_MIN}`)).map((r) => ({ name: String(r.name), n: Number(r.n), sqm: r.sqm != null ? Math.round(Number(r.sqm) * (s.deal === "rent" ? 10 : 1)) / (s.deal === "rent" ? 10 : 1) : null })).filter((r): r is { name: string; n: number; sqm: number } => r.sqm != null)
         : [];

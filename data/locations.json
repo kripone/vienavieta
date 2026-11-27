@@ -187,6 +187,111 @@
     "name": "Ziepniekkalns",
     "lat": 56.9,
     "lon": 24.09
+   },
+   {
+    "name": "Bišumuiža",
+    "lat": 56.9048,
+    "lon": 24.1405
+   },
+   {
+    "name": "Daugavgrīva",
+    "lat": 57.0461,
+    "lon": 24.0111
+   },
+   {
+    "name": "Vecdaugava",
+    "lat": 57.0521,
+    "lon": 24.1
+   },
+   {
+    "name": "Dārziņi",
+    "lat": 56.869,
+    "lon": 24.2663
+   },
+   {
+    "name": "Voleri",
+    "lat": 57.017,
+    "lon": 24.0764
+   },
+   {
+    "name": "Mangaļsala",
+    "lat": 57.0691,
+    "lon": 24.0575
+   },
+   {
+    "name": "Buļļi",
+    "lat": 57.0181,
+    "lon": 23.9628
+   },
+   {
+    "name": "Trīsciems",
+    "lat": 57.0592,
+    "lon": 24.1387
+   },
+   {
+    "name": "Suži",
+    "lat": 57.0137,
+    "lon": 24.2158
+   },
+   {
+    "name": "Spilve",
+    "lat": 56.9877,
+    "lon": 24.0677
+   },
+   {
+    "name": "Dzirciems",
+    "lat": 56.9564,
+    "lon": 24.064
+   },
+   {
+    "name": "Salas",
+    "lat": 56.928,
+    "lon": 24.1203
+   },
+   {
+    "name": "Pētersala-Andrejsala",
+    "lat": 56.9657,
+    "lon": 24.1003
+   },
+   {
+    "name": "Pleskodāle",
+    "lat": 56.9309,
+    "lon": 24.0319
+   },
+   {
+    "name": "Mūkupurvs",
+    "lat": 56.9344,
+    "lon": 23.9846
+   },
+   {
+    "name": "Kundziņsala",
+    "lat": 57.0116,
+    "lon": 24.0986
+   },
+   {
+    "name": "Bukulti",
+    "lat": 57.0057,
+    "lon": 24.257
+   },
+   {
+    "name": "Kleisti",
+    "lat": 56.9895,
+    "lon": 23.9993
+   },
+   {
+    "name": "Brekši",
+    "lat": 56.9631,
+    "lon": 24.3005
+   },
+   {
+    "name": "Beberbeķi",
+    "lat": 56.9445,
+    "lon": 23.957
+   },
+   {
+    "name": "Atgāzene",
+    "lat": 56.9085,
+    "lon": 24.0795
    }
   ],
   "country": "LV"

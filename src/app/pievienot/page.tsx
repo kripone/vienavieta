@@ -31,7 +31,7 @@ export default async function AddPage() {
         <a className="btn small primary" href={isBusiness(user.sellerType) ? "/importi" : "/profils"}>{isBusiness(user.sellerType) ? t("Sludinājumu imports") : t("Mans profils")} →</a>
       </div>
       <p className="lead">{t("Lauki ar * ir obligāti. Pārējie palīdz pircējiem tevi atrast filtros.")}</p>
-      <ListingForm regions={await regionOptions()} defaultPhone={user.phone ?? ""} />
+      <ListingForm regions={await regionOptions({ withCity: true })} defaultPhone={user.phone ?? ""} />
     </main>
   );
 }

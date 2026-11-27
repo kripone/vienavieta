@@ -62,7 +62,7 @@ export default async function EditPage(props: { params: Promise<{ id: string }> 
   return (
     <main className="wrap mid">
       <h1>{t("Rediģēt sludinājumu")}</h1>
-      <ListingForm regions={await regionOptions()} initial={initial} initialAmenities={l.amenities} initialPhotos={data.photos.map((p) => ({ id: p.id, thumbUrl: p.thumbUrl }))} />
+      <ListingForm regions={await regionOptions({ withCity: true })} initial={initial} initialAmenities={l.amenities} initialPhotos={data.photos.map((p) => ({ id: p.id, thumbUrl: p.thumbUrl }))} />
     </main>
   );
 }

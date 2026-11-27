@@ -104,15 +104,18 @@ export async function getListing(id: string) {
   };
 }
 
-/** Vietas grupētas pa novadiem formām (bez ciemiem). */
-export async function regionOptions() {
+/**
+ * Vietas grupētas pa novadiem formām (bez ciemiem). `withCity`: arī „tikai pilsēta” (valstspilsēta bez apkaimes) –
+ * sludinājuma formai; meklēšanas filtrā to nerāda (tur pilsētu izvēlas kā reģionu).
+ */
+export async function regionOptions({ withCity = false }: { withCity?: boolean } = {}) {
   const rows = await db
     .select({ id: places.id, name: places.name, regionId: regions.id, region: regions.name, kind: regions.kind, country: regions.country })
     .from(places)
     .innerJoin(regions, eq(places.regionId, regions.id))
     // ciemus sarakstā nerādām (tie ietilpst pagastā); novadā vispirms pilsētas, tad pagasti
-    .where(sql`coalesce(${places.kind}, '') <> 'village'`)
-    .orderBy(asc(regions.country), asc(regions.id), sql`case ${places.kind} when 'town' then 0 when 'parish' then 2 else 1 end`, sql`case when ${places.kind} is null then ${places.id} else 0 end`, asc(places.name));
+    .where(withCity ? sql`coalesce(${places.kind}, '') <> 'village'` : sql`coalesce(${places.kind}, '') not in ('village', 'city')`)
+    .orderBy(asc(regions.country), asc(regions.id), sql`case ${places.kind} when 'city' then -1 when 'town' then 0 when 'parish' then 2 else 1 end`, sql`case when ${places.kind} is null then ${places.id} else 0 end`, asc(places.name));
   const map = new Map<string, { regionId: number; region: string; kind: "city" | "municipality"; country: "LV" | "LT"; places: { id: number; name: string }[] }>();
   for (const r of rows) (map.get(r.region) ?? map.set(r.region, { regionId: r.regionId, region: r.region, kind: r.kind, country: r.country, places: [] }).get(r.region)!).places.push({ id: r.id, name: r.name });
   return [...map.values()];
@@ -130,6 +133,7 @@ export function fullLocation(address: string | null | undefined, place: string |
 
 export function locationLabel(place: string | null, region: string | null, regionKind: string | null) {
   if (!place || !region) return "";
+  if (place === region) return region; // „tikai pilsēta” (bez apkaimes)
   return regionKind === "city" ? `${region}, ${place}` : `${place}, ${region.replace(" novads", " nov.").replace(" apskritis", " apskr.")}`;
 }
 

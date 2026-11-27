@@ -243,7 +243,7 @@ export async function textQueryCatalog(): Promise<TqCatalog> {
     db.select({ id: schema.regions.id, name: schema.regions.name }).from(schema.regions).where(sql`${schema.regions.country} = 'LV'`),
     db.select({ id: schema.places.id, name: schema.places.name, regionId: schema.places.regionId }).from(schema.places)
       .innerJoin(schema.regions, sql`${schema.regions.id} = ${schema.places.regionId} and ${schema.regions.country} = 'LV'`)
-      .where(sql`coalesce(${schema.places.kind}, '') not in ('village', 'parish')`),
+      .where(sql`coalesce(${schema.places.kind}, '') not in ('village', 'parish', 'city')`),
   ]);
   // "Ogres novads" → meklējam pēc "Ogres"; pilsētas vārds ir arī vietu sarakstā
   const cat = { makes, models, regions: regions.map((r) => ({ ...r, name: r.name.replace(/ novads$/, "") })), places };

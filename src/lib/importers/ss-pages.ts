@@ -99,7 +99,7 @@ async function saveRows(section: Section, pageRows: PageRow[], ctx: Ctx, res: Cr
   const byId = new Map(mapped.map((m) => [m.externalId!, m]));
   if (!byId.size) return;
   const existing = await db
-    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl, address: listings.address, makeId: listings.makeId, modelId: listings.modelId, body: listings.body, placeId: listings.placeId, propertyType: listings.propertyType, deal: listings.deal, trim: listings.trim, batteryKwh: listings.batteryKwh })
+    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl, address: listings.address, makeId: listings.makeId, modelId: listings.modelId, body: listings.body, placeId: listings.placeId, propertyType: listings.propertyType, deal: listings.deal, trim: listings.trim, batteryKwh: listings.batteryKwh, geoPrecision: listings.geoPrecision })
     .from(listings)
     .where(and(eq(listings.source, "ss.com"), inArray(listings.externalId, [...byId.keys()])));
   const seen = new Set<string>();
@@ -113,7 +113,8 @@ async function saveRows(section: Section, pageRows: PageRow[], ctx: Ctx, res: Cr
     const better = (row.makeId && !e.makeId) || (row.modelId && !e.modelId);
     const newPlace = row.kind === "vehicle" && row.placeId && !e.placeId;
     // īpašumam vieta precizēta (pagasts/ciems pēc VZD kataloga, piem. Salas pag. nevis Salaspils): jauna vieta, virsraksts, adrese
-    const movedPlace = row.kind === "property" && row.placeId && row.placeId !== e.placeId;
+    // Ja adrese ģeokodēta (ielas precizitāte) un nav mainījusies, vietu nosaka koordinātas (city-places.ts: apkaime pēc robežām), nevis ss.com adreses apkaime.
+    const movedPlace = row.kind === "property" && row.placeId && row.placeId !== e.placeId && !(e.geoPrecision === "street" && !newAddress);
     // īpašuma veids precizēts (piem. "Māja" → "Vasarnīca" pēc teksta): atjaunojam veidu un virsrakstu
     const newType = row.kind === "property" && row.propertyType && row.propertyType !== e.propertyType;
     // pārdevējs pārvērtis sludinājumu no pārdošanas uz īri (vai otrādi): tā nav cenas maiņa — vēsturi sākam no jauna
