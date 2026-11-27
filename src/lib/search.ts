@@ -316,6 +316,22 @@ async function searchListingsFresh(s: SearchParams) {
   return { rows, total, pages: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
 }
 
+/** Tikai skaits ar tiem pašiem filtriem kā sarakstā (arī zona) – kartes piemēra zonai; kešots. */
+export function searchCount(s: SearchParams) {
+  return cached(`cnt:${JSON.stringify({ ...s, page: 1, sort: "" })}`, async () => {
+    const r = await db
+      .select({ total: count() })
+      .from(listings)
+      .leftJoin(places, eq(listings.placeId, places.id))
+      .leftJoin(regions, eq(places.regionId, regions.id))
+      .leftJoin(makes, eq(listings.makeId, makes.id))
+      .leftJoin(models, eq(listings.modelId, models.id))
+      .leftJoin(users, eq(listings.userId, users.id))
+      .where(and(...conditions(s)));
+    return r[0]?.total ?? 0;
+  });
+}
+
 /** Kartes skats: robežas un tālummaiņa, ko pārlūks atsūta pēc katras kustības. */
 export type MapView = { west: number; south: number; east: number; north: number; zoom: number };
 export type MapPoint = { id: string; lat: number; lon: number; kind: "vehicle" | "property"; price: number; title: string };

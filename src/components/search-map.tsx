@@ -25,6 +25,13 @@ const short = (n: number) => (n < 1000 ? String(n) : n < 10000 ? `${(Math.floor(
 const SPREAD_MAX = 24;
 const popupHtml = (p: Props) => `<a href="/sludinajumi/${p.id}" style="font-weight:700">${esc(p.title)}</a><br>${fmt.format(p.price)} €`;
 
+/** Punktu slānis (izvēles) ielādējas tikai no šīs tālummaiņas: visu valsti punktos nekad neprasām. */
+const POINTS_MIN_ZOOM = 11;
+/** Piemēra zona pirmajam apmeklējumam: Rīgas centrs (aptuveni Centra apkaime, bez Vecrīgas). */
+const EXAMPLE_ZONE: [number, number][] = [[56.949, 24.114], [56.9575, 24.106], [56.9655, 24.118], [56.964, 24.142], [56.9545, 24.149], [56.9455, 24.133]];
+const zoneParam = (pts: [number, number][]) => pts.map(([a, b]) => `${a},${b}`).join(";");
+const HINT_KEY = "vv-tip:map-draw";
+
 /** Vienkāršo zīmēto līniju: atstāj punktus, kas ir vismaz `min` pikseļu attālumā. */
 function simplify(pts: L.Point[], min = 8) {
   const out: L.Point[] = [];
@@ -32,8 +39,14 @@ function simplify(pts: L.Point[], min = 8) {
   return out;
 }
 
-export function SearchMap({ query, zone }: { query: string; zone?: string }) {
-  const { t } = useT();
+/**
+ * Meklēšanas karte kā rīks „uzzīmē, kur gribi, un redzi, kas tur ir”:
+ * noklusējumā bez punktiem (ātra, nepārblīvēta); galvenā darbība – uzzīmēt apgabalu (zona filtrē sarakstu);
+ * pirmajā reizē padoms ar piemēra zonu; punkti – izvēles slānis tikai redzamajam laukumam pēc pietuvināšanas.
+ */
+export function SearchMap({ query, zone, zoneTotal }: { query: string; zone?: string; zoneTotal?: number }) {
+  const { t, tp, lp } = useT();
+  const home = lp("/"); // saglabā valodas prefiksu (/en, /ru, /lt)
   const router = useRouter();
   const box = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
@@ -42,6 +55,15 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
   const [drawing, setDrawing] = useState(false);
   const [count, setCount] = useState<number | null>(null);
   const [full, setFull] = useState(false);
+  const [showPoints, setShowPoints] = useState(false);
+  const [zoom, setZoom] = useState(6);
+  const [hint, setHint] = useState(false);
+  const [exampleN, setExampleN] = useState<number | null>(null);
+  const exampleLayer = useRef<L.Polygon | null>(null);
+  const closeHint = () => {
+    try { localStorage.setItem(HINT_KEY, "1"); } catch {}
+    setHint(false);
+  };
 
   // punktu rādiuss pēc tālummaiņas: tālu mazi (lai karte redzama), tuvu lielāki
   const radiusFor = (z: number) => (z >= 15 ? 7 : z >= 12 ? 5.5 : z >= 9 ? 4 : 3);
@@ -64,6 +86,7 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
     m.createPane("spider").style.zIndex = "650";
     spiderRenderer.current = L.svg({ pane: "spider" });
     spider.current = L.layerGroup().addTo(m);
+    m.on("zoomend", () => setZoom(m.getZoom()));
     map.current = m;
     return () => { m.remove(); map.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -79,6 +102,8 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
   useEffect(() => {
     const m = map.current;
     if (!m || !markers.current) return;
+    // punktu slānis izslēgts (noklusējums): neko neprasām serverim
+    if (!showPoints) { markers.current.clearLayers(); spider.current?.clearLayers(); setCount(null); return; }
     let alive = true;
     // Vienā adresē vairāki sludinājumi: izklāj punktus aplī (līdz 8) vai spirālē ap burbuli, lai katram var uzspiest.
     // Ja to ir ļoti daudz, rāda sarakstu.
@@ -136,14 +161,16 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
       }
     };
     // dati redzamajam laukumam: pēc katras kustības pieprasa serverim (īsti skaiti arī tad, ja sludinājumu ir tūkstošiem)
-    let seq = 0, timer: ReturnType<typeof setTimeout> | undefined, first = true;
+    let seq = 0, timer: ReturnType<typeof setTimeout> | undefined;
     const load = () => {
       const my = ++seq;
+      // tālu (visa valsts / reģions) punktus neprasām: pārāk daudz un pārklājas
+      if (m.getZoom() < POINTS_MIN_ZOOM) { markers.current?.clearLayers(); index.current = null; setCount(null); return; }
       const b = m.getBounds().pad(0.25), z = Math.round(m.getZoom());
       const view = `b=${b.getWest().toFixed(4)},${b.getSouth().toFixed(4)},${b.getEast().toFixed(4)},${b.getNorth().toFixed(4)}&z=${z}`;
       fetch(`/api/search/points?${query ? `${query}&` : ""}${view}`).then((r) => r.json()).then((d: MapData) => {
         if (!alive || my !== seq) return;
-        if (first) { setCount(d.total); first = false; }
+        setCount(d.total);
         cells.current = !d.points;
         const feature = (lat: number, lon: number, properties: Props) => ({ type: "Feature" as const, geometry: { type: "Point" as const, coordinates: [lon, lat] }, properties });
         index.current = new Supercluster<Props, { n: number }>({ radius: 84, maxZoom: 18, minPoints: 2, map: (p) => ({ n: p.n }), reduce: (acc, p) => { acc.n += p.n; } }).load(
@@ -158,7 +185,33 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
     m.on("moveend", onMove);
     return () => { alive = false; clearTimeout(timer); m.off("moveend", onMove); m.off("zoomstart", closeSpread); m.off("click", closeSpread); closeSpread(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
+  }, [query, showPoints]);
+
+  // pirmā apmeklējuma padoms ar piemēra zonu (tikai bez zīmētas zonas)
+  useEffect(() => {
+    if (zone) return;
+    try { if (!localStorage.getItem(HINT_KEY)) setHint(true); } catch {}
+  }, [zone]);
+  useEffect(() => {
+    const m = map.current;
+    exampleLayer.current?.remove();
+    exampleLayer.current = null;
+    if (!m || !hint || zone) return;
+    const poly = L.polygon(EXAMPLE_ZONE, { color: "#2f5fa8", weight: 2, dashArray: "6 6", fillOpacity: 0.1, interactive: false }).addTo(m);
+    exampleLayer.current = poly;
+    m.fitBounds(poly.getBounds(), { padding: [40, 40], maxZoom: 13 });
+    let alive = true;
+    fetch(`/api/search/count?${query ? `${query}&` : ""}zone=${encodeURIComponent(zoneParam(EXAMPLE_ZONE))}`)
+      .then((r) => r.json()).then((d: { total: number }) => { if (alive) setExampleN(d.total); }).catch(() => {});
+    return () => { alive = false; poly.remove(); };
+  }, [hint, zone, query]);
+
+  function applyZone(z: string) {
+    const params = new URLSearchParams(query);
+    params.set("zone", z);
+    params.delete("page");
+    router.push(`${home}${home.endsWith("/") ? "" : "/"}?${params}`, { scroll: false });
+  }
 
   // zona no URL
   useEffect(() => {
@@ -205,11 +258,7 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
       if (s.length < 3) return;
       let ll = s.map((p) => m.containerPointToLatLng(p));
       while (ll.length > 60) ll = ll.filter((_, i) => i % 2 === 0);
-      const z = ll.map((p) => `${p.lat.toFixed(4)},${p.lng.toFixed(4)}`).join(";");
-      const params = new URLSearchParams(query);
-      params.set("zone", z);
-      params.delete("page");
-      router.push(`/?${params}`, { scroll: false });
+      applyZone(ll.map((p) => `${p.lat.toFixed(4)},${p.lng.toFixed(4)}`).join(";"));
     };
     el.addEventListener("pointerdown", down);
     el.addEventListener("pointermove", move);
@@ -227,30 +276,57 @@ export function SearchMap({ query, zone }: { query: string; zone?: string }) {
       m.dragging.enable();
       m.scrollWheelZoom.enable();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [drawing, query, router]);
 
   function clearZone() {
     const params = new URLSearchParams(query);
     params.delete("zone");
     params.delete("page");
-    router.push(params.toString() ? `/?${params}` : "/", { scroll: false });
+    router.push(params.toString() ? `${home}${home.endsWith("/") ? "" : "/"}?${params}` : home, { scroll: false });
   }
 
+  const vehicles = /(^|&)cat=vehicle(&|$)/.test(query);
   return (
     <div className={`mapwrap${full ? " full" : ""}`}>
       <div className="maptools">
-        <button type="button" className={`btn small${drawing ? " primary" : ""}`} onClick={() => setDrawing((d) => !d)}>
-          {drawing ? t("Atcelt zīmēšanu") : `✎ ${t("Apvilkt zonu")}`}
+        <button type="button" className={`btn small${drawing ? "" : " primary"} draw-btn`} onClick={() => { closeHint(); setDrawing((d) => !d); }}>
+          {drawing ? t("Atcelt zīmēšanu") : <><span aria-hidden="true">✏️</span> {zone ? t("Zīmēt no jauna") : t("Uzzīmē apgabalu")}</>}
         </button>
-        {zone && <button type="button" className="btn small" onClick={clearZone}>{t("Notīrīt zonu")}</button>}
+        {zone && <button type="button" className="btn small" onClick={clearZone}>✕ {t("Notīrīt zonu")}</button>}
+        <label className="pts-toggle fine">
+          <input type="checkbox" checked={showPoints} onChange={(e) => setShowPoints(e.target.checked)} /> {t("Rādīt punktus kartē")}
+        </label>
         <button type="button" className="btn small" onClick={() => setFull((f) => !f)}>{full ? `✕ ${t("Aizvērt")}` : `⤢ ${t("Lielā karte")}`}</button>
-        {count != null && <span className="fine">{t("{n} kartē", { n: count })}</span>}
-        {count === 0 && /(^|&)cat=vehicle(&|$)/.test(query) && (
-          <span className="fine">{t("· ss.com auto sarakstā vieta nav norādīta, tāpēc tie kartē nav redzami")}</span>
-        )}
       </div>
-      {drawing && <div className="drawhint">{t("Velc ar peli vai pirkstu ap vajadzīgo vietu")}</div>}
-      <div ref={box} className="map" role="application" aria-label={t("Sludinājumu karte")} />
+      {zone && zoneTotal != null && (
+        <div className="zone-sum">
+          <b>{t("Šajā zonā: {n}", { n: tp(zoneTotal, "sludinājums", "sludinājumi") })}</b>
+          <a href="#rezultati" className="fine">{t("Skatīt sarakstu")} ↓</a>
+        </div>
+      )}
+      {showPoints && zoom < POINTS_MIN_ZOOM && <p className="fine pts-note">{t("Pietuvini karti, lai redzētu punktus")}</p>}
+      {showPoints && zoom >= POINTS_MIN_ZOOM && count === 0 && vehicles && (
+        <p className="fine pts-note">{t("· ss.com auto sarakstā vieta nav norādīta, tāpēc tie kartē nav redzami")}</p>
+      )}
+      <div className="map-box">
+        {drawing && <div className="drawhint">{t("Velc ar peli vai pirkstu ap vajadzīgo vietu")}</div>}
+        {hint && !zone && !drawing && (
+          <div className="map-hint" role="note">
+            <p><b>{t(vehicles ? "Apvelc rajonu, kurā meklē auto." : "Apvelc rajonu, kurā meklē īpašumu.")}</b></p>
+            <p className="fine">
+              {t("Piemērs: Rīgas centrs")}
+              {exampleN != null && <> – {t("šajā zonā ir {n}", { n: tp(exampleN, "sludinājums", "sludinājumi") })}</>}
+            </p>
+            <div className="map-hint-btns">
+              <button type="button" className="btn small primary" onClick={() => { closeHint(); setDrawing(true); }}>✏️ {t("Uzzīmē apgabalu")}</button>
+              <button type="button" className="btn small" onClick={() => { closeHint(); applyZone(zoneParam(EXAMPLE_ZONE)); }}>{t("Rādīt šo zonu")}</button>
+              <button type="button" className="btn small" onClick={closeHint}>{t("Sapratu")}</button>
+            </div>
+          </div>
+        )}
+        <div ref={box} className="map" role="application" aria-label={t("Sludinājumu karte")} />
+      </div>
     </div>
   );
 }

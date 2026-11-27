@@ -270,7 +270,18 @@ main .fine { margin-top: 14px; }
 .mapwrap.full { position: fixed; inset: 0; z-index: 50; border-radius: 0; display: flex; flex-direction: column; padding: max(10px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(10px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
 .mapwrap.full .map { flex: 1; height: auto; }
 .maptools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
-.drawhint { position: absolute; left: 20px; top: 56px; z-index: 500; background: var(--accent); color: var(--accent-fg); font-size: 12px; font-weight: 600; padding: 5px 9px; border-radius: 6px; pointer-events: none; }
+.map-box { position: relative; }
+.mapwrap.full .map-box { flex: 1; display: flex; flex-direction: column; }
+.mapwrap.full .map-box .map { flex: 1; height: auto; }
+.pts-toggle { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+.pts-toggle input { width: 16px; height: 16px; accent-color: var(--accent); }
+.pts-note { margin: 0 0 6px; }
+.zone-sum { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; margin: 0 0 8px; padding: 8px 12px; border-radius: 8px; background: color-mix(in srgb, var(--accent) 8%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--line)); }
+.map-hint { position: absolute; left: 10px; bottom: 10px; z-index: 500; max-width: min(360px, calc(100% - 20px)); background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; box-shadow: 0 4px 16px rgba(0,0,0,.18); }
+.map-hint p { margin: 0 0 4px; }
+.map-hint-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+@media (max-width: 560px) { .map-hint { left: 6px; right: 6px; bottom: 6px; max-width: none; } }
+.drawhint { position: absolute; left: 10px; top: 10px; z-index: 500; background: var(--accent); color: var(--accent-fg); font-size: 12px; font-weight: 600; padding: 5px 9px; border-radius: 6px; pointer-events: none; }
 .leaflet-container { font-family: var(--f-body); }
 @media (max-width: 900px) {
   /* telefonā filtru virsraksts ir skaidri redzama poga */

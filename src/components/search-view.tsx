@@ -150,9 +150,9 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
         )}
         {!landing && Object.keys(flat).length === 0 && <HomeCategories />}
         {stripMode && <TypeStrip mode={stripMode} flat={flat} counts={counts} />}
-        <SearchMapLazy query={pointsQuery} zone={flat.zone} />
+        <SearchMapLazy query={pointsQuery} zone={flat.zone} zoneTotal={flat.zone ? result?.total : undefined} />
         {insights && <PriceInsights d={insights} flat={flat} rent={s.deal === "rent"} />}
-        <div className="results-head">
+        <div className="results-head" id="rezultati">
           {landing ? <h1>{landing.h1}</h1> : <h1>{heading}</h1>}
           {result && <span className="count">{tp(result.total, "sludinājums", "sludinājumi")}</span>}
           <span className="grow" />

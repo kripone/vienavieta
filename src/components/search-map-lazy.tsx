@@ -37,7 +37,7 @@ export function SearchMapLazy(props: ComponentProps<typeof SearchMap>) {
           </span>
           <span className="mo-txt">
             <b>{t("Rādīt karti")}</b>
-            <small>{t("Sludinājumi kartē")}</small>
+            <small>{t("Uzzīmē apgabalu un redzi, kas tur pārdošanā")}</small>
           </span>
           <span className="mo-go" aria-hidden="true">→</span>
         </button>
