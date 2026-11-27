@@ -173,7 +173,9 @@ main .fine { margin-top: 14px; }
 .contact { display: flex; flex-direction: column; gap: 4px; }
 .contact .big { font-family: var(--f-display); font-weight: 800; font-size: 22px; text-decoration: none; }
 .det-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin-top: 24px; max-width: 860px; }
-.det-body h2 { font-family: var(--f-display); font-size: 19px; margin: 12px 0 8px; }
+.det-body h2, .det-side .det-params h2, .det-side .fin-calc h2 { font-family: var(--f-display); font-size: 19px; margin: 12px 0 8px; }
+.det-side .det-params, .det-side .fin-calc { margin-top: 16px; }
+.det-side .params { grid-template-columns: repeat(auto-fill, minmax(min(100%, 130px), 1fr)); }
 .params { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 8px; margin: 0; }
 .params div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px; min-width: 0; }
 .params dt { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
@@ -886,7 +888,8 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 @media (min-width: 861px) {
   .det { grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr); grid-template-areas: "media side" "body side"; column-gap: 32px; row-gap: 0; }
   .det > .det-media { grid-area: media; }
-  .det > .det-side { grid-area: side; position: sticky; top: 16px; align-self: start; }
+  .det > .det-side { grid-area: side; align-self: start; }
+  .det-side .fin-box { grid-template-columns: 1fr; }
   .det > .det-body { grid-area: body; max-width: none; }
 }
 

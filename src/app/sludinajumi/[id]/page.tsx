@@ -195,6 +195,30 @@ export default async function ListingPage(props: Props) {
             <span>{ext ? t("Pievienots {when}", { when: timeAgo(l.createdAt, t) }) : t("Ievietots {when}", { when: timeAgo(l.createdAt, t) })}</span>
           </p>
           {evaluation && <EvalBadge e={evaluation} long />}
+          {!ext && (
+            <div className="panel seller" id="kontakti">
+              <b>{seller}</b>
+              <span className="fine">
+                {t(d.sellerType === "agency" ? "Aģentūra" : d.sellerType === "dealer" ? (l.kind === "vehicle" ? "Auto salons" : "Aģentūra") : "Privātpersona")}
+                {d.sellerVerified ? ` · ✔ ${t("identitāte apstiprināta")}` : ""}
+              </span>
+              {l.status === "active" && !isOwner && <ContactReveal id={l.id} />}
+              {l.feedId && l.externalUrl && /^https?:\/\//.test(l.externalUrl) && (
+                <a className="fine" href={l.externalUrl} rel="nofollow noopener noreferrer">{/(^|\.)city24\.lv$/.test(new URL(l.externalUrl).hostname) ? t("Sludinājums city24.lv") : t("Sludinājums salona mājaslapā")} ↗</a>
+              )}
+            </div>
+          )}
+          <section className="det-params">
+            <h2>{t("Parametri")}</h2>
+            <dl className="params">
+              {rows.filter(([, v]) => v != null && v !== "").map(([k, v]) => (
+                <div key={k}>
+                  <dt>{t(k)}</dt>
+                  <dd>{typeof v === "string" ? t(v) : v}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
           {(() => {
             // „Cik vērts ir tavs …?” — aicinājums novērtēt savu auto/dzīvokli (iepildām šī sludinājuma marku/modeli vai vietu)
             const v = l.kind === "vehicle" && l.vehicleClass === "car"
@@ -210,19 +234,8 @@ export default async function ListingPage(props: Props) {
               </a>
             ) : null;
           })()}
-          {!ext && (
-            <div className="panel seller" id="kontakti">
-              <b>{seller}</b>
-              <span className="fine">
-                {t(d.sellerType === "agency" ? "Aģentūra" : d.sellerType === "dealer" ? (l.kind === "vehicle" ? "Auto salons" : "Aģentūra") : "Privātpersona")}
-                {d.sellerVerified ? ` · ✔ ${t("identitāte apstiprināta")}` : ""}
-              </span>
-              {l.status === "active" && !isOwner && <ContactReveal id={l.id} />}
-              {l.feedId && l.externalUrl && /^https?:\/\//.test(l.externalUrl) && (
-                <a className="fine" href={l.externalUrl} rel="nofollow noopener noreferrer">{/(^|\.)city24\.lv$/.test(new URL(l.externalUrl).hostname) ? t("Sludinājums city24.lv") : t("Sludinājums salona mājaslapā")} ↗</a>
-              )}
-            </div>
-          )}
+          {l.status === "active" && l.kind === "vehicle" && !l.deal?.match(/^(rent|day|buy)$/) && l.price >= FINANCE.lease.minPrice && <FinanceCalc price={l.price} kind="lease" />}
+          {l.status === "active" && l.kind === "property" && l.deal === "sell" && l.price >= FINANCE.mortgage.minPrice && <FinanceCalc price={l.price} kind="mortgage" />}
         </div>
       <div className="det-body">
         {summary.length > 0 && (
@@ -231,17 +244,6 @@ export default async function ListingPage(props: Props) {
             <p className="desc">{summary.join(" ")}</p>
           </section>
         )}
-        <section>
-          <h2>{t("Parametri")}</h2>
-          <dl className="params">
-            {rows.filter(([, v]) => v != null && v !== "").map(([k, v]) => (
-              <div key={k}>
-                <dt>{t(k)}</dt>
-                <dd>{typeof v === "string" ? t(v) : v}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
         {l.features.length > 0 && (
           <details className="feat-box">
             <summary>{t("Aprīkojums")} ({l.features.length})</summary>
@@ -278,8 +280,6 @@ export default async function ListingPage(props: Props) {
         {l.kind === "property" && l.lat != null && l.lon != null && <ListingMapLazy lat={l.lat} lon={l.lon} exact={l.geoPrecision === "street"} />}
         {vzd && <VzdDeals data={vzd} perM2={l.areaM2 ? Math.round(l.price / Number(l.areaM2)) : null} />}
         {history && <PriceHistory h={history} external={l.source !== "own"} />}
-        {l.status === "active" && l.kind === "vehicle" && !l.deal?.match(/^(rent|day|buy)$/) && l.price >= FINANCE.lease.minPrice && <FinanceCalc price={l.price} kind="lease" />}
-        {l.status === "active" && l.kind === "property" && l.deal === "sell" && l.price >= FINANCE.mortgage.minPrice && <FinanceCalc price={l.price} kind="mortgage" />}
         {ext && (
           <div className="panel seller ext-open">
             <b>{t("Sludinājums no {src}", { src })}</b>
