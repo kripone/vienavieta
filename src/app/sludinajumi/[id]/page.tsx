@@ -223,21 +223,6 @@ export default async function ListingPage(props: Props) {
               ))}
             </dl>
           </section>
-          {(() => {
-            // „Cik vērts ir tavs …?” — aicinājums novērtēt savu auto/dzīvokli (iepildām šī sludinājuma marku/modeli vai vietu)
-            const v = l.kind === "vehicle" && l.vehicleClass === "car"
-              ? { h: t("Cik vērts ir tavs auto?"), p: t("Uzzini sava auto tirgus cenu pēc tūkstošiem līdzīgu sludinājumu."), href: `/novertejums?${new URLSearchParams({ ...(l.makeId ? { make: String(l.makeId) } : {}), ...(l.modelId ? { model: String(l.modelId) } : {}) })}` }
-              : l.kind === "property" && l.propertyType === "Dzīvoklis"
-                ? { h: t("Cik vērts ir tavs dzīvoklis?"), p: t("Uzzini cenu pēc līdzīgiem sludinājumiem un reālajiem darījumiem tavā mājā."), href: `/novertejums?${new URLSearchParams({ veids: "dzivoklis", ...(l.placeId ? { vieta: String(l.placeId) } : {}) })}` }
-                : null;
-            return v ? (
-              <a className="value-cta" href={lp(v.href)}>
-                <b>{v.h}</b>
-                <span>{v.p}</span>
-                <span className="btn">{t("Novērtēt bez maksas")} →</span>
-              </a>
-            ) : null;
-          })()}
           {/* datorā labajā kolonnā; telefonā zemāk (pēc vēstures), lai neaizsedz kopsavilkumu un karti */}
           {calcEl && <div className="calc-side">{calcEl}</div>}
         </div>
@@ -336,6 +321,22 @@ export default async function ListingPage(props: Props) {
           )}
         </div>
       )}
+      {/* „Cik vērts ir tavs …?” – virs līdzīgajiem sludinājumiem (lietotājs 2026-11-27) */}
+      {(() => {
+        // „Cik vērts ir tavs …?” — aicinājums novērtēt savu auto/dzīvokli (iepildām šī sludinājuma marku/modeli vai vietu)
+        const v = l.kind === "vehicle" && l.vehicleClass === "car"
+          ? { h: t("Cik vērts ir tavs auto?"), p: t("Uzzini sava auto tirgus cenu pēc tūkstošiem līdzīgu sludinājumu."), href: `/novertejums?${new URLSearchParams({ ...(l.makeId ? { make: String(l.makeId) } : {}), ...(l.modelId ? { model: String(l.modelId) } : {}) })}` }
+          : l.kind === "property" && l.propertyType === "Dzīvoklis"
+            ? { h: t("Cik vērts ir tavs dzīvoklis?"), p: t("Uzzini cenu pēc līdzīgiem sludinājumiem un reālajiem darījumiem tavā mājā."), href: `/novertejums?${new URLSearchParams({ veids: "dzivoklis", ...(l.placeId ? { vieta: String(l.placeId) } : {}) })}` }
+            : null;
+        return v ? (
+          <a className="value-cta wide" href={lp(v.href)}>
+            <b>{v.h}</b>
+            <span>{v.p}</span>
+            <span className="btn">{t("Novērtēt bez maksas")} →</span>
+          </a>
+        ) : null;
+      })()}
       {similar.length > 0 && (
         <section className="similar">
           <h2>{t("Līdzīgi sludinājumi")}</h2>
