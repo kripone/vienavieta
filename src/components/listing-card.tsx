@@ -4,7 +4,7 @@ import { EvalBadge } from "@/components/eval-badge";
 import { ExtThumb } from "@/components/ext-thumb";
 import type { PriceEval } from "@/lib/price-eval";
 import { Ill } from "@/components/ill";
-import { DEAL_LABEL, DROP_MAX, SOURCE_LABEL } from "@/lib/constants";
+import { DEAL_LABEL, DROP_MAX, PRICE_EVAL, SOURCE_LABEL } from "@/lib/constants";
 import { listingIll } from "@/lib/illustrations";
 import { ssBigThumb } from "@/lib/ext-img";
 import { formatNumber, formatPrice, timeAgo } from "@/lib/format";
@@ -45,10 +45,12 @@ type CardProps = {
 export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, also, evaluation, compare, vzd, priority, heading = "h2" }: CardProps) {
   const H = heading;
   const { t, lp } = await getT();
+  // platība zem PRICE_EVAL.AREA_MIN (portālos „1 m²”) nozīmē, ka tās nav – nerādām un €/m² nerēķinām
+  const area = l.areaM2 && Number(l.areaM2) >= PRICE_EVAL.AREA_MIN ? Number(l.areaM2) : null;
   const meta =
     l.kind === "vehicle"
       ? [l.year, l.mileageKm != null ? `${formatNumber(l.mileageKm)} km` : null, l.fuel && t(l.fuel), l.gearbox && t(l.gearbox), l.body && t(l.body)]
-      : [l.propertyType && t(l.propertyType), l.areaM2 ? `${Number(l.areaM2)} m²` : null, l.rooms ? t("{n} ist.", { n: l.rooms }) : null, l.landM2 && !l.areaM2 ? landLabel(l.landM2) : null, l.deal ? t(DEAL_LABEL[l.deal]) : null];
+      : [l.propertyType && t(l.propertyType), area ? `${area} m²` : null, l.rooms ? t("{n} ist.", { n: l.rooms }) : null, l.landM2 && !area ? landLabel(l.landM2) : null, l.deal ? t(DEAL_LABEL[l.deal]) : null];
   const unit = priceUnit(l.deal, t);
   const ext = l.source !== "own" && l.externalUrl ? l.externalUrl : null;
   const src = SOURCE_LABEL[l.source] ?? l.source;
@@ -105,7 +107,7 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
         {vzd && (
           <a className="vzd-badge" href={lp(`/sludinajumi/${l.id}`) + "#vzd"} title={t("Reālās pirkuma cenas šajā mājā (Valsts zemes dienests)")}>
             {t("VZD: šajā mājā {v} €/m² ({n})", { v: formatNumber(vzd.median), n: vzd.n })}
-            {l.areaM2 ? <> · {t("šis {v} €/m²", { v: formatNumber(Math.round(l.price / Number(l.areaM2))) })}</> : null}
+            {area ? <> · {t("šis {v} €/m²", { v: formatNumber(Math.round(l.price / area)) })}</> : null}
           </a>
         )}
         {actions}

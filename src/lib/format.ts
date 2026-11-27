@@ -1,6 +1,8 @@
 const nf = new Intl.NumberFormat("lv-LV");
 
-export const formatNumber = (n: number) => nf.format(n);
+/** Skaitlis ar atstarpēm; `digits` – līdz cik zīmēm aiz komata (noklusējumā kā nf). */
+export const formatNumber = (n: number, digits?: number) =>
+  digits == null ? nf.format(n) : new Intl.NumberFormat("lv-LV", { maximumFractionDigits: digits }).format(n);
 export const formatPrice = (eur: number) => `${nf.format(eur)} €`;
 
 type Tr = (key: string, vars?: Record<string, string | number>) => string;

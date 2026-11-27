@@ -5,6 +5,7 @@ import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { PRICE_EVAL } from "./constants";
 import { plausibleVehicle } from "./plausible";
+import { groupPrimaryAs } from "./dedupe";
 
 /** scope: ar ko salīdzināts – tas pats modelis (auto), tā pati vieta (apkaime/pilsēta) vai viss reģions (īpašumi) */
 export type PriceEval = { label: "Laba cena" | "Tirgus cena" | "Virs tirgus"; cls: "good" | "fair" | "high"; ratio: number; median: number; n: number; perM2: boolean; scope: "model" | "place" | "region" };
@@ -14,7 +15,8 @@ const TTL = 10 * 60_000;
 
 function verdict(ratio: number, median: number, n: number, perM2: boolean, scope: PriceEval["scope"]): PriceEval {
   const [label, cls] = ratio < PRICE_EVAL.GOOD ? (["Laba cena", "good"] as const) : ratio > PRICE_EVAL.HIGH ? (["Virs tirgus", "high"] as const) : (["Tirgus cena", "fair"] as const);
-  return { label, cls, ratio, median: Math.round(median), n, perM2, scope };
+  // mediānu glabājam ar tādu precizitāti, kādu rādām (mazām €/m² vērtībām 2 zīmes aiz komata), lai % atbilst redzamajam skaitlim
+  return { label, cls, ratio, median: median < 100 ? Math.round(median * 100) / 100 : Math.round(median), n, perM2, scope };
 }
 
 /** Novērtējums dotajiem sludinājumiem (līdz ~50); null, ja līdzīgu par maz. */
@@ -42,14 +44,15 @@ export async function priceEvals(ids: string[]): Promise<Map<string, PriceEval |
         and x.make_id = l.make_id and x.model_id = l.model_id
         and x.year between l.year - ${PRICE_EVAL.YEARS} and l.year + ${PRICE_EVAL.YEARS}
         and x.id <> l.id and (l.group_key is null or x.group_key is distinct from l.group_key)
-        and x.price > 100 and ${plausibleVehicle("x")}
+        and x.price > 100 and ${plausibleVehicle("x")} and ${groupPrimaryAs("x")}
     ) e
     where l.id in (${idList}) and l.kind = 'vehicle' and l.make_id is not null and l.model_id is not null and l.year is not null and ${plausibleVehicle("l")}`);
 
   // Īpašumi: agrāk mediānu rēķināja SQL katram sludinājumam atsevišķi (lateral), un lapā ar 24 dzīvokļiem
   // tas pašu reģionu pārlasīja 24 reizes (~1 s datubāzē). Tagad vienā vaicājumā nolasām grupas (veids, darījums, reģions)
   // €/m² vērtības un mediānu katram sludinājumam rēķinām šeit, izslēdzot to pašu un tā dublikātus (rezultāts tāds pats).
-  const unit = (t: string) => sql.raw(`(case when ${t}.property_type = 'Zeme' then ${t}.land_m2::numeric else ${t}.area_m2 end)`);
+  // platība: zemei zemes m² (≥ LAND_MIN), pārējam telpu m² (≥ AREA_MIN); mazāka = trūkstoša (portālos „1 m²”) → €/m² nerēķinām
+  const unit = (t: string) => sql.raw(`(case when ${t}.property_type = 'Zeme' then nullif(greatest(${t}.land_m2::numeric, 0), 0) * (${t}.land_m2 >= ${PRICE_EVAL.LAND_MIN})::int else ${t}.area_m2 * (${t}.area_m2 >= ${PRICE_EVAL.AREA_MIN})::int end)`);
   const props = await db.execute<{ id: string; price: number; u: number; group_key: string | null; property_type: string; deal: string | null; region_id: number; place_id: number }>(sql`
     select l.id, l.price, ${unit("l")}::float8 as u, l.group_key, l.property_type, l.deal::text as deal, p.region_id, l.place_id
     from listings l
@@ -59,7 +62,8 @@ export async function priceEvals(ids: string[]): Promise<Map<string, PriceEval |
 
   for (const id of need) out.set(id, null);
   for (const r of vehicles.rows) {
-    if (r.med && r.n >= PRICE_EVAL.MIN) out.set(r.id, verdict(r.price / r.med, r.med, r.n, false, "model"));
+    const ratio = r.med ? r.price / r.med : 0;
+    if (r.med && r.n >= PRICE_EVAL.MIN && ratio >= PRICE_EVAL.RATIO_MIN_VEHICLE && ratio <= PRICE_EVAL.RATIO_MAX) out.set(r.id, verdict(ratio, r.med, r.n, false, "model"));
   }
   for (const r of props.rows) {
     const vals = groups.get(groupKeyOf(r.property_type, r.deal, r.region_id)) ?? [];
@@ -69,7 +73,8 @@ export async function priceEvals(ids: string[]): Promise<Map<string, PriceEval |
     const [own, scope] = near.length >= PRICE_EVAL.PLACE_MIN ? [near.map((x) => x.v), "place" as const] : [others.map((x) => x.v), "region" as const];
     const med = medianCont(own);
     const u = Number(r.u);
-    if (med && own.length >= PRICE_EVAL.MIN && u > 0) out.set(r.id, verdict(r.price / u / med, med, own.length, true, scope));
+    const ratio = med && u > 0 ? r.price / u / med : 0;
+    if (med && own.length >= PRICE_EVAL.MIN && u > 0 && ratio >= PRICE_EVAL.RATIO_MIN && ratio <= PRICE_EVAL.RATIO_MAX) out.set(r.id, verdict(ratio, med, own.length, true, scope));
   }
   for (const id of need) cache.set(id, { at: now, v: out.get(id) ?? null });
   return out;
@@ -99,11 +104,11 @@ async function propertyGroups(keys: string[]): Promise<Map<string, GroupVal[]>> 
     }),
     sql`, `,
   );
-  const unit = sql.raw(`(case when x.property_type = 'Zeme' then x.land_m2::numeric else x.area_m2 end)`);
+  const unit = sql.raw(`(case when x.property_type = 'Zeme' then x.land_m2::numeric * (x.land_m2 >= ${PRICE_EVAL.LAND_MIN})::int else x.area_m2 * (x.area_m2 >= ${PRICE_EVAL.AREA_MIN})::int end)`);
   const rows = await db.execute<{ id: string; group_key: string | null; property_type: string; deal: string; region_id: number; place_id: number; v: number }>(sql`
     select x.id, x.group_key, x.property_type, coalesce(x.deal::text, '') as deal, px.region_id, x.place_id, (x.price / ${unit})::float8 as v
     from listings x join places px on px.id = x.place_id
-    where x.status = 'active' and x.kind = 'property' and ${unit} > 0
+    where x.status = 'active' and x.kind = 'property' and ${unit} > 0 and ${groupPrimaryAs("x")}
       and (x.property_type, coalesce(x.deal::text, ''), px.region_id) in (${tuples})`);
   for (const k of need) out.set(k, []);
   for (const r of rows.rows) out.get(groupKeyOf(r.property_type, r.deal || null, Number(r.region_id)))?.push({ id: r.id, g: r.group_key, p: Number(r.place_id), v: Number(r.v) });

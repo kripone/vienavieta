@@ -5,6 +5,11 @@ import { houseKey, houseTail } from "./vzd-key";
 
 const { vzdDeals } = schema;
 
+// Ārpus tirgus darījumi (radinieku pārdošana, daļas, kļūdas: 32,7 m² par 900 €) mediānās netiek ņemti.
+const VZD_MIN = { amount: 2000, perM2: 100 } as const;
+export const isMarketDeal = (amount: number, areaM2: number) => amount >= VZD_MIN.amount && areaM2 > 0 && amount / areaM2 >= VZD_MIN.perM2;
+const marketSql = sql`${vzdDeals.amount} >= ${VZD_MIN.amount} and ${vzdDeals.areaM2} > 0 and ${vzdDeals.amount} / ${vzdDeals.areaM2}::float >= ${VZD_MIN.perM2}`;
+
 export type VzdDeal = { day: string; amount: number; areaM2: string; rooms: number | null; floor: number | null; floors: number | null; address: string };
 
 /** Darījumi tajā pašā mājā un tuvumā (tikai dzīvokļiem ar ielu un mājas numuru). */
@@ -40,7 +45,7 @@ export async function dealsForListing(l: { address: string | null; lat: number |
         median: sql<number | null>`percentile_cont(0.5) within group (order by ${vzdDeals.amount} / ${vzdDeals.areaM2}::float)`,
       })
       .from(vzdDeals)
-      .where(and(near(0.0036, 0.0065), gte(vzdDeals.day, since), l.rooms ? sql`${vzdDeals.rooms} between ${l.rooms - 1} and ${l.rooms + 1}` : sql`true`));
+      .where(and(near(0.0036, 0.0065), gte(vzdDeals.day, since), marketSql, l.rooms ? sql`${vzdDeals.rooms} between ${l.rooms - 1} and ${l.rooms + 1}` : sql`true`));
     area = r.n >= 3 ? { n: r.n, median: r.median ? Math.round(r.median) : null } : null;
   }
   if (!same.length && !area) return null;
@@ -81,8 +86,10 @@ export async function vzdBadges(ids: string[]) {
     let mine = deals.filter((d) => d.key === l.key && close(l, d));
     if (!mine.length && l.tail && l.lat != null) mine = deals.filter((d) => d.tail === l.tail && close(l, d));
     if (!mine.length) continue;
-    const recent = mine.filter((d) => d.day >= cut);
-    const basis = recent.length >= 3 ? recent : mine;
+    const market = mine.filter((d) => isMarketDeal(d.amount, Number(d.areaM2)));
+    const recentM = market.filter((d) => d.day >= cut);
+    const basis = recentM.length >= 3 ? recentM : market;
+    if (!basis.length) continue;
     const m = median(basis.map((d) => d.amount / Number(d.areaM2)));
     if (m) out.set(l.id, { median: m, n: basis.length });
   }
@@ -110,8 +117,9 @@ export async function dealsByAddress(q: string) {
   }
   const cut = threeYearsAgo();
   const houses = [...groups].map(([address, deals]) => {
-    const recent = deals.filter((d) => d.day >= cut);
-    const basis = recent.length >= 3 ? recent : deals;
+    const market = deals.filter((d) => isMarketDeal(d.amount, Number(d.areaM2)));
+    const recent = market.filter((d) => d.day >= cut);
+    const basis = recent.length >= 3 ? recent : market;
     return { address, deals, median: median(basis.map((d) => d.amount / Number(d.areaM2))), medianN: basis.length, medianRecent: basis === recent, builtYear: deals[0].builtYear, material: deals[0].material };
   });
   // precīza iela vispirms, tad pēc darījumu skaita

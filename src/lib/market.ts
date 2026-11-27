@@ -2,12 +2,13 @@
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { cached } from "./search";
+import { groupPrimaryAs } from "./dedupe";
 
 type Row = Record<string, unknown>;
 const rows = async <T extends Row>(q: ReturnType<typeof sql>) => (await db.execute<T>(q)).rows;
 
 /** Viena dublikātu grupa skaitās vienreiz (savējais vai agrākais). */
-const primary = sql.raw(`(l.group_key is null or not exists (select 1 from listings g where g.group_key = l.group_key and g.status = 'active' and g.id <> l.id and (g.source = 'own' and l.source <> 'own' or (g.source <> 'own' and l.source <> 'own' and g.created_at < l.created_at))))`);
+const primary = groupPrimaryAs("l");
 
 /** Saglabā šodienas tirgus momentuzņēmumu (atkārtoti tajā pašā dienā pārraksta). */
 export async function snapshotMarket(day = new Date()) {

@@ -315,7 +315,9 @@ export const TRIM_AUTO_MIN = 5;
 export const DROP_MAX = 0.5;
 /** Lētāko/dārgāko vietu topos (€/m²) vietai vajag vismaz tik sludinājumu, lai 5–7 objekti nekļūtu par „dārgāko”. */
 export const TOP_PLACE_MIN = 20;
-export const PRICE_EVAL = { GOOD: 0.88, HIGH: 1.15, MIN: 3, YEARS: 2, PLACE_MIN: 12 } as const;
+/** Cenas spriedums: robežas, minimālais salīdzināmo skaits (MIN), neticamas attiecības (RATIO_MIN/MAX – drīzāk kļūda datos, spriedumu nerādām),
+ *  minimālā platība €/m² aprēķinam (AREA_MIN m² ēkām, LAND_MIN m² zemei – „1 m²” ir trūkstoša platība, nevis fakts). */
+export const PRICE_EVAL = { GOOD: 0.88, HIGH: 1.15, MIN: 8, YEARS: 2, PLACE_MIN: 12, RATIO_MIN_VEHICLE: 0.35, RATIO_MIN: 0.3, RATIO_MAX: 4, AREA_MIN: 10, LAND_MIN: 50 } as const;
 /** Cik sludinājumus var salīdzināt vienlaikus. */
 export const MAX_COMPARE = 4;
 

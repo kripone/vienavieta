@@ -110,16 +110,21 @@ export async function alsoAt(rows: { id: string; groupKey: string | null }[]): P
  * Meklēšanas nosacījums: no grupas rāda tikai vienu sludinājumu — savējo, ja tāds ir, citādi agrāko ārējo.
  * Pilni kolonnu nosaukumi, lai apakšvaicājums nesajauktu tabulas.
  */
-export const groupPrimaryOnly = sql`not exists (
+/** Tas pats nosacījums jebkuram tabulas aizstājvārdam (piem. "l"), lai visi skaitļi un mediānas skaitītu objektu vienreiz. */
+export function groupPrimaryAs(alias: string) {
+  const a = `"${alias.replace(/"/g, "")}"`;
+  return sql.raw(`not exists (
   select 1 from "listings" l2
-  where l2."group_key" = "listings"."group_key" and "listings"."group_key" is not null
-    and l2."status" = 'active' and l2."id" <> "listings"."id"
+  where l2."group_key" = ${a}."group_key" and ${a}."group_key" is not null
+    and l2."status" = 'active' and l2."id" <> ${a}."id"
     and (
-      (l2."source" = 'own' and "listings"."source" <> 'own')
-      or (l2."source" <> 'own' and "listings"."source" <> 'own'
-          and (l2."created_at" < "listings"."created_at" or (l2."created_at" = "listings"."created_at" and l2."id" < "listings"."id")))
+      (l2."source" = 'own' and ${a}."source" <> 'own')
+      or (l2."source" <> 'own' and ${a}."source" <> 'own'
+          and (l2."created_at" < ${a}."created_at" or (l2."created_at" = ${a}."created_at" and l2."id" < ${a}."id")))
     )
-)`;
+)`);
+}
+export const groupPrimaryOnly = groupPrimaryAs("listings");
 
 /**
  * Fona kārta (ik stundu): sagrupē acīmredzamus dublikātus, ko ielādes brīdī nevarēja sasaistīt

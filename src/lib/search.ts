@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { and, asc, count, desc, eq, gte, ilike, inArray, isNotNull, isNull, lt, lte, ne, or, sql, type SQL } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { groupPrimaryOnly } from "./dedupe";
+import { groupPrimaryAs, groupPrimaryOnly } from "./dedupe";
 import {
   AMENITIES, BODY_TYPES, COLORS, CONDITIONS, DEALS, DRIVES, FUELS, GEARBOXES, HEATING, MATERIALS, PROPERTY_GROUPS, PROPERTY_TYPES,
   PURPOSES, SERIES, VEHICLE_CLASSES, VEHICLE_CLASS_LABEL, DEAL_LABEL, type VehicleClass,
@@ -702,7 +702,7 @@ export async function homeCategoryCounts(): Promise<Record<string, number>> {
           when property_type = 'Mežs' and deal = 'sell' then 'forest'
           when property_type = 'Birojs' then 'office'
         end as k
-        from listings where status = 'active'
+        from listings where status = 'active' and ${groupPrimaryOnly}
       ) q where k is not null group by k`);
     return Object.fromEntries(r.rows.map((x) => [x.k, Number(x.n)]));
   });
@@ -713,14 +713,14 @@ export async function todayStats(): Promise<{ fresh: number; drops: number; riga
   return cached("today-stats", async () => {
     const r = await db.execute<{ fresh: number; drops: number; riga: number | null }>(sql`
       select
-        (select count(*)::int from listings where status = 'active' and created_at > now() - interval '24 hours') as fresh,
+        (select count(*)::int from listings where status = 'active' and created_at > now() - interval '24 hours' and ${groupPrimaryOnly}) as fresh,
         (select count(distinct e.listing_id)::int from (
            select listing_id, price, changed_at, lag(price) over (partition by listing_id order by changed_at) as prev from price_history
          ) e join listings l on l.id = e.listing_id
-         where l.status = 'active' and e.changed_at > now() - interval '24 hours' and e.prev > e.price and e.price::numeric / e.prev >= 0.5) as drops,
+         where l.status = 'active' and e.changed_at > now() - interval '24 hours' and e.prev > e.price and e.price::numeric / e.prev >= 0.5 and ${groupPrimaryAs("l")}) as drops,
         (select percentile_cont(0.5) within group (order by l.price::numeric / l.area_m2)
            from listings l join places p on p.id = l.place_id join regions g on g.id = p.region_id
-           where l.status = 'active' and l.property_type = 'Dzīvoklis' and l.deal = 'sell' and g.name = 'Rīga' and l.area_m2 > 10) as riga`);
+           where l.status = 'active' and l.property_type = 'Dzīvoklis' and l.deal = 'sell' and g.name = 'Rīga' and l.area_m2 > 10 and ${groupPrimaryAs("l")}) as riga`);
     const x = r.rows[0];
     return { fresh: Number(x?.fresh ?? 0), drops: Number(x?.drops ?? 0), rigaM2: x?.riga != null ? Math.round(Number(x.riga)) : null };
   });
