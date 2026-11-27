@@ -15,6 +15,7 @@ import { mollerEnabled, tickMoller } from "./moller-pages";
 import { toyotaEnabled, tickToyota } from "./toyota-pages";
 import { wessEnabled, tickWess } from "./wess-pages";
 import { city24Enabled, tickCity24 } from "./city24-pages";
+import { porscheEnabled, tickPorsche } from "./porsche-pages";
 import { fillCity24Details } from "./city24-details";
 import { backfillBodies, backfillHouseTail, backfillMakeModel, backfillPlaceholderTitles, ensureMotoModels, forceModelRecrawl, forcePlacesRecrawl } from "./backfill";
 import { crawlSection } from "./ss-pages";
@@ -242,6 +243,17 @@ export function startSsCrawler() {
       for (;;) {
         const r = await tickCity24().catch((e) => (console.error("city24.lv ievākšana:", e instanceof Error ? e.message : e), null));
         if (r) console.log(`city24.lv ${r.mode} ${r.section}:`, JSON.stringify({ ...r, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
+        await new Promise((res) => setTimeout(res, 60_000));
+      }
+    })();
+  }
+  // finder.porsche.com (Porsche Center Riga Airport): Playwright pārlūks, ieslēdz ar PORSCHE_CRAWL=on
+  if (porscheEnabled()) {
+    (async () => {
+      await new Promise((r) => setTimeout(r, 330_000));
+      for (;;) {
+        const r = await tickPorsche().catch((e) => (console.error("finder.porsche.com ievākšana:", e instanceof Error ? e.message : e), null));
+        if (r) console.log(`porsche ${r.mode}:`, JSON.stringify({ ...r, errors: r.errors.slice(0, 3), errorCount: r.errors.length }));
         await new Promise((res) => setTimeout(res, 60_000));
       }
     })();

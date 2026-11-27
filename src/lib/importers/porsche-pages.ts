@@ -1,7 +1,7 @@
 // finder.porsche.com (Porsche Center Riga Airport) lietoto auto ievākšana (lietotājs apstiprināja 2026-11-12).
 // Parasto HTTP pieprasījumu bloķē Vercel bot aizsardzība (429 checkpoint), tāpēc lapas atver ar reālu
-// pārlūku (Playwright, chromium), tāpat kā autoplius.lt un city24.lv importētāji. Skrien lokāli (stundu
-// uzdevums), serverī PORSCHE_CRAWL=off nav vajadzīgs — serverī šis netiek izsaukts.
+// pārlūku (Playwright, chromium), tāpat kā autoplius.lt un city24.lv importētāji. Serverī ieslēdz ar
+// PORSCHE_CRAWL=on (ss-scheduler.ts; noklusējumā izslēgts); agrāk skrēja lokāli (scripts/porsche-crawl.ts).
 // Dati nāk no lapas JSON-LD (schema.org ItemList → Car): marka/modelis, gads, cena, nobraukums, degviela,
 // jauda, ātrumkārba, virsbūve, krāsa, piedziņa, sīktēls un dīlera adrese. Sludinājumu lapas neatveram;
 // bildes rādām no Porsche servera ar avota norādi. Virsrakstu veidojam paši no faktiem, tāpat kā ss.com.
@@ -280,6 +280,10 @@ export async function crawlPorsche(mode: "quick" | "full", fetchHtml: (url: stri
       : { lastQuickAt: started };
   await db.insert(crawlState).values({ name: PORSCHE.key, ...set }).onConflictDoUpdate({ target: crawlState.name, set });
   return res;
+}
+
+export function porscheEnabled() {
+  return process.env.PORSCHE_CRAWL === "on";
 }
 
 /** Plānotāja solis: ātrā vai pilnā kārta, ja pienācis laiks (null, ja nav pienākusies). */
