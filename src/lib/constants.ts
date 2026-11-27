@@ -498,6 +498,7 @@ export const WARMUP_PATHS = [
   "/", "/auto", "/moto", "/ipasumi", "/ipasumi/dzivokli", "/ipasumi/dzivokli/riga", "/ipasumi/dzivokli-ire", "/ipasumi/dzivokli-ire/riga",
   "/ipasumi/majas", "/ipasumi/zeme", "/ipasumi/dzivokli/jurmala", "/auto/lidz-5000", "/en", "/ru", "/lt",
   "/auto/lidz-20000", "/en/auto", "/ru/auto", "/ru/auto/lidz-20000", "/lt/auto",
+  "/cenu-kritumi", "/cenu-kritumi?tab=kritumi", "/cenu-kritumi?tab=kapumi",
 ];
 
 /** „Aizpildi ar AI” sludinājuma formā: cik reizes stundā viens lietotājs (`/api/listing-assist`). */

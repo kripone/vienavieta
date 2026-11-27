@@ -119,6 +119,11 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
             <s>{formatPrice(oldPrice)}</s> −{formatPrice(oldPrice - l.price)}
           </div>
         )}
+        {oldPrice != null && oldPrice < l.price && l.price <= oldPrice * (1 + DROP_MAX) && (
+          <div className="drop rise">
+            <s>{formatPrice(oldPrice)}</s> +{formatPrice(l.price - oldPrice)}
+          </div>
+        )}
         {evaluation && <EvalBadge e={evaluation} />}
         <div className="card-tools">
           {compare && <CompareToggle id={l.id} kind={l.kind} />}

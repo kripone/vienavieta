@@ -5,6 +5,7 @@ import { db, schema } from "@/db";
 import { cardFields } from "@/lib/listings";
 import { groupPrimaryOnly } from "@/lib/dedupe";
 import { DROP_MAX } from "@/lib/constants";
+import { cached } from "@/lib/search";
 
 const { listings, priceHistory, places, regions } = schema;
 
@@ -59,7 +60,11 @@ function changesSql(opts: ChangeOpts) {
 }
 
 /** Cenu kritumi vai kāpumi: kārtojums pēc laika ("time") vai izmaiņas % ("pct"); vienādiem – jaunākais pirmais. */
-export async function recentChanges(opts: ChangeOpts & { dir?: ChangeDir; order?: "time" | "pct"; limit?: number } = {}) {
+export function recentChanges(opts: ChangeOpts & { dir?: ChangeDir; order?: "time" | "pct"; limit?: number } = {}) {
+  // kešs (10 min svaigs, pēc tam rāda veco un pārrēķina fonā): vaicājums pār visu cenu vēsturi aizņem sekundes
+  return cached(`chg:${JSON.stringify(opts)}`, () => loadChanges(opts));
+}
+async function loadChanges(opts: ChangeOpts & { dir?: ChangeDir; order?: "time" | "pct"; limit?: number }) {
   const dir = opts.dir ?? "down";
   const limit = opts.limit ?? 60;
   const order = opts.order === "pct" ? sql`abs(c.price - c.prev)::float8 / c.prev desc, c.changed_at desc` : sql`c.changed_at desc`;
@@ -88,11 +93,13 @@ export async function recentChanges(opts: ChangeOpts & { dir?: ChangeDir; order?
 }
 
 /** Kritumu un kāpumu skaits periodā (cilņu skaitļiem). */
-export async function changeCounts(opts: ChangeOpts = {}) {
+export function changeCounts(opts: ChangeOpts = {}) {
+  return cached(`chgn:${JSON.stringify(opts)}`, async () => {
   const res = await db.execute<{ down: number; up: number }>(sql`
     select count(*) filter (where c.price < c.prev)::int as down, count(*) filter (where c.price > c.prev)::int as up
     from (${changesSql(opts)}) c`);
   return { down: Number(res.rows[0]?.down ?? 0), up: Number(res.rows[0]?.up ?? 0) };
+  });
 }
 
 /** Pēdējie cenu kritumi (jaunākie pirmie) – saderībai (AI čats). */
