@@ -1111,4 +1111,8 @@ export const en: Dict = {
   "Akumulators, kWh": "Battery, kWh",
   "akumulators {n} kWh": "{n} kWh battery",
   "Akumulatora ietilpībai jābūt kWh (1–300).": "Battery capacity must be in kWh (1–300).",
+  "Cenu kāpumi": "Price increases",
+  "Lielākais kritums": "Biggest drop",
+  "Šajā periodā cenu kāpumu nav.": "No price increases in this period.",
+  "Sludinājumi, kuriem cena paaugstināta {period}.": "Listings whose price was raised {period}.",
 };

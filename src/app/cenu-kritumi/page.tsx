@@ -1,8 +1,8 @@
 import { getT } from "@/i18n/server";
 import type { Metadata } from "next";
 import { langAlternates } from "@/lib/seo";
-import { ListingCard } from "@/components/listing-card";
-import { recentDrops } from "@/lib/history";
+import { ListingCard, priceUnit } from "@/components/listing-card";
+import { changeCounts, recentChanges } from "@/lib/history";
 import { alsoAt } from "@/lib/dedupe";
 import { priceEvals } from "@/lib/price-eval";
 import { vzdBadges } from "@/lib/vzd";
@@ -17,49 +17,71 @@ export async function generateMetadata(props: { searchParams: Promise<Record<str
 export const dynamic = "force-dynamic";
 
 const PERIODS = { "1": "24 stundās", "7": "7 dienās", "30": "30 dienās" } as const;
+/** Cilnes (URL parametrs tab): jaunākie kritumi, lielākie kritumi, cenu kāpumi */
+const TABS = { jaunakie: "Jaunākie", kritumi: "Lielākais kritums", kapumi: "Cenu kāpumi" } as const;
+type Tab = keyof typeof TABS;
 
 export default async function DropsPage(props: { searchParams: Promise<Record<string, string | undefined>> }) {
   const { t } = await getT();
   const sp = await props.searchParams;
   const kind = sp.k === "auto" ? "vehicle" : sp.k === "ipasumi" ? "property" : undefined;
   const days = sp.d === "1" || sp.d === "30" ? sp.d : "7";
-  const rows = await recentDrops({ kind, days: Number(days), limit: 60 }).catch(soft("cenu-kritumi", []));
+  const tab: Tab = sp.tab === "kritumi" || sp.tab === "kapumi" ? sp.tab : "jaunakie";
+  const up = tab === "kapumi";
+  const [rows, counts] = await Promise.all([
+    recentChanges({ kind, days: Number(days), limit: 60, dir: up ? "up" : "down", order: tab === "jaunakie" ? "time" : "pct" }).catch(soft("cenu-kritumi", [])),
+    changeCounts({ kind, days: Number(days) }).catch(soft("cenu-kritumi", null)),
+  ]);
   const [also, evals, vzd] = await Promise.all([
     alsoAt(rows.map((r) => r.card)).catch(soft("cenu-kritumi", new Map())),
     priceEvals(rows.map((r) => r.card.id)).catch(soft("cenu-kritumi", new Map())),
     vzdBadges(rows.filter((r) => r.card.kind === "property").map((r) => r.card.id)).catch(soft("cenu-kritumi", new Map())),
   ]);
-  const q = (k?: string, d?: string) => {
+  const k = sp.k === "auto" || sp.k === "ipasumi" ? sp.k : undefined;
+  const q = (o: { k?: string; d?: string; tab?: Tab }) => {
     const p = new URLSearchParams();
-    if (k) p.set("k", k);
-    if (d && d !== "7") p.set("d", d);
+    if (o.tab && o.tab !== "jaunakie") p.set("tab", o.tab);
+    if (o.k) p.set("k", o.k);
+    if (o.d && o.d !== "7") p.set("d", o.d);
     return p.toString() ? `/cenu-kritumi?${p}` : "/cenu-kritumi";
   };
-  const k = sp.k === "auto" || sp.k === "ipasumi" ? sp.k : undefined;
+  const count = (x: Tab) => (counts ? (x === "kapumi" ? counts.up : counts.down) : null);
+  const money = (v: number, deal: string | null) => `${formatPrice(v)}${priceUnit(deal, t)}`;
   return (
     <main className="wrap">
-      <h1>{t("Cenu kritumi")}</h1>
-      <p className="lead">{t("Sludinājumi, kuriem cena samazināta {period}. Visu sarakstu var kārtot arī meklēšanā: „Lielākais cenu kritums”.", { period: t(PERIODS[days]) })}</p>
+      <h1>{t(up ? "Cenu kāpumi" : "Cenu kritumi")}</h1>
+      <p className="lead">
+        {up
+          ? t("Sludinājumi, kuriem cena paaugstināta {period}.", { period: t(PERIODS[days]) })
+          : t("Sludinājumi, kuriem cena samazināta {period}. Visu sarakstu var kārtot arī meklēšanā: „Lielākais cenu kritums”.", { period: t(PERIODS[days]) })}
+      </p>
+      <nav className="seg mod-tabs" aria-label={t("Skats")}>
+        {(Object.keys(TABS) as Tab[]).map((x) => (
+          <a key={x} href={q({ k, d: days, tab: x })} aria-current={tab === x ? "page" : undefined}>
+            {t(TABS[x])}{count(x) != null ? ` (${count(x)})` : ""}
+          </a>
+        ))}
+      </nav>
       <nav className="seg mod-tabs" aria-label={t("Sadaļa")}>
-        <a href={q(undefined, days)} aria-current={!k ? "page" : undefined}>{t("Visi")}</a>
-        <a href={q("auto", days)} aria-current={k === "auto" ? "page" : undefined}>{t("Transports")}</a>
-        <a href={q("ipasumi", days)} aria-current={k === "ipasumi" ? "page" : undefined}>{t("Īpašumi")}</a>
+        <a href={q({ d: days, tab })} aria-current={!k ? "page" : undefined}>{t("Visi")}</a>
+        <a href={q({ k: "auto", d: days, tab })} aria-current={k === "auto" ? "page" : undefined}>{t("Transports")}</a>
+        <a href={q({ k: "ipasumi", d: days, tab })} aria-current={k === "ipasumi" ? "page" : undefined}>{t("Īpašumi")}</a>
       </nav>
       <nav className="seg mod-tabs" aria-label={t("Periods")}>
         {Object.entries(PERIODS).map(([d, label]) => (
-          <a key={d} href={q(k, d)} aria-current={days === d ? "page" : undefined}>{t(label)}</a>
+          <a key={d} href={q({ k, d, tab })} aria-current={days === d ? "page" : undefined}>{t(label)}</a>
         ))}
       </nav>
       {rows.length === 0 ? (
-        <p className="empty">{t("Šajā periodā cenu kritumu nav.")}</p>
+        <p className="empty">{t(up ? "Šajā periodā cenu kāpumu nav." : "Šajā periodā cenu kritumu nav.")}</p>
       ) : (
         <div className="list">
-          {rows.map(({ card, prev, at }) => (
+          {rows.map(({ card, prev, at, diff, pct }) => (
             <div key={card.id} className="drop-item">
               <p className="fine">
-                {timeAgo(at, t)}: {formatPrice(prev)} → <b>{formatPrice(card.price)}</b> (−{Math.round(((prev - card.price) / prev) * 100)}%)
+                {timeAgo(at, t)}: {money(prev, card.deal)} → <b>{money(card.price, card.deal)}</b> ({diff > 0 ? "+" : "−"}{formatPrice(Math.abs(diff))}, {pct > 0 ? "+" : "−"}{Math.abs(pct)}%)
               </p>
-              <ListingCard l={card} oldPrice={prev} also={also.get(card.id)} evaluation={evals.get(card.id)} vzd={vzd.get(card.id)} compare />
+              <ListingCard l={card} oldPrice={up ? null : prev} also={also.get(card.id)} evaluation={evals.get(card.id)} vzd={vzd.get(card.id)} compare />
             </div>
           ))}
         </div>

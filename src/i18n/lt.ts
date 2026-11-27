@@ -1119,4 +1119,8 @@ export const lt: Dict = {
   "Akumulators, kWh": "Baterija, kWh",
   "akumulators {n} kWh": "baterija {n} kWh",
   "Akumulatora ietilpībai jābūt kWh (1–300).": "Baterijos talpa turi būti kWh (1–300).",
+  "Cenu kāpumi": "Kainų padidėjimai",
+  "Lielākais kritums": "Didžiausias kritimas",
+  "Šajā periodā cenu kāpumu nav.": "Šiuo laikotarpiu kainų padidėjimų nėra.",
+  "Sludinājumi, kuriem cena paaugstināta {period}.": "Skelbimai, kurių kaina padidinta {period}.",
 };

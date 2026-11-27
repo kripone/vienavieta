@@ -264,7 +264,8 @@ async function searchListingsFresh(s: SearchParams) {
   const order =
     s.sort === "cheap" ? [asc(listings.price)]
     : s.sort === "dear" ? [desc(listings.price)]
-    : s.sort === "drop" ? [desc(dropPct)]
+    // vienādam kritumam – pēc pēdējās cenu izmaiņas laika (kā /cenu-kritumi?tab=kritumi)
+    : s.sort === "drop" ? [desc(dropPct), sql`(select max(h.changed_at) from price_history h where h.listing_id = ${listings.id}) desc nulls last`]
     : s.sort === "old" ? [asc(listings.createdAt)]
     : [desc(fresh)];
 

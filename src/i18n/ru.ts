@@ -1119,4 +1119,8 @@ export const ru: Dict = {
   "Akumulators, kWh": "Батарея, кВт·ч",
   "akumulators {n} kWh": "батарея {n} кВт·ч",
   "Akumulatora ietilpībai jābūt kWh (1–300).": "Ёмкость батареи — в кВт·ч (1–300).",
+  "Cenu kāpumi": "Повышения цен",
+  "Lielākais kritums": "Наибольшее снижение",
+  "Šajā periodā cenu kāpumu nav.": "За этот период повышений цен нет.",
+  "Sludinājumi, kuriem cena paaugstināta {period}.": "Объявления, у которых цена повышена {period}.",
 };
