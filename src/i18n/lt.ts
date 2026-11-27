@@ -1137,4 +1137,10 @@ export const lt: Dict = {
   "Salīdzini blakus": "Palyginkite greta",
   "Atzīmē ⇄ pie līdz 4 sludinājumiem un salīdzini tos vienā tabulā.": "Pažymėkite ⇄ iki 4 skelbimų ir palyginkite juos vienoje lentelėje.",
   "Katram sludinājumam vari pierakstīt piezīmi un atzīmēt statusu, piem. „Sazinājos” vai „Sarunāta apskate”. Ja piezīmē ieraksti dienu un laiku, piedāvāsim to ielikt kalendārā.": "Kiekvienam skelbimui galite užrašyti pastabą ir pažymėti būseną, pvz., „Susisiekiau“ ar „Sutarta apžiūra“. Jei pastaboje nurodysite dieną ir laiką, pasiūlysime įtraukti į kalendorių.",
+  "Favorītos vari pierakstīt piezīmi, atzīmēt statusu un ielikt tikšanos kalendārā. Saņemsi ziņu, ja cena kritīsies.": "Įsimintiniuose galite užrašyti pastabą, pažymėti būseną ir įtraukti susitikimą į kalendorių. Pranešime, jei kaina sumažės.",
+  "Vēlāk": "Vėliau",
+  "Piemērs": "Pavyzdys",
+  "Tavs saglabātais sludinājums": "Jūsų išsaugotas skelbimas",
+  "Zvanīt rīt 10:00": "Skambinti rytoj 10:00",
+  "Piezīmē ir diena un laiks – piedāvāsim to ielikt Google kalendārā vai lejupielādēt .ics failu.": "Pastaboje yra diena ir laikas – pasiūlysime įtraukti į Google kalendorių arba atsisiųsti .ics failą.",
 };

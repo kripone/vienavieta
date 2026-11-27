@@ -1137,4 +1137,10 @@ export const ru: Dict = {
   "Salīdzini blakus": "Сравните рядом",
   "Atzīmē ⇄ pie līdz 4 sludinājumiem un salīdzini tos vienā tabulā.": "Отметьте ⇄ у 4 объявлений и сравните их в одной таблице.",
   "Katram sludinājumam vari pierakstīt piezīmi un atzīmēt statusu, piem. „Sazinājos” vai „Sarunāta apskate”. Ja piezīmē ieraksti dienu un laiku, piedāvāsim to ielikt kalendārā.": "К каждому объявлению можно добавить заметку и статус, например «Связался» или «Договорился о просмотре». Если в заметке есть день и время, предложим добавить в календарь.",
+  "Favorītos vari pierakstīt piezīmi, atzīmēt statusu un ielikt tikšanos kalendārā. Saņemsi ziņu, ja cena kritīsies.": "В «Избранном» можно написать заметку, отметить статус и добавить встречу в календарь. Сообщим, если цена снизится.",
+  "Vēlāk": "Позже",
+  "Piemērs": "Пример",
+  "Tavs saglabātais sludinājums": "Ваше сохранённое объявление",
+  "Zvanīt rīt 10:00": "Позвонить завтра в 10:00",
+  "Piezīmē ir diena un laiks – piedāvāsim to ielikt Google kalendārā vai lejupielādēt .ics failu.": "В заметке есть день и время – предложим добавить в Google Календарь или скачать файл .ics.",
 };

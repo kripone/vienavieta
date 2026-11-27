@@ -29,6 +29,7 @@ export default async function LoginPage(props: { searchParams: Promise<{ next?: 
     <main className="wrap narrow">
       <h1>{t("Ielogoties vai reģistrēties")}</h1>
       <p className="lead">{t("Konts vajadzīgs, lai ievietotu sludinājumus, saglabātu favorītus un rakstītu pārdevējiem.")}</p>
+      <p className="fine">{t("Favorītos vari pierakstīt piezīmi, atzīmēt statusu un ielikt tikšanos kalendārā. Saņemsi ziņu, ja cena kritīsies.")}</p>
       {error && <p className="alert">{t(ERRORS[error] ?? "Pieteikties neizdevās. Mēģini vēlreiz.")}</p>}
       <LoginForm next={target} social={enabledSocial} telegramBot={process.env.TELEGRAM_BOT_USERNAME ?? ""} />
       <p className="fine">

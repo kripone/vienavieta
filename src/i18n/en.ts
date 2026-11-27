@@ -1129,4 +1129,10 @@ export const en: Dict = {
   "Salīdzini blakus": "Compare side by side",
   "Atzīmē ⇄ pie līdz 4 sludinājumiem un salīdzini tos vienā tabulā.": "Mark ⇄ on up to 4 listings and compare them in one table.",
   "Katram sludinājumam vari pierakstīt piezīmi un atzīmēt statusu, piem. „Sazinājos” vai „Sarunāta apskate”. Ja piezīmē ieraksti dienu un laiku, piedāvāsim to ielikt kalendārā.": "You can add a note to each listing and mark its status, e.g. “Contacted” or “Viewing booked”. If the note has a day and time, we offer to add it to your calendar.",
+  "Favorītos vari pierakstīt piezīmi, atzīmēt statusu un ielikt tikšanos kalendārā. Saņemsi ziņu, ja cena kritīsies.": "In Favourites you can write a note, mark a status and add a viewing to your calendar. You'll get a message if the price drops.",
+  "Vēlāk": "Later",
+  "Piemērs": "Example",
+  "Tavs saglabātais sludinājums": "Your saved listing",
+  "Zvanīt rīt 10:00": "Call tomorrow 10:00",
+  "Piezīmē ir diena un laiks – piedāvāsim to ielikt Google kalendārā vai lejupielādēt .ics failu.": "The note has a day and time – we offer to add it to Google Calendar or download an .ics file.",
 };

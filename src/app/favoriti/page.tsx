@@ -36,9 +36,20 @@ export default async function FavoritesPage() {
         ]} />
       )}
       {rows.length === 0 ? (
+        <>
         <div className="notice">
           {t("Tev vēl nav saglabātu sludinājumu. Spied sirsniņu pie sludinājuma, lai to saglabātu šeit.")}
         </div>
+          <div className="fav-demo" aria-label={t("Piemērs")}>
+            <span className="fav-demo-tag">{t("Piemērs")}</span>
+            <b>{t("Tavs saglabātais sludinājums")}</b>
+            <div className="fav-demo-row">
+              <span className="chip">{t("Statuss")}: {t("Sarunāta apskate")}</span>
+            </div>
+            <div className="fav-demo-note">📝 {t("Zvanīt rīt 10:00")}</div>
+            <div className="fav-demo-row fine">📅 {t("Piezīmē ir diena un laiks – piedāvāsim to ielikt Google kalendārā vai lejupielādēt .ics failu.")}</div>
+          </div>
+        </>
       ) : (
         <>
           <p className="lead">

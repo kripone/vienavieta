@@ -1032,3 +1032,16 @@ body:has(.det-bar) .ai-pill { bottom: 90px; }
 @keyframes tip-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 @keyframes tip-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
 @media (prefers-reduced-motion: reduce) { .tip, .tip-ico { animation: none; } }
+
+/* sirsniņa neielogotam (fav-button.tsx) un piemērs tukšajos favorītos */
+.fav-ask { max-width: 360px; border: 1px solid var(--line); border-radius: 14px; padding: 18px; background: var(--surface); color: var(--fg); box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+.fav-ask::backdrop { background: rgba(10, 12, 18, .45); }
+.fav-ask p { margin: 0 0 12px; line-height: 1.45; }
+.fav-ask .fav-ask-h { font-weight: 700; font-size: 17px; }
+.fav-ask .row { display: flex; gap: 8px; }
+.fav-demo { position: relative; margin: 14px 0; padding: 14px; border: 1px dashed var(--line); border-radius: 12px; background: var(--surface); }
+.fav-demo-tag { position: absolute; top: -10px; left: 12px; padding: 1px 8px; border-radius: 999px; font-size: 12px; background: var(--accent-soft); color: var(--fg); }
+.fav-demo b { display: block; margin-bottom: 8px; }
+.fav-demo-row { margin: 6px 0; }
+.fav-demo .chip { display: inline-block; padding: 3px 10px; border-radius: 999px; background: var(--surface-2); font-size: 13px; }
+.fav-demo-note { padding: 8px 10px; border-radius: 8px; background: var(--surface-2); font-size: 14px; }
