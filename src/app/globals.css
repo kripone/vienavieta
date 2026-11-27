@@ -890,6 +890,8 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
   body:has(.det-bar) { padding-bottom: 84px; }
   body:has(.det-bar) .ai-fab { bottom: 90px; }
   body:has(.det-bar) .cmp-bar { bottom: 90px; }
+  /* instalēšanas josla virs apakšējās joslas, lai neaizsedz sirsniņu un galveno pogu */
+  body:has(.det-bar) .pwa-banner { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* sākumlapas rinda „Ko meklē?” */
