@@ -149,6 +149,10 @@ export default async function ListingPage(props: Props) {
       }
     : null;
 
+  const calcEl = l.status !== "active" ? null
+    : l.kind === "vehicle" && !l.deal?.match(/^(rent|day|buy)$/) && l.price >= FINANCE.lease.minPrice ? <FinanceCalc price={l.price} kind="lease" />
+    : l.kind === "property" && l.deal === "sell" && l.price >= FINANCE.mortgage.minPrice ? <FinanceCalc price={l.price} kind="mortgage" />
+    : null;
   return (
     <main className="wrap">
       {crumbs.length > 0 && (
@@ -234,8 +238,8 @@ export default async function ListingPage(props: Props) {
               </a>
             ) : null;
           })()}
-          {l.status === "active" && l.kind === "vehicle" && !l.deal?.match(/^(rent|day|buy)$/) && l.price >= FINANCE.lease.minPrice && <FinanceCalc price={l.price} kind="lease" />}
-          {l.status === "active" && l.kind === "property" && l.deal === "sell" && l.price >= FINANCE.mortgage.minPrice && <FinanceCalc price={l.price} kind="mortgage" />}
+          {/* datorā labajā kolonnā; telefonā zemāk (pēc vēstures), lai neaizsedz kopsavilkumu un karti */}
+          {calcEl && <div className="calc-side">{calcEl}</div>}
         </div>
       <div className="det-body">
         {summary.length > 0 && (
@@ -280,6 +284,7 @@ export default async function ListingPage(props: Props) {
         {l.kind === "property" && l.lat != null && l.lon != null && <ListingMapLazy lat={l.lat} lon={l.lon} exact={l.geoPrecision === "street"} />}
         {vzd && <VzdDeals data={vzd} perM2={l.areaM2 ? Math.round(l.price / Number(l.areaM2)) : null} />}
         {history && <PriceHistory h={history} external={l.source !== "own"} />}
+        {calcEl && <div className="calc-body">{calcEl}</div>}
         {ext && (
           <div className="panel seller ext-open">
             <b>{t("Sludinājums no {src}", { src })}</b>

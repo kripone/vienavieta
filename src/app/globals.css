@@ -881,6 +881,7 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .det-fav { position: absolute; top: 12px; right: 12px; z-index: 2; }
 .det-fav .fav { width: 44px; height: 44px; justify-content: center; padding: 0; background: rgba(255,255,255,.94); border-color: transparent; color: #181b24; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
 .det-fav .fav.on { color: var(--accent); }
+.calc-side { display: none; }
 .det-body .ext-open { margin-top: 20px; }
 .det-body .also-panel { margin-top: 12px; }
 
@@ -890,6 +891,8 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
   .det > .det-media { grid-area: media; }
   .det > .det-side { grid-area: side; align-self: start; }
   .det-side .fin-box { grid-template-columns: 1fr; }
+  .calc-side { display: block; }
+  .calc-body { display: none; }
   .det > .det-body { grid-area: body; max-width: none; }
 }
 
