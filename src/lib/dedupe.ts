@@ -13,10 +13,21 @@ const priceRange = (p: number) => [Math.floor(p * 0.97), Math.ceil(p * 1.03)] as
 /** Atrod tā paša objekta sludinājumu citā avotā; null, ja nav vai dati par maz drošai atbilstībai. */
 export async function findDuplicate(l: Row): Promise<Row | null> {
   const [pmin, pmax] = priceRange(l.price);
+  // Tas pats avots (pārdevējs ielicis sludinājumu atkārtoti): tikai stingra sakritība – tā pati cena,
+  // nobraukums/platība un pārējais (citi avoti: cena ±3 %, nobraukums ±3 %).
+  const sameSource = sql`${listings.source} = ${l.source}`;
+  const strict =
+    l.kind === "vehicle"
+      ? l.mileageKm != null && l.mileageKm >= 1000 && l.modelId
+        ? and(eq(listings.price, l.price), eq(listings.mileageKm, l.mileageKm), eq(listings.year, l.year ?? -1), eq(listings.modelId, l.modelId))
+        : undefined
+      : l.areaM2 && l.floor != null
+        ? and(eq(listings.price, l.price), sql`abs(${listings.areaM2} - ${Number(l.areaM2)}) <= 0.5`, eq(listings.floor, l.floor))
+        : undefined;
   const base = [
     eq(listings.status, "active"),
     eq(listings.kind, l.kind),
-    ne(listings.source, l.source),
+    strict ? or(ne(listings.source, l.source), and(sameSource, strict)) : ne(listings.source, l.source),
     ne(listings.id, l.id),
     gte(listings.price, pmin),
     lte(listings.price, pmax),
@@ -52,7 +63,7 @@ export async function findDuplicate(l: Row): Promise<Row | null> {
     extra = [
       eq(listings.propertyType, l.propertyType!),
       l.deal ? eq(listings.deal, l.deal) : undefined,
-      eq(listings.placeId, l.placeId),
+      sql`(${listings.placeId} = ${l.placeId} or ${listings.placeId} in (select p2.id from places p2 where coalesce(p2.parent_id, p2.id) = (select coalesce(p1.parent_id, p1.id) from places p1 where p1.id = ${l.placeId})))`,
       l.rooms ? eq(listings.rooms, l.rooms) : undefined,
       area ? and(isNotNull(listings.areaM2), sql`abs(${listings.areaM2} - ${area}) <= 2`) : undefined,
       l.landM2 ? sql`abs(coalesce(${listings.landM2}, 0) - ${l.landM2}) <= ${Math.max(20, l.landM2 * 0.03)}` : undefined,
@@ -105,6 +116,39 @@ export const groupPrimaryOnly = sql`not exists (
     and l2."status" = 'active' and l2."id" <> "listings"."id"
     and (
       (l2."source" = 'own' and "listings"."source" <> 'own')
-      or (l2."source" <> 'own' and "listings"."source" <> 'own' and l2."created_at" < "listings"."created_at")
+      or (l2."source" <> 'own' and "listings"."source" <> 'own'
+          and (l2."created_at" < "listings"."created_at" or (l2."created_at" = "listings"."created_at" and l2."id" < "listings"."id")))
     )
 )`;
+
+/**
+ * Fona kārta (ik stundu): sagrupē acīmredzamus dublikātus, ko ielādes brīdī nevarēja sasaistīt
+ * (viens sludinājums ielikts atkārtoti tajā pašā portālā; abi ielādēti vienā kārtā).
+ * Tikai pilnīga sakritība: auto – marka, modelis, gads, nobraukums (≥1000 km, lai salonu jaunie vienādie auto netiek apvienoti), degviela, cena;
+ * īpašumi – veids, darījums, pilsēta, istabas, platība, stāvs, cena (jaunajos projektos vienādi dzīvokļi atšķiras ar stāvu).
+ */
+export async function groupExactDuplicates() {
+  const veh = await db.execute(sql`
+    with g as (
+      select id,
+        first_value(coalesce(group_key, id::text)) over w as k,
+        count(*) over (partition by vehicle_class, make_id, model_id, year, mileage_km, coalesce(fuel::text, ''), price) as n
+      from listings
+      where status = 'active' and kind = 'vehicle' and make_id is not null and model_id is not null and year is not null and mileage_km >= 1000
+      window w as (partition by vehicle_class, make_id, model_id, year, mileage_km, coalesce(fuel::text, ''), price order by group_key nulls last, created_at, id)
+    )
+    update listings set group_key = g.k from g
+    where listings.id = g.id and g.n > 1 and listings.group_key is distinct from g.k`);
+  const prop = await db.execute(sql`
+    with g as (
+      select l.id,
+        first_value(coalesce(l.group_key, l.id::text)) over w as k,
+        count(*) over (partition by l.property_type, l.deal, coalesce(p.parent_id, p.id), l.rooms, round(l.area_m2), l.floor, l.price) as n
+      from listings l join places p on p.id = l.place_id
+      where l.status = 'active' and l.kind = 'property' and l.area_m2 is not null and l.floor is not null and l.price > 0
+      window w as (partition by l.property_type, l.deal, coalesce(p.parent_id, p.id), l.rooms, round(l.area_m2), l.floor, l.price order by l.group_key nulls last, l.created_at, l.id)
+    )
+    update listings set group_key = g.k from g
+    where listings.id = g.id and g.n > 1 and listings.group_key is distinct from g.k`);
+  return { vehicles: veh.rowCount ?? 0, properties: prop.rowCount ?? 0 };
+}

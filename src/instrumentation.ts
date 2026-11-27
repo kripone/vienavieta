@@ -9,6 +9,10 @@ export async function register() {
   // jaunas komplektācijas no portāliem: saglabā un aktivizē automātiski (src/lib/trims-db.ts)
   const { startTrimSync } = await import("./lib/trims-db");
   startTrimSync();
+  // acīmredzamie dublikāti (atkārtoti ielikti sludinājumi) – 2 min pēc starta, tad ik stundu
+  const { groupExactDuplicates } = await import("./lib/dedupe");
+  const dedupe = () => groupExactDuplicates().then((r) => (r.vehicles || r.properties) && console.log("Dublikāti sagrupēti:", r)).catch((e) => console.error("Dublikātu kārta:", e));
+  setTimeout(() => { void dedupe(); setInterval(() => void dedupe(), 60 * 60_000); }, 2 * 60_000);
   // IndexNow: reizi dienā paziņo Bing par jaunām sitemap lapām (izslēdzams ar INDEXNOW=off)
   const { startIndexNowDaily } = await import("./lib/indexnow");
   startIndexNowDaily();
