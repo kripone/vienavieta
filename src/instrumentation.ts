@@ -18,11 +18,13 @@ export async function register() {
   if (process.env.NODE_ENV === "production" && process.env.WARMUP !== "off") {
     const { WARMUP_PATHS } = await import("./lib/constants");
     const base = `http://127.0.0.1:${process.env.PORT || 3000}`;
-    setTimeout(async () => {
+    const warm = async () => {
       for (const p of WARMUP_PATHS) {
         await fetch(base + p, { headers: { "user-agent": "VienaVieta-warmup" } }).then((r) => r.arrayBuffer()).catch(() => {});
       }
-    }, 20_000);
+    };
+    // pēc starta un tad ik 30 min (kešs pēc 6 h kļūst nederīgs; naktī bez apmeklētājiem rīta pirmais gaidītu sekundes)
+    setTimeout(() => { void warm(); setInterval(() => void warm(), 30 * 60_000); }, 20_000);
   }
 }
 

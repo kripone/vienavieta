@@ -499,6 +499,9 @@ export const WARMUP_PATHS = [
   "/ipasumi/majas", "/ipasumi/zeme", "/ipasumi/dzivokli/jurmala", "/auto/lidz-5000", "/en", "/ru", "/lt",
   "/auto/lidz-20000", "/en/auto", "/ru/auto", "/ru/auto/lidz-20000", "/lt/auto",
   "/cenu-kritumi", "/cenu-kritumi?tab=kritumi", "/cenu-kritumi?tab=kapumi",
+  // populārākās markas un modeļi (pēc sludinājumu skaita)
+  "/auto/bmw", "/auto/audi", "/auto/volkswagen", "/auto/mercedes-benz", "/auto/volvo", "/auto/toyota", "/auto/skoda",
+  "/auto/bmw/5-serija", "/auto/bmw/3-serija", "/auto/audi/a6", "/auto/volkswagen/passat", "/auto/volkswagen/golf",
 ];
 
 /** „Aizpildi ar AI” sludinājuma formā: cik reizes stundā viens lietotājs (`/api/listing-assist`). */

@@ -62,9 +62,9 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
           // eslint-disable-next-line @next/next/no-img-element
           <img src={mediaUrl(l.thumbKey)} alt={trTitle(l.title, t)} loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : undefined} />
         ) : ext && l.externalThumbUrl && process.env.EXTERNAL_THUMBS !== "off" ? (
-          <ExtThumb src={ssBigThumb(l.externalThumbUrl) ?? l.externalThumbUrl} fallbackSrc={l.externalThumbUrl} source={src} fallback={listingIll(l)} alt={trTitle(l.title, t)} priority={priority} />
+          <ExtThumb src={ssBigThumb(l.externalThumbUrl) ?? l.externalThumbUrl} fallbackSrc={l.externalThumbUrl} source={src} ill={{ kind: l.kind, vehicleClass: l.vehicleClass, body: l.body, color: l.color, propertyType: l.propertyType }} alt={trTitle(l.title, t)} priority={priority} />
         ) : !ext && l.externalThumbUrl ? (
-          <ExtThumb src={ssBigThumb(l.externalThumbUrl) ?? l.externalThumbUrl} fallbackSrc={l.externalThumbUrl} source="" fallback={listingIll(l)} alt={trTitle(l.title, t)} priority={priority} />
+          <ExtThumb src={ssBigThumb(l.externalThumbUrl) ?? l.externalThumbUrl} fallbackSrc={l.externalThumbUrl} source="" ill={{ kind: l.kind, vehicleClass: l.vehicleClass, body: l.body, color: l.color, propertyType: l.propertyType }} alt={trTitle(l.title, t)} priority={priority} />
         ) : (
           <Ill svg={listingIll(l)} />
         )}

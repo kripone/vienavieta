@@ -173,7 +173,7 @@ export default async function ListingPage(props: Props) {
           // ārējam sludinājumam: bilde no avota servera; ss.com gadījumā lielais 800px variants,
           // rezervē 174px sīktēls, tad ilustrācija (ja avots bloķē karstās saites)
           <div className="ext-hero">
-            <ExtThumb src={ssBigThumb(l.externalThumbUrl) ?? l.externalThumbUrl} fallbackSrc={l.externalThumbUrl} source={SOURCE_LABEL[l.source] ?? l.source} fallback={listingIll(l)} alt={trTitle(l.title, t)} />
+            <ExtThumb src={ssBigThumb(l.externalThumbUrl) ?? l.externalThumbUrl} fallbackSrc={l.externalThumbUrl} source={SOURCE_LABEL[l.source] ?? l.source} ill={{ kind: l.kind, vehicleClass: l.vehicleClass, body: l.body, color: l.color, propertyType: l.propertyType }} alt={trTitle(l.title, t)} />
           </div>
         ) : (
           <Gallery photos={d.photos} title={l.title} placeholder={listingIll(l)} />
