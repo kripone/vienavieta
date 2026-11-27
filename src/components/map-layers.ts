@@ -29,15 +29,19 @@ function addGoogleLayers(m: L.Map) {
       .catch(() => {});
   };
 
-  Promise.all((["roadmap", "satellite"] as const).map((t) => googleSession(t).then((session) => [t, session] as const)))
-    .then((sessions) => {
-      for (const [t, session] of sessions) layers[t] = { session, layer: L.tileLayer(googleTileUrl(session), { maxZoom: 20, tileSize: 256 }) };
-      layers.roadmap!.layer.addTo(m);
-      L.control.layers({ "Karte": layers.roadmap!.layer, "Satelīts": layers.satellite!.layer }, {}, { position: "topright" }).addTo(m);
-      m.on("baselayerchange", (e: L.LayersControlEvent) => { active = e.name === "Satelīts" ? "satellite" : "roadmap"; refreshCopyright(); });
+  // ielu karti rādām, tiklīdz ir tās sesija (satelīta sesija – paralēli, slēdzis parādās vēlāk), lai flīzes nesāk ielādēties vēlāk
+  googleSession("roadmap")
+    .then((session) => {
+      layers.roadmap = { session, layer: L.tileLayer(googleTileUrl(session), { maxZoom: 20, tileSize: 256 }) };
+      layers.roadmap.layer.addTo(m);
       let t: ReturnType<typeof setTimeout> | undefined;
       m.on("moveend", () => { clearTimeout(t); t = setTimeout(refreshCopyright, 400); });
       refreshCopyright();
+      googleSession("satellite").then((sat) => {
+        layers.satellite = { session: sat, layer: L.tileLayer(googleTileUrl(sat), { maxZoom: 20, tileSize: 256 }) };
+        L.control.layers({ "Karte": layers.roadmap!.layer, "Satelīts": layers.satellite.layer }, {}, { position: "topright" }).addTo(m);
+        m.on("baselayerchange", (e: L.LayersControlEvent) => { active = e.name === "Satelīts" ? "satellite" : "roadmap"; refreshCopyright(); });
+      }).catch(() => {});
     })
     .catch(() => {
       // rezerve: OpenStreetMap

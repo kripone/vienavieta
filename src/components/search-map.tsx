@@ -30,7 +30,8 @@ const popupHtml = (p: Props) => `<a href="/sludinajumi/${p.id}" style="font-weig
 const POINTS_MIN_ZOOM = 11;
 const EXAMPLE_ZONE = MAP_EXAMPLE_ZONE;
 const zoneParam = mapZoneParam;
-const HINT_KEY = "vv-tip:map-draw";
+// v2: agrāk padoms tika paslēpts arī pēc zīmēšanas; tagad tikai pēc „Skaidrs”, tāpēc vecā atzīme neder
+const HINT_KEY = "vv-tip:map-draw2";
 
 /** Vienkāršo zīmēto līniju: atstāj punktus, kas ir vismaz `min` pikseļu attālumā. */
 function simplify(pts: L.Point[], min = 8) {
@@ -57,13 +58,15 @@ export function SearchMap({ query, zone, zoneTotal }: { query: string; zone?: st
   const [full, setFull] = useState(false);
   const [showPoints, setShowPoints] = useState(false);
   const [zoom, setZoom] = useState(6);
-  const [hint, setHint] = useState(false);
+  /** Padomu paslēpj uz visiem laikiem tikai „Skaidrs”; zīmēšanas laikā un ar zonu tas vienkārši nav redzams. */
+  const [dismissed, setDismissed] = useState(true);
+  const hint = !dismissed && !zone && !drawing;
   const [exampleN, setExampleN] = useState<number | null>(null);
   const [ptsLoading, setPtsLoading] = useState(false);
   const exampleLayer = useRef<L.Polygon | null>(null);
   const closeHint = () => {
     try { localStorage.setItem(HINT_KEY, "1"); } catch {}
-    setHint(false);
+    setDismissed(true);
   };
 
   // punktu rādiuss pēc tālummaiņas: tālu mazi (lai karte redzama), tuvu lielāki
@@ -192,9 +195,10 @@ export function SearchMap({ query, zone, zoneTotal }: { query: string; zone?: st
 
   // pirmā apmeklējuma padoms ar piemēra zonu (tikai bez zīmētas zonas)
   useEffect(() => {
-    if (zone) return;
-    try { if (!localStorage.getItem(HINT_KEY)) setHint(true); } catch {}
-  }, [zone]);
+    let seen = false;
+    try { seen = !!localStorage.getItem(HINT_KEY); } catch {}
+    setDismissed(seen);
+  }, []);
   useEffect(() => {
     const m = map.current;
     exampleLayer.current?.remove();
@@ -293,7 +297,7 @@ export function SearchMap({ query, zone, zoneTotal }: { query: string; zone?: st
   return (
     <div className={`mapwrap${full ? " full" : ""}`}>
       <div className="maptools">
-        <button type="button" className={`btn small${drawing ? "" : " primary"} draw-btn`} onClick={() => { closeHint(); setDrawing((d) => !d); }}>
+        <button type="button" className={`btn small${drawing ? "" : " primary"} draw-btn`} onClick={() => setDrawing((d) => !d)}>
           {drawing ? t("Atcelt zīmēšanu") : <><span aria-hidden="true">✏️</span> {zone ? t("Zīmēt no jauna") : t("Uzzīmē apgabalu")}</>}
         </button>
         {zone && <button type="button" className="btn small" onClick={clearZone}>✕ {t("Notīrīt zonu")}</button>}
@@ -315,7 +319,7 @@ export function SearchMap({ query, zone, zoneTotal }: { query: string; zone?: st
       )}
       <div className="map-box">
         {drawing && <div className="drawhint">{t("Velc ar peli vai pirkstu ap vajadzīgo vietu")}</div>}
-        {hint && !zone && !drawing && (
+        {hint && (
           <div className="map-hint" role="note">
             <p><b>{t(vehicles ? "Apvelc rajonu, kurā meklē auto." : "Apvelc rajonu, kurā meklē īpašumu.")}</b></p>
             <p className="fine">
@@ -323,8 +327,8 @@ export function SearchMap({ query, zone, zoneTotal }: { query: string; zone?: st
               {" – "}{exampleN != null ? t("šajā zonā ir {n}", { n: tp(exampleN, "sludinājums", "sludinājumi") }) : "…"}
             </p>
             <div className="map-hint-btns">
-              <button type="button" className="btn small primary" onClick={() => { closeHint(); setDrawing(true); }}>✏️ {t("Uzzīmē apgabalu")}</button>
-              <button type="button" className="btn small" onClick={() => { closeHint(); applyZone(zoneParam(EXAMPLE_ZONE)); }}>{t("Rādīt šo zonu")}</button>
+              <button type="button" className="btn small primary" onClick={() => setDrawing(true)}>✏️ {t("Uzzīmē apgabalu")}</button>
+              <button type="button" className="btn small" onClick={() => applyZone(zoneParam(EXAMPLE_ZONE))}>{t("Rādīt šo zonu")}</button>
               <button type="button" className="btn small" onClick={closeHint}>{t("Skaidrs")}</button>
             </div>
           </div>

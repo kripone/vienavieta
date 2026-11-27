@@ -2,6 +2,8 @@
 import { useT } from "@/i18n/client";
 import dynamic from "next/dynamic";
 import { useEffect, useState, type ComponentProps } from "react";
+import { preconnect } from "react-dom";
+import { GOOGLE_KEY, googleSession } from "@/lib/google-tiles";
 
 /** Kamēr kartes kods ielādējas: tā pati rīkjosla un kartes laukums (bez „Ielādē…” teksta), lai lapa nelēkā un neizskatās „iesprūdusi”. */
 function MapLoading() {
@@ -20,7 +22,14 @@ function MapLoading() {
 // Leaflet strādā tikai pārlūkā, tāpēc karti ielādējam bez servera renderēšanas.
 // Kartes kodu sākam lejupielādēt jau tad, kad šis modulis ielādējas (paralēli lapas hidratācijai), nevis tikai pēc tās.
 const loadMap = () => import("./search-map");
-if (typeof window !== "undefined" && !window.matchMedia("(max-width: 560px)").matches) void loadMap();
+if (typeof window !== "undefined" && !window.matchMedia("(max-width: 560px)").matches) {
+  void loadMap();
+  // Google flīžu sesiju un savienojumu sagatavojam jau tagad (pirmajam apmeklētājam tas ir vēl viens pieprasījums pirms flīzēm)
+  if (GOOGLE_KEY) {
+    preconnect("https://tile.googleapis.com", { crossOrigin: "anonymous" });
+    void googleSession("roadmap").catch(() => {});
+  }
+}
 const SearchMap = dynamic(() => loadMap().then((m) => m.SearchMap), {
   ssr: false,
   loading: () => <MapLoading />,
