@@ -1,7 +1,7 @@
 import { getT } from "@/i18n/server";
 import type { Metadata } from "next";
 import { langAlternates } from "@/lib/seo";
-import { dealsByAddress } from "@/lib/vzd";
+import { dealsByAddress, materialLabels } from "@/lib/vzd";
 import { formatNumber, formatPrice } from "@/lib/format";
 import { INTL_LOCALE, type Locale } from "@/i18n/core";
 
@@ -18,7 +18,7 @@ const fmtDay = (d: string, loc: Locale) => new Date(d + "T12:00:00Z").toLocaleDa
 const streetOf = (address: string) => address.split(",")[0].replace(/\s+\d.*$/, "").replace(/\s+(iela|gatve|prospekts|bulvāris|šoseja|laukums|aleja|dambis|krastmala|ceļš)$/i, "").trim() || null;
 
 export default async function DealsPage(props: { searchParams: Promise<Record<string, string | undefined>> }) {
-  const { t, tp, locale } = await getT();
+  const { t, tp, lp, locale } = await getT();
   const { q: raw } = await props.searchParams;
   const q = (raw ?? "").trim().slice(0, 120);
   const res = q ? await dealsByAddress(q).catch(() => ({ houses: [], suggestions: [] })) : null;
@@ -38,7 +38,7 @@ export default async function DealsPage(props: { searchParams: Promise<Record<st
               <p>{t("Varbūt domāji:")}</p>
               <ul className="sugg">
                 {res.suggestions.map((a) => (
-                  <li key={a}><a className="btn small" href={`/darijumi?q=${encodeURIComponent(a)}`}>{a}</a></li>
+                  <li key={a}><a className="btn small" href={lp(`/darijumi?q=${encodeURIComponent(a)}`)}>{a}</a></li>
                 ))}
               </ul>
             </>
@@ -49,7 +49,7 @@ export default async function DealsPage(props: { searchParams: Promise<Record<st
         <section key={h.address} className="house">
           <h2>{h.address}</h2>
           <p className="fine">
-            {[h.builtYear ? t("Būvēta {y}", { y: h.builtYear }) : null, h.material && t(h.material)].filter(Boolean).join(" · ")}
+            {[h.builtYear ? t("Būvēta {y}", { y: h.builtYear }) : null, ...materialLabels(h.material).map((m) => t(m))].filter(Boolean).join(" · ")}
           </p>
           <div className="stat-row">
             {h.median != null && (
@@ -82,7 +82,7 @@ export default async function DealsPage(props: { searchParams: Promise<Record<st
         </section>
       ))}
       <p className="fine">
-        Dati: Valsts zemes dienests, NĪTIS (<a href="https://data.gov.lv/dati/lv/dataset/darijumi-ar-telpu-grupam" rel="noopener noreferrer">{t("data.gov.lv")}</a>, CC BY 4.0). Tikai veseli dzīvokļi; atjaunots reizi mēnesī. Zemesgrāmatā reģistrētā summa var atšķirties no tirgus vērtības.
+        {t("Dati: Valsts zemes dienests, NĪTIS")} (<a href="https://data.gov.lv/dati/lv/dataset/darijumi-ar-telpu-grupam" rel="noopener noreferrer">data.gov.lv</a>, CC BY 4.0). {t("Tikai veseli dzīvokļi; atjaunots reizi mēnesī. Zemesgrāmatā reģistrētā summa var atšķirties no tirgus vērtības.")}
       </p>
     </main>
   );

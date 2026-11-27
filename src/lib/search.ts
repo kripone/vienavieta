@@ -2,6 +2,8 @@ import { createHash } from "node:crypto";
 import { and, asc, count, desc, eq, gte, ilike, inArray, isNotNull, isNull, lt, lte, ne, or, sql, type SQL } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { groupPrimaryAs, groupPrimaryOnly } from "./dedupe";
+import { INTL_LOCALE, type Locale, type T } from "@/i18n/core";
+import { trTitle } from "@/i18n/content";
 import {
   AMENITIES, BODY_TYPES, COLORS, CONDITIONS, DEALS, DRIVES, FUELS, GEARBOXES, HEATING, MATERIALS, PROPERTY_GROUPS, PROPERTY_TYPES,
   PURPOSES, SERIES, VEHICLE_CLASSES, VEHICLE_CLASS_LABEL, DEAL_LABEL, type VehicleClass,
@@ -401,56 +403,62 @@ export function normalizeFilters(raw: Raw): Record<string, string> {
   return Object.fromEntries(q);
 }
 
-/** Cilvēkam saprotams saglabātās meklēšanas nosaukums, piem. "Vieglie auto · BMW 3. sērija · līdz 15 000 € · Rīga". */
-export async function describeSearch(s: SearchParams) {
+/**
+ * Cilvēkam saprotams meklēšanas apraksts, piem. "Vieglie auto · BMW 3. sērija · līdz 15 000 € · Rīga".
+ * Bez `tr` – latviski (saglabātās meklēšanas nosaukums); ar `tr` (t no getT) – lietotāja valodā (brīvā teksta „Sapratu”).
+ */
+export async function describeSearch(s: SearchParams, tr?: { t: T; locale: Locale }) {
+  const t: T = tr?.t ?? ((k, v) => (v ? k.replace(/\{(\w+)\}/g, (_, x) => String(v[x] ?? "")) : k));
   const parts: string[] = [];
-  parts.push(s.cat === "vehicle" ? VEHICLE_CLASS_LABEL[(s.vc ?? "car") as VehicleClass] : s.cat === "property" ? (s.ptype?.replace(/^g:/, "") ?? "Nekustamais īpašums") : "Visi sludinājumi");
-  if (s.cat === "property" && s.deal) parts.push(DEAL_LABEL[s.deal]);
+  parts.push(t(s.cat === "vehicle" ? VEHICLE_CLASS_LABEL[(s.vc ?? "car") as VehicleClass] : s.cat === "property" ? (s.ptype?.replace(/^g:/, "") ?? "Nekustamais īpašums") : "Visi sludinājumi"));
+  if (s.cat === "property" && s.deal) parts.push(t(DEAL_LABEL[s.deal]));
   if (s.make) {
     const mk = await db.query.makes.findFirst({ where: eq(makes.id, s.make), columns: { name: true } });
     const md = s.model ? await db.query.models.findFirst({ where: eq(models.id, s.model), columns: { name: true } }) : null;
-    if (mk) parts.push([mk.name, md?.name].filter(Boolean).join(" "));
+    if (mk) parts.push([mk.name, md?.name ? (tr ? trTitle(md.name, tr.t) : md.name) : null].filter(Boolean).join(" "));
   }
   if (s.q) parts.push(`“${s.q}”`);
-  const nf = new Intl.NumberFormat("lv-LV");
+  const nf = new Intl.NumberFormat(INTL_LOCALE[tr?.locale ?? "lv"]);
+  const dec = (n: number) => (tr?.locale === "en" ? String(n) : String(n).replace(".", ","));
   if (s.pmin != null && s.pmax != null) parts.push(`${nf.format(s.pmin)}–${nf.format(s.pmax)} €`);
-  else if (s.pmax != null) parts.push(`līdz ${nf.format(s.pmax)} €`);
-  else if (s.pmin != null) parts.push(`no ${nf.format(s.pmin)} €`);
-  if (s.ymin && s.ymin === s.ymax) parts.push(`${s.ymin}. g.`);
+  else if (s.pmax != null) parts.push(t("līdz {v} €", { v: nf.format(s.pmax) }));
+  else if (s.pmin != null) parts.push(t("no {v} €", { v: nf.format(s.pmin) }));
+  if (s.ymin && s.ymin === s.ymax) parts.push(t("{y}. g.", { y: s.ymin }));
   else {
-    if (s.ymin) parts.push(`no ${s.ymin}. g.`);
-    if (s.ymax) parts.push(`līdz ${s.ymax}. g.`);
+    if (s.ymin) parts.push(t("no {y}. g.", { y: s.ymin }));
+    if (s.ymax) parts.push(t("līdz {y}. g.", { y: s.ymax }));
   }
   if (s.cat === "vehicle") {
-    for (const x of [s.trim, s.el ? "Elektro" : s.fuel, s.gear, s.body, s.drive, s.color]) if (x) parts.push(x);
-    if (s.ccmax != null) parts.push(`dzinējs līdz ${String(s.ccmax).replace(".", ",")} l`);
-    if (s.kmmax != null) parts.push(`līdz ${nf.format(s.kmmax)} km`);
-    if (s.batmin) parts.push(`akumulators no ${s.batmin} kWh`);
+    if (s.trim) parts.push(s.trim);
+    for (const x of [s.el ? "Elektro" : s.fuel, s.gear, s.body, s.drive, s.color]) if (x) parts.push(t(x));
+    if (s.ccmax != null) parts.push(t("dzinējs līdz {v} l", { v: dec(s.ccmax) }));
+    if (s.kmmax != null) parts.push(t("līdz {v} km", { v: nf.format(s.kmmax) }));
+    if (s.batmin) parts.push(t("akumulators no {v} kWh", { v: s.batmin }));
   }
-  if (s.rmin && s.rmin === s.rmax) parts.push(`${s.rmin} ist.`);
-  else if (s.rmin) parts.push(`${s.rmin}+ ist.`);
+  if (s.rmin && s.rmin === s.rmax) parts.push(t("{n} ist.", { n: s.rmin }));
+  else if (s.rmin) parts.push(t("{n}+ ist.", { n: s.rmin }));
   if (s.cat === "property") {
     if (s.amin != null && s.amax != null) parts.push(`${s.amin}–${s.amax} m²`);
-    else if (s.amin != null) parts.push(`no ${s.amin} m²`);
-    else if (s.amax != null) parts.push(`līdz ${s.amax} m²`);
-    if (s.fmin != null && s.fmin === s.fmax) parts.push(`${s.fmin}. stāvs`);
-    if (s.series) parts.push(s.series);
+    else if (s.amin != null) parts.push(t("no {v} m²", { v: s.amin }));
+    else if (s.amax != null) parts.push(t("līdz {v} m²", { v: s.amax }));
+    if (s.fmin != null && s.fmin === s.fmax) parts.push(t("{n}. stāvs", { n: s.fmin }));
+    if (s.series) parts.push(t(s.series));
   }
   if (s.loc.length) {
     const names: string[] = [];
     for (const tok of s.loc) {
-      if (REGION_GROUPS_LOC[tok]) { names.push(REGION_GROUP_LABEL[tok]); continue; }
+      if (REGION_GROUPS_LOC[tok]) { names.push(t(REGION_GROUP_LABEL[tok])); continue; }
       const id = Number(tok.slice(2));
       const row = tok[0] === "p"
         ? await db.query.places.findFirst({ where: eq(places.id, id), columns: { name: true } })
         : await db.query.regions.findFirst({ where: eq(regions.id, id), columns: { name: true } });
-      if (row) names.push(row.name);
+      if (row) names.push(t(row.name));
     }
     if (names.length) parts.push(names.join(", "));
-  } else if (s.country === "LT") parts.push("Lietuva");
-  if (s.zone) parts.push("zona kartē");
-  if (s.src === "own") parts.push("tikai VienāVietā");
-  else if (s.src === "ext") parts.push("no citiem portāliem");
+  } else if (s.country === "LT") parts.push(t("Lietuva"));
+  if (s.zone) parts.push(t("zona kartē"));
+  if (s.src === "own") parts.push(t("tikai VienāVietā"));
+  else if (s.src === "ext") parts.push(t("no citiem portāliem"));
   return parts.join(" · ").slice(0, 160);
 }
 

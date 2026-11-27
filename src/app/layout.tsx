@@ -89,7 +89,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {children}
         <footer className="foot">
           <div className="wrap">
-            <span>© {new Date().getFullYear()} VienāVietā{OPERATOR.name ? ` · ${OPERATOR.name}` : ""}</span>
+            <span>{`© ${new Date().getFullYear()} VienāVietā${OPERATOR.name ? ` · ${OPERATOR.name}` : ""}`}</span>
             <nav className="foot-cats" aria-label={t("Kategorijas")}>
               <a href={lp("/auto")}>{t("Auto")}</a>
               <a href={lp("/moto")}>{t("Moto")}</a>

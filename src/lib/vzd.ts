@@ -133,3 +133,27 @@ export async function dealsByAddress(q: string) {
   }
   return { houses, suggestions };
 }
+
+/**
+ * VZD sienu materiāls ("Ķieģeļu mūris 2,5 ķieģeļu biezumā vai biezāks, 224 - Ķieģeļu mūris 1,5 līdz 2,5 …", bieži nogriezts)
+ * → īsi, tulkojami nosaukumi bez atkārtojumiem: "Ķieģeļu", "Paneļu" u.c.; "Cits neklasificēts" neradām.
+ */
+const MATERIALS: [RegExp, string][] = [
+  [/ķieģeļ/i, "Ķieģeļu māja"],
+  [/keramikas bloku/i, "Keramikas bloku māja"],
+  [/dzelzsbetona paneļ/i, "Paneļu māja"],
+  [/monolīt/i, "Monolīta betona māja"],
+  [/arbolīt|gāzbeton|ģipšbeton|keramzītbeton|vieglbeton/i, "Bloku māja"],
+  [/koka|baļķ/i, "Koka māja"],
+  [/akmens/i, "Akmens māja"],
+  [/tērauda|metāla/i, "Metāla karkasa māja"],
+];
+export function materialLabels(raw: string | null | undefined): string[] {
+  if (!raw) return [];
+  const out: string[] = [];
+  for (const part of raw.split(/,\s*\d{3}\s*-\s*/)) {
+    const hit = MATERIALS.find(([re]) => re.test(part));
+    if (hit && !out.includes(hit[1])) out.push(hit[1]);
+  }
+  return out.slice(0, 2);
+}

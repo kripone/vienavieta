@@ -139,7 +139,7 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
         {flat.tq && !landing && (
           <div className="tq-note">
             <p>🔎 <b>„{flat.tq}”</b></p>
-            <p>{t("Sapratu")}: <b>{await describeSearch(s).catch(() => "")}</b>. <span className="fine">{t("Filtri ir iestatīti pēc tava teksta; vari tos labot sadaļā „Filtri”.")}</span></p>
+            <p>{t("Sapratu")}: <b>{await describeSearch(s, { t, locale }).catch(() => "")}</b>. <span className="fine">{t("Filtri ir iestatīti pēc tava teksta; vari tos labot sadaļā „Filtri”.")}</span></p>
             {(flat.tn ?? "").split(",").filter(Boolean).map((n) => (
               <p key={n} className="fine">
                 {n === "economy" ? t("„Ekonomisks” saprasts kā dzinējs līdz 2,0 l.") : t("„{x}”: citu portālu sludinājumos to nevar pārbaudīt, tāpēc pēc tā nav filtrēts.", { x: t(n.replace("unchecked:", "")) })}
