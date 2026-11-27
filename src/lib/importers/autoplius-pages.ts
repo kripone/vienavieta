@@ -139,7 +139,8 @@ export function parseListPage(html: string): { rows: ApRow[]; lastPage: number; 
 
     const em = engineRaw?.match(/([\d]+(?:\.\d+)?)\s*l\.,\s*(\d+)\s*kW/i);
     const engineL = em ? em[1] : null;
-    const powerKw = Number(em?.[2] ?? engineRaw?.match(/(\d+)\s*kW(?!h)/i)?.[1]) || null;
+    const powerNum = Number(em?.[2] ?? engineRaw?.match(/(\d+)\s*kW(?!h)/i)?.[1]) || null;
+    const powerKw = powerNum && powerNum <= 1500 ? powerNum : null; // smallint; mūļķības tipa "65535 kW" laužot ierakstu apturēja visu lapu
     const mileageNum = Number(mileageRaw?.replace(/[^\d]/g, "")) || null;
     const mileageKm = mileageNum && mileageNum <= 9_999_999 ? mileageNum : null; // aizsardzība pret int4 pārplūdi (mūļķības tipa "2222222222")
 
@@ -285,34 +286,63 @@ const pageUrl = (t: ApTarget, n: number) => (n <= 1 ? t.url : `${t.url}${t.url.i
  * Viena kārta vienai plūsmai. "quick": pirmās target.quickPages lapas (jaunie un cenu maiņas).
  * "full": līdz target.maxPages lapām; beigās ilgi neredzētie tiek paslēpti (sk. EXTERNAL_TTL_DAYS).
  */
-export async function crawlAutoplius(mode: "quick" | "full", target: ApTarget = AP_TARGETS[0], fetchHtml: (url: string) => Promise<string> = browserFetch, delayMs = AUTOPLIUS_DELAY_MS): Promise<CrawlResult> {
+/** Pilnās kārtas rezultāts: resumeFrom = lapa, no kuras turpināt, ja kārta pārtrūka (portāls bloķēja vairākas lapas pēc kārtas). */
+export type ApResult = CrawlResult & { skipped?: number[]; resumeFrom?: number; startPage?: number; at?: string };
+
+export async function crawlAutoplius(mode: "quick" | "full", target: ApTarget = AP_TARGETS[0], fetchHtml: (url: string) => Promise<string> = browserFetch, delayMs = AUTOPLIUS_DELAY_MS, startPage = 1): Promise<ApResult> {
   const started = new Date();
-  const res: CrawlResult = { mode, pages: 0, rows: 0, created: 0, updated: 0, priceChanged: 0, duplicates: 0, removed: 0, errors: [], ms: 0 };
+  const res: ApResult = { mode, pages: 0, rows: 0, created: 0, updated: 0, priceChanged: 0, duplicates: 0, removed: 0, errors: [], ms: 0, skipped: [], startPage, at: started.toISOString() };
   const fullCtx = await loadCtx();
   const ctx: Ctx = { makes: fullCtx.makes, models: fullCtx.models, findCity: fullCtx.findCity };
   let last: number = mode === "quick" ? target.quickPages : target.maxPages;
   let failsInRow = 0;
-  for (let n = 1; n <= last; n++) {
+  let skippedInRow = 0;
+  // turpinot pārtrūkušu kārtu, lapu skaitu (no kopējā skaita) uzzinām no 1. lapas, tāpēc sākam ar to
+  if (mode === "full" && startPage > 1) {
+    try {
+      const first = parseListPage(await fetchHtml(pageUrl(target, 1)));
+      if (first.total) last = Math.min(target.maxPages, Math.ceil(first.total / 20));
+    } catch {
+      // ja 1. lapa neielādējas, turpinām ar target.maxPages (tukša lapa apturēs)
+    }
+  }
+  for (let n = Math.max(1, startPage); n <= last; n++) {
     try {
       const { rows, lastPage, total } = parseListPage(await fetchHtml(pageUrl(target, n)));
       res.pages++;
       res.rows += rows.length;
       await saveRows(rows, ctx, res, mode, target.vc);
       failsInRow = 0;
+      skippedInRow = 0;
       if (!rows.length) break;
       // pilnajā kārtā: ja zināms kopējais sludinājumu skaits (h1), lapu skaitu rēķinām no tā
       // (20 kartītes lapā) — filtrētām joslu lapām slidošā loga saites nav uzticamas.
-      if (mode === "full" && total && n === 1) last = Math.min(target.maxPages, Math.ceil(total / 20));
+      if (mode === "full" && total && n === Math.max(1, startPage)) last = Math.min(target.maxPages, Math.ceil(total / 20));
       if (n >= last) break;
       // rezerves variants, ja total nav zināms: apstājamies, kad saitēs vairs nav nākamā lapas numura
       if (mode === "full" && !total && lastPage <= n) break;
     } catch (err) {
-      res.errors.push(`lapa ${n}: ${err instanceof Error ? err.message : err}`);
+      res.errors.push(`lapa ${n}: ${(err instanceof Error ? err.message : String(err)).split("\n")[0].slice(0, 200)}`);
       failsInRow++;
-      if (failsInRow >= 5) break;
-      // Cloudflare rate-limit gadījumā dzesējamies ar pieaugošu pauzi (10s, 30s, 90s, 180s) un mēģinām to pašu lapu vēlreiz
-      await sleep([10_000, 30_000, 90_000, 180_000][failsInRow - 1] ?? 180_000);
-      n--;
+      // pēdējā lapa (kopējais skaits mēdz būt par dažiem lielāks nekā lapās redzamie): beigas, nevis kļūda
+      if (n >= last && res.pages > 0) break;
+      if (failsInRow < 3) {
+        // Cloudflare gadījumā: jauna sesija un pieaugoša pauze (10 s, 40 s), tad to pašu lapu vēlreiz
+        await resetSession();
+        await sleep(failsInRow === 1 ? 10_000 : 40_000);
+        n--;
+        continue;
+      }
+      // lapa neielādējas arī 3. reizi: izlaižam to un ejam tālāk (agrāk visa kārta apstājās, un dziļākās lapas netika atjaunotas)
+      failsInRow = 0;
+      res.skipped!.push(n);
+      if (++skippedInRow >= 3) {
+        // vairākas lapas pēc kārtas bloķētas: apstājamies, nākamā kārta turpinās no šīs vietas
+        res.resumeFrom = n + 1;
+        break;
+      }
+      await resetSession();
+      await sleep(60_000);
       continue;
     }
     if (n < last) await sleep(delayMs);
@@ -334,7 +364,8 @@ export async function crawlAutoplius(mode: "quick" | "full", target: ApTarget = 
 
   // Pilnā kārta, kas neieguva NE VIENAS rindas (tipiski Cloudflare rate-limit), neatzīmējas kā pabeigta:
   // lastFullAt paliek vecs, tāpēc nākamā plānotā kārta to mēģinās no jauna (līdz 5 atkārtojumiem lapai).
-  const fullFailed = mode === "full" && res.rows === 0 && res.errors.length > 0;
+  // Pārtrūkusi kārta (resumeFrom) arī neatzīmējas kā pabeigta: plānotājs to turpina no resumeFrom.
+  const fullFailed = mode === "full" && ((res.rows === 0 && res.errors.length > 0) || res.resumeFrom != null);
   // Pilnā kārta ietver arī ātrās kārtas darbu — atzīmējam lastQuickAt, lai josla neizskatītos
   // novecojusi uzraudzībai, kamēr tā faktiski tikusi izsūknēta pilnajā režīmā.
   const set =
@@ -354,18 +385,22 @@ export function autopliusEnabled() {
  * Plānotāja solis: katrai plūsmai (LV un LT) izpilda ātro vai pilno kārtu, ja pienācis laiks.
  * Atgriež izpildīto kārtu rezultātus (ar plūsmas atslēgu) vai null, ja neviena kārta nav pienākusies.
  */
-export async function tickAutoplius(): Promise<(CrawlResult & { key: string })[] | null> {
-  const out: (CrawlResult & { key: string })[] = [];
+export async function tickAutoplius(): Promise<(ApResult & { key: string })[] | null> {
+  const out: (ApResult & { key: string })[] = [];
   // pa vienam pārlūkam visiem crawleriem (512 MB instances) un pēc kārtas pārlūku aizveram
   await withCrawlLock(async () => {
     for (const target of AP_TARGETS) {
       const st = await db.query.crawlState.findFirst({ where: eq(crawlState.name, target.key) });
       const now = Date.now();
+      const lr = (st?.lastResult ?? null) as ApResult | null;
+      // pārtrūkusi pilnā kārta: turpinām no resumeFrom, bet ne ātrāk kā pēc 20 min (lai portāls „atdziest”)
+      const resume = lr?.mode === "full" && lr.resumeFrom && lr.at && now - Date.parse(lr.at) - lr.ms > 20 * 60_000 ? lr.resumeFrom : 1;
       const fullDue = !st?.lastFullAt || now - st.lastFullAt.getTime() > target.fullEveryHours * 3600_000;
       const quickDue = !st?.lastQuickAt || now - st.lastQuickAt.getTime() > target.quickEveryMin * 60_000;
       if (!fullDue && !quickDue) continue;
+      if (fullDue && lr?.resumeFrom && resume === 1 && !quickDue) continue; // gaidām atdzišanu
       try {
-        out.push({ ...(await crawlAutoplius(fullDue ? "full" : "quick", target)), key: target.key });
+        out.push({ ...(await crawlAutoplius(fullDue && (resume > 1 || !lr?.resumeFrom) ? "full" : "quick", target, browserFetch, AUTOPLIUS_DELAY_MS, resume)), key: target.key });
       } finally {
         await closeBrowser().catch(() => {});
       }
@@ -391,6 +426,13 @@ async function getBrowser() {
     });
   }
   return browserPromise;
+}
+
+/** Aizver tikai sesiju (sīkdatnes): nākamā lapa sāk ar jaunu Cloudflare sesiju. */
+async function resetSession() {
+  const ctx = contextPromise;
+  contextPromise = null;
+  if (ctx) await ctx.then((c) => c.close()).catch(() => {});
 }
 
 /** Aizver pārlūku un sesiju pēc kārtas — atmiņa (512 MB instances) netiek turēta starp kārtām. */
@@ -419,7 +461,9 @@ export async function browserFetch(url: string): Promise<string> {
         return await page.content();
       } catch (e) {
         const title = await page.title().catch(() => "");
-        if (attempt >= 3 || !/uzgaidiet|just a moment|cloudflare|autoplius/i.test(title)) throw e;
+        if (attempt >= 3 || !/uzgaidiet|just a moment|cloudflare|autoplius/i.test(title)) {
+          throw new Error(`kartītes neparādījās (lapas virsraksts: „${title.slice(0, 80)}”)`);
+        }
         await page.reload({ waitUntil: "domcontentloaded", timeout: 45_000 });
       }
     }
