@@ -952,7 +952,7 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .ai-pill.away { transform: translateY(90px); opacity: 0; pointer-events: none; }
 @media (min-width: 861px) { body:has(.ai-card) .ai-pill { display: none; } }
 /* telefonā, kamēr redzama instalēšanas josla, „Jautā AI” poga to nepārklāj (parādās pēc joslas aizvēršanas) */
-@media (max-width: 860px) { body:has(.pwa-banner) .ai-pill { opacity: 0; pointer-events: none; } }
+@media (max-width: 860px) { body:has(.pwa-banner) .ai-pill { visibility: hidden; } }
 body:has(.det-bar) .ai-pill { bottom: 90px; }
 @media (min-width: 861px) { body:has(.det-bar) .ai-pill { bottom: 18px; } }
 .ai-title { display: flex; align-items: center; gap: 10px; }
