@@ -304,7 +304,7 @@ export function SearchFilters({ initial, regions, sources = [] }: { initial: Fil
 
       {active > 0 && (
         <button type="button" className="btn small" onClick={() => update({ ...Object.fromEntries(Object.keys(v).map((k) => [k, ""])), cat: v.cat ?? "", vc: v.vc ?? "", sort: v.sort ?? "" })}>
-          Notīrīt filtrus ({active})
+          {t("Notīrīt filtrus ({n})", { n: active })}
         </button>
       )}
     </div>

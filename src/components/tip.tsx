@@ -39,7 +39,7 @@ export function Tip({ id, steps }: { id: string; steps: TipStep[] }) {
             </span>
           )}
           {last ? (
-            <button type="button" className="btn small primary" onClick={close}>{t("Sapratu")}</button>
+            <button type="button" className="btn small primary" onClick={close}>{t("Skaidrs")}</button>
           ) : (
             <button type="button" className="btn small primary" onClick={() => setI(i + 1)}>{t("Tālāk")}</button>
           )}

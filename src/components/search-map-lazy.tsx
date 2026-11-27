@@ -3,9 +3,18 @@ import { useT } from "@/i18n/client";
 import dynamic from "next/dynamic";
 import { useEffect, useState, type ComponentProps } from "react";
 
+/** Kamēr kartes kods ielādējas: tā pati rīkjosla un kartes laukums (bez „Ielādē…” teksta), lai lapa nelēkā un neizskatās „iesprūdusi”. */
 function MapLoading() {
   const { t } = useT();
-  return <div className="mapwrap"><div className="map loading">{t("Ielādē karti…")}</div></div>;
+  return (
+    <div className="mapwrap">
+      <div className="maptools">
+        <span className="btn small primary draw-btn" aria-hidden="true"><span>✏️</span> {t("Uzzīmē apgabalu")}</span>
+        <span className="pts-toggle fine" aria-hidden="true"><input type="checkbox" disabled /> {t("Rādīt punktus kartē")}</span>
+      </div>
+      <div className="map-box"><div className="map loading" aria-busy="true" aria-label={t("Sludinājumu karte")} /></div>
+    </div>
+  );
 }
 
 // Leaflet strādā tikai pārlūkā, tāpēc karti ielādējam bez servera renderēšanas.

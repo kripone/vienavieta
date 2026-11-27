@@ -325,7 +325,7 @@ export function SearchMap({ query, zone, zoneTotal }: { query: string; zone?: st
             <div className="map-hint-btns">
               <button type="button" className="btn small primary" onClick={() => { closeHint(); setDrawing(true); }}>✏️ {t("Uzzīmē apgabalu")}</button>
               <button type="button" className="btn small" onClick={() => { closeHint(); applyZone(zoneParam(EXAMPLE_ZONE)); }}>{t("Rādīt šo zonu")}</button>
-              <button type="button" className="btn small" onClick={closeHint}>{t("Sapratu")}</button>
+              <button type="button" className="btn small" onClick={closeHint}>{t("Skaidrs")}</button>
             </div>
           </div>
         )}

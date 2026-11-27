@@ -1175,4 +1175,6 @@ export const en: Dict = {
   "Rādīt šo zonu": "Show this area",
   "Uzzīmē apgabalu un redzi, kas tur pārdošanā": "Draw an area and see what's for sale there",
   "Ielādē punktus…": "Loading points…",
+  "Notīrīt filtrus ({n})": "Clear filters ({n})",
+  "Skaidrs": "Got it",
 };

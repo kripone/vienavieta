@@ -1183,4 +1183,6 @@ export const ru: Dict = {
   "Rādīt šo zonu": "Показать эту зону",
   "Uzzīmē apgabalu un redzi, kas tur pārdošanā": "Нарисуйте область и посмотрите, что там продаётся",
   "Ielādē punktus…": "Загрузка точек…",
+  "Notīrīt filtrus ({n})": "Сбросить фильтры ({n})",
+  "Skaidrs": "Понятно",
 };
