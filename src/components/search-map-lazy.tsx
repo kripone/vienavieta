@@ -8,8 +8,11 @@ function MapLoading() {
   return <div className="mapwrap"><div className="map loading">{t("Ielādē karti…")}</div></div>;
 }
 
-// Leaflet strādā tikai pārlūkā, tāpēc karti ielādējam bez servera renderēšanas
-const SearchMap = dynamic(() => import("./search-map").then((m) => m.SearchMap), {
+// Leaflet strādā tikai pārlūkā, tāpēc karti ielādējam bez servera renderēšanas.
+// Kartes kodu sākam lejupielādēt jau tad, kad šis modulis ielādējas (paralēli lapas hidratācijai), nevis tikai pēc tās.
+const loadMap = () => import("./search-map");
+if (typeof window !== "undefined" && !window.matchMedia("(max-width: 560px)").matches) void loadMap();
+const SearchMap = dynamic(() => loadMap().then((m) => m.SearchMap), {
   ssr: false,
   loading: () => <MapLoading />,
 });

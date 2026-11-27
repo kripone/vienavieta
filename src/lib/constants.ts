@@ -500,7 +500,12 @@ export const HOME_CATEGORIES = [
 export const HOME_CAT_MIN = 20;
 
 /** Lapas, ko serveris pēc starta ielādē pats, lai sasildītu kešus (`src/instrumentation.ts`, izslēdz ar WARMUP=off). */
+/** Kartes pirmās reizes padoma piemēra zona: Rīgas centrs (aptuveni Centra apkaime, bez Vecrīgas), [lat, lon]. */
+export const MAP_EXAMPLE_ZONE: [number, number][] = [[56.949, 24.114], [56.9575, 24.106], [56.9655, 24.118], [56.964, 24.142], [56.9545, 24.149], [56.9455, 24.133]];
+export const mapZoneParam = (pts: [number, number][]) => pts.map(([a, b]) => `${a},${b}`).join(";");
+
 export const WARMUP_PATHS = [
+  `/api/search/count?zone=${encodeURIComponent(mapZoneParam(MAP_EXAMPLE_ZONE))}`,
   "/", "/auto", "/moto", "/ipasumi", "/ipasumi/dzivokli", "/ipasumi/dzivokli/riga", "/ipasumi/dzivokli-ire", "/ipasumi/dzivokli-ire/riga",
   "/ipasumi/majas", "/ipasumi/zeme", "/ipasumi/dzivokli/jurmala", "/auto/lidz-5000", "/en", "/ru", "/lt",
   "/auto/lidz-20000", "/en/auto", "/ru/auto", "/ru/auto/lidz-20000", "/lt/auto",

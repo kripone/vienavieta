@@ -6,6 +6,7 @@ import Supercluster from "supercluster";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { GOOGLE_KEY } from "@/lib/google-tiles";
+import { MAP_EXAMPLE_ZONE, mapZoneParam } from "@/lib/constants";
 import { addGoogleLayers, STREETS_ATTR } from "./map-layers";
 
 type Point = [string, number, number, 1 | 2, number, string];
@@ -27,9 +28,8 @@ const popupHtml = (p: Props) => `<a href="/sludinajumi/${p.id}" style="font-weig
 
 /** Punktu slānis (izvēles) ielādējas tikai no šīs tālummaiņas: visu valsti punktos nekad neprasām. */
 const POINTS_MIN_ZOOM = 11;
-/** Piemēra zona pirmajam apmeklējumam: Rīgas centrs (aptuveni Centra apkaime, bez Vecrīgas). */
-const EXAMPLE_ZONE: [number, number][] = [[56.949, 24.114], [56.9575, 24.106], [56.9655, 24.118], [56.964, 24.142], [56.9545, 24.149], [56.9455, 24.133]];
-const zoneParam = (pts: [number, number][]) => pts.map(([a, b]) => `${a},${b}`).join(";");
+const EXAMPLE_ZONE = MAP_EXAMPLE_ZONE;
+const zoneParam = mapZoneParam;
 const HINT_KEY = "vv-tip:map-draw";
 
 /** Vienkāršo zīmēto līniju: atstāj punktus, kas ir vismaz `min` pikseļu attālumā. */
@@ -59,6 +59,7 @@ export function SearchMap({ query, zone, zoneTotal }: { query: string; zone?: st
   const [zoom, setZoom] = useState(6);
   const [hint, setHint] = useState(false);
   const [exampleN, setExampleN] = useState<number | null>(null);
+  const [ptsLoading, setPtsLoading] = useState(false);
   const exampleLayer = useRef<L.Polygon | null>(null);
   const closeHint = () => {
     try { localStorage.setItem(HINT_KEY, "1"); } catch {}
@@ -168,8 +169,10 @@ export function SearchMap({ query, zone, zoneTotal }: { query: string; zone?: st
       if (m.getZoom() < POINTS_MIN_ZOOM) { markers.current?.clearLayers(); index.current = null; setCount(null); return; }
       const b = m.getBounds().pad(0.25), z = Math.round(m.getZoom());
       const view = `b=${b.getWest().toFixed(4)},${b.getSouth().toFixed(4)},${b.getEast().toFixed(4)},${b.getNorth().toFixed(4)}&z=${z}`;
+      setPtsLoading(true);
       fetch(`/api/search/points?${query ? `${query}&` : ""}${view}`).then((r) => r.json()).then((d: MapData) => {
         if (!alive || my !== seq) return;
+        setPtsLoading(false);
         setCount(d.total);
         cells.current = !d.points;
         const feature = (lat: number, lon: number, properties: Props) => ({ type: "Feature" as const, geometry: { type: "Point" as const, coordinates: [lon, lat] }, properties });
@@ -178,7 +181,7 @@ export function SearchMap({ query, zone, zoneTotal }: { query: string; zone?: st
             ? d.points.map(([id, lat, lon, kind, price, title]) => feature(lat, lon, { n: 1, id, kind, price, title }))
             : (d.cells ?? []).map(([lat, lon, n]) => feature(lat, lon, { n, id: "", kind: 1, price: 0, title: "" }))) as unknown as Supercluster<Props>;
         draw.current();
-      }).catch(() => {});
+      }).catch(() => { if (my === seq) setPtsLoading(false); });
     };
     load();
     const onMove = () => { clearTimeout(timer); timer = setTimeout(load, 200); };
@@ -305,6 +308,7 @@ export function SearchMap({ query, zone, zoneTotal }: { query: string; zone?: st
           <a href="#rezultati" className="fine">{t("Skatīt sarakstu")} ↓</a>
         </div>
       )}
+      {showPoints && zoom >= POINTS_MIN_ZOOM && ptsLoading && <p className="fine pts-note">{t("Ielādē punktus…")}</p>}
       {showPoints && zoom < POINTS_MIN_ZOOM && <p className="fine pts-note">{t("Pietuvini karti, lai redzētu punktus")}</p>}
       {showPoints && zoom >= POINTS_MIN_ZOOM && count === 0 && vehicles && (
         <p className="fine pts-note">{t("· ss.com auto sarakstā vieta nav norādīta, tāpēc tie kartē nav redzami")}</p>
@@ -316,7 +320,7 @@ export function SearchMap({ query, zone, zoneTotal }: { query: string; zone?: st
             <p><b>{t(vehicles ? "Apvelc rajonu, kurā meklē auto." : "Apvelc rajonu, kurā meklē īpašumu.")}</b></p>
             <p className="fine">
               {t("Piemērs: Rīgas centrs")}
-              {exampleN != null && <> – {t("šajā zonā ir {n}", { n: tp(exampleN, "sludinājums", "sludinājumi") })}</>}
+              {" – "}{exampleN != null ? t("šajā zonā ir {n}", { n: tp(exampleN, "sludinājums", "sludinājumi") }) : "…"}
             </p>
             <div className="map-hint-btns">
               <button type="button" className="btn small primary" onClick={() => { closeHint(); setDrawing(true); }}>✏️ {t("Uzzīmē apgabalu")}</button>

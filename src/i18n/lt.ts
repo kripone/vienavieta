@@ -1182,4 +1182,5 @@ export const lt: Dict = {
   "šajā zonā ir {n}": "šioje zonoje yra {n}",
   "Rādīt šo zonu": "Rodyti šią zoną",
   "Uzzīmē apgabalu un redzi, kas tur pārdošanā": "Nubrėžkite sritį ir pažiūrėkite, kas ten parduodama",
+  "Ielādē punktus…": "Įkeliami taškai…",
 };
