@@ -1114,4 +1114,9 @@ export const ru: Dict = {
   "Mainīt": "Изменить",
   "Virsbūves tips": "Тип кузова",
   "Avoti": "Источники",
+  "Akumulators no": "Батарея от",
+  "Akumulators": "Батарея",
+  "Akumulators, kWh": "Батарея, кВт·ч",
+  "akumulators {n} kWh": "батарея {n} кВт·ч",
+  "Akumulatora ietilpībai jābūt kWh (1–300).": "Ёмкость батареи — в кВт·ч (1–300).",
 };

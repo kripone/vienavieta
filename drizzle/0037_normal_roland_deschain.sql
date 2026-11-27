@@ -1,0 +1,2 @@
+ALTER TABLE "listings" ADD COLUMN "battery_kwh" smallint;--> statement-breakpoint
+CREATE INDEX "listings_battery_idx" ON "listings" USING btree ("battery_kwh") WHERE "listings"."battery_kwh" is not null;

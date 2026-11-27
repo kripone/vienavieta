@@ -13,6 +13,7 @@ import { landLabel } from "../listing-input";
 import { findMake, matchModel, slug, vehicleTitle, type ImportRow, type MakeRow, type ModelRow, type PlaceRow } from "./ss-rss";
 import { loadCtx } from "./ss-pages";
 import { detectTrim } from "../trims";
+import { detectBatteryKwh } from "../battery";
 
 const { listings, priceHistory, crawlState } = schema;
 
@@ -123,6 +124,7 @@ export function mapVehicle(item: ZipItem, vc: VehicleClass, ctx: Ctx, createdAt:
     makeText: make ? null : makeName || null,
     modelText: model ? null : modelRaw || null,
     trim: detectTrim(make?.name, nameRaw),
+    batteryKwh: detectBatteryKwh(fuel, nameRaw),
     year,
     mileageKm,
     engineL,

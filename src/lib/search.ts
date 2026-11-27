@@ -86,6 +86,8 @@ export function parseSearch(raw: Raw) {
     body: vc ? pick(raw.body, BODY_TYPES[vc as VehicleClass]) : undefined,
     drive: pick(raw.drive, DRIVES),
     kwmin: int(raw.kwmin, 1),
+    /** akumulatora ietilpība no, kWh (src/lib/battery.ts) */
+    batmin: int(raw.batmin, 1, 300),
     ccmin: dec(raw.ccmin),
     ccmax: dec(raw.ccmax),
     color: pick(raw.color, COLORS),
@@ -178,6 +180,7 @@ function conditions(s: SearchParams): SQL[] {
     if (s.body) add(eq(listings.body, s.body));
     if (s.drive) add(eq(listings.drive, s.drive));
     if (s.kwmin) add(gte(listings.powerKw, s.kwmin));
+    if (s.batmin) add(gte(listings.batteryKwh, s.batmin));
     if (s.ccmin != null) add(gte(listings.engineL, String(s.ccmin)));
     if (s.ccmax != null) add(lte(listings.engineL, String(s.ccmax)));
     if (s.color) add(eq(listings.color, s.color));
@@ -421,6 +424,7 @@ export async function describeSearch(s: SearchParams) {
     for (const x of [s.trim, s.el ? "Elektro" : s.fuel, s.gear, s.body, s.drive, s.color]) if (x) parts.push(x);
     if (s.ccmax != null) parts.push(`dzinējs līdz ${String(s.ccmax).replace(".", ",")} l`);
     if (s.kmmax != null) parts.push(`līdz ${nf.format(s.kmmax)} km`);
+    if (s.batmin) parts.push(`akumulators no ${s.batmin} kWh`);
   }
   if (s.rmin && s.rmin === s.rmax) parts.push(`${s.rmin} ist.`);
   else if (s.rmin) parts.push(`${s.rmin}+ ist.`);

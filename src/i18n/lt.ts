@@ -1114,4 +1114,9 @@ export const lt: Dict = {
   "Turpināt ar {p}": "Tęsti su {p}",
   "Mainīt": "Keisti",
   "Virsbūves tips": "Kėbulo tipas",
+  "Akumulators no": "Baterija nuo",
+  "Akumulators": "Baterija",
+  "Akumulators, kWh": "Baterija, kWh",
+  "akumulators {n} kWh": "baterija {n} kWh",
+  "Akumulatora ietilpībai jābūt kWh (1–300).": "Baterijos talpa turi būti kWh (1–300).",
 };

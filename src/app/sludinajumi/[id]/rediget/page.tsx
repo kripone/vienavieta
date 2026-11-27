@@ -41,6 +41,7 @@ export default async function EditPage(props: { params: Promise<{ id: string }> 
     body: str(l.body),
     engineL: l.engineL ? String(Number(l.engineL)) : "",
     powerKw: str(l.powerKw),
+    batteryKwh: str(l.batteryKwh),
     drive: str(l.drive),
     color: str(l.color),
     vin: str(l.vin),

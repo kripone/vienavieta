@@ -16,6 +16,7 @@ export type FilterValues = Record<string, string>;
 
 const YEARS = Array.from({ length: new Date().getFullYear() + 1 - 1980 }, (_, i) => String(new Date().getFullYear() - i));
 const KM = ["25000", "50000", "100000", "150000", "200000", "250000", "300000"];
+const BATTERY = ["20", "40", "50", "60", "70", "80", "90", "100"];
 const KW = [["55", "75 ZS"], ["75", "102 ZS"], ["100", "136 ZS"], ["130", "177 ZS"], ["160", "218 ZS"], ["200", "272 ZS"], ["250", "340 ZS"]];
 
 /** Kuri īpašuma lauki rādāmi filtros izvēlētajam veidam vai grupai. */
@@ -190,6 +191,9 @@ export function SearchFilters({ initial, regions, sources = [] }: { initial: Fil
             {sel("body", "Virsbūve / tips", BODY_TYPES[vc], "Jebkura")}
           </div>
           <div className="checks">{check("el", "⚡ Tikai elektriskie")}</div>
+          {(v.el === "1" || v.fuel === "Elektro" || v.fuel === "Hibrīds" || v.batmin) && (
+            <div className="grid2">{sel("batmin", "Akumulators no", BATTERY.map((k) => [k, `${k} kWh`] as const), "Jebkāds")}</div>
+          )}
           <details className="more" open={Boolean(v.drive || v.kwmin || v.ccmin || v.ccmax || v.color)}>
             <summary>{t("Vairāk filtru")}</summary>
             <div className="grid2">

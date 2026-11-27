@@ -18,6 +18,7 @@ import { findMake, matchModel, vehicleTitle } from "./ss-rss";
 import { loadCtx } from "./ss-pages";
 import { linkDuplicate } from "../dedupe";
 import { detectTrim } from "../trims";
+import { detectBatteryKwh } from "../battery";
 
 const { listings, priceHistory, dealerFeeds, users } = schema;
 
@@ -355,6 +356,7 @@ export async function runFeed(feedId: number): Promise<FeedResult> {
           makeText: make ? null : makeRaw.slice(0, 60),
           modelText: model ? null : modelRaw.slice(0, 60) || null,
           trim: detectTrim(make?.name, modelRaw),
+          batteryKwh: detectBatteryKwh(fuel, modelRaw, get(f, "title")),
           year,
           mileageKm: km != null ? Math.round(km) : null,
           fuel,

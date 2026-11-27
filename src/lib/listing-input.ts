@@ -42,6 +42,7 @@ export const VehicleInput = z
     body: z.string().trim().min(1, "Izvēlies virsbūvi vai tipu."),
     engineL: opt(num(0.05, 30, "Tilpumam jābūt litros, piem. 2.0.")),
     powerKw: opt(int(1, 2000, "Jaudai jābūt kilovatos.")),
+    batteryKwh: opt(int(1, 300, "Akumulatora ietilpībai jābūt kWh (1–300).")),
     drive: opt(oneOf(DRIVES, "Izvēlies piedziņu.")),
     color: opt(oneOf(COLORS, "Izvēlies krāsu.")),
     vin: opt(z.string().trim().toUpperCase().regex(/^[A-HJ-NPR-Z0-9]{17}$/, "VIN kodam jābūt 17 zīmēm (bez I, O, Q).")),

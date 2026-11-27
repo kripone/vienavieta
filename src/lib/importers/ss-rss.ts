@@ -8,6 +8,7 @@ import { linkDuplicate } from "../dedupe";
 import { inferBody } from "../illustrations";
 import { landLabel } from "../listing-input";
 import { detectTrim } from "../trims";
+import { detectBatteryKwh } from "../battery";
 
 const { listings, places, regions, makes, models, priceHistory } = schema;
 
@@ -433,6 +434,7 @@ export function mapItem(
       makeText: make ? null : realName(makeName) || null,
       modelText: model ? null : realName(modelRaw) || null,
       trim: feed.vehicleClass === "car" ? detectTrim(make?.name, modelRaw0, item.snippet) : null,
+      batteryKwh: detectBatteryKwh(fuel, modelRaw0, item.snippet),
       year: year && year > 1900 && year < 2100 ? year : null,
       mileageKm: mileage(first(f, "Nobraukums")),
       engineL,

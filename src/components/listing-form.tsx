@@ -18,7 +18,7 @@ export type FormValues = Record<string, string> & { kind: "vehicle" | "property"
 
 const blank: FormValues = {
   kind: "vehicle", vehicleClass: "car", makeId: "", modelId: "", makeText: "", modelText: "", year: "", mileageKm: "", fuel: "", gearbox: "", trim: "",
-  body: "", engineL: "", powerKw: "", drive: "", color: "", vin: "",
+  body: "", engineL: "", powerKw: "", batteryKwh: "", drive: "", color: "", vin: "",
   propertyType: "Dzīvoklis", deal: "sell", rooms: "", areaM2: "", landM2: "", floor: "", floors: "", series: "", material: "", heating: "",
   condition: "", builtYear: "", purpose: "",
   title: "", description: "", price: "", placeId: "", contactPhone: "", contactEmail: "",
@@ -212,6 +212,7 @@ export function ListingForm(props: {
           {sel({ k: "body", label: "Virsbūve / tips", list: BODY_TYPES[vc] ?? [], required: true })}
           {num({ k: "engineL", label: "Motora tilpums, L", step: "0.1" })}
           {num({ k: "powerKw", label: "Jauda, kW" })}
+          {(v.fuel === "Elektro" || v.fuel === "Hibrīds") && num({ k: "batteryKwh", label: "Akumulators, kWh" })}
           {sel({ k: "drive", label: "Piedziņa", list: DRIVES, any: "Nav norādīts" })}
           {sel({ k: "color", label: "Krāsa", list: COLORS, any: "Nav norādīts" })}
           <label className="field">

@@ -13,6 +13,7 @@ type L = {
   fuel: string | null;
   gearbox: string | null;
   powerKw: number | null;
+  batteryKwh?: number | null;
   mileageKm: number | null;
   body: string | null;
   makeText: string | null;
@@ -48,6 +49,7 @@ export function listingSummary(
     const specs = [
       engine,
       l.powerKw ? `${l.powerKw} kW` : null,
+      l.batteryKwh ? t("akumulators {n} kWh", { n: l.batteryKwh }) : null,
       l.gearbox ? lower(t(l.gearbox)) : null,
       l.body ? lower(t(l.body)) : null,
       l.mileageKm != null ? t("nobraukums {km} km", { km: formatNumber(l.mileageKm) }) : null,

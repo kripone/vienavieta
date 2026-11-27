@@ -1106,4 +1106,9 @@ export const en: Dict = {
   "Mainīt": "Change",
   "Virsbūves tips": "Body type",
   "Avoti": "Sources",
+  "Akumulators no": "Battery from",
+  "Akumulators": "Battery",
+  "Akumulators, kWh": "Battery, kWh",
+  "akumulators {n} kWh": "{n} kWh battery",
+  "Akumulatora ietilpībai jābūt kWh (1–300).": "Battery capacity must be in kWh (1–300).",
 };

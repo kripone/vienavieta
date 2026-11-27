@@ -13,6 +13,7 @@ import { findMake, matchModel, realName, slug, vehicleTitle, type ImportRow, typ
 import { withCrawlLock } from "./crawl-lock";
 import { loadCtx } from "./ss-pages";
 import { detectTrim } from "../trims";
+import { detectBatteryKwh } from "../battery";
 
 const { listings, priceHistory, crawlState } = schema;
 
@@ -194,6 +195,7 @@ export function mapRow(r: ApRow, ctx: Ctx, createdAt: Date, vc: "car" | "moto" |
     makeText: make ? null : realName(makeName) || null,
     modelText: model ? null : realName(modelRaw) || null,
     trim: vc === "car" ? detectTrim(make?.name, r.titleRaw) : null,
+    batteryKwh: detectBatteryKwh(fuel, r.titleRaw),
     year: r.year,
     mileageKm: r.mileageKm,
     engineL: r.engineL,
@@ -222,7 +224,7 @@ async function saveRows(apRows: ApRow[], ctx: Ctx, res: CrawlResult, mode: "quic
   const byId = new Map(mapped.map((m) => [m.externalId!, m]));
   if (!byId.size) return;
   const existing = await db
-    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl, makeId: listings.makeId, modelId: listings.modelId, placeId: listings.placeId, fuel: listings.fuel, powerKw: listings.powerKw, trim: listings.trim })
+    .select({ id: listings.id, externalId: listings.externalId, price: listings.price, status: listings.status, thumb: listings.externalThumbUrl, makeId: listings.makeId, modelId: listings.modelId, placeId: listings.placeId, fuel: listings.fuel, powerKw: listings.powerKw, trim: listings.trim, batteryKwh: listings.batteryKwh })
     .from(listings)
     .where(and(eq(listings.source, "autoplius.lt"), inArray(listings.externalId, [...byId.keys()])));
   const seen = new Set<string>();
@@ -235,7 +237,8 @@ async function saveRows(apRows: ApRow[], ctx: Ctx, res: CrawlResult, mode: "quic
     const newPlace = row.placeId && !e.placeId;
     const newSpecs = (!e.fuel && row.fuel) || (!e.powerKw && row.powerKw); // piem., EV degviela/jauda, ko vecais parsētājs laida garām
     const newTrim = row.trim && row.trim !== e.trim;
-    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl || better || newPlace || newSpecs || newTrim) {
+    const newBattery = row.batteryKwh != null && row.batteryKwh !== e.batteryKwh;
+    if (e.price !== row.price || e.status === "deleted" || e.thumb !== row.externalThumbUrl || better || newPlace || newSpecs || newTrim || newBattery) {
       await db
         .update(listings)
         .set({
@@ -248,6 +251,7 @@ async function saveRows(apRows: ApRow[], ctx: Ctx, res: CrawlResult, mode: "quic
           ...(better ? { makeId: row.makeId, modelId: row.modelId, makeText: row.makeText, modelText: row.modelText, title: row.title, body: row.body } : {}),
           ...(newSpecs ? { fuel: row.fuel, powerKw: row.powerKw, title: row.title } : {}),
           ...(newTrim ? { trim: row.trim } : {}),
+          ...(newBattery ? { batteryKwh: row.batteryKwh } : {}),
         })
         .where(eq(listings.id, e.id));
       if (e.price !== row.price) {

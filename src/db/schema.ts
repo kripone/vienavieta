@@ -232,6 +232,8 @@ export const listings = pgTable(
     body: text("body"),
     engineL: numeric("engine_l", { precision: 4, scale: 2 }),
     powerKw: smallint("power_kw"),
+    /** akumulatora ietilpība kWh (elektroauto, plug-in hibrīdi; src/lib/battery.ts) */
+    batteryKwh: smallint("battery_kwh"),
     drive: text("drive"),
     color: text("color"),
     vin: text("vin"),
@@ -266,6 +268,7 @@ export const listings = pgTable(
     index("listings_place_idx").on(t.placeId),
     index("listings_vehicle_idx").on(t.vehicleClass, t.makeId, t.modelId, t.year),
     index("listings_trim_idx").on(t.makeId, t.trim).where(sql`${t.trim} is not null`),
+    index("listings_battery_idx").on(t.batteryKwh).where(sql`${t.batteryKwh} is not null`),
     index("listings_property_idx").on(t.propertyType, t.deal),
     index("listings_user_idx").on(t.userId),
     index("listings_group_idx").on(t.groupKey),

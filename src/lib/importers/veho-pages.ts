@@ -12,6 +12,7 @@ import { inferBody } from "../illustrations";
 import { findMake, matchModel, vehicleTitle, type ImportRow, type MakeRow, type ModelRow, type PlaceRow } from "./ss-rss";
 import { loadCtx } from "./ss-pages";
 import { detectTrim } from "../trims";
+import { detectBatteryKwh } from "../battery";
 
 const { listings, priceHistory, crawlState } = schema;
 
@@ -117,6 +118,7 @@ export function mapRow(r: VehoRow, ctx: Ctx, createdAt: Date): ImportRow | null 
     makeText: make ? null : r.makeRaw || null,
     modelText: model ? null : r.modelRaw || null,
     trim: detectTrim(make?.name, r.modelRaw),
+    batteryKwh: detectBatteryKwh(fuel, r.modelRaw),
     year: r.year,
     mileageKm: r.mileageKm,
     engineL: null,

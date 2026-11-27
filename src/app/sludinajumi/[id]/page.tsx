@@ -79,6 +79,7 @@ export default async function ListingPage(props: Props) {
           ["Virsbūve / tips", l.body],
           ["Tilpums", l.engineL ? `${Number(l.engineL).toFixed(1)} L` : null],
           ["Jauda", l.powerKw ? `${l.powerKw} kW (${Math.round(l.powerKw * 1.36)} ZS)` : null],
+          ["Akumulators", l.batteryKwh ? `${l.batteryKwh} kWh` : null],
           ["Piedziņa", l.drive],
           ["Krāsa", l.color],
           ["Vietu skaits", l.seats],

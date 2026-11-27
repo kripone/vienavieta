@@ -120,6 +120,7 @@ export async function saveListing(raw: unknown): Promise<SaveResult> {
           body: v.body,
           engineL: v.engineL != null ? String(v.engineL) : null,
           powerKw: v.powerKw ?? null,
+          batteryKwh: v.fuel === "Elektro" || v.fuel === "Hibrīds" ? v.batteryKwh ?? null : null,
           drive: v.drive ?? null,
           color: v.color ?? null,
           vin: v.vin ?? null,

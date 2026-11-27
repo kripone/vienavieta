@@ -122,6 +122,7 @@ export function parseTextQuery(text: string, cat: TqCatalog): TqResult {
     else { p.amin = String(Math.floor(a * 0.85)); p.amax = String(Math.ceil(a * 1.15)); }
     kind ??= "property";
   });
+  take(/\b(\d{2,3})\s*(?:kwh|kw h|квт ?ч)\b/, (m) => { p.batmin = m[1]; p.el ??= "1"; kind = "vehicle"; });
   take(/\b(\d{1,2})\s*-?\s*(?:ist\w*|istab\w*|rooms?|bedrooms?|комн\w*|к\b)/, (m) => { p.rmin = p.rmax = m[1]; kind ??= "property"; });
   for (const [re, n] of ROOM_WORDS) take(re, () => { p.rmin = p.rmax = String(n); kind ??= "property"; });
   take(/\b(\d{1,2})\.?\s*(?:stav\w*|floor|этаж\w*)/, (m) => { p.fmin = p.fmax = m[1]; kind ??= "property"; });
@@ -129,7 +130,8 @@ export function parseTextQuery(text: string, cat: TqCatalog): TqResult {
   take(new RegExp(`(?:${FROM}|pec|jaunaks par|после)\\s*((?:19[89]|20[0-3])\\d)\\b(?!\\s*${EUR})|\\b((?:19[89]|20[0-3])\\d)\\s*\\+`), (m) => { p.ymin = m[1] ?? m[2]; kind = "vehicle"; });
   take(new RegExp(`${UPTO}\\s*((?:19[89]|20[0-3])\\d)\\s*\\.?\\s*(?:g\\b|gad\\w*|год\\w*)`), (m) => { p.ymax = m[1]; kind = "vehicle"; });
   // --- cena: "līdz 6000 eiro", "no 50k", "50000-80000 €", "6000 eur"
-  take(new RegExp(`${NUM}\\s*(?:-|–|lidz|до|to)\\s*${NUM}\\s*${EUR}`), (m) => { p.pmin = String(num(m[1], m[2] || m[4])); p.pmax = String(num(m[3], m[4])); });
+  // intervāla sākumam vajag ≥100 €, citādi „Model 3 līdz 30000 eur” dotu cenu no 3 €
+  take(new RegExp(`${NUM}\\s*(?:-|–|lidz|до|to)\\s*${NUM}\\s*${EUR}`), (m) => { const lo = num(m[1], m[2] || m[4]); if (lo >= 100) p.pmin = String(lo); p.pmax = String(num(m[3], m[4])); });
   take(new RegExp(`${UPTO}\\s*${NUM}\\s*${EUR}?`), (m) => { p.pmax = String(num(m[1], m[2])); });
   take(new RegExp(`${FROM}\\s*${NUM}\\s*${EUR}`), (m) => { p.pmin = String(num(m[1], m[2])); });
   if (!p.pmax) take(new RegExp(`\\b${NUM}\\s*${EUR}`), (m) => { p.pmax = String(num(m[1], m[2])); });
@@ -219,7 +221,7 @@ export function parseTextQuery(text: string, cat: TqCatalog): TqResult {
     if (!p.deal && p.pmax && (p.ptype === "Dzīvoklis" || p.ptype === "Māja" || p.ptype === "Istaba")) p.deal = Number(p.pmax) <= 3000 ? "rent" : "sell";
   }
   // transporta filtri bez jēgas īpašumiem un otrādi
-  if (p.cat !== "vehicle") for (const k of ["fuel", "gear", "trim", "body", "drive", "color", "ccmax", "kmmax", "ymin", "ymax", "vc", "make", "model"]) delete p[k];
+  if (p.cat !== "vehicle") for (const k of ["fuel", "gear", "trim", "batmin", "el", "body", "drive", "color", "ccmax", "kmmax", "ymin", "ymax", "vc", "make", "model"]) delete p[k];
   if (p.cat !== "property") for (const k of ["ptype", "rmin", "rmax", "amin", "amax", "fmin", "fmax", "series"]) delete p[k];
   if (p.cat !== "property" && p.deal) delete p.deal;
   if (p.body && p.vc && p.vc !== "car") delete p.body;
