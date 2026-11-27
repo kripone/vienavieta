@@ -69,7 +69,8 @@ export async function fixCityPlaces() {
         const chunk = list.slice(i, i + 500);
         await db.update(listings).set({
           placeId: to.id,
-          title: old ? sql`case when right(${listings.title}, ${old.length + 2}) = ${`, ${old}`} then left(${listings.title}, -${old.length}) || ${to.name} else ${listings.title} end` : sql`${listings.title}`,
+          // skaitļi kā int (parametru tipu Postgres pats nenosaka: „-$3” neder)
+          title: old ? sql`case when right(${listings.title}, ${old.length + 2}::int) = ${`, ${old}`}::text then left(${listings.title}, ${-old.length}::int) || ${to.name}::text else ${listings.title} end` : sql`${listings.title}`,
         }).where(inArray(listings.id, chunk));
         moved += chunk.length;
       }
