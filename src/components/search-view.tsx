@@ -178,10 +178,6 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
         <Suspense>
           <SaveSearchButton loggedIn={Boolean(user)} filters={flat} />
         </Suspense>
-        <Tip id="search-v1" steps={[
-          { icon: "🔔", title: "Saglabā meklēšanu", text: "Paziņosim par jauniem sludinājumiem ar šiem filtriem – e-pastā vai telefonā." },
-          { icon: "⇄", title: "Salīdzini blakus", text: "Atzīmē ⇄ pie līdz 4 sludinājumiem un salīdzini tos vienā tabulā." },
-        ]} />
         {s.zone && (() => {
           const [unit, value, approx, label] = (flat.zl ?? "").split("|");
           if (!label) return <p className="zone-note">{t("Rāda tikai sludinājumus iezīmētajā zonā.")}</p>;
@@ -205,6 +201,11 @@ export async function SearchView({ raw, landing }: { raw: SP; landing?: Landing 
                 <ListingCard key={l.id} l={l} priority={i === 0} favorite={{ on: favs.has(l.id), loggedIn: Boolean(user) }} also={also.get(l.id)} evaluation={evals.get(l.id)} oldPrice={l.firstPrice} vzd={vzd.get(l.id)} compare />
               ))}
             </div>
+            {/* pamācība zem rezultātiem (nenobīda sarakstu pēc ielādes) */}
+            <Tip id="search-v1" steps={[
+              { icon: "🔔", title: "Saglabā meklēšanu", text: "Paziņosim par jauniem sludinājumiem ar šiem filtriem – e-pastā vai telefonā." },
+              { icon: "⇄", title: "Salīdzini blakus", text: "Atzīmē ⇄ pie līdz 4 sludinājumiem un salīdzini tos vienā tabulā." },
+            ]} />
             {result.pages > 1 && (
               <nav className="pager" aria-label={t("Lapas")}>
                 {s.page > 1 && <a className="btn small" href={pageHref(s.page - 1)}>{t("‹ Iepriekšējā")}</a>}

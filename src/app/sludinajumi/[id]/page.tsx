@@ -181,13 +181,6 @@ export default async function ListingPage(props: Props) {
           {!isOwner && <div className="det-fav"><FavButton id={l.id} on={isFav} loggedIn={Boolean(user)} /></div>}
         </div>
         <div className="det-side">
-          {!isOwner && (
-            <Tip id="listing-v1" steps={[
-              { icon: "♡", title: "Saglabā favorītos", text: "Spied sirsniņu – sludinājums saglabāsies sadaļā „Favorīti”, un varēsi saņemt ziņu, ja cena kritīsies." },
-              { icon: "📝", title: "Piezīme un statuss", text: "Favorītos katram sludinājumam vari pierakstīt piezīmi un atzīmēt statusu, piem. „Sazinājos” vai „Sarunāta apskate”. Ja piezīmē ieraksti dienu un laiku, piedāvāsim to ielikt kalendārā." },
-              { icon: "👨‍👩‍👧", title: "Dalies ar ģimeni", text: "Favorītu sarakstu var nosūtīt ar saiti – citi var atzīmēt „patīk / nepatīk” un komentēt bez reģistrācijas." },
-            ]} />
-          )}
           <div className="det-title">
             <h1>{trTitle(l.title, t)}</h1>
             <div className="card-tools">
@@ -312,6 +305,14 @@ export default async function ListingPage(props: Props) {
               ))}
             </ul>
           </div>
+        )}
+        {/* pamācība lejā, lai, parādoties pēc ielādes, nenobīda virsrakstu un cenu (CLS) */}
+        {!isOwner && (
+          <Tip id="listing-v1" steps={[
+            { icon: "♡", title: "Saglabā favorītos", text: "Spied sirsniņu – sludinājums saglabāsies sadaļā „Favorīti”, un varēsi saņemt ziņu, ja cena kritīsies." },
+            { icon: "📝", title: "Piezīme un statuss", text: "Favorītos katram sludinājumam vari pierakstīt piezīmi un atzīmēt statusu, piem. „Sazinājos” vai „Sarunāta apskate”. Ja piezīmē ieraksti dienu un laiku, piedāvāsim to ielikt kalendārā." },
+            { icon: "👨‍👩‍👧", title: "Dalies ar ģimeni", text: "Favorītu sarakstu var nosūtīt ar saiti – citi var atzīmēt „patīk / nepatīk” un komentēt bez reģistrācijas." },
+          ]} />
         )}
         {l.status === "active" && !isOwner && <ReportButton id={l.id} loggedIn={Boolean(user)} />}
       </div>
