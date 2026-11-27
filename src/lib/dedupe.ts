@@ -63,7 +63,8 @@ export async function findDuplicate(l: Row): Promise<Row | null> {
     extra = [
       eq(listings.propertyType, l.propertyType!),
       l.deal ? eq(listings.deal, l.deal) : undefined,
-      sql`(${listings.placeId} = ${l.placeId} or ${listings.placeId} in (select p2.id from places p2 where coalesce(p2.parent_id, p2.id) = (select coalesce(p1.parent_id, p1.id) from places p1 where p1.id = ${l.placeId})))`,
+      // tā pati vieta vai tā pati pilsēta (apkaimēm bez parent_id pilsēta ir reģions: Bulduri un Majori – Jūrmala)
+      sql`(${listings.placeId} = ${l.placeId} or ${listings.placeId} in (select p2.id from places p2 where coalesce(p2.parent_id::text, case when p2.kind is null then 'r' || p2.region_id else p2.id::text end) = (select coalesce(p1.parent_id::text, case when p1.kind is null then 'r' || p1.region_id else p1.id::text end) from places p1 where p1.id = ${l.placeId})))`,
       l.rooms ? eq(listings.rooms, l.rooms) : undefined,
       area ? and(isNotNull(listings.areaM2), sql`abs(${listings.areaM2} - ${area}) <= 2`) : undefined,
       l.landM2 ? sql`abs(coalesce(${listings.landM2}, 0) - ${l.landM2}) <= ${Math.max(20, l.landM2 * 0.03)}` : undefined,
@@ -148,10 +149,10 @@ export async function groupExactDuplicates() {
     with g as (
       select l.id,
         first_value(coalesce(l.group_key, l.id::text)) over w as k,
-        count(*) over (partition by l.property_type, l.deal, coalesce(p.parent_id, p.id), l.rooms, round(l.area_m2), l.floor, l.price) as n
+        count(*) over (partition by l.property_type, l.deal, coalesce(p.parent_id::text, case when p.kind is null then 'r' || p.region_id else p.id::text end), l.rooms, round(l.area_m2), l.floor, l.price) as n
       from listings l join places p on p.id = l.place_id
       where l.status = 'active' and l.kind = 'property' and l.area_m2 is not null and l.floor is not null and l.price > 0
-      window w as (partition by l.property_type, l.deal, coalesce(p.parent_id, p.id), l.rooms, round(l.area_m2), l.floor, l.price order by l.group_key nulls last, l.created_at, l.id)
+      window w as (partition by l.property_type, l.deal, coalesce(p.parent_id::text, case when p.kind is null then 'r' || p.region_id else p.id::text end), l.rooms, round(l.area_m2), l.floor, l.price order by l.group_key nulls last, l.created_at, l.id)
     )
     update listings set group_key = g.k from g
     where listings.id = g.id and g.n > 1 and listings.group_key is distinct from g.k`);
