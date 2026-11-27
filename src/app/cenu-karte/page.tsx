@@ -6,7 +6,7 @@ import { formatNumber } from "@/lib/format";
 import { langAlternates, regionName } from "@/lib/seo";
 import { flatPriceMap, PRICE_MAP_MIN, type PriceMapDeal } from "@/lib/price-map";
 import { PriceMapLazy } from "@/components/price-map-lazy";
-import { PRICE_RAMP } from "@/lib/constants";
+import { PRICE_RAMP, TOP_PLACE_MIN } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 type Props = { searchParams: Promise<{ d?: string }> };
@@ -26,6 +26,8 @@ export default async function PriceMapPage(props: Props) {
   const { t, lp, locale } = await getT();
   const deal: PriceMapDeal = (await props.searchParams).d === "ire" ? "rent" : "sell";
   const { places, breaks, total } = await flatPriceMap(deal);
+  // „dārgākā / lētākā” tikai no vietām ar pietiekami daudz sludinājumiem (karte rāda arī mazākās, ar skaitu)
+  const ranked = places.filter((p) => p.n >= TOP_PLACE_MIN);
   const unit = deal === "sell" ? "€/m²" : t("€/m² mēnesī");
   const fmt = (v: number) => (deal === "sell" ? formatNumber(v) : v.toFixed(1).replace(".", ","));
   const href = (id: number) => lp(`/?cat=property&ptype=Dzīvoklis&deal=${deal}&loc=p:${id}`);
@@ -41,12 +43,12 @@ export default async function PriceMapPage(props: Props) {
       <p className="lead">
         {t("Cik maksā kvadrātmetrs katrā apkaimē un pilsētā: mediāna no {n} aktīvajiem sludinājumiem. Uzspied uz apļa, lai redzētu sludinājumus.", { n: formatNumber(total) })}
       </p>
-      {places.length > 1 && (
+      {ranked.length > 1 && (
         // datēts kopsavilkums citēšanai
         <p className="facts">
           <time dateTime={new Date().toISOString().slice(0, 10)}>{new Date().toLocaleDateString(INTL_LOCALE[locale], { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Riga" })}</time>
           {": "}
-          {t("dārgākā vieta {a} ({x} {u}), lētākā {b} ({y} {u}); {n} vietas ar vismaz {k} sludinājumiem.", { a: places[0].name, x: fmt(places[0].median), b: places.at(-1)!.name, y: fmt(places.at(-1)!.median), u: unit, n: String(places.length), k: String(PRICE_MAP_MIN) })}{" "}
+          {t("dārgākā vieta {a} ({x} {u}), lētākā {b} ({y} {u}); {n} vietas ar vismaz {k} sludinājumiem.", { a: ranked[0].name, x: fmt(ranked[0].median), b: ranked.at(-1)!.name, y: fmt(ranked.at(-1)!.median), u: unit, n: String(ranked.length), k: String(TOP_PLACE_MIN) })}{" "}
           <a href={lp("/dati")}>{t("Kā skaitām")}</a>
         </p>
       )}

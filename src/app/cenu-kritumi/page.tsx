@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { langAlternates } from "@/lib/seo";
 import { ListingCard, priceUnit } from "@/components/listing-card";
 import { changeCounts, recentChanges } from "@/lib/history";
+import { CHANGES_PER_PAGE } from "@/lib/constants";
 import { alsoAt } from "@/lib/dedupe";
 import { priceEvals } from "@/lib/price-eval";
 import { vzdBadges } from "@/lib/vzd";
@@ -28,8 +29,9 @@ export default async function DropsPage(props: { searchParams: Promise<Record<st
   const days = sp.d === "1" || sp.d === "30" ? sp.d : "7";
   const tab: Tab = sp.tab === "kritumi" || sp.tab === "kapumi" ? sp.tab : "jaunakie";
   const up = tab === "kapumi";
+  const page = Math.max(1, Math.min(200, Number(sp.p) || 1));
   const [rows, counts] = await Promise.all([
-    recentChanges({ kind, days: Number(days), limit: 60, dir: up ? "up" : "down", order: tab === "jaunakie" ? "time" : "pct" }).catch(soft("cenu-kritumi", [])),
+    recentChanges({ kind, days: Number(days), limit: CHANGES_PER_PAGE, offset: (page - 1) * CHANGES_PER_PAGE, dir: up ? "up" : "down", order: tab === "jaunakie" ? "time" : "pct" }).catch(soft("cenu-kritumi", [])),
     changeCounts({ kind, days: Number(days) }).catch(soft("cenu-kritumi", null)),
   ]);
   const [also, evals, vzd] = await Promise.all([
@@ -38,8 +40,9 @@ export default async function DropsPage(props: { searchParams: Promise<Record<st
     vzdBadges(rows.filter((r) => r.card.kind === "property").map((r) => r.card.id)).catch(soft("cenu-kritumi", new Map())),
   ]);
   const k = sp.k === "auto" || sp.k === "ipasumi" ? sp.k : undefined;
-  const q = (o: { k?: string; d?: string; tab?: Tab }) => {
+  const q = (o: { k?: string; d?: string; tab?: Tab; p?: number }) => {
     const p = new URLSearchParams();
+    if (o.p && o.p > 1) p.set("p", String(o.p));
     if (o.tab && o.tab !== "jaunakie") p.set("tab", o.tab);
     if (o.k) p.set("k", o.k);
     if (o.d && o.d !== "7") p.set("d", o.d);
@@ -86,6 +89,18 @@ export default async function DropsPage(props: { searchParams: Promise<Record<st
           ))}
         </div>
       )}
+      {(() => {
+        const total = count(tab) ?? 0;
+        const pages = Math.ceil(total / CHANGES_PER_PAGE);
+        if (pages <= 1) return null;
+        return (
+          <nav className="pager" aria-label={t("Lapas")}>
+            {page > 1 && <a href={q({ k, d: days, tab, p: page - 1 })}>{t("‹ Iepriekšējā")}</a>}
+            <span>{t("{n}. lapa no {m}", { n: page, m: pages })}</span>
+            {page < pages && <a href={q({ k, d: days, tab, p: page + 1 })}>{t("Nākamā ›")}</a>}
+          </nav>
+        );
+      })()}
     </main>
   );
 }

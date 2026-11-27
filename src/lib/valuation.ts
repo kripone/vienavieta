@@ -4,8 +4,9 @@ import { sql } from "drizzle-orm";
 import { plausibleVehicle } from "./plausible";
 import { db } from "@/db";
 import { dealsByAddress } from "./vzd";
+import { groupPrimaryAs } from "./dedupe";
 
-const primary = sql.raw(`(l.group_key is null or not exists (select 1 from listings g where g.group_key = l.group_key and g.status = 'active' and g.id <> l.id and (g.source = 'own' and l.source <> 'own' or (g.source <> 'own' and l.source <> 'own' and g.created_at < l.created_at))))`);
+const primary = groupPrimaryAs("l");
 type Stats = { n: number; median: number; p25: number; p75: number };
 const stats = async (q: ReturnType<typeof sql>) => {
   const r = (await db.execute<{ n: string; median: number | null; p25: number | null; p75: number | null }>(q)).rows[0];

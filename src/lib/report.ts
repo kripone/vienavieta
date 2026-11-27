@@ -7,7 +7,7 @@ import { cached } from "./search";
 
 type Row = Record<string, unknown>;
 const rows = async <T extends Row>(q: ReturnType<typeof sql>) => (await db.execute<T>(q)).rows;
-const primary = sql.raw(`(l.group_key is null or not exists (select 1 from listings g where g.group_key = l.group_key and g.id <> l.id and (g.source = 'own' and l.source <> 'own' or (g.source <> 'own' and l.source <> 'own' and g.created_at < l.created_at))))`);
+const primary = sql.raw(`(l.group_key is null or not exists (select 1 from listings g where g.group_key = l.group_key and g.id <> l.id and (g.source = 'own' and l.source <> 'own' or (g.source <> 'own' and l.source <> 'own' and (g.created_at < l.created_at or (g.created_at = l.created_at and g.id < l.id))))))`); // mēneša pārskatā arī neaktīvie (tāpēc bez statusa)
 
 export const MONTH_RE = /^(20\d\d)-(0[1-9]|1[0-2])$/;
 export function monthRange(ym: string) {

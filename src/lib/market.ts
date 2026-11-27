@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { cached } from "./search";
 import { groupPrimaryAs } from "./dedupe";
+import { TOP_PLACE_MIN } from "./constants";
 
 type Row = Record<string, unknown>;
 const rows = async <T extends Row>(q: ReturnType<typeof sql>) => (await db.execute<T>(q)).rows;
@@ -129,7 +130,7 @@ async function propertyByRegionFresh(propertyType: string, deal: string) {
           where l.status = 'active' and l.kind = 'property' and l.property_type = ${propertyType} and l.deal = ${deal}::deal_type and ${primary}) l
     join places p on p.id = l.place_id join regions r on r.id = p.region_id
     where l.u > 0 and r.country = 'LV'
-    group by r.id, r.name having count(*) >= 5 order by median desc`);
+    group by r.id, r.name having count(*) >= ${TOP_PLACE_MIN} order by median desc`);
   return r.map((x) => ({ regionId: x.region_id, region: x.region, median: x.median, n: Number(x.n) }));
 }
 
@@ -144,7 +145,7 @@ async function propertyByPlaceFresh(regionId: number, propertyType: string, deal
           where l.status = 'active' and l.kind = 'property' and l.property_type = ${propertyType} and l.deal = ${deal}::deal_type and ${primary}) l
     join places p on p.id = l.place_id
     where l.u > 0 and p.region_id = ${regionId}
-    group by p.name having count(*) >= 3 order by median desc`);
+    group by p.name having count(*) >= ${TOP_PLACE_MIN} order by median desc`);
   return r.map((x) => ({ place: x.place, median: x.median, n: Number(x.n) }));
 }
 

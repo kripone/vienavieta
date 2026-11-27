@@ -2,12 +2,13 @@
 // Viens objekts vairākos portālos skaitās vienreiz; vietas ar mazāk nekā PRICE_MAP_MIN sludinājumiem nerādām.
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
+import { groupPrimaryAs } from "./dedupe";
 
 export const PRICE_MAP_MIN = 5;
 export type PriceMapDeal = "sell" | "rent";
 export type PriceMapPlace = { id: number; name: string; region: string; lat: number; lon: number; n: number; median: number; level: number };
 
-const primary = sql.raw(`(l.group_key is null or not exists (select 1 from listings g where g.group_key = l.group_key and g.status = 'active' and g.id <> l.id and (g.source = 'own' and l.source <> 'own' or (g.source <> 'own' and l.source <> 'own' and g.created_at < l.created_at))))`);
+const primary = groupPrimaryAs("l");
 
 /** Robežas 5 krāsu pakāpēm: kvintiles, noapaļotas (pārdošanai līdz 50 €, īrei līdz 0,5 €). */
 function breaks(values: number[], step: number) {

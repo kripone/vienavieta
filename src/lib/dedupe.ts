@@ -157,3 +157,24 @@ export async function groupExactDuplicates() {
     where listings.id = g.id and g.n > 1 and listings.group_key is distinct from g.k`);
   return { vehicles: veh.rowCount ?? 0, properties: prop.rowCount ?? 0 };
 }
+
+/**
+ * Virsbūves tips no modeļa (ik stundu): ja citos avotos (ne autoplius, ne savējie) modelim ≥85 % no ≥15 sludinājumiem ir viens tips,
+ * ārējiem sludinājumiem ar citu vai tukšu tipu iestata šo (autoplius pārdevēji bieži izvēlas nepareizi: Tesla Model 3 „Hečbeks”, XC60 „Minivens”).
+ * Mikroautobusus neaiztiekam (Master/Ducato ir gan pasažieru, gan kravas versijas). Savējos sludinājumus nemaina.
+ */
+export async function normalizeBodies() {
+  const r = await db.execute(sql`
+    with d as (
+      select model_id, body, count(*) as n, sum(count(*)) over (partition by model_id) as tot,
+        row_number() over (partition by model_id order by count(*) desc) as rn
+      from listings
+      where status = 'active' and kind = 'vehicle' and vehicle_class = 'car' and body is not null and model_id is not null
+        and source not in ('autoplius.lt', 'own')
+      group by model_id, body
+    )
+    update listings l set body = d.body from d
+    where d.rn = 1 and d.tot >= 15 and d.n::float / d.tot >= 0.85 and d.body <> 'Mikroautobuss'
+      and l.model_id = d.model_id and l.source <> 'own' and l.status = 'active' and l.vehicle_class = 'car' and l.body is distinct from d.body`);
+  return r.rowCount ?? 0;
+}

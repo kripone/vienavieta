@@ -313,6 +313,10 @@ export const PORSCHE = { key: "porsche:used", url: "https://finder.porsche.com/l
 export const TRIM_AUTO_MIN = 5;
 /** Cenu kritums virs šīs daļas (50%) ir aizdomīgs (bieži 10× drukas kļūda: 129 000 → 12 900): netiek rādīts topos, kārtošanā un kartītēs. */
 export const DROP_MAX = 0.5;
+/** Mazākā cenu izmaiņa, ko rāda kritumos/kāpumos (zem 1 % – noapaļošana, „−1 €”, „−0 %”). */
+export const CHANGE_MIN = 0.01;
+/** Cenu izmaiņu lapā kartītes vienā lapā. */
+export const CHANGES_PER_PAGE = 60;
 /** Lētāko/dārgāko vietu topos (€/m²) vietai vajag vismaz tik sludinājumu, lai 5–7 objekti nekļūtu par „dārgāko”. */
 export const TOP_PLACE_MIN = 20;
 /** Cenas spriedums: robežas, minimālais salīdzināmo skaits (MIN), neticamas attiecības (RATIO_MIN/MAX – drīzāk kļūda datos, spriedumu nerādām),

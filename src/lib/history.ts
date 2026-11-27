@@ -4,7 +4,7 @@ import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { cardFields } from "@/lib/listings";
 import { groupPrimaryOnly } from "@/lib/dedupe";
-import { DROP_MAX } from "@/lib/constants";
+import { CHANGE_MIN, DROP_MAX } from "@/lib/constants";
 import { cached } from "@/lib/search";
 
 const { listings, priceHistory, places, regions } = schema;
@@ -51,7 +51,8 @@ function changesSql(opts: ChangeOpts) {
         where ph.listing_id in (select listing_id from price_history group by listing_id having count(*) > 1 and max(changed_at) >= ${since})
       ) x
       where rn = 1 and prev is not null and prev > 0 and changed_at >= ${since}
-        and price between prev * ${1 - DROP_MAX}::float8 and prev * ${1 + DROP_MAX}::float8 and price <> prev
+        and price between prev * ${1 - DROP_MAX}::float8 and prev * ${1 + DROP_MAX}::float8
+        and abs(price - prev) >= prev * ${CHANGE_MIN}::float8
     )
     select ch.listing_id, ch.prev, ch.price, ch.changed_at from ch
     join listings on listings.id = ch.listing_id
@@ -60,11 +61,11 @@ function changesSql(opts: ChangeOpts) {
 }
 
 /** Cenu kritumi vai kāpumi: kārtojums pēc laika ("time") vai izmaiņas % ("pct"); vienādiem – jaunākais pirmais. */
-export function recentChanges(opts: ChangeOpts & { dir?: ChangeDir; order?: "time" | "pct"; limit?: number } = {}) {
+export function recentChanges(opts: ChangeOpts & { dir?: ChangeDir; order?: "time" | "pct"; limit?: number; offset?: number } = {}) {
   // kešs (10 min svaigs, pēc tam rāda veco un pārrēķina fonā): vaicājums pār visu cenu vēsturi aizņem sekundes
   return cached(`chg:${JSON.stringify(opts)}`, () => loadChanges(opts));
 }
-async function loadChanges(opts: ChangeOpts & { dir?: ChangeDir; order?: "time" | "pct"; limit?: number }) {
+async function loadChanges(opts: ChangeOpts & { dir?: ChangeDir; order?: "time" | "pct"; limit?: number; offset?: number }) {
   const dir = opts.dir ?? "down";
   const limit = opts.limit ?? 60;
   const order = opts.order === "pct" ? sql`abs(c.price - c.prev)::float8 / c.prev desc, c.changed_at desc` : sql`c.changed_at desc`;
@@ -73,7 +74,7 @@ async function loadChanges(opts: ChangeOpts & { dir?: ChangeDir; order?: "time" 
     from (${changesSql(opts)}) c
     where ${dir === "down" ? sql`c.price < c.prev` : sql`c.price > c.prev`}
     order by ${order}, c.listing_id
-    limit ${limit}`);
+    limit ${limit} offset ${opts.offset ?? 0}`);
   const ids = res.rows.map((r) => r.listing_id);
   if (!ids.length) return [];
   const cards = await db

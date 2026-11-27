@@ -516,7 +516,9 @@ const STORED_MAX_AGE = 7 * 24 * 3600_000;
 /** Datubāzē glabājam tikai meklēšanas skaitus bez lietotāja brīvā teksta vai zonas (citādi tabula augtu bez gala). */
 const persistable = (key: string) =>
   /^(type|facet|src|sum2|ins|seo|mo):|^home-cats$|^today-stats$/.test(key) && !/"zone":\[/.test(key) && !/"q":"[^"]/.test(key);
-const storeKey = (key: string) => createHash("sha256").update(key).digest("hex");
+/** Palielini, ja mainās skaitīšanas loģika (dublikāti, sliekšņi), lai `page_cache` vecās vērtības netiek rādītas. */
+const CACHE_VER = "2";
+const storeKey = (key: string) => createHash("sha256").update(`${CACHE_VER}|${key}`).digest("hex");
 
 function remember(key: string, v: unknown) {
   facetCache.delete(key);

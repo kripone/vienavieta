@@ -3,8 +3,9 @@ import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { cached } from "@/lib/search";
 import { normalizeSeries, SERIES } from "@/lib/constants";
+import { groupPrimaryAs } from "./dedupe";
 
-const primary = sql.raw(`(l.group_key is null or not exists (select 1 from listings g where g.group_key = l.group_key and g.status = 'active' and g.id <> l.id and (g.source = 'own' and l.source <> 'own' or (g.source <> 'own' and l.source <> 'own' and g.created_at < l.created_at))))`);
+const primary = groupPrimaryAs("l");
 
 export type SeriesStat = { n: number; m2: number | null; floors: number | null };
 
