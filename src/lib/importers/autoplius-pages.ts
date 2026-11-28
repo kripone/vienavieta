@@ -387,9 +387,10 @@ export function autopliusEnabled() {
  */
 export async function tickAutoplius(): Promise<(ApResult & { key: string })[] | null> {
   const out: (ApResult & { key: string })[] = [];
-  // pa vienam pārlūkam visiem crawleriem (512 MB instances) un pēc kārtas pārlūku aizveram
-  await withCrawlLock(async () => {
-    for (const target of AP_TARGETS) {
+  // pa vienam pārlūkam visiem crawleriem, bet slēdzeni ņemam katrai plūsmai atsevišķi: starp autoplius joslām
+  // tiek arī city24/wess (agrāk viens solis ar visām 24 joslām aizņēma slēdzeni stundām, un city24 stāvēja)
+  for (const target of AP_TARGETS) {
+    await withCrawlLock(async () => {
       const st = await db.query.crawlState.findFirst({ where: eq(crawlState.name, target.key) });
       const now = Date.now();
       const lr = (st?.lastResult ?? null) as ApResult | null;
@@ -397,15 +398,15 @@ export async function tickAutoplius(): Promise<(ApResult & { key: string })[] | 
       const resume = lr?.mode === "full" && lr.resumeFrom && lr.at && now - Date.parse(lr.at) - lr.ms > 20 * 60_000 ? lr.resumeFrom : 1;
       const fullDue = !st?.lastFullAt || now - st.lastFullAt.getTime() > target.fullEveryHours * 3600_000;
       const quickDue = !st?.lastQuickAt || now - st.lastQuickAt.getTime() > target.quickEveryMin * 60_000;
-      if (!fullDue && !quickDue) continue;
-      if (fullDue && lr?.resumeFrom && resume === 1 && !quickDue) continue; // gaidām atdzišanu
+      if (!fullDue && !quickDue) return;
+      if (fullDue && lr?.resumeFrom && resume === 1 && !quickDue) return; // gaidām atdzišanu
       try {
         out.push({ ...(await crawlAutoplius(fullDue && (resume > 1 || !lr?.resumeFrom) ? "full" : "quick", target, browserFetch, AUTOPLIUS_DELAY_MS, resume)), key: target.key });
       } finally {
         await closeBrowser().catch(() => {});
       }
-    }
-  });
+    });
+  }
   return out.length ? out : null;
 }
 
