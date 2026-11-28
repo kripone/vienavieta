@@ -1177,4 +1177,5 @@ export const en: Dict = {
   "Ielādē punktus…": "Loading points…",
   "Notīrīt filtrus ({n})": "Clear filters ({n})",
   "Skaidrs": "Got it",
+  "Saglabā favorītos: piezīmes, statuss, kalendārs un cenu kritumu paziņojumi – viss vienuviet.": "Save to favourites: notes, status, calendar and price-drop alerts – all in one place.",
 };

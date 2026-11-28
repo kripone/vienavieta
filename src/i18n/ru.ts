@@ -1185,4 +1185,5 @@ export const ru: Dict = {
   "Ielādē punktus…": "Загрузка точек…",
   "Notīrīt filtrus ({n})": "Сбросить фильтры ({n})",
   "Skaidrs": "Понятно",
+  "Saglabā favorītos: piezīmes, statuss, kalendārs un cenu kritumu paziņojumi – viss vienuviet.": "Сохрани в избранное: заметки, статус, календарь и уведомления о снижении цены – всё в одном месте.",
 };

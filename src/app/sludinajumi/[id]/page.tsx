@@ -8,6 +8,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ContactReveal } from "@/components/contact-reveal";
 import { FinanceCalc } from "@/components/finance-calc";
+import { FavBanner } from "@/components/fav-banner";
 import { FavButton } from "@/components/fav-button";
 import { ReportButton } from "@/components/report-button";
 import { Gallery } from "@/components/gallery";
@@ -225,6 +226,7 @@ export default async function ListingPage(props: Props) {
           </section>
           {/* datorā labajā kolonnā; telefonā zemāk (pēc vēstures), lai neaizsedz kopsavilkumu un karti */}
           {calcEl && <div className="calc-side">{calcEl}</div>}
+          <div className="calc-side"><FavBanner kind="v" /></div>
         </div>
       <div className="det-body">
         {summary.length > 0 && (
@@ -270,6 +272,7 @@ export default async function ListingPage(props: Props) {
         {vzd && <VzdDeals data={vzd} perM2={l.areaM2 ? Math.round(l.price / Number(l.areaM2)) : null} />}
         {history && <PriceHistory h={history} external={l.source !== "own"} />}
         {calcEl && <div className="calc-body">{calcEl}</div>}
+        <div className="calc-body"><FavBanner kind="h" /></div>
         {ext && (
           <div className="panel seller ext-open">
             <b>{t("Sludinājums no {src}", { src })}</b>

@@ -1185,4 +1185,5 @@ export const lt: Dict = {
   "Ielādē punktus…": "Įkeliami taškai…",
   "Notīrīt filtrus ({n})": "Išvalyti filtrus ({n})",
   "Skaidrs": "Supratau",
+  "Saglabā favorītos: piezīmes, statuss, kalendārs un cenu kritumu paziņojumi – viss vienuviet.": "Išsaugok į mėgstamus: pastabos, būsena, kalendorius ir pranešimai apie kainos kritimą – viskas vienoje vietoje.",
 };

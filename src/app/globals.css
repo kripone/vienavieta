@@ -882,6 +882,8 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .det-fav .fav { width: 44px; height: 44px; justify-content: center; padding: 0; background: rgba(255,255,255,.94); border-color: transparent; color: #181b24; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
 .det-fav .fav.on { color: var(--accent); }
 .calc-side { display: none; }
+.fav-banner { display: block; width: 100%; height: auto; margin-top: 16px; border-radius: 14px; border: 1px solid var(--line); background: #fff; object-fit: cover; }
+.fav-banner-v { max-width: 360px; margin-inline: auto; }
 .det-body .ext-open { margin-top: 20px; }
 .det-body .also-panel { margin-top: 12px; }
 
