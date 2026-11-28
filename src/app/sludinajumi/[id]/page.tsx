@@ -226,7 +226,7 @@ export default async function ListingPage(props: Props) {
           </section>
           {/* datorā labajā kolonnā; telefonā zemāk (pēc vēstures), lai neaizsedz kopsavilkumu un karti */}
           {calcEl && <div className="calc-side">{calcEl}</div>}
-          <div className="calc-side"><FavBanner kind="v" /></div>
+          <div className="calc-side fav-slot"><FavBanner kind="v" /></div>
         </div>
       <div className="det-body">
         {summary.length > 0 && (
