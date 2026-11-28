@@ -102,5 +102,6 @@ databases:
     region: frankfurt
     plan: basic-1gb # ~19 $/mēn.: 0,5 CPU, 1 GB atmiņa (256mb ar 0,1 CPU bija par lēnu)
     postgresMajorVersion: "16"
+    diskSizeGB: 5 # 2026-11-28: 1 GB pietrūka (WAL), palielināts uz 5 GB
     databaseName: vienavieta
     user: vienavieta

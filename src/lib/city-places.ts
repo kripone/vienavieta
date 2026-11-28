@@ -73,6 +73,7 @@ export async function fixCityPlaces() {
           title: old ? sql`case when right(${listings.title}, ${old.length + 2}::int) = ${`, ${old}`}::text then left(${listings.title}, ${-old.length}::int) || ${to.name}::text else ${listings.title} end` : sql`${listings.title}`,
         }).where(inArray(listings.id, chunk));
         moved += chunk.length;
+        await new Promise((r) => setTimeout(r, 1500)); // lēni: lai datubāzes žurnāls (WAL) paspēj arhivēties
       }
     }
   };
