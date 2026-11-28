@@ -1,3 +1,4 @@
+import { safeHref } from "@/lib/safe-url";
 import { FavButton } from "@/components/fav-button";
 import { CompareToggle } from "@/components/compare";
 import { EvalBadge } from "@/components/eval-badge";
@@ -97,7 +98,7 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
               a.source === "own" ? (
                 <a key={a.id} href={a.url}>VienāVietā</a>
               ) : (
-                <a key={a.id} href={a.url} {...extLink}>
+                <a key={a.id} href={safeHref(a.url)} {...extLink}>
                   {SOURCE_LABEL[a.source] ?? a.source}{a.price !== l.price ? ` (${formatPrice(a.price)})` : ""} ↗
                 </a>
               ),

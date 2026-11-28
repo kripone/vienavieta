@@ -1,3 +1,4 @@
+import { safeHref } from "@/lib/safe-url";
 import { seriesAnchor } from "@/content/series";
 import { listingSummary } from "@/lib/listing-summary";
 import { ModelInfo } from "@/components/model-info";
@@ -113,7 +114,7 @@ export default async function ListingPage(props: Props) {
   const summary = listingSummary(l, { make: d.make ?? null, model: d.model ?? null, place: d.place ?? null }, evaluation, vzd, t, tp);
   const seller = (d.sellerType === "dealer" || d.sellerType === "agency") && d.companyName ? d.companyName : d.sellerName || t("Privātpersona");
   const unit = priceUnit(l.deal, t);
-  const ext = l.source !== "own" && l.externalUrl ? l.externalUrl : null;
+  const ext = l.source !== "own" ? safeHref(l.externalUrl) ?? null : null;
   const src = SOURCE_LABEL[l.source] ?? l.source;
 
   // ceļš uz SEO lapām (iekšējās saites)
@@ -209,7 +210,7 @@ export default async function ListingPage(props: Props) {
               </span>
               {l.status === "active" && !isOwner && <ContactReveal id={l.id} />}
               {l.feedId && l.externalUrl && /^https?:\/\//.test(l.externalUrl) && (
-                <a className="fine" href={l.externalUrl} rel="nofollow noopener noreferrer">{/(^|\.)city24\.lv$/.test(new URL(l.externalUrl).hostname) ? t("Sludinājums city24.lv") : t("Sludinājums salona mājaslapā")} ↗</a>
+                <a className="fine" href={safeHref(l.externalUrl)} rel="nofollow noopener noreferrer">{/(^|\.)city24\.lv$/.test(new URL(l.externalUrl).hostname) ? t("Sludinājums city24.lv") : t("Sludinājums salona mājaslapā")} ↗</a>
               )}
             </div>
           )}
@@ -291,7 +292,7 @@ export default async function ListingPage(props: Props) {
                   {a.source === "own" ? (
                     <a href={lp(a.url)}>VienāVietā</a>
                   ) : (
-                    <a href={a.url} rel="nofollow noopener noreferrer">{SOURCE_LABEL[a.source] ?? a.source} ↗</a>
+                    <a href={safeHref(a.url)} rel="nofollow noopener noreferrer">{SOURCE_LABEL[a.source] ?? a.source} ↗</a>
                   )}{" "}
                   <span className="fine">{formatPrice(a.price)}</span>
                 </li>

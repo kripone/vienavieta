@@ -1,3 +1,4 @@
+import { safeHref } from "@/lib/safe-url";
 import { getT } from "@/i18n/server";
 import type { Metadata } from "next";
 import { ModActions } from "@/components/mod-actions";
@@ -161,7 +162,7 @@ function Errors({ rows }: { rows: Awaited<ReturnType<typeof recentErrors>> }) {
             <b>{r.source === "server" ? "Serveris" : "Pārlūks"}</b> · {r.count}× · pēdējo reizi {r.lastAt.toLocaleString("lv-LV", { timeZone: "Europe/Riga" })}
             <div className="err-msg">{r.message}</div>
           </summary>
-          {r.url && <p className="fine">Lapa: <a href={r.url}>{r.url}</a></p>}
+          {r.url && <p className="fine">Lapa: {safeHref(r.url) ? <a href={safeHref(r.url)} rel="nofollow noopener noreferrer">{r.url}</a> : r.url}</p>}
           {r.digest && <p className="fine">Digest: {r.digest}</p>}
           {r.userAgent && <p className="fine">Pārlūks: {r.userAgent}</p>}
           <p className="fine">Pirmo reizi: {r.firstAt.toLocaleString("lv-LV", { timeZone: "Europe/Riga" })}</p>

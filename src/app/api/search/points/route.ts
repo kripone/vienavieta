@@ -1,4 +1,5 @@
 import { parseSearch, searchMapView } from "@/lib/search";
+import { clientIp, overLimit } from "@/lib/client-ip";
 
 /** Īss kešs (5 min, līdz 200 skatiem): punktu saraksti var būt lieli, tāpēc ne kopējā `cached` kešā. */
 const viewCache = new Map<string, { at: number; v: Promise<Awaited<ReturnType<typeof searchMapView>>> }>();
@@ -8,6 +9,8 @@ const viewCache = new Map<string, { at: number; v: Promise<Awaited<ReturnType<ty
  * Atbilde: { total, points: [id, lat, lon, veids, cena, virsraksts][] } vai { total, cells: [lat, lon, skaits][] }.
  */
 export async function GET(req: Request) {
+  // kartes kustības: ~1 pieprasījums sekundē ir daudz; 120 minūtē no vienas adreses
+  if (overLimit("search-points", clientIp(req.headers), 120, 60_000)) return Response.json({ error: "limit" }, { status: 429 });
   const url = new URL(req.url);
   const sp = Object.fromEntries(url.searchParams.entries());
   const b = (url.searchParams.get("b") ?? "").split(",").map(Number);

@@ -1,3 +1,4 @@
+import { safeHref } from "@/lib/safe-url";
 import { trTitle } from "@/i18n/content";
 import { getT } from "@/i18n/server";
 import type { Metadata } from "next";
@@ -83,7 +84,7 @@ export default async function ComparePage(props: { searchParams: Promise<{ ids?:
         d.l.source === "own" ? (
           "VienāVietā"
         ) : (
-          <a href={d.l.externalUrl!} rel="nofollow noopener noreferrer">{SOURCE_LABEL[d.l.source] ?? d.l.source} ↗</a>
+          <a href={safeHref(d.l.externalUrl)} rel="nofollow noopener noreferrer">{SOURCE_LABEL[d.l.source] ?? d.l.source} ↗</a>
         ),
     },
   ];

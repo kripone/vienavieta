@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { importSsRss } from "@/lib/importers/ss-rss";
 import { ssCrawlerEnabled } from "@/lib/importers/ss-scheduler";
 import { ensureDailySnapshot } from "@/lib/market";
@@ -15,9 +16,12 @@ let lastRun = 0;
  * Ja iestatīts CRON_SECRET, pieprasījumam jābūt ar galveni "Authorization: Bearer <CRON_SECRET>".
  * Bez tā izsaukums ir drošs: e-pasti netiek sūtīti biežāk, kā atļauj katras meklēšanas biežums.
  */
+const safeEqual = (a: string, b: string) => a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
+
 async function handle(req: Request) {
   const secret = process.env.CRON_SECRET;
-  if (secret && req.headers.get("authorization") !== `Bearer ${secret}`) {
+  // produkcijā bez CRON_SECRET aizvērts (drošības audits 2026-11-28); izstrādē var bez tā
+  if ((secret || process.env.NODE_ENV === "production") && (!secret || !safeEqual(req.headers.get("authorization") ?? "", `Bearer ${secret}`))) {
     return Response.json({ error: "unauthorized" }, { status: 401 });
   }
   if (running) return Response.json({ skipped: "running" }, { status: 409 });

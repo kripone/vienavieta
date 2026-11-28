@@ -4,6 +4,7 @@
 // City24 formāta JSON (aģentūru eksports vai City24 partneru plūsma): city24-format.ts, bez brokeru datiem, viena bilde.
 // dealer_feeds.source = portāls (tikai administrators): sludinājumi ar portāla avotu, bez apraksta un kontaktiem,
 // viens sīktēls un saite uz oriģinālu ar UTM.
+import { safeHref } from "@/lib/safe-url";
 import { indexNow, listingPaths } from "../indexnow";
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
@@ -308,7 +309,8 @@ export async function runFeed(feedId: number): Promise<FeedResult> {
       const lat = num(get(f, "lat")), lon = num(get(f, "lon"));
       const exact = lat != null && lon != null && lat > 55.5 && lat < 58.2 && lon > 20.8 && lon < 28.3;
       // portāla partneru plūsma: tikai fakti, viens sīktēls un saite uz oriģinālu (ar UTM); bez apraksta un kontaktiem
-      const url = get(f, "url")?.slice(0, 500) ?? null;
+      // tikai http(s) saites (javascript: u.c. būtu XSS sludinājuma lapā)
+      const url = safeHref(get(f, "url")?.slice(0, 500)) ?? null;
       if (partner && !url) { res.skipped++; if (res.errors.length < 10) res.errors.push(`${itemId}: nav saites uz oriģinālu`); continue; }
       const photos = partner || get(f, "format") === "city24" ? images(f).slice(0, 1) : images(f);
       const base = {

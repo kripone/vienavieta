@@ -16,6 +16,21 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // drošības galvenes visām lapām (audits 2026-11-28). Pilnu skriptu CSP nelikām: Google kartes, Telegram,
+        // Cloudflare analītika un portālu bildes prasītu precīzu sarakstu; šeit tikai tas, kas neko nesalauž.
+        source: "/:path*",
+        headers: [
+          { key: "Strict-Transport-Security", value: "max-age=31536000" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // mikrofons – AI čata balss ievadei, atrašanās vieta – „tuvumā”; pārējais izslēgts
+          { key: "Permissions-Policy", value: "camera=(), microphone=(self), geolocation=(self), payment=(), usb=(), interest-cohort=()" },
+          { key: "Content-Security-Policy", value: "frame-ancestors 'self'; base-uri 'self'; object-src 'none'" },
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
+        ],
+      },
+      {
         // servisa darbiniekam vienmēr jābūt svaigam
         source: "/sw.js",
         headers: [
