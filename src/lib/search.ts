@@ -12,6 +12,7 @@ import {
   SOURCE_LABEL,
   DROP_MAX,
   TOP_PLACE_MIN,
+  PRICE_EVAL,
 } from "./constants";
 
 const { listings, places, regions, makes, models, users, listingPhotos } = schema;
@@ -613,14 +614,17 @@ export function sourceCounts(s: SearchParams): Promise<{ source: string; n: numb
 }
 
 /** Skaits, cenas mediāna (bez nulles cenām) un īpašumiem kvadrātmetra cenas mediāna. */
-export function priceSummary(s: SearchParams): Promise<{ n: number; median: number | null; sqm: number | null }> {
+export function priceSummary(s: SearchParams): Promise<{ n: number; median: number | null; sqm: number | null; areaMin?: number | null; areaMax?: number | null }> {
   const base = { ...s, page: 1, sort: "new" as const };
-  return cached(`sum2:${JSON.stringify(base)}`, async () => {
+  return cached(`sum3:${JSON.stringify(base)}`, async () => {
     const [r] = await db
       .select({
         n: count(),
         median: sql<number | null>`percentile_cont(0.5) within group (order by ${listings.price}) filter (where ${listings.price} > 0)`,
         sqm: sql<number | null>`percentile_cont(0.5) within group (order by ${listings.price}::float / ${listings.areaM2}) filter (where ${listings.price} > 0 and ${listings.areaM2} > 10 and ${listings.kind} = 'property')`,
+        // platību amplitūda bez galējībām (5. un 95. procentile – portālos gadās „1 m²” un drukas kļūdas)
+        areaMin: sql<number | null>`percentile_cont(0.05) within group (order by ${listings.areaM2}) filter (where ${listings.areaM2} >= ${PRICE_EVAL.AREA_MIN} and ${listings.kind} = 'property')`,
+        areaMax: sql<number | null>`percentile_cont(0.95) within group (order by ${listings.areaM2}) filter (where ${listings.areaM2} >= ${PRICE_EVAL.AREA_MIN} and ${listings.kind} = 'property')`,
       })
       .from(listings)
       .leftJoin(places, eq(listings.placeId, places.id))
@@ -630,7 +634,7 @@ export function priceSummary(s: SearchParams): Promise<{ n: number; median: numb
       .leftJoin(users, eq(listings.userId, users.id))
       .where(and(...conditions(base)));
     const sqm = r?.sqm != null ? Number(r.sqm) : null;
-    return { n: Number(r?.n ?? 0), median: r?.median != null ? Math.round(Number(r.median)) : null, sqm: sqm == null ? null : sqm < 50 ? Math.round(sqm * 10) / 10 : Math.round(sqm) };
+    return { n: Number(r?.n ?? 0), median: r?.median != null ? Math.round(Number(r.median)) : null, sqm: sqm == null ? null : sqm < 50 ? Math.round(sqm * 10) / 10 : Math.round(sqm), areaMin: r?.areaMin != null ? Number(r.areaMin) : null, areaMax: r?.areaMax != null ? Number(r.areaMax) : null };
   });
 }
 

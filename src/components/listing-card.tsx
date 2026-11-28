@@ -57,10 +57,13 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
   const src = SOURCE_LABEL[l.source] ?? l.source;
   // Visi sludinājumi vispirms atveras pie mums; saite uz oriģinālu ir sludinājuma lapā.
   const extLink = { rel: "nofollow noopener noreferrer" } as const; // tajā pašā cilnē, lai darbojas poga "Atpakaļ"
+  // citu portālu sludinājumu lapas ir noindex (saturs pieder avotam) – meklētāju robotus uz tām nesūtām,
+  // lai tie tērē laiku indeksējamām kategoriju lapām; pašu sludinājumi paliek ar parastu saiti (ir sitemap)
+  const crawl = l.source !== "own" ? ({ rel: "nofollow" } as const) : {};
   const where = l.kind === "property" ? fullLocation(l.address, l.place, l.region, l.regionKind) : locationLabel(l.place, l.region, l.regionKind);
   return (
     <article className="card lcard">
-      <a href={lp(`/sludinajumi/${l.id}`)} className="thumb" aria-hidden="true" tabIndex={-1}>
+      <a href={lp(`/sludinajumi/${l.id}`)} {...crawl} className="thumb" aria-hidden="true" tabIndex={-1}>
         {l.thumbKey ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={mediaUrl(l.thumbKey)} alt={trTitle(l.title, t)} loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : undefined} />
@@ -77,7 +80,7 @@ export async function ListingCard({ l, showStatus, actions, favorite, oldPrice, 
         <span className={`kind ${l.kind}`}>{l.kind === "vehicle" ? t("Transports") : t("Īpašums")}</span>
         {showStatus && l.status !== "active" && <span className="status">{t(STATUS[l.status])}</span>}
         <H>
-          <a href={lp(`/sludinajumi/${l.id}`)}>{trTitle(l.title, t)}</a>
+          <a href={lp(`/sludinajumi/${l.id}`)} {...crawl}>{trTitle(l.title, t)}</a>
         </H>
         <div className="meta">
           {meta.filter(Boolean).map((m, i) => (

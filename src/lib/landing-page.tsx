@@ -1,10 +1,10 @@
-import { SEO_INDEX_MIN } from "@/lib/constants";
+import { SEO_FACET_SAME, SEO_INDEX_MIN } from "@/lib/constants";
 // Kopīgā SEO lapu loģika (/auto, /moto, /ipasumi): filtri no adreses + metadati.
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getT } from "@/i18n/server";
 import { SearchView, type SP } from "@/components/search-view";
-import { formatPrice } from "./format";
+import { formatNumber, formatPrice } from "./format";
 import { parseSearch, priceSummary } from "./search";
 import { langAlternates, type Landing } from "./seo";
 import type { Locale, T } from "@/i18n/core";
@@ -32,7 +32,15 @@ export function landingRoute(resolve: (parts: string[], tr: { t: T; locale: Loca
     const page = pageOf(sp);
     const { t, tp, locale } = await getT();
     const sum = await priceSummary(parseSearch(landing.raw)).catch(() => null);
-    const stats = sum && sum.n ? ` ${tp(sum.n, "sludinājums", "sludinājumi")}${sum.median ? `, ${t("cenas mediāna {p}", { p: formatPrice(sum.median) })}` : ""}.` : "";
+    // filtra lapa, kas gandrīz sakrīt ar vecāklapu (piem. modelis, kura visi sludinājumi ir dīzeļi): canonical uz vecāklapu
+    const parent = landing.more?.current && landing.more.base !== landing.path ? landing.more : null;
+    const parentSum = parent && sum && sum.n >= SEO_INDEX_MIN ? await priceSummary(parseSearch(parent.raw)).catch(() => null) : null;
+    const sameAsParent = !!(parent && sum && parentSum && sum.n >= parentSum.n * SEO_FACET_SAME);
+    const rent = landing.raw.deal === "rent";
+    const money = (v: number) => (rent ? `${formatNumber(Math.round(v))} ${t("€/mēn.")}` : formatPrice(v));
+    // platību amplitūda īpašumiem (meklē „noliktava 1000 m²”, „100 sqm warehouse”) – tikai fakti no sludinājumiem
+    const areas = sum?.areaMin && sum.areaMax && sum.areaMax > sum.areaMin ? `, ${t("platība {a}–{b} m²", { a: formatNumber(Math.round(sum.areaMin)), b: formatNumber(Math.round(sum.areaMax)) })}` : "";
+    const stats = sum && sum.n ? ` ${tp(sum.n, "sludinājums", "sludinājumi")}${sum.median ? `, ${t("cenas mediāna {p}", { p: money(sum.median) })}` : ""}${areas}.` : "";
     // virsrakstā skaits: tā mēs izceļamies pret ss.com u.c. meklēšanas rezultātos
     const count = sum && sum.n >= SEO_INDEX_MIN ? ` – ${tp(sum.n, "sludinājums", "sludinājumi")}` : "";
     const title = `${landing.title}${count}${page > 1 ? ` – ${t("{n}. lapa", { n: page })}` : ""}`;
@@ -41,6 +49,7 @@ export function landingRoute(resolve: (parts: string[], tr: { t: T; locale: Loca
       title,
       description,
       alternates: (() => {
+        if (sameAsParent && page === 1) return langAlternates(parent!.base, locale);
         const a = langAlternates(landing.path, locale);
         return page > 1 ? { canonical: `${a.canonical}?page=${page}` } : a;
       })(),

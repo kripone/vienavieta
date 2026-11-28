@@ -466,6 +466,11 @@ export const SEO_ROOMS = [1, 2, 3, 4, 5] as const;
 export const SEO_COMBO_MIN = 10;
 /** SEO lapa tiek indeksēta un iekļauta sitemap tikai ar vismaz tik sludinājumiem (plānas lapas Google neindeksē un tās velk vietni uz leju). */
 export const SEO_INDEX_MIN = 8;
+/**
+ * Filtra lapa (marka + degviela, modelis + degviela, reģions + istabas u.c.), kurā ir ≥ tik daļa no vecāklapas sludinājumiem,
+ * ir praktiski tā pati lapa: canonical uz vecāklapu un sitemap to neiekļauj (GSC 2026-11-28: tūkstošiem „atklāta, nav indeksēta”).
+ */
+export const SEO_FACET_SAME = 0.9;
 /** Kopsavilkuma frāzes visu auto lapām pēc degvielas un virsbūves (/auto/dizelis, /auto/universals). */
 export const SEO_FUEL_ROOT: Record<string, string> = {
   "Benzīns": "Benzīna auto", "Dīzelis": "Dīzeļa auto", "Hibrīds": "Hibrīdauto", "Elektro": "Elektroauto", "Benzīns/gāze": "Auto ar gāzes iekārtu",

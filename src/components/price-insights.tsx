@@ -22,7 +22,7 @@ export async function PriceInsights({ d, flat, rent }: { d: Data; flat: Record<s
         <span className="fine"> · {t("lielākā daļa: {a} – {b}", { a: money(d.p25), b: money(d.p75) })}</span>
       </p>
       {d.drops > 0 && (
-        <p className="ins-drop">▼ {t("Pēdējās 30 dienās cena samazināta {n} sludinājumiem", { n: formatNumber(d.drops) })}{d.dropPct != null ? ` (${t("vidēji −{p}%", { p: String(d.dropPct).replace(".", ",") })})` : ""}. <a href={href({ sort: "drop" })}>{t("Rādīt tos")} →</a></p>
+        <p className="ins-drop">▼ {t("Pēdējās 30 dienās cena samazināta {n} sludinājumiem", { n: formatNumber(d.drops) })}{d.dropPct != null ? ` (${t("vidēji −{p}%", { p: String(d.dropPct).replace(".", ",") })})` : ""}. <a href={href({ sort: "drop" })} rel="nofollow">{t("Rādīt tos")} →</a></p>
       )}
       <div className="ins-chart" role="img" aria-label={t("Cenu sadalījums")}>
         {d.bins.map(([from, to, c], i) => (
@@ -31,9 +31,9 @@ export async function PriceInsights({ d, flat, rent }: { d: Data; flat: Record<s
       </div>
       <div className="ins-axis"><span>{money(Math.round(d.lo / 100) * 100 || d.lo)}</span><span>{t("mediāna")} {money(d.median)}</span><span>{money(Math.round(d.hi / 100) * 100 || d.hi)}</span></div>
       <div className="ins-legend">
-        <a className="cheap" href={href({ pmax: String(d.cheapMax), pmin: null })}><b>{formatNumber(d.cheap)}</b> {t("lēti")}<small>{t("zem {p}", { p: money(d.cheapMax) })}</small></a>
-        <a className="mid" href={href({ pmin: String(d.cheapMax), pmax: String(d.dearMin) })}><b>{formatNumber(d.mid)}</b> {t("vidēji")}<small>{money(d.cheapMax)} – {money(d.dearMin)}</small></a>
-        <a className="dear" href={href({ pmin: String(d.dearMin), pmax: null })}><b>{formatNumber(d.dear)}</b> {t("dārgi")}<small>{t("virs {p}", { p: money(d.dearMin) })}</small></a>
+        <a className="cheap" rel="nofollow" href={href({ pmax: String(d.cheapMax), pmin: null })}><b>{formatNumber(d.cheap)}</b> {t("lēti")}<small>{t("zem {p}", { p: money(d.cheapMax) })}</small></a>
+        <a className="mid" rel="nofollow" href={href({ pmin: String(d.cheapMax), pmax: String(d.dearMin) })}><b>{formatNumber(d.mid)}</b> {t("vidēji")}<small>{money(d.cheapMax)} – {money(d.dearMin)}</small></a>
+        <a className="dear" rel="nofollow" href={href({ pmin: String(d.dearMin), pmax: null })}><b>{formatNumber(d.dear)}</b> {t("dārgi")}<small>{t("virs {p}", { p: money(d.dearMin) })}</small></a>
       </div>
     </section>
   );

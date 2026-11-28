@@ -210,7 +210,7 @@ export async function resolveVehicle(vc: VehicleClass, parts: string[], { t, loc
   const baseH1 = name ? of(name) : t(vc === "car" ? "Lietotas automašīnas pārdošanā" : "Motocikli pārdošanā");
   const more = { kind: "vehicle" as const, vc, base, level, raw: { ...raw }, current: facet?.slug };
   if (!facet) {
-    if (!make) return { raw, path: base, h1: baseH1, title: baseH1, about: t(vc === "car" ? "Lietoti un jauni auto no ss.com, autoplius.lt un citiem portāliem vienā meklētājā." : "Motocikli no visiem portāliem vienā meklētājā."), crumbs, facet: "make", more };
+    if (!make) return { raw, path: base, h1: baseH1, title: t(vc === "car" ? "Lietotas automašīnas pārdošanā Latvijā" : "Motocikli pārdošanā Latvijā"), about: t(vc === "car" ? "Lietoti un jauni auto no ss.com, autoplius.lt un citiem portāliem vienā meklētājā." : "Motocikli no visiem portāliem vienā meklētājā."), crumbs, facet: "make", more };
     return { raw, path: base, h1: baseH1, title: vc === "car" ? t("Lietoti {name} pārdošanā Latvijā", { name: name! }) : t("{name} motocikli pārdošanā Latvijā", { name: name! }), about: about(name!), crumbs, facet: model ? null : "model", more, ...(make && model ? { model: { make: make.name, model: model.name } } : {}) };
   }
 
