@@ -226,7 +226,7 @@ export default async function ListingPage(props: Props) {
           </section>
           {/* datorā labajā kolonnā; telefonā zemāk (pēc vēstures), lai neaizsedz kopsavilkumu un karti */}
           {calcEl && <div className="calc-side">{calcEl}</div>}
-          <div className="calc-side fav-slot"><FavBanner kind="v" /></div>
+          <div className="calc-side fav-slot"><FavBanner kind="v" loggedIn={Boolean(user)} /></div>
         </div>
       <div className="det-body">
         {summary.length > 0 && (
@@ -272,7 +272,7 @@ export default async function ListingPage(props: Props) {
         {vzd && <VzdDeals data={vzd} perM2={l.areaM2 ? Math.round(l.price / Number(l.areaM2)) : null} />}
         {history && <PriceHistory h={history} external={l.source !== "own"} />}
         {calcEl && <div className="calc-body">{calcEl}</div>}
-        <div className="calc-body"><FavBanner kind="h" /></div>
+        <div className="calc-body"><FavBanner kind="h" loggedIn={Boolean(user)} /></div>
         {ext && (
           <div className="panel seller ext-open">
             <b>{t("Sludinājums no {src}", { src })}</b>

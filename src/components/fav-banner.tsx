@@ -33,7 +33,13 @@ function Clip({ kind, alt }: { kind: "h" | "v"; alt: string }) {
   );
 }
 
-export function FavBanner({ kind }: { kind: "h" | "v" }) {
-  const { t } = useT();
-  return <Clip kind={kind} alt={t("Saglabā favorītos: piezīmes, statuss, kalendārs un cenu kritumu paziņojumi – viss vienuviet.")} />;
+/** Viss baneris ir saite: pieteiktam – uz favorītiem, citādi – uz pieteikšanos/reģistrāciju. */
+export function FavBanner({ kind, loggedIn }: { kind: "h" | "v"; loggedIn: boolean }) {
+  const { t, lp } = useT();
+  const alt = t("Saglabā favorītos: piezīmes, statuss, kalendārs un cenu kritumu paziņojumi – viss vienuviet.");
+  return (
+    <a className={`fav-banner-link fav-banner-link-${kind}`} href={lp(loggedIn ? "/favoriti" : "/ielogoties")} aria-label={alt}>
+      <Clip kind={kind} alt={alt} />
+    </a>
+  );
 }

@@ -884,6 +884,9 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
 .calc-side { display: none; }
 .fav-banner { display: block; width: 100%; height: auto; margin-top: 16px; border-radius: 14px; border: 1px solid var(--line); background: #fff; object-fit: cover; }
 .fav-banner-v { max-width: 360px; margin-inline: auto; }
+.fav-banner-link { display: block; cursor: pointer; border-radius: 14px; transition: transform .12s, box-shadow .12s; }
+.fav-banner-link:hover .fav-banner { box-shadow: 0 4px 16px rgba(0,0,0,.14); }
+.fav-banner-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .det-body .ext-open { margin-top: 20px; }
 .det-body .also-panel { margin-top: 12px; }
 
@@ -897,6 +900,7 @@ table.cmp tr.best td.best { background: color-mix(in srgb, #2f8a64 14%, transpar
   /* vertikālais baneris aizpilda tikai atlikušo vietu: beidzas līdz ar kreisās kolonnas blokiem (nepagarina lapu) */
   .det > .det-side { align-self: stretch; display: flex; flex-direction: column; }
   .det-side .fav-slot { flex: 1 1 0; min-height: 240px; position: relative; margin-top: 16px; }
+  .det-side .fav-slot .fav-banner-link { position: absolute; inset: 0; }
   .det-side .fav-slot .fav-banner { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; margin: 0; aspect-ratio: auto !important; object-fit: contain; object-position: center bottom; border: 0; background: transparent; border-radius: 14px; }
   .calc-body { display: none; }
   .det > .det-body { grid-area: body; max-width: none; }
