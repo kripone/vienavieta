@@ -14,7 +14,8 @@ export async function register() {
   const { fixCityPlaces } = await import("./lib/city-places");
   const dedupe = async () => {
     // apkaimes pēc koordinātām / „tikai pilsēta” (nevis „Centrs”) – pirms dublikātiem, jo tie grupē pēc pilsētas
-    await fixCityPlaces().then((r) => r.moved && console.log("Vietas precizētas:", r)).catch((e) => console.error("Vietu kārta:", e));
+    // ieslēdz ar CITY_PLACES=on: pirmā kārta pārvieto desmitiem tūkstošu ierakstu, un 1 GB datubāzes diskam pietrūka vietas (WAL)
+    if (process.env.CITY_PLACES === "on") await fixCityPlaces().then((r) => r.moved && console.log("Vietas precizētas:", r)).catch((e) => console.error("Vietu kārta:", e));
     await groupExactDuplicates().then((r) => (r.vehicles || r.properties) && console.log("Dublikāti sagrupēti:", r)).catch((e) => console.error("Dublikātu kārta:", e));
     await normalizeBodies().then((n) => n && console.log("Virsbūves tips no modeļa:", n)).catch((e) => console.error("Virsbūvju kārta:", e));
   };
